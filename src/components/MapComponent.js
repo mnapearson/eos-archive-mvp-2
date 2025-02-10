@@ -1,68 +1,59 @@
 'use client';
-import { useEffect, useRef } from 'react';
+
+import { useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase with your credentials from .env.local
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Set your Mapbox access token
+// Set Mapbox token
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-export default function MapComponent() {
-  const mapContainer = useRef(null); // Reference to the map container HTML element
-  const map = useRef(null); // Store the map instance
+export default function MapComponent({ eventId, spaces }) {
+  const [mapData, setMapData] = useState([]);
+
+  // Fetch data depending on whether eventId or spaces are passed
+  useEffect(() => {
+    async function fetchData() {
+      if (eventId) {
+        // Fetch a single event
+        const response = await fetch(`/api/events/${eventId}`);
+        const data = await response.json();
+        setMapData([data]); // Wrap single event in an array
+      } else if (spaces) {
+        // Fetch all spaces
+        const response = await fetch('/api/spaces');
+        const data = await response.json();
+        setMapData(data);
+      }
+    }
+    fetchData();
+  }, [eventId, spaces]);
 
   useEffect(() => {
-    // Initialize the Mapbox map only once
-    if (map.current) return;
+    if (mapData.length === 0) return;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current, // HTML element to render the map in
-      style: 'mapbox://styles/eosarchive/cm6y739q900ls01saf5urburu', // Map style
-      center: [12.3731, 51.3397], // Center of the map (longitude, latitude) e.g., Leipzig
-      zoom: 10, // Starting zoom level
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/dark-v10',
+      center: eventId
+        ? [mapData[0].longitude, mapData[0].latitude]
+        : [12.3731, 51.3397], // Default center Leipzig
+      zoom: eventId ? 14 : 6,
     });
 
-    // Function to fetch approved events from Supabase
-    const fetchEvents = async () => {
-      const { data: events, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('approved', true); // Only select events where approved is true
+    mapData.forEach((item) => {
+      new mapboxgl.Marker()
+        .setLngLat([item.longitude, item.latitude])
+        .setPopup(new mapboxgl.Popup().setText(item.name || item.space))
+        .addTo(map);
+    });
 
-      if (error) {
-        console.error('Error fetching events:', error);
-        return;
-      }
-      console.log('Fetched events:', events);
+    return () => map.remove();
+  }, [mapData]);
 
-      // For each event, add a marker on the map
-      events.forEach((event) => {
-        if (event.latitude && event.longitude) {
-          new mapboxgl.Marker()
-            .setLngLat([event.longitude, event.latitude])
-            .setPopup(
-              new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<h3>${event.title}</h3><p>${event.description}</p>`
-              )
-            )
-            .addTo(map.current);
-        }
-      });
-    };
-
-    // Call the function to fetch events and add markers
-    fetchEvents();
-  }, []);
-
-  // Return a div that will contain the Mapbox map
   return (
-    <div
-      ref={mapContainer}
-      style={{ width: '100%', height: '500px' }}
-    />
+    <div className='w-full h-64'>
+      <div
+        id='map'
+        className='w-full h-full'></div>
+    </div>
   );
 }

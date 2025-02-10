@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
                 <Link
                   href='/map'
                   className='hover:underline'>
-                  map
+                  spaces
                 </Link>
                 <Link
                   href='/submission'

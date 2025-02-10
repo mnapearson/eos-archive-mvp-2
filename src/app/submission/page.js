@@ -13,6 +13,7 @@ export default function DynamicSubmissionForm() {
     city: '',
     title: '',
     date: '',
+    time: '',
     category: '',
     designer: '',
     space: '',
@@ -266,6 +267,7 @@ export default function DynamicSubmissionForm() {
       city: '',
       title: '',
       date: '',
+      time: '',
       category: '',
       designer: '',
       space: '',
@@ -347,6 +349,19 @@ export default function DynamicSubmissionForm() {
               type='date'
               name='date'
               value={formData.date}
+              onChange={handleInputChange}
+              required
+              className='w-full bg-transparent border-b p-2 focus:outline-none'
+            />
+          </div>
+
+          {/* Time */}
+          <div>
+            <label className='block mb-1'>time</label>
+            <input
+              type='time'
+              name='time'
+              value={formData.time}
               onChange={handleInputChange}
               required
               className='w-full bg-transparent border-b p-2 focus:outline-none'

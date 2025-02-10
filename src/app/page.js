@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Filters from '../components/Filter';
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,24 +35,33 @@ export default function HomePage() {
   }, [filters]);
 
   return (
-    <div>
+    <div className='max-w-6xl mx-auto p-6'>
+      {/* Page Title */}
+      <h1 className='text-2xl font-semibold mb-4'>eos archive</h1>
+      <p className='mb-6'>
+        an archive of event art from subcultural and independent scenes.
+      </p>
+
+      {/* Filters */}
       <Filters
         filters={filters}
         setFilters={setFilters}
       />
 
       {/* Event Grid */}
-      <section className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+      <section className='grid grid-cols-2 md:grid-cols-4 gap-4 mt-6'>
         {events.map((event) => (
-          <div
+          <Link
             key={event.id}
-            className='bg-gray-800 rounded-lg overflow-hidden'>
-            <img
-              src={event.image_url}
-              alt={event.title}
-              className='w-full h-auto'
-            />
-          </div>
+            href={`/events/${event.id}`}>
+            <div className='cursor-pointer bg-gray-800 rounded-lg overflow-hidden hover:opacity-80 transition'>
+              <img
+                src={event.image_url || '/placeholder.jpg'} // Fallback if image is missing
+                alt={event.title}
+                className='w-full h-auto'
+              />
+            </div>
+          </Link>
         ))}
       </section>
     </div>
