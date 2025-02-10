@@ -3,20 +3,42 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  svg,
+  i {
+    color: currentColor;
   }
 }
 
+/* Default (Dawn Mode) */
+:root {
+  --background: #f5f1f0;
+  --foreground: #342c2a;
+}
+
+/* System Dark Mode Preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #342c2a;
+    --foreground: #f5f1f0;
+  }
+}
+
+/* Apply variables */
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Dusk Mode (manually applied) */
+.dusk {
+  --background: #16171e;
+  --foreground: #e7dbf0;
+}
+
+/* Dawn Mode */
+.dawn {
+  --background: #f5f1f0;
+  --foreground: #342c2a;
 }

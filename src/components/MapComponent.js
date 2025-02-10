@@ -21,7 +21,7 @@ export default function MapComponent() {
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current, // HTML element to render the map in
-      style: 'mapbox://styles/mapbox/streets-v11', // Map style
+      style: 'mapbox://styles/eosarchive/cm6y739q900ls01saf5urburu', // Map style
       center: [12.3731, 51.3397], // Center of the map (longitude, latitude) e.g., Leipzig
       zoom: 10, // Starting zoom level
     });
@@ -38,6 +38,7 @@ export default function MapComponent() {
         return;
       }
       console.log('Fetched events:', events);
+
       // For each event, add a marker on the map
       events.forEach((event) => {
         if (event.latitude && event.longitude) {
