@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
             <div className='w-1/3 flex justify-center'>
               <Link href='/'>
                 <Image
-                  src='/eos-logo.png'
+                  src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets//EOS24_metal_blue_transparent.png'
                   alt='eos archive logo'
                   width={120}
                   height={40}
