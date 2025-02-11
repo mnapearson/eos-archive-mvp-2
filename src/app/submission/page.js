@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function DynamicSubmissionForm() {
+  const router = useRouter();
   // Form state with additional 'designer' field.
   const [formData, setFormData] = useState({
     city: '',
@@ -256,13 +258,12 @@ export default function DynamicSubmissionForm() {
       .insert([dataToInsert]);
     if (insertError) {
       console.error('Error inserting event:', insertError);
-      setError('There was an error submitting your event.');
+      setError(
+        'There was an error submitting your event. Please review the required fields and get in touch hello@eosarchive.app if the error perists.'
+      );
       return;
     }
 
-    setMessage(
-      'Event submitted successfully! It will be displayed after approval.'
-    );
     setFormData({
       city: '',
       title: '',
@@ -276,10 +277,11 @@ export default function DynamicSubmissionForm() {
       description: '',
     });
     setImageFile(null);
+    router.push('/submission-success');
   };
 
   return (
-    <div className='flex flex-col items-center justify-center min-h-screen p-8'>
+    <div className='flex flex-col items-center justify-center min-h-screen'>
       <div className='max-w-2xl w-full bg-[var(--background)] text-[var(--foreground)] shadow-lg p-8 rounded-lg border border-[var(--foreground)]'>
         <h1 className='text-2xl font-semibold mb-6'>submit an event</h1>
 
@@ -363,7 +365,6 @@ export default function DynamicSubmissionForm() {
               name='time'
               value={formData.time}
               onChange={handleInputChange}
-              required
               className='w-full bg-transparent border-b p-2 focus:outline-none'
             />
           </div>
@@ -473,7 +474,6 @@ export default function DynamicSubmissionForm() {
                 name='latitude'
                 value={formData.latitude}
                 onChange={handleInputChange}
-                required
                 readOnly={
                   !!formData.space &&
                   spaceOptions.find((opt) => opt.space === formData.space)
@@ -488,7 +488,6 @@ export default function DynamicSubmissionForm() {
                 name='longitude'
                 value={formData.longitude}
                 onChange={handleInputChange}
-                required
                 readOnly={
                   !!formData.space &&
                   spaceOptions.find((opt) => opt.space === formData.space)
@@ -519,7 +518,7 @@ export default function DynamicSubmissionForm() {
         </form>
 
         {message && (
-          <p className='text-green-500 mt-4 text-center'>{message}</p>
+          <p className='text-[var(--background)] mt-4 text-center'>{message}</p>
         )}
         {error && <p className='text-red-500 mt-4 text-center'>{error}</p>}
       </div>

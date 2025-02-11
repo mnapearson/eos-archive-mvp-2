@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import MapComponent from '@/components/MapComponent';
+import Link from 'next/link';
 
 export default function EventPage() {
   const { id } = useParams(); // ✅ Fix: Use useParams() instead of accessing params directly
@@ -23,7 +24,14 @@ export default function EventPage() {
   if (!event) return <p>Loading event details...</p>;
 
   return (
-    <div className='max-w-3xl mx-auto p-6'>
+    <div className='max-w-3xl mx-auto'>
+      <div className='mb-10 flex flex-col gap-4'>
+        <Link
+          href='/'
+          className='hover:underline'>
+          return to archive
+        </Link>
+      </div>
       <h1 className='text-2xl font-semibold mb-4'>{event.title}</h1>
       {/* Display Event Flyer */}
       {event.image_url ? (

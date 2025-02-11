@@ -1,6 +1,6 @@
 export default function AboutPage() {
   return (
-    <div className='flex items-center justify-center min-h-screen px-8'>
+    <div className='flex justify-center min-h-screen px-8'>
       <div className='max-w-3xl text-[var(--foreground)]'>
         <h1 className='text-2xl font-semibold mb-6'>about eos</h1>
         <p className='mb-4'>
@@ -34,7 +34,12 @@ export default function AboutPage() {
 
         <p className='mb-4'>
           curious about eos archive and want to get involved? email us at any
-          time.
+          time:{' '}
+          <a
+            href='mailto:hello@eosarchive.app'
+            className='hover:underline'>
+            hello@eosarchive.app.
+          </a>
         </p>
 
         <p>

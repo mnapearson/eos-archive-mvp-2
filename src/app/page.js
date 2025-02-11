@@ -35,13 +35,7 @@ export default function HomePage() {
   }, [filters]);
 
   return (
-    <div className='max-w-6xl mx-auto p-6'>
-      {/* Page Title */}
-      <h1 className='text-2xl font-semibold mb-4'>eos archive</h1>
-      <p className='mb-6'>
-        an archive of event art from subcultural and independent scenes.
-      </p>
-
+    <div className='max-w-6xl mx-auto'>
       {/* Filters */}
       <Filters
         filters={filters}
@@ -49,7 +43,7 @@ export default function HomePage() {
       />
 
       {/* Event Grid */}
-      <section className='grid grid-cols-2 md:grid-cols-4 gap-4 mt-6'>
+      <section className='grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-6'>
         {events.map((event) => (
           <Link
             key={event.id}

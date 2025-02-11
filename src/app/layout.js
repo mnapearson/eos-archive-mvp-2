@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import './globals.css';
+import Image from 'next/image';
 
 export default function RootLayout({ children }) {
   // State for theme (default to system preference)
   const [theme, setTheme] = useState('dawn');
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     // Check localStorage for user preference
@@ -20,6 +22,11 @@ export default function RootLayout({ children }) {
       ).matches;
       setTheme(prefersDark ? 'dusk' : 'dawn');
     }
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -36,39 +43,45 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body className='min-h-screen flex flex-col'>
         {/* NavBar */}
-        <header className='w-full border-b border-gray-200 px-4'>
+        <header
+          className={`fixed top-0 w-full px-4 border-b border-gray-200 backdrop-blur-md transition-all ${
+            isScrolled ? 'bg-[var(--background)]/80' : 'bg-transparent'
+          }`}>
           <div className='max-w-6xl mx-auto py-4 flex items-center justify-between'>
-            {/* Left side: 'eos archive' -> Home */}
-            <div className='flex items-center space-x-8'>
-              <Link href='/'>
-                <span className='text-xl font-bold uppercase tracking-widest cursor-pointer'>
-                  eos archive
-                </span>
+            {/* Left: Nav Links */}
+            <nav className='w-1/3 flex items-center space-x-6'>
+              <Link
+                href='/about'
+                className='hover:underline'>
+                about
               </Link>
-              <nav className='hidden md:flex items-center space-x-4'>
-                <Link
-                  href='/about'
-                  className='hover:underline'>
-                  about
-                </Link>
-                <Link
-                  href='/map'
-                  className='hover:underline'>
-                  spaces
-                </Link>
-                <Link
-                  href='/submission'
-                  className='hover:underline'>
-                  submit
-                </Link>
-              </nav>
+              <Link
+                href='/map'
+                className='hover:underline'>
+                spaces
+              </Link>
+              <Link
+                href='/submission'
+                className='hover:underline'>
+                submit
+              </Link>
+            </nav>
+
+            {/* Center: Logo (Perfectly Centered) */}
+            <div className='w-1/3 flex justify-center'>
+              <Link href='/'>
+                <Image
+                  src='/eos-logo.png'
+                  alt='eos archive logo'
+                  width={120}
+                  height={40}
+                  priority
+                />
+              </Link>
             </div>
 
-            {/* Right side: Connect + Toggle Icon */}
-            <div className='flex items-center space-x-3'>
-              {/* <Link href='/signup'>connect</Link> */}
-
-              {/* Dusk/Dawn Toggle using SVG icon */}
+            {/* Right: Dusk/Dawn Toggle */}
+            <div className='w-1/3 flex justify-end'>
               <button
                 onClick={toggleTheme}
                 aria-label='Toggle Theme'>
@@ -93,14 +106,15 @@ export default function RootLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className='flex-grow px-4'>{children}</main>
+        {/* Page Content */}
+        <main className='flex-grow px-4 pt-40'>{children}</main>
 
         <footer className='w-full border-t border-gray-200 px-4'>
           <div className='max-w-6xl mx-auto py-4 flex flex-col md:flex-row items-center justify-between'>
             <p className='text-sm'>© {new Date().getFullYear()} eos archive</p>
             <div className='text-sm mt-2 md:mt-0'>
               <a
-                href='mailto:info@eosarchive.xyz'
+                href='mailto:hello@eosarchive.app'
                 className='hover:underline'>
                 hello@eosarchive.app
               </a>{' '}

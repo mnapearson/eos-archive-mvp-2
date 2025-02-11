@@ -33,7 +33,7 @@ export default function Filters({ filters, setFilters }) {
   }, []);
 
   return (
-    <div className='flex justify-center gap-4 py-4'>
+    <div className='flex justify-center gap-4 pb-4'>
       {[
         { name: 'city', options: cityOptions },
         { name: 'category', options: categoryOptions },
