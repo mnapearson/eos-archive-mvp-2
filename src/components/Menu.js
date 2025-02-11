@@ -1,15 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function Menu({ menuOpen, toggleMenu }) {
+  const menuRef = useRef(null);
+
   useEffect(() => {
     if (menuOpen) {
-      document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
     } else {
       document.body.style.overflow = 'auto';
     }
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        toggleMenu(); // Close if clicked outside
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
   return (
@@ -20,6 +34,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
           : 'opacity-0 pointer-events-none'
       }`}>
       <div
+        ref={menuRef}
         className={`fixed left-0 top-0 h-full w-72 bg-[var(--background)] text-[var(--foreground)] shadow-lg p-6 border-r border-gray-300 transform transition-transform duration-300 ease-in-out ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
@@ -44,22 +59,31 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
         {/* Navigation Links */}
         <nav className='mt-6'>
-          <Link
-            href='/about'
-            className='block py-2'>
-            about
-          </Link>
-          <Link
-            href='/map'
-            className='block py-2'>
-            map
-          </Link>
-          <Link
-            href='/submission'
-            className='block py-2'>
-            submit
-          </Link>
+          {['about', 'map', 'submission'].map((link) => (
+            <Link
+              key={link}
+              href={`/${link}`}
+              className='block py-2'
+              onClick={toggleMenu} // Closes menu when a link is clicked
+            >
+              {link}
+            </Link>
+          ))}
         </nav>
+
+        {/* Footer Info Inside Menu */}
+        <div className='absolute bottom-6 left-0 w-full px-6 text-sm'>
+          <a
+            href='mailto:hello@eosarchive.app'
+            className='block hover:underline mb-2'>
+            hello@eosarchive.app
+          </a>
+          <Link
+            href='/privacy'
+            className='hover:underline'>
+            privacy
+          </Link>
+        </div>
       </div>
     </div>
   );
