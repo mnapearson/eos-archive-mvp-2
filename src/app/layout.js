@@ -107,7 +107,7 @@ export default function RootLayout({ children }) {
 
         {/* Page Content */}
         {/* Page Content */}
-        <main className='flex-grow px-4 pt-40'>{children}</main>
+        <main className='flex-grow px-4 py-40'>{children}</main>
 
         <footer className='w-full border-t border-gray-200 px-4'>
           <div className='max-w-6xl mx-auto py-4 flex flex-col md:flex-row items-center justify-between'>
