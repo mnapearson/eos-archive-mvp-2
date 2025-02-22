@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Menu from './Menu'; // Importing the new Menu component
+import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
 
 export default function NavBar() {
+  const { setSelectedFilters } = useContext(FilterContext);
   const [theme, setTheme] = useState('dawn');
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,6 +38,17 @@ export default function NavBar() {
   const toggleTheme = () => setTheme(theme === 'dawn' ? 'dusk' : 'dawn');
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
+  // When the logo is clicked, reset the filters and navigate to the homepage.
+  const handleLogoClick = () => {
+    setSelectedFilters({
+      city: [],
+      space: [],
+      date: [],
+      category: [],
+      designer: [],
+    });
+  };
+
   return (
     <>
       <header
@@ -53,7 +66,9 @@ export default function NavBar() {
 
           {/* Center: Logo */}
           <div className='w-1/3 flex justify-center'>
-            <Link href='/'>
+            <Link
+              href='/'
+              onClick={handleLogoClick}>
               <Image
                 src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets/EOS24_metal_blue_transparent.png'
                 alt='eos archive logo'

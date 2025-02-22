@@ -1,7 +1,8 @@
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 
 export default function Menu({ menuOpen, toggleMenu }) {
@@ -15,24 +16,42 @@ export default function Menu({ menuOpen, toggleMenu }) {
     designerOptions,
   } = useContext(FilterContext);
 
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // State to control accordion open/close for each filter category
+  const [openFilters, setOpenFilters] = useState({
+    city: false,
+    space: false,
+    date: false,
+    category: false,
+    designer: false,
+  });
+
   // Toggle a value in an array-based filter (add/remove)
   function toggleValue(category, value) {
     setSelectedFilters((prev) => {
       const current = prev[category] || [];
       if (current.includes(value)) {
-        // remove it
         return {
           ...prev,
           [category]: current.filter((v) => v !== value),
         };
       } else {
-        // add it
         return {
           ...prev,
           [category]: [...current, value],
         };
       }
     });
+  }
+
+  // Toggle accordion open/close for a category
+  function toggleAccordion(category) {
+    setOpenFilters((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
   }
 
   // Clear all filter selections
@@ -46,153 +65,141 @@ export default function Menu({ menuOpen, toggleMenu }) {
     });
   }
 
-  // "Save" could simply close the menu. You could also push a new route if desired.
+  // "Save" navigates to the homepage with the selected filters if not already on it
   function handleSave() {
-    toggleMenu();
+    const params = new URLSearchParams();
+    Object.entries(selectedFilters).forEach(([key, values]) => {
+      if (values.length > 0) {
+        values.forEach((val) => params.append(key, val));
+      }
+    });
+    // If not on the homepage, navigate there with query parameters.
+    if (pathname !== '/') {
+      router.push(`/?${params.toString()}`);
+    } else {
+      toggleMenu();
+    }
+  }
+
+  // Helper to render a filter section with accordion behavior
+  function renderFilterSection(title, category, options) {
+    return (
+      <div className='mb-4'>
+        <button
+          onClick={() => toggleAccordion(category)}
+          className='w-full flex items-center justify-between focus:outline-none'>
+          <h3 className='font-bold mb-2'>{title.toUpperCase()}</h3>
+          <span className='text-xl'>{openFilters[category] ? '−' : '+'}</span>
+        </button>
+        <div
+          className={`transition-all duration-300 overflow-hidden ${
+            openFilters[category] ? 'max-h-96' : 'max-h-0'
+          }`}>
+          {options.map((item) => (
+            <label
+              key={item}
+              className='block cursor-pointer mb-1 pl-4'>
+              <input
+                type='checkbox'
+                checked={selectedFilters[category].includes(item)}
+                onChange={() => toggleValue(category, item)}
+                className='mr-2'
+              />
+              {item.toLowerCase()}
+            </label>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div
       className={`fixed inset-0 z-50 transition-all duration-300 ${
         menuOpen
-          ? 'bg-[var(--background)]/90 opacity-100'
+          ? 'bg-[var(--background)]/90 backdrop-blur-md opacity-100'
           : 'opacity-0 pointer-events-none'
       }`}>
-      {/* Sidebar */}
+      {/* Sidebar Panel */}
       <div
-        className={`fixed left-0 top-0 h-full w-80 bg-[var(--background)] text-[var(--foreground)] p-6 border-r border-gray-300 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 h-full w-80 bg-[var(--background)]/80 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
-        {/* Header Row: FILTER (left) | CLEAR & SAVE (right) */}
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-md font-semibold italic'>FILTER</h2>
-          <div className='flex gap-4'>
-            <button
-              onClick={handleClear}
-              className='underline text-sm'>
-              CLEAR
-            </button>
-            <button
-              onClick={handleSave}
-              className='underline text-sm'>
-              SAVE
-            </button>
+        {/* Scrollable Content */}
+        <div className='flex-grow overflow-y-auto p-6'>
+          {/* Header Row: FILTER (left) | CLEAR & SAVE (right) */}
+          <div className='flex items-center justify-between mb-4'>
+            <h2 className='text-md font-semibold italic'>FILTER</h2>
+            <div className='flex gap-4'>
+              <button
+                onClick={handleClear}
+                className='underline text-sm'>
+                CLEAR
+              </button>
+              <button
+                onClick={handleSave && toggleMenu}
+                className='underline text-sm'>
+                SAVE
+              </button>
+            </div>
+          </div>
+
+          {/* Render each filter section as an accordion */}
+          {renderFilterSection('City', 'city', cityOptions)}
+          {renderFilterSection('Space', 'space', spaceOptions)}
+          {renderFilterSection('Date', 'date', dateOptions)}
+          {renderFilterSection('Category', 'category', categoryOptions)}
+          {renderFilterSection('Designer', 'designer', designerOptions)}
+
+          {/* Navigation Links */}
+          <div className='mt-6'>
+            <Link
+              onClick={toggleMenu}
+              href='/news'
+              className='block py-1 underline'>
+              NEWS
+            </Link>
+            <Link
+              onClick={toggleMenu}
+              href='/about'
+              className='block py-1 underline'>
+              ABOUT
+            </Link>
+            <Link
+              onClick={toggleMenu}
+              href='/map'
+              className='block py-1 underline'>
+              SPACES
+            </Link>
+            <Link
+              onClick={toggleMenu}
+              href='/submission'
+              className='block py-1 underline'>
+              SUBMIT EVENT
+            </Link>
           </div>
         </div>
 
-        {/* CITY Filter */}
-        <div className='mb-4'>
-          <h3 className='font-bold mb-2'>CITY</h3>
-          {cityOptions.map((city) => (
-            <label
-              key={city}
-              className='block cursor-pointer mb-1'>
-              <input
-                type='checkbox'
-                checked={selectedFilters.city.includes(city)}
-                onChange={() => toggleValue('city', city)}
-                className='mr-2'
-              />
-              {city}
-            </label>
-          ))}
-        </div>
-
-        {/* SPACE Filter */}
-        <div className='mb-4'>
-          <h3 className='font-bold mb-2'>SPACE</h3>
-          {spaceOptions.map((space) => (
-            <label
-              key={space}
-              className='block cursor-pointer mb-1'>
-              <input
-                type='checkbox'
-                checked={selectedFilters.space.includes(space)}
-                onChange={() => toggleValue('space', space)}
-                className='mr-2'
-              />
-              {space}
-            </label>
-          ))}
-        </div>
-
-        {/* DATE Filter */}
-        <div className='mb-4'>
-          <h3 className='font-bold mb-2'>DATE</h3>
-          {dateOptions.map((date) => (
-            <label
-              key={date}
-              className='block cursor-pointer mb-1'>
-              <input
-                type='checkbox'
-                checked={selectedFilters.date.includes(date)}
-                onChange={() => toggleValue('date', date)}
-                className='mr-2'
-              />
-              {date}
-            </label>
-          ))}
-        </div>
-
-        {/* CATEGORY Filter */}
-        <div className='mb-4'>
-          <h3 className='font-bold mb-2'>CATEGORY</h3>
-          {categoryOptions.map((cat) => (
-            <label
-              key={cat}
-              className='block cursor-pointer mb-1'>
-              <input
-                type='checkbox'
-                checked={selectedFilters.category.includes(cat)}
-                onChange={() => toggleValue('category', cat)}
-                className='mr-2'
-              />
-              {cat}
-            </label>
-          ))}
-        </div>
-
-        {/* DESIGNER Filter */}
-        <div className='mb-4'>
-          <h3 className='font-bold mb-2'>DESIGNER</h3>
-          {designerOptions.map((designer) => (
-            <label
-              key={designer}
-              className='block cursor-pointer mb-1'>
-              <input
-                type='checkbox'
-                checked={selectedFilters.designer.includes(designer)}
-                onChange={() => toggleValue('designer', designer)}
-                className='mr-2'
-              />
-              {designer}
-            </label>
-          ))}
-        </div>
-
-        {/* Navigation Links */}
-        <div className='mt-6'>
-          <Link
-            href='/news'
-            className='block py-1 underline'>
-            NEWS
-          </Link>
-          <Link
-            href='/about'
-            className='block py-1 underline'>
-            ABOUT
-          </Link>
-          <Link
-            href='/contact'
-            className='block py-1 underline'>
-            CONTACT US
-          </Link>
-          <Link
-            href='/submission'
-            className='block py-1 underline'>
-            SUBMIT EVENT
-          </Link>
-        </div>
+        {/* Footer (always at the bottom) */}
+        <footer className='w-full border-t border-gray-200 px-4 py-4'>
+          <div className='max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between'>
+            <p className='text-sm'>© {new Date().getFullYear()} eos archive</p>
+            <div className='text-sm mt-2 md:mt-0'>
+              <a
+                href='mailto:hello@eosarchive.app'
+                className='hover:underline'>
+                hello@eosarchive.app
+              </a>{' '}
+              |{' '}
+              <Link
+                onClick={toggleMenu}
+                href='/privacy'
+                className='hover:underline'>
+                privacy
+              </Link>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {/* Clicking outside the menu closes it */}
