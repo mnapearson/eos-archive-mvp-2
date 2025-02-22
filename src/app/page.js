@@ -1,28 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import Filters from '../components/Filter';
 import Link from 'next/link';
+import { FilterContext } from '@/contexts/FilterContext';
+import { EventList } from '@/components/EventList';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function HomePage() {
-  const [filters, setFilters] = useState({
-    city: '',
-    category: '',
-    space: '',
-    designer: '',
-  });
-
+  const { filters } = useContext(FilterContext);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
     async function fetchEvents() {
       let query = supabase.from('events').select('*');
 
+      // Append filters to the query only if a value is selected
       Object.entries(filters).forEach(([key, value]) => {
         if (value) query = query.eq(key, value);
       });
@@ -36,12 +32,6 @@ export default function HomePage() {
 
   return (
     <div className='max-w-6xl mx-auto'>
-      {/* Filters */}
-      <Filters
-        filters={filters}
-        setFilters={setFilters}
-      />
-
       {/* Event Grid */}
       <section className='grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-6'>
         {events.map((event) => (

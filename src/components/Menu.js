@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Filter from './Filter';
 
 export default function Menu({ menuOpen, toggleMenu }) {
   const menuRef = useRef(null);
@@ -24,7 +25,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
     }
 
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [menuOpen]);
+  }, [menuOpen, toggleMenu]);
 
   return (
     <div
@@ -48,14 +49,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
         {/* Filters */}
         <h2 className='text-md font-semibold mb-2 italic'>FILTER</h2>
-        {['city', 'space', 'date', 'category', 'designer'].map((key) => (
-          <select
-            key={key}
-            className='w-full bg-transparent border-b border-gray-400 py-2 mb-2'>
-            <option value=''>{key.toUpperCase()}</option>
-            <option value='example'>Example {key}</option>
-          </select>
-        ))}
+        <Filter toggleMenu={toggleMenu} />
 
         {/* Navigation Links */}
         <nav className='mt-6'>
