@@ -56,6 +56,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
   // Clear all filter selections
   function handleClear() {
+    const params = new URLSearchParams();
     setSelectedFilters({
       city: [],
       space: [],
@@ -63,6 +64,11 @@ export default function Menu({ menuOpen, toggleMenu }) {
       category: [],
       designer: [],
     });
+    if (pathname !== '/') {
+      router.push(`/?${params.toString()}`);
+
+      toggleMenu();
+    }
   }
 
   // "Save" navigates to the homepage with the selected filters if not already on it
@@ -76,7 +82,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
     // If not on the homepage, navigate there with query parameters.
     if (pathname !== '/') {
       router.push(`/?${params.toString()}`);
-    } else {
+
       toggleMenu();
     }
   }
