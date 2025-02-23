@@ -73,6 +73,7 @@ export default function EventPage() {
     return <p className='p-4'>Loading event details...</p>;
   }
 
+  const eventSpace = event.space;
   // Title in uppercase
   const eventTitle = (event.title || 'UNTITLED').toUpperCase();
   // Category: match your Figma (if you want uppercase or normal case)
@@ -115,7 +116,7 @@ export default function EventPage() {
       {/* Two-column layout */}
       <div className='flex flex-col md:flex-row gap-8 mb-8'>
         {/* Left Column: Flyer */}
-        <div className='md:w-1/2'>
+        <div className='md:w-3/4'>
           {event.image_url ? (
             <img
               src={event.image_url}
@@ -128,7 +129,7 @@ export default function EventPage() {
         </div>
 
         {/* Right Column: Info */}
-        <div className='md:w-1/2 flex flex-col justify-between'>
+        <div className='md:w-1/4 flex flex-col justify-between'>
           <div>
             {/* Title + SHARE in same line, top-right for SHARE */}
             <div className='flex items-center justify-between mb-1'>
@@ -140,23 +141,24 @@ export default function EventPage() {
                 SHARE
               </Link>
             </div>
-            {/* Category */}
-            <p className='text-sm italic mb-4'>{eventCategory}</p>
+            <p className='text-sm italic mb-2'>{eventCategory}</p>
 
             {/* Date & Time: "JUNE 1, 2024 @ 19.00" */}
             {dateTimeDisplay && (
-              <p className='text-sm mb-4'>{dateTimeDisplay}</p>
+              <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
-
             {/* Reverse-geocoded address (no "LOCATION" label) */}
-            {address && <p className='text-sm mb-4'>{address}</p>}
+            {/* {address && <p className='text-sm mb-4'>{address}</p>} */}
 
             {/* Description */}
             <p className='text-sm whitespace-pre-line'>{eventDescription}</p>
           </div>
         </div>
       </div>
-      <MapComponent eventId={id} />
+      <MapComponent
+        eventId={id}
+        address={address}
+      />
     </div>
   );
 }
