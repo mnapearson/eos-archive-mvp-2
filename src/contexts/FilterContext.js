@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const FilterContext = createContext();
 
 export function FilterProvider({ children }) {
-  // Example of multi-select approach
+  // Multi-select state for filters
   const [selectedFilters, setSelectedFilters] = useState({
     city: [],
     space: [],
@@ -26,18 +26,16 @@ export function FilterProvider({ children }) {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [designerOptions, setDesignerOptions] = useState([]);
 
-  // Re-fetch available options whenever selectedFilters changes
   useEffect(() => {
     fetchAvailableOptions();
   }, [selectedFilters]);
 
   async function fetchAvailableOptions() {
-    // Build a Supabase query that filters by the user's current selections
+    // Build a query filtering by the user's current selections
     let query = supabase
       .from('events')
       .select('city, space, date, category, designer');
 
-    // If the user has selected multiple cities, we can use the "in" operator
     if (selectedFilters.city.length > 0) {
       query = query.in('city', selectedFilters.city);
     }
@@ -60,15 +58,22 @@ export function FilterProvider({ children }) {
       return;
     }
 
-    // Extract unique options from matching events
+    // Helper to extract unique values for a given key
     const unique = (items, key) =>
       Array.from(new Set(items.map((item) => item[key]).filter(Boolean)));
 
-    setCityOptions(unique(events, 'city'));
-    setSpaceOptions(unique(events, 'space'));
-    setDateOptions(unique(events, 'date'));
-    setCategoryOptions(unique(events, 'category'));
-    setDesignerOptions(unique(events, 'designer'));
+    // Sort alphabetically (ascending)
+    const sortAlpha = (arr) => arr.sort((a, b) => a.localeCompare(b));
+
+    setCityOptions(sortAlpha(unique(events, 'city')));
+    setSpaceOptions(sortAlpha(unique(events, 'space')));
+    setCategoryOptions(sortAlpha(unique(events, 'category')));
+    setDesignerOptions(sortAlpha(unique(events, 'designer')));
+
+    // For dates, sort descending (most recent first)
+    const dates = unique(events, 'date');
+    dates.sort((a, b) => new Date(b) - new Date(a));
+    setDateOptions(dates);
   }
 
   return (

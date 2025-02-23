@@ -56,7 +56,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
   // Clear all filter selections
   function handleClear() {
-    const params = new URLSearchParams();
     setSelectedFilters({
       city: [],
       space: [],
@@ -64,11 +63,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
       category: [],
       designer: [],
     });
-    if (pathname !== '/') {
-      router.push(`/?${params.toString()}`);
-
-      toggleMenu();
-    }
+    toggleMenu();
   }
 
   // "Save" navigates to the homepage with the selected filters if not already on it
@@ -82,8 +77,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
     // If not on the homepage, navigate there with query parameters.
     if (pathname !== '/') {
       router.push(`/?${params.toString()}`);
-
-      toggleMenu();
     }
   }
 
@@ -159,12 +152,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
           {/* Navigation Links */}
           <div className='mt-6'>
-            <Link
+            {/* <Link
               onClick={toggleMenu}
               href='/news'
               className='block py-1'>
               NEWS
-            </Link>
+            </Link> */}
             <Link
               onClick={toggleMenu}
               href='/about'
@@ -175,13 +168,13 @@ export default function Menu({ menuOpen, toggleMenu }) {
               onClick={toggleMenu}
               href='/map'
               className='block py-1'>
-              SPACES
+              SPACES MAP
             </Link>
             <Link
               onClick={toggleMenu}
               href='/submission'
               className='block py-1'>
-              SUBMIT EVENT
+              SUBMIT AN EVENT
             </Link>
           </div>
         </div>

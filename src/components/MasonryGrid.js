@@ -18,7 +18,7 @@ export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
       hasMore={hasMore}
       loader={<p className='text-center py-4'>Loading more items...</p>}
       endMessage={
-        <p className='text-center py-4'>
+        <p className='text-center py-16'>
           <b>No more events to display.</b>
         </p>
       }>

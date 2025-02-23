@@ -112,7 +112,6 @@ export default function EventPage() {
           return to archive
         </Link>
       </div>
-
       {/* Two-column layout */}
       <div className='flex flex-col md:flex-row gap-8 mb-8'>
         {/* Left Column: Flyer */}
@@ -157,11 +156,7 @@ export default function EventPage() {
           </div>
         </div>
       </div>
-
-      {/* Map below */}
-      <div className='border-t border-gray-300 pt-4'>
-        <MapComponent eventId={id} />
-      </div>
+      <MapComponent eventId={id} />
     </div>
   );
 }

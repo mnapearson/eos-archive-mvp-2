@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -10,7 +11,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function DynamicSubmissionForm() {
   const router = useRouter();
-  // Form state with additional 'designer' field.
   const [formData, setFormData] = useState({
     city: '',
     title: '',
@@ -24,6 +24,7 @@ export default function DynamicSubmissionForm() {
     description: '',
   });
   const [imageFile, setImageFile] = useState(null);
+  const [agreed, setAgreed] = useState(false); // New state for T&C checkbox
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -111,9 +112,7 @@ export default function DynamicSubmissionForm() {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Handler for free-text input changes and suggestions
@@ -128,7 +127,7 @@ export default function DynamicSubmissionForm() {
           ? cityOptions.filter((opt) =>
               opt.toLowerCase().startsWith(value.toLowerCase())
             )
-          : [] // Leave empty if nothing typed
+          : []
       );
     }
     if (name === 'category') {
@@ -160,8 +159,6 @@ export default function DynamicSubmissionForm() {
     }
   };
 
-  // Handler for when the user focuses on a dynamic input field.
-  // If the field is empty, show the full list of options.
   const handleFocus = (field) => {
     if (field === 'city' && formData.city.trim() === '') {
       setCitySuggestions(cityOptions);
@@ -177,7 +174,6 @@ export default function DynamicSubmissionForm() {
     }
   };
 
-  // When a suggestion is clicked, update the corresponding field
   const handleSuggestionSelect = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (field === 'city') {
@@ -188,7 +184,6 @@ export default function DynamicSubmissionForm() {
       setDesignerSuggestions([]);
     } else if (field === 'space') {
       setSpaceSuggestions([]);
-      // Auto-fill latitude and longitude if the space exists
       const selected = spaceOptions.find((opt) => opt.space === value);
       if (selected) {
         setFormData((prev) => ({
@@ -218,6 +213,34 @@ export default function DynamicSubmissionForm() {
     e.preventDefault();
     setMessage('');
     setError('');
+
+    if (!agreed) {
+      setError('You must agree to the Terms and Conditions to submit.');
+      return;
+    }
+
+    // Fallback: if latitude or longitude are empty, try to fetch them based on the city
+    let latitude = formData.latitude;
+    let longitude = formData.longitude;
+    if ((!latitude || !longitude) && formData.city) {
+      const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      try {
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+            formData.city
+          )}.json?access_token=${mapboxToken}`
+        );
+        const geoData = await res.json();
+        if (geoData.features && geoData.features.length > 0) {
+          const [lng, lat] = geoData.features[0].center;
+          latitude = lat;
+          longitude = lng;
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+        // Optionally, you could set latitude and longitude to defaults or leave them blank
+      }
+    }
 
     const dataToInsert = {
       ...formData,
@@ -252,18 +275,18 @@ export default function DynamicSubmissionForm() {
       dataToInsert.image_url = publicData.publicUrl;
     }
 
-    console.log('Data to insert:', dataToInsert);
     const { error: insertError } = await supabase
       .from('events')
       .insert([dataToInsert]);
     if (insertError) {
       console.error('Error inserting event:', insertError);
       setError(
-        'There was an error submitting your event. Please review the required fields and get in touch hello@eosarchive.app if the error perists.'
+        'There was an error submitting your event. Please review the required fields and contact hello@eosarchive.app if the error persists.'
       );
       return;
     }
 
+    // Reset form after submission
     setFormData({
       city: '',
       title: '',
@@ -281,25 +304,29 @@ export default function DynamicSubmissionForm() {
   };
 
   return (
-    <div className='flex flex-col items-center justify-center min-h-screen'>
-      <div className='max-w-2xl w-full bg-[var(--background)] text-[var(--foreground)] shadow-lg p-8 rounded-lg border border-[var(--foreground)]'>
-        <h1 className='text-2xl font-semibold mb-6'>submit an event</h1>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-[var(--background)] text-[var(--foreground)]'>
+      <div className='max-w-2xl w-full bg-[var(--background)] p-10'>
+        <h1 className='font-semibold mb-6 uppercase tracking-wide'>
+          SUBMIT AN EVENT
+        </h1>
 
         <form
           onSubmit={handleSubmit}
           className='grid gap-6'>
           {/* City Field */}
           <div className='relative'>
-            <label className='block mb-1'>city</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              City
+            </label>
             <input
               type='text'
               name='city'
               value={formData.city}
               onChange={handleInputChange}
               onFocus={() => handleFocus('city')}
-              placeholder='select or type a city'
+              placeholder='Select or type a city'
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
               autoComplete='off'
             />
             {citySuggestions.length > 0 && (
@@ -320,67 +347,77 @@ export default function DynamicSubmissionForm() {
 
           {/* Event Art Upload */}
           <div>
-            <label className='block mb-1'>event art</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Event Art
+            </label>
             <input
               type='file'
               accept='image/*'
               onChange={handleFileChange}
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
             />
           </div>
 
           {/* Title */}
           <div>
-            <label className='block mb-1'>title</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Title
+            </label>
             <input
               type='text'
               name='title'
               value={formData.title}
               onChange={handleInputChange}
-              placeholder='enter a title'
+              placeholder='Enter a title'
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
             />
           </div>
 
           {/* Date */}
           <div>
-            <label className='block mb-1'>date</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Date
+            </label>
             <input
               type='date'
               name='date'
               value={formData.date}
               onChange={handleInputChange}
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
             />
           </div>
 
           {/* Time */}
           <div>
-            <label className='block mb-1'>time</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Time
+            </label>
             <input
               type='time'
               name='time'
               value={formData.time}
               onChange={handleInputChange}
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
             />
           </div>
 
           {/* Category Field */}
           <div className='relative'>
-            <label className='block mb-1'>category</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Category
+            </label>
             <input
               type='text'
               name='category'
               value={formData.category}
               onChange={handleInputChange}
               onFocus={() => handleFocus('category')}
-              placeholder='select or type a category'
+              placeholder='Select or type a category'
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
               autoComplete='off'
             />
             {categorySuggestions.length > 0 && (
@@ -403,16 +440,18 @@ export default function DynamicSubmissionForm() {
 
           {/* Designer Field */}
           <div className='relative'>
-            <label className='block mb-1'>designer</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Designer
+            </label>
             <input
               type='text'
               name='designer'
               value={formData.designer}
               onChange={handleInputChange}
               onFocus={() => handleFocus('designer')}
-              placeholder='select or type a designer'
+              placeholder='Select or type a designer'
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
               autoComplete='off'
             />
             {designerSuggestions.length > 0 && (
@@ -435,16 +474,18 @@ export default function DynamicSubmissionForm() {
 
           {/* Space Field */}
           <div className='relative'>
-            <label className='block mb-1'>space</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Space
+            </label>
             <input
               type='text'
               name='space'
               value={formData.space}
               onChange={handleInputChange}
               onFocus={() => handleFocus('space')}
-              placeholder='select or type a space'
+              placeholder='Select or type a space'
               required
-              className='w-full bg-transparent border-b p-2 focus:outline-none'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
               autoComplete='off'
             />
             {spaceSuggestions.length > 0 && (
@@ -468,7 +509,9 @@ export default function DynamicSubmissionForm() {
           {/* Latitude & Longitude */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block mb-1'>latitude</label>
+              <label className='block mb-1 uppercase tracking-wider text-xs'>
+                Latitude
+              </label>
               <input
                 type='text'
                 name='latitude'
@@ -478,11 +521,13 @@ export default function DynamicSubmissionForm() {
                   !!formData.space &&
                   spaceOptions.find((opt) => opt.space === formData.space)
                 }
-                className='w-full bg-transparent border-b p-2'
+                className='w-full bg-transparent border-b border-[var(--foreground)] p-2'
               />
             </div>
             <div>
-              <label className='block mb-1'>longitude</label>
+              <label className='block mb-1 uppercase tracking-wider text-xs'>
+                Longitude
+              </label>
               <input
                 type='text'
                 name='longitude'
@@ -492,28 +537,53 @@ export default function DynamicSubmissionForm() {
                   !!formData.space &&
                   spaceOptions.find((opt) => opt.space === formData.space)
                 }
-                className='w-full bg-transparent border-b p-2'
+                className='w-full bg-transparent border-b border-[var(--foreground)] p-2'
               />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className='block mb-1'>description</label>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Description
+            </label>
             <textarea
               name='description'
               value={formData.description}
               onChange={handleInputChange}
-              placeholder='enter additional details (optional)'
-              className='w-full bg-transparent border-b p-2'
+              placeholder='Enter additional details (optional)'
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
             />
+          </div>
+
+          {/* Terms and Conditions Checkbox */}
+          <div className='flex items-center mt-4'>
+            <input
+              type='checkbox'
+              id='terms'
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className='mr-2'
+              required
+            />
+            <label
+              htmlFor='terms'
+              className='text-xs'>
+              I agree to the{' '}
+              <Link
+                href='/terms'
+                className='underline hover:text-gray-400'>
+                Terms and Conditions
+              </Link>
+              .
+            </label>
           </div>
 
           {/* Submit Button */}
           <button
             type='submit'
-            className='w-full py-3 bg-[var(--foreground)] text-[var(--background)] rounded-lg hover:opacity-80 transition'>
-            submit event
+            className='w-full py-3 bg-[var(--foreground)] text-[var(--background)] rounded-lg hover:opacity-80 transition mt-6'>
+            SUBMIT EVENT
           </button>
         </form>
 

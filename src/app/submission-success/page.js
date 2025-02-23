@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 export default function SubmissionSuccess() {
   return (
-    <div className='max-w-2xl mx-auto p-6 text-justify'>
-      <h1 className='text-2xl font-semibold mb-4'>submission received</h1>
+    <div className='max-w-2xl mx-auto p-10 text-justify'>
+      <h1 className='font-semibold mb-4'>submission received</h1>
       <p className='mb-4'>
         thank you for contributing to eos archive and supporting the subculture
         scene. your event has been submitted and will be reviewed soon.{' '}
@@ -27,7 +27,7 @@ export default function SubmissionSuccess() {
         ps. need help with your submission? get in touch:{' '}
         <a
           href='mailto:hello@eosarchive.app'
-          className='hover:underline'>
+          className='underline hover:text-gray-600'>
           hello@eosarchive.app.
         </a>
       </p>
@@ -36,12 +36,12 @@ export default function SubmissionSuccess() {
       <div className='mt-10 flex flex-col gap-4'>
         <Link
           href='/'
-          className='hover:underline'>
+          className='underline text-sm hover:text-gray-600'>
           return to archive
         </Link>
         <Link
           href='/submission'
-          className='hover:underline'>
+          className='underline text-sm hover:text-gray-600'>
           submit another event
         </Link>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 
 // Set Mapbox token
@@ -8,8 +8,10 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 export default function MapComponent({ eventId, spaces }) {
   const [mapData, setMapData] = useState([]);
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
 
-  // Fetch data depending on whether eventId or spaces are passed
+  // Fetch data based on eventId or spaces
   useEffect(() => {
     async function fetchData() {
       if (eventId) {
@@ -27,33 +29,46 @@ export default function MapComponent({ eventId, spaces }) {
     fetchData();
   }, [eventId, spaces]);
 
+  // Initialize the map when mapData is available
   useEffect(() => {
     if (mapData.length === 0) return;
 
+    // Initialize map with the container ref
     const map = new mapboxgl.Map({
-      container: 'map',
+      container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/dark-v10',
       center: eventId
         ? [mapData[0].longitude, mapData[0].latitude]
-        : [12.3731, 51.3397], // Default center Leipzig
+        : [12.3731, 51.3397], // Default center (Leipzig)
       zoom: eventId ? 14 : 6,
     });
 
+    // Create a custom marker for each item
     mapData.forEach((item) => {
-      new mapboxgl.Marker()
+      const markerEl = document.createElement('div');
+      markerEl.style.width = '15px';
+      markerEl.style.height = '15px';
+      markerEl.style.borderRadius = '50%';
+      // Use off-white for dawn mode
+      markerEl.style.backgroundColor = '#f5f1f0';
+
+      const popupText = (item.name || item.space || '').toUpperCase();
+
+      new mapboxgl.Marker({ element: markerEl })
         .setLngLat([item.longitude, item.latitude])
-        .setPopup(new mapboxgl.Popup().setText(item.name || item.space))
+        .setPopup(new mapboxgl.Popup().setText(popupText))
         .addTo(map);
     });
 
+    mapRef.current = map;
     return () => map.remove();
-  }, [mapData]);
+  }, [mapData, eventId]);
 
   return (
-    <div className='w-full h-64'>
-      <div
-        id='map'
-        className='w-full h-full'></div>
-    </div>
+    // Container takes full width and a fixed height (adjust h-[400px] as needed)
+    <div
+      className='h-[400px] w-full'
+      ref={mapContainerRef}
+    />
   );
 }

@@ -61,7 +61,7 @@ export default function NavBar() {
             className='w-1/3 flex items-center space-x-6'
             onClick={toggleMenu}
             aria-label='Toggle menu'>
-            menu
+            MENU
           </button>
 
           {/* Center: Logo */}
