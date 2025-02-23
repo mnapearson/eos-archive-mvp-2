@@ -117,12 +117,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
     <div
       className={`fixed inset-0 z-50 transition-all duration-300 ${
         menuOpen
-          ? 'bg-[var(--background)]/90 backdrop-blur-md opacity-100'
+          ? 'bg-[var(--background)]/80 backdrop-blur-md opacity-100'
           : 'opacity-0 pointer-events-none'
       }`}>
       {/* Sidebar Panel */}
       <div
-        className={`fixed left-0 top-0 h-full w-80 bg-[var(--background)]/80 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`border-x border-gray-200 fixed left-0 top-0 h-full w-80 bg-[var(--background)]/20 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Scrollable Content */}
@@ -133,12 +133,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
             <div className='flex gap-4'>
               <button
                 onClick={handleClear}
-                className='underline text-sm'>
+                className='text-sm'>
                 CLEAR
               </button>
               <button
                 onClick={handleSave && toggleMenu}
-                className='underline text-sm'>
+                className='text-sm'>
                 SAVE
               </button>
             </div>
@@ -156,25 +156,25 @@ export default function Menu({ menuOpen, toggleMenu }) {
             <Link
               onClick={toggleMenu}
               href='/news'
-              className='block py-1 underline'>
+              className='block py-1'>
               NEWS
             </Link>
             <Link
               onClick={toggleMenu}
               href='/about'
-              className='block py-1 underline'>
+              className='block py-1'>
               ABOUT
             </Link>
             <Link
               onClick={toggleMenu}
               href='/map'
-              className='block py-1 underline'>
+              className='block py-1'>
               SPACES
             </Link>
             <Link
               onClick={toggleMenu}
               href='/submission'
-              className='block py-1 underline'>
+              className='block py-1'>
               SUBMIT EVENT
             </Link>
           </div>
