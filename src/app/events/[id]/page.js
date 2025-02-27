@@ -92,7 +92,7 @@ export default function EventPage() {
       try {
         await navigator.share({
           title: event.title,
-          text: 'Check out this event!',
+          text: 'Check out this event I found on eos archive.',
           url: window.location.href,
         });
       } catch (error) {

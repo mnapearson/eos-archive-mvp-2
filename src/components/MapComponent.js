@@ -83,23 +83,47 @@ export default function MapComponent({
         markerColors[typeKey] || markerColors.default;
 
       const popupTitle = (item.name || item.space || 'UNKNOWN').toUpperCase();
-      const popupAddress = item.address || fallbackAddress || '';
+      // Use existing address or fallbackAddress if provided;
+      // if neither is available, display "Loading address..."
+      let initialAddress =
+        item.address || fallbackAddress || 'Loading address...';
+
       const popupContent = `
-        <div style="color:#000; font-size:12px; line-height:1.4;">
-          <strong>${popupTitle}</strong>
-          ${
-            popupAddress
-              ? `<br/><a href="#" class="copy-address" data-address="${popupAddress}" style="text-decoration:underline; color:inherit;">${popupAddress}</a>`
-              : ''
-          }
-        </div>
-      `;
+      <div style="color:#000; font-size:12px; line-height:1.4;">
+        <strong>${popupTitle}</strong>
+        ${initialAddress ? `<br/>${initialAddress}` : ''}
+      </div>
+    `;
 
       const marker = new mapboxgl.Marker({ element: markerEl })
         .setLngLat([item.longitude, item.latitude])
         .setPopup(new mapboxgl.Popup().setHTML(popupContent))
         .addTo(mapRef.current);
       markersRef.current.push(marker);
+
+      // If no address is provided in the item or fallback, perform reverse geocoding.
+      if (!(item.address || fallbackAddress)) {
+        fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${item.longitude},${item.latitude}.json?access_token=${mapboxgl.accessToken}`
+        )
+          .then((res) => res.json())
+          .then((geoData) => {
+            let address = 'UNKNOWN ADDRESS';
+            if (geoData.features && geoData.features.length > 0) {
+              address = geoData.features[0].place_name;
+            }
+            const newPopupContent = `
+            <div style="color:#000; font-size:12px; line-height:1.4;">
+              <strong>${popupTitle}</strong><br/>
+              <a href="#" class="copy-address" data-address="${address}" style="text-decoration:underline; color:inherit;">${address}</a>
+            </div>
+          `;
+            marker.getPopup().setHTML(newPopupContent);
+          })
+          .catch((err) => {
+            console.error('Reverse geocoding error:', err);
+          });
+      }
     });
   };
 
@@ -118,7 +142,7 @@ export default function MapComponent({
         navigator.clipboard
           .writeText(text)
           .then(() => {
-            e.target.textContent = 'Copied!';
+            e.target.textContent = 'Address copied to clipboard.';
             setTimeout(() => {
               e.target.textContent = text;
             }, 2000);
