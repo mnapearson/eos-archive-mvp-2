@@ -6,24 +6,30 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function GET(req, { params }) {
   const { id } = params;
-
-  if (!id) {
-    return new Response(JSON.stringify({ error: 'Event ID is required' }), {
-      status: 400,
-    });
-  }
-
+  // Query the events table and join the related space record.
+  // We alias the joined data as "space" for clarity.
   const { data, error } = await supabase
     .from('events')
-    .select('*')
+    .select(
+      `
+      *,
+      space:spaces(
+        id,
+        name,
+        type,
+        latitude,
+        longitude,
+        city
+      )
+    `
+    )
     .eq('id', id)
     .single();
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+      status: 400,
     });
   }
-
   return new Response(JSON.stringify(data), { status: 200 });
 }

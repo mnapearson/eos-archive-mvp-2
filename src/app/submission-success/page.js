@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function SubmissionSuccess() {
   return (
-    <div className='max-w-2xl mx-auto p-10 text-justify'>
+    <div className='max-w-2xl mx-auto text-justify'>
       <h1 className='font-semibold mb-4'>submission received</h1>
       <p className='mb-4'>
         thank you for contributing to eos archive and supporting the subculture

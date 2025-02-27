@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.48.1",
     "mapbox-gl": "^3.9.4",
     "next": "15.1.6",
+    "node-fetch": "^3.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-infinite-scroll-component": "^6.1.0",

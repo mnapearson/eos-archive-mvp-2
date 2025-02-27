@@ -22,9 +22,10 @@ export default function DynamicSubmissionForm() {
     latitude: '',
     longitude: '',
     description: '',
+    spaceType: '', // New field for space type
   });
   const [imageFile, setImageFile] = useState(null);
-  const [agreed, setAgreed] = useState(false); // New state for T&C checkbox
+  const [agreed, setAgreed] = useState(false); // Terms and Conditions checkbox
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -46,17 +47,20 @@ export default function DynamicSubmissionForm() {
   const designerRef = useRef(null);
   const spaceRef = useRef(null);
 
-  // Fetch distinct options from the events table on mount
+  // Fetch distinct options on mount.
   useEffect(() => {
     async function fetchOptions() {
-      // Cities
-      const { data: cityData } = await supabase.from('events').select('city');
+      // Fetch Cities from the spaces table.
+      const { data: cityData, error: cityError } = await supabase
+        .from('spaces')
+        .select('city');
+      if (cityError) console.error('Error fetching cities:', cityError);
       const uniqueCities = [
         ...new Set(cityData?.map((item) => item.city).filter(Boolean)),
       ];
       setCityOptions(uniqueCities);
 
-      // Categories
+      // Fetch Categories from the events table.
       const { data: catData } = await supabase
         .from('events')
         .select('category');
@@ -65,7 +69,7 @@ export default function DynamicSubmissionForm() {
       ];
       setCategoryOptions(uniqueCategories);
 
-      // Designers
+      // Fetch Designers from the events table.
       const { data: designerData } = await supabase
         .from('events')
         .select('designer');
@@ -74,23 +78,21 @@ export default function DynamicSubmissionForm() {
       ];
       setDesignerOptions(uniqueDesigners);
 
-      // Spaces (with lat/lng)
-      const { data: spaceData } = await supabase
-        .from('events')
-        .select('space, latitude, longitude');
-      const spaceMap = new Map();
-      spaceData?.forEach((item) => {
-        if (item.space) {
-          if (!spaceMap.has(item.space)) {
-            spaceMap.set(item.space, {
-              space: item.space,
-              latitude: item.latitude,
-              longitude: item.longitude,
-            });
-          }
-        }
-      });
-      setSpaceOptions(Array.from(spaceMap.values()));
+      // Fetch Spaces from the spaces table (with latitude, longitude, city, and type)
+      const { data: spaceData, error: spaceError } = await supabase
+        .from('spaces')
+        .select('name, latitude, longitude, city, type');
+      if (spaceError) console.error('Error fetching spaces:', spaceError);
+      // Normalize each record with a "space" property equal to the name
+      const normalizedSpaces =
+        spaceData?.map((item) => ({
+          space: item.name,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          city: item.city,
+          spaceType: item.type, // Include space type
+        })) || [];
+      setSpaceOptions(normalizedSpaces);
     }
     fetchOptions();
   }, []);
@@ -115,12 +117,11 @@ export default function DynamicSubmissionForm() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handler for free-text input changes and suggestions
+  // Handler for input changes and updating suggestions
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Update suggestion lists for dynamic fields
     if (name === 'city') {
       setCitySuggestions(
         value.length
@@ -190,9 +191,16 @@ export default function DynamicSubmissionForm() {
           ...prev,
           latitude: selected.latitude ? selected.latitude.toString() : '',
           longitude: selected.longitude ? selected.longitude.toString() : '',
+          city: selected.city || prev.city,
+          spaceType: selected.spaceType || '', // Auto-fill space type if available
         }));
       } else {
-        setFormData((prev) => ({ ...prev, latitude: '', longitude: '' }));
+        setFormData((prev) => ({
+          ...prev,
+          latitude: '',
+          longitude: '',
+          spaceType: '',
+        }));
       }
     }
   };
@@ -220,9 +228,9 @@ export default function DynamicSubmissionForm() {
     }
 
     // Fallback: if latitude or longitude are empty, try to fetch them based on the city
-    let latitude = formData.latitude;
-    let longitude = formData.longitude;
-    if ((!latitude || !longitude) && formData.city) {
+    let lat = formData.latitude;
+    let lng = formData.longitude;
+    if ((!lat || !lng) && formData.city) {
       const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
       try {
         const res = await fetch(
@@ -232,20 +240,57 @@ export default function DynamicSubmissionForm() {
         );
         const geoData = await res.json();
         if (geoData.features && geoData.features.length > 0) {
-          const [lng, lat] = geoData.features[0].center;
-          latitude = lat;
-          longitude = lng;
+          const [fLng, fLat] = geoData.features[0].center;
+          lat = fLat;
+          lng = fLng;
         }
       } catch (error) {
         console.error('Geocoding error:', error);
-        // Optionally, you could set latitude and longitude to defaults or leave them blank
       }
     }
 
+    // Check if the space already exists in the new "spaces" table (match on name and city)
+    const { data: existingSpaces, error: spaceError } = await supabase
+      .from('spaces')
+      .select('id')
+      .eq('name', formData.space)
+      .eq('city', formData.city)
+      .limit(1);
+
+    let spaceId;
+    if (existingSpaces && existingSpaces.length > 0) {
+      spaceId = existingSpaces[0].id;
+    } else {
+      // If spaceType is empty, set it to null.
+      const newSpaceType =
+        formData.spaceType === '' ? null : formData.spaceType;
+      const { data: newSpace, error: insertSpaceError } = await supabase
+        .from('spaces')
+        .insert([
+          {
+            name: formData.space,
+            city: formData.city,
+            type: newSpaceType,
+            latitude: Number(lat),
+            longitude: Number(lng),
+          },
+        ])
+        .select();
+      if (insertSpaceError) {
+        console.error('Error inserting new space:', insertSpaceError);
+        setError('Error submitting your event. Please try again.');
+        return;
+      }
+      spaceId = newSpace[0].id;
+    }
+
+    // Remove fields that now belong to the spaces table.
+    const { city, space, spaceType, latitude, longitude, ...eventData } =
+      formData;
+
     const dataToInsert = {
-      ...formData,
-      latitude: Number(formData.latitude),
-      longitude: Number(formData.longitude),
+      ...eventData,
+      space_id: spaceId, // Reference the space record
       approved: false,
       image_url: null,
     };
@@ -298,6 +343,7 @@ export default function DynamicSubmissionForm() {
       latitude: '',
       longitude: '',
       description: '',
+      spaceType: '',
     });
     setImageFile(null);
     router.push('/submission-success');
@@ -305,7 +351,7 @@ export default function DynamicSubmissionForm() {
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-[var(--background)] text-[var(--foreground)]'>
-      <div className='max-w-2xl w-full bg-[var(--background)] p-10'>
+      <div className='max-w-2xl w-full bg-[var(--background)] '>
         <h1 className='font-semibold mb-6 uppercase tracking-wide'>
           SUBMIT AN EVENT
         </h1>
@@ -326,6 +372,10 @@ export default function DynamicSubmissionForm() {
               onFocus={() => handleFocus('city')}
               placeholder='Select or type a city'
               required
+              readOnly={
+                !!formData.space &&
+                spaceOptions.find((opt) => opt.space === formData.space)
+              }
               className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
               autoComplete='off'
             />
@@ -504,6 +554,26 @@ export default function DynamicSubmissionForm() {
                 ))}
               </ul>
             )}
+          </div>
+
+          {/* Space Type Field */}
+          <div>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Space Type
+            </label>
+            <input
+              type='text'
+              name='spaceType'
+              value={formData.spaceType}
+              onChange={handleInputChange}
+              placeholder='Enter space type (e.g., gallery, bar, club)'
+              readOnly={
+                !!formData.space &&
+                spaceOptions.find((opt) => opt.space === formData.space)
+              }
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+              autoComplete='off'
+            />
           </div>
 
           {/* Latitude & Longitude */}

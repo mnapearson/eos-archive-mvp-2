@@ -31,16 +31,18 @@ export function FilterProvider({ children }) {
   }, [selectedFilters]);
 
   async function fetchAvailableOptions() {
-    // Build a query filtering by the user's current selections
+    // Query events and join with the related spaces record.
+    // The syntax 'space:spaces(city, name)' renames the joined record to "space"
     let query = supabase
       .from('events')
-      .select('city, space, date, category, designer');
+      .select('date, category, designer, space:spaces(city, name)');
 
+    // Apply filters – for city and space we filter on nested fields.
     if (selectedFilters.city.length > 0) {
-      query = query.in('city', selectedFilters.city);
+      query = query.in('space.city', selectedFilters.city);
     }
     if (selectedFilters.space.length > 0) {
-      query = query.in('space', selectedFilters.space);
+      query = query.in('space.name', selectedFilters.space);
     }
     if (selectedFilters.date.length > 0) {
       query = query.in('date', selectedFilters.date);
@@ -58,22 +60,31 @@ export function FilterProvider({ children }) {
       return;
     }
 
-    // Helper to extract unique values for a given key
+    // Helper to extract unique values from a nested field (for space)
+    const uniqueNested = (items, nestedField) =>
+      Array.from(
+        new Set(items.map((item) => item.space?.[nestedField]).filter(Boolean))
+      );
+    // Helper for flat fields from events
     const unique = (items, key) =>
       Array.from(new Set(items.map((item) => item[key]).filter(Boolean)));
 
-    // Sort alphabetically (ascending)
-    const sortAlpha = (arr) => arr.sort((a, b) => a.localeCompare(b));
+    const uniqueCities = uniqueNested(events, 'city');
+    const uniqueSpaces = uniqueNested(events, 'name');
+    const uniqueCategories = unique(events, 'category');
+    const uniqueDesigners = unique(events, 'designer');
+    const uniqueDates = unique(events, 'date');
 
-    setCityOptions(sortAlpha(unique(events, 'city')));
-    setSpaceOptions(sortAlpha(unique(events, 'space')));
-    setCategoryOptions(sortAlpha(unique(events, 'category')));
-    setDesignerOptions(sortAlpha(unique(events, 'designer')));
+    // Sort alphabetically (ascending) for text options
+    const sortAlpha = (arr) => [...arr].sort((a, b) => a.localeCompare(b));
+    setCityOptions(sortAlpha(uniqueCities));
+    setSpaceOptions(sortAlpha(uniqueSpaces));
+    setCategoryOptions(sortAlpha(uniqueCategories));
+    setDesignerOptions(sortAlpha(uniqueDesigners));
 
     // For dates, sort descending (most recent first)
-    const dates = unique(events, 'date');
-    dates.sort((a, b) => new Date(b) - new Date(a));
-    setDateOptions(dates);
+    uniqueDates.sort((a, b) => new Date(b) - new Date(a));
+    setDateOptions(uniqueDates);
   }
 
   return (

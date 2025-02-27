@@ -35,7 +35,7 @@ export default function HomePage() {
   }, [selectedFilters]);
 
   return (
-    <div className='max-w-6xl mx-auto px-6 mt-6'>
+    <div className='max-w-6xl mx-auto'>
       <MasonryGrid items={events} />
     </div>
   );

@@ -52,7 +52,7 @@ export default function SpacesPage() {
   };
 
   return (
-    <div className='max-w-3xl mx-auto p-10'>
+    <div className='max-w-3xl mx-auto'>
       <h1 className='font-semibold mb-6'>spaces in the archive</h1>
 
       {/* Legend placed outside the map */}
@@ -76,8 +76,6 @@ export default function SpacesPage() {
           </button>
         ))}
       </div>
-
-      {/* Spaces Map */}
       <MapComponent
         spaces={spaces}
         activeTypes={activeTypes}

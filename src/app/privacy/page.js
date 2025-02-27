@@ -1,10 +1,10 @@
 export default function PrivacyPage() {
   return (
-    <div className='flex items-center justify-center min-h-screen px-8 mb-6'>
+    <div className='flex items-center justify-center min-h-screen'>
       <div className='max-w-3xl text-[var(--foreground)]'>
-        <h1 className='text-2xl font-semibold mt-6'>privacy & impressum</h1>
+        <h1 className='font-semibold'>privacy & impressum</h1>
 
-        <h2 className='text-lg font-semibold mt-8 mb-2'>impressum</h2>
+        <h2 className='font-semibold mt-8 mb-2'>impressum</h2>
         <p className='mb-2'>Angaben gemäß § 5 TMG</p>
         <p className='mb-4'>
           <strong>eos archive</strong> <br />
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           Germany
         </p>
 
-        <h2 className='text-lg font-semibold mt-8 mb-2'>kontakt</h2>
+        <h2 className='font-semibold mt-8 mb-2'>kontakt</h2>
         <p className='mb-2'>Telefon: 01625790189</p>
         <p className='mb-4'>
           E-Mail:{' '}
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           </a>
         </p>
 
-        <h2 className='text-lg font-semibold mt-8 mb-2'>
+        <h2 className='font-semibold mt-8 mb-2'>
           verantwortlich für den inhalt nach § 55 abs. 2 rstv
         </h2>
         <p className='mb-4'>
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
           Germany
         </p>
 
-        <h2 className='text-lg font-semibold mt-8 mb-2'>
+        <h2 className='font-semibold mt-8 mb-2'>
           haftungsausschluss (disclaimer)
         </h2>
         <h3 className='font-semibold mt-6 mb-1'>haftung für inhalte</h3>

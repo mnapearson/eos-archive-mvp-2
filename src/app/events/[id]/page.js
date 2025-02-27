@@ -5,17 +5,15 @@ import { useParams } from 'next/navigation';
 import MapComponent from '@/components/MapComponent';
 import Link from 'next/link';
 
-// Format the date/time: "JUNE 1, 2024 @ 19.00"
+// Format the date/time: "DD.MM.YY @ HH.MM"
 function formatDateTime(dateString, timeString) {
   if (!dateString) return '';
   const dateObj = new Date(dateString);
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const year = String(dateObj.getFullYear()).slice(-2);
-
   let timePart = '';
   if (timeString) {
-    // Split the time string and take only hours and minutes
     const segments = timeString.split(':');
     if (segments.length >= 2) {
       timePart = `${segments[0]}.${segments[1]}`;
@@ -31,7 +29,6 @@ function formatDateTime(dateString, timeString) {
 export default function EventPage() {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
-  const [address, setAddress] = useState(''); // Reverse-geocoded address
 
   useEffect(() => {
     async function fetchEvent() {
@@ -39,55 +36,28 @@ export default function EventPage() {
       const response = await fetch(`/api/events/${id}`);
       const data = await response.json();
       setEvent(data);
-
-      // If lat/long are present, reverse-geocode them
-      if (data.latitude && data.longitude) {
-        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-        if (!mapboxToken) {
-          console.warn('No Mapbox token found in NEXT_PUBLIC_MAPBOX_TOKEN');
-          return;
-        }
-        const geoUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${data.longitude},${data.latitude}.json?access_token=${mapboxToken}`;
-        try {
-          const geoRes = await fetch(geoUrl);
-          const geoData = await geoRes.json();
-          if (geoData.features && geoData.features.length > 0) {
-            setAddress(geoData.features[0].place_name);
-          } else {
-            setAddress('UNKNOWN ADDRESS');
-          }
-        } catch (error) {
-          console.error('Error reverse-geocoding:', error);
-          setAddress('UNKNOWN ADDRESS');
-        }
-      } else {
-        // If no lat/long, fallback
-        setAddress(data.city || 'UNKNOWN ADDRESS');
-      }
     }
     fetchEvent();
   }, [id]);
 
-  // If still loading
   if (!event) {
     return <p className='p-16'>Loading event details...</p>;
   }
 
-  const eventSpace = event.space;
-  // Title in uppercase
+  // Use joined space data if available
+  // For example, if your API returns the related space data under "space"
   const eventTitle = (event.title || 'UNTITLED').toUpperCase();
-  // Category: match your Figma (if you want uppercase or normal case)
   const eventCategory = event.category || '';
-  // Format date/time as "JUNE 1, 2024 @ 19.00"
   const dateTimeDisplay = formatDateTime(event.date, event.time);
-  // Fallback description
   const eventDescription =
     event.description ||
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt vehicula turpis.';
+  // Use the space's address if available, otherwise fallback to city.
+  const fallbackAddress =
+    event.space?.name || event.space?.city || 'UNKNOWN ADDRESS';
 
-  // SHARE handler
   const handleShare = async (e) => {
-    e.preventDefault(); // So clicking doesn't navigate if using <Link>
+    e.preventDefault();
     if (navigator.share) {
       try {
         await navigator.share({
@@ -96,7 +66,7 @@ export default function EventPage() {
           url: window.location.href,
         });
       } catch (error) {
-        // If user cancels, do nothing
+        // If user cancels, do nothing.
       }
     } else {
       alert('Sharing not supported in this browser.');
@@ -104,7 +74,7 @@ export default function EventPage() {
   };
 
   return (
-    <div className='max-w-screen-lg mx-auto px-4 py-8'>
+    <div className='max-w-screen-lg mx-auto text-[var(--foreground)]'>
       {/* Return Link */}
       <div className='mb-4'>
         <Link
@@ -113,7 +83,8 @@ export default function EventPage() {
           return to archive
         </Link>
       </div>
-      {/* Two-column layout */}
+
+      {/* Two-column layout for event details */}
       <div className='flex flex-col md:flex-row gap-8 mb-8'>
         {/* Left Column: Flyer */}
         <div className='md:w-3/4'>
@@ -127,13 +98,11 @@ export default function EventPage() {
             <p className='text-gray-500'>No flyer available</p>
           )}
         </div>
-
-        {/* Right Column: Info */}
+        {/* Right Column: Event Info */}
         <div className='md:w-1/4 flex flex-col justify-between'>
           <div>
-            {/* Title + SHARE in same line, top-right for SHARE */}
             <div className='flex items-center justify-between mb-1'>
-              <h1 className='text-l font-bold'>{eventTitle}</h1>
+              <h1 className='font-bold'>{eventTitle}</h1>
               <Link
                 href='#'
                 onClick={handleShare}
@@ -142,22 +111,27 @@ export default function EventPage() {
               </Link>
             </div>
             <p className='text-sm italic mb-2'>{eventCategory}</p>
-
-            {/* Date & Time: "JUNE 1, 2024 @ 19.00" */}
             {dateTimeDisplay && (
               <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
-            {/* Reverse-geocoded address (no "LOCATION" label) */}
-            {/* {address && <p className='text-sm mb-4'>{address}</p>} */}
+            {fallbackAddress && (
+              <p className='text-sm mb-4'>
+                {fallbackAddress}, {event.space.city}
+              </p>
+            )}
 
-            {/* Description */}
             <p className='text-sm whitespace-pre-line'>{eventDescription}</p>
           </div>
         </div>
       </div>
+
+      {/* Full-width Map below event info.
+          Pass fallbackAddress to MapComponent so that its markers can use it if needed.
+          Also, if you need the event's space data for the markers (like type, lat, lng),
+          ensure your API endpoint returns those fields within the "space" object. */}
       <MapComponent
         eventId={id}
-        address={address}
+        address={fallbackAddress}
       />
     </div>
   );
