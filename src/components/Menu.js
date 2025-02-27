@@ -121,7 +121,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
       }`}>
       {/* Sidebar Panel */}
       <div
-        className={`border-x border-gray-200 fixed left-0 top-0 h-full w-80 bg-[var(--background)]/20 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`border-x border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/20 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Scrollable Content */}
@@ -180,7 +180,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
         </div>
 
         {/* Footer (always at the bottom) */}
-        <footer className='w-full border-t border-gray-200 px-4 py-4'>
+        <footer className='w-full border-t border-[var(--foreground)] px-4 py-4'>
           <div className='max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between'>
             <p className='text-sm'>© {new Date().getFullYear()} eos archive</p>
             <div className='text-sm mt-2 md:mt-0'>

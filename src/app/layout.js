@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import './globals.css';
 import NavBar from '@/components/NavBar';
+import CookieConsentBar from '@/components/CookieConsentBar';
 import { FilterProvider } from '@/contexts/FilterContext';
 
 export default function RootLayout({ children }) {
@@ -40,6 +41,7 @@ export default function RootLayout({ children }) {
             </div>
           </footer>
         </FilterProvider>
+        <CookieConsentBar />
       </body>
     </html>
   );

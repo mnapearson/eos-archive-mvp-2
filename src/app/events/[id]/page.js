@@ -70,7 +70,7 @@ export default function EventPage() {
 
   // If still loading
   if (!event) {
-    return <p className='p-4'>Loading event details...</p>;
+    return <p className='p-16'>Loading event details...</p>;
   }
 
   const eventSpace = event.space;
