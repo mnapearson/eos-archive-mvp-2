@@ -6,6 +6,17 @@ import mapboxgl from 'mapbox-gl';
 // Set Mapbox token
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+// Define marker colors based on space type
+const markerColors = {
+  'off-space': '#FF6EC7', // neon pink
+  bar: '#1F51FF', // neon blue
+  club: '#9D00FF', // neon purple
+  gallery: '#FFFF00', // neon yellow
+  studio: '#39FF14', // neon green
+  kino: '#FF073A', // neon red
+  default: '#F8F8F8', // off-white
+};
+
 export default function MapComponent({
   eventId,
   spaces,
@@ -49,19 +60,21 @@ export default function MapComponent({
     // Add default navigation controls
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Create a custom marker for each item
+    // Create a custom marker for each item with color based on space type
     mapData.forEach((item) => {
       const markerEl = document.createElement('div');
       markerEl.style.width = '15px';
       markerEl.style.height = '15px';
       markerEl.style.borderRadius = '50%';
-      // Use off-white for dawn mode
-      markerEl.style.backgroundColor = '#F8F8F8';
 
-      // Use the event's name/space as title and use the event's address if available, else fallbackAddress.
+      // Determine marker color based on type (fallback to default if null)
+      const typeKey = item.type ? item.type.toLowerCase() : 'default';
+      const markerColor = markerColors[typeKey] || markerColors.default;
+      markerEl.style.backgroundColor = markerColor;
+
+      // Build the popup content with uppercase name and address
       const popupTitle = (item.name || item.space || 'UNKNOWN').toUpperCase();
       const popupAddress = item.address || fallbackAddress || '';
-
       const popupContent = `
         <div style="color:#000; font-size:12px; line-height:1.4;">
           <strong>${popupTitle}</strong>
@@ -80,7 +93,7 @@ export default function MapComponent({
   }, [mapData, eventId, fallbackAddress]);
 
   return (
-    // Container takes full width and fixed height (adjust as needed)
+    // Container takes full width and a fixed height (adjust as needed)
     <div className='w-full h-[400px]'>
       <div
         ref={mapContainerRef}
