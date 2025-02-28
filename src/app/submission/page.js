@@ -359,169 +359,6 @@ export default function DynamicSubmissionForm() {
         <form
           onSubmit={handleSubmit}
           className='grid gap-6'>
-          {/* City Field */}
-          <div className='relative'>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              City
-            </label>
-            <input
-              type='text'
-              name='city'
-              value={formData.city}
-              onChange={handleInputChange}
-              onFocus={() => handleFocus('city')}
-              placeholder='Select or type a city'
-              required
-              readOnly={
-                !!formData.space &&
-                spaceOptions.find((opt) => opt.space === formData.space)
-              }
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-              autoComplete='off'
-            />
-            {citySuggestions.length > 0 && (
-              <ul
-                ref={cityRef}
-                className='absolute left-0 right-0 bg-[var(--background)] border border-[var(--foreground)] shadow-lg z-50 mt-1 max-h-40 overflow-y-auto'>
-                {citySuggestions.map((suggestion) => (
-                  <li
-                    key={suggestion}
-                    onClick={() => handleSuggestionSelect('city', suggestion)}
-                    className='p-2 cursor-pointer hover:bg-gray-700'>
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Event Art Upload */}
-          <div>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              Event Art
-            </label>
-            <input
-              type='file'
-              accept='image/*'
-              onChange={handleFileChange}
-              required
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-            />
-          </div>
-
-          {/* Title */}
-          <div>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              Title
-            </label>
-            <input
-              type='text'
-              name='title'
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder='Enter a title'
-              required
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-            />
-          </div>
-
-          {/* Date */}
-          <div>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              Date
-            </label>
-            <input
-              type='date'
-              name='date'
-              value={formData.date}
-              onChange={handleInputChange}
-              required
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-            />
-          </div>
-
-          {/* Time */}
-          <div>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              Time
-            </label>
-            <input
-              type='time'
-              name='time'
-              value={formData.time}
-              onChange={handleInputChange}
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-            />
-          </div>
-
-          {/* Category Field */}
-          <div className='relative'>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              Category
-            </label>
-            <input
-              type='text'
-              name='category'
-              value={formData.category}
-              onChange={handleInputChange}
-              onFocus={() => handleFocus('category')}
-              placeholder='Select or type a category'
-              required
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-              autoComplete='off'
-            />
-            {categorySuggestions.length > 0 && (
-              <ul
-                ref={categoryRef}
-                className='absolute left-0 right-0 bg-[var(--background)] border border-[var(--foreground)] shadow-lg z-50 mt-1 max-h-40 overflow-y-auto'>
-                {categorySuggestions.map((suggestion) => (
-                  <li
-                    key={suggestion}
-                    onClick={() =>
-                      handleSuggestionSelect('category', suggestion)
-                    }
-                    className='p-2 cursor-pointer hover:bg-gray-700'>
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Designer Field */}
-          <div className='relative'>
-            <label className='block mb-1 uppercase tracking-wider text-xs'>
-              Designer
-            </label>
-            <input
-              type='text'
-              name='designer'
-              value={formData.designer}
-              onChange={handleInputChange}
-              onFocus={() => handleFocus('designer')}
-              placeholder='Select or type a designer'
-              required
-              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
-              autoComplete='off'
-            />
-            {designerSuggestions.length > 0 && (
-              <ul
-                ref={designerRef}
-                className='absolute left-0 right-0 bg-[var(--background)] border border-[var(--foreground)] shadow-lg z-50 mt-1 max-h-40 overflow-y-auto'>
-                {designerSuggestions.map((suggestion) => (
-                  <li
-                    key={suggestion}
-                    onClick={() =>
-                      handleSuggestionSelect('designer', suggestion)
-                    }
-                    className='p-2 cursor-pointer hover:bg-gray-700'>
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
           {/* Space Field */}
           <div className='relative'>
             <label className='block mb-1 uppercase tracking-wider text-xs'>
@@ -576,6 +413,42 @@ export default function DynamicSubmissionForm() {
             />
           </div>
 
+          {/* City Field */}
+          <div className='relative'>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              City
+            </label>
+            <input
+              type='text'
+              name='city'
+              value={formData.city}
+              onChange={handleInputChange}
+              onFocus={() => handleFocus('city')}
+              placeholder='Select or type a city'
+              required
+              readOnly={
+                !!formData.space &&
+                spaceOptions.find((opt) => opt.space === formData.space)
+              }
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+              autoComplete='off'
+            />
+            {citySuggestions.length > 0 && (
+              <ul
+                ref={cityRef}
+                className='absolute left-0 right-0 bg-[var(--background)] border border-[var(--foreground)] shadow-lg z-50 mt-1 max-h-40 overflow-y-auto'>
+                {citySuggestions.map((suggestion) => (
+                  <li
+                    key={suggestion}
+                    onClick={() => handleSuggestionSelect('city', suggestion)}
+                    className='p-2 cursor-pointer hover:bg-gray-700'>
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {/* Latitude & Longitude */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
@@ -610,6 +483,133 @@ export default function DynamicSubmissionForm() {
                 className='w-full bg-transparent border-b border-[var(--foreground)] p-2'
               />
             </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Title
+            </label>
+            <input
+              type='text'
+              name='title'
+              value={formData.title}
+              onChange={handleInputChange}
+              placeholder='Enter a title'
+              required
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+            />
+          </div>
+
+          {/* Category Field */}
+          <div className='relative'>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Category
+            </label>
+            <input
+              type='text'
+              name='category'
+              value={formData.category}
+              onChange={handleInputChange}
+              onFocus={() => handleFocus('category')}
+              placeholder='Select or type a category'
+              required
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+              autoComplete='off'
+            />
+            {categorySuggestions.length > 0 && (
+              <ul
+                ref={categoryRef}
+                className='absolute left-0 right-0 bg-[var(--background)] border border-[var(--foreground)] shadow-lg z-50 mt-1 max-h-40 overflow-y-auto'>
+                {categorySuggestions.map((suggestion) => (
+                  <li
+                    key={suggestion}
+                    onClick={() =>
+                      handleSuggestionSelect('category', suggestion)
+                    }
+                    className='p-2 cursor-pointer hover:bg-gray-700'>
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Date */}
+          <div>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Date
+            </label>
+            <input
+              type='date'
+              name='date'
+              value={formData.date}
+              onChange={handleInputChange}
+              required
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+            />
+          </div>
+
+          {/* Time */}
+          <div>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Time
+            </label>
+            <input
+              type='time'
+              name='time'
+              value={formData.time}
+              onChange={handleInputChange}
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+            />
+          </div>
+
+          {/* Event Art Upload */}
+          <div>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Event Art
+            </label>
+            <input
+              type='file'
+              accept='image/*'
+              onChange={handleFileChange}
+              required
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+            />
+          </div>
+
+          {/* Designer Field */}
+          <div className='relative'>
+            <label className='block mb-1 uppercase tracking-wider text-xs'>
+              Designer
+            </label>
+            <input
+              type='text'
+              name='designer'
+              value={formData.designer}
+              onChange={handleInputChange}
+              onFocus={() => handleFocus('designer')}
+              placeholder='Select or type a designer'
+              required
+              className='w-full bg-transparent border-b border-[var(--foreground)] p-2 focus:outline-none'
+              autoComplete='off'
+            />
+            {designerSuggestions.length > 0 && (
+              <ul
+                ref={designerRef}
+                className='absolute left-0 right-0 bg-[var(--background)] border border-[var(--foreground)] shadow-lg z-50 mt-1 max-h-40 overflow-y-auto'>
+                {designerSuggestions.map((suggestion) => (
+                  <li
+                    key={suggestion}
+                    onClick={() =>
+                      handleSuggestionSelect('designer', suggestion)
+                    }
+                    className='p-2 cursor-pointer hover:bg-gray-700'>
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Description */}
