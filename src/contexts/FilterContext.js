@@ -20,7 +20,7 @@ export function FilterProvider({ children }) {
     designer: [],
   });
 
-  // Options for dropdowns
+  // Options for filter dropdowns
   const [cityOptions, setCityOptions] = useState([]);
   const [spaceOptions, setSpaceOptions] = useState([]);
   const [dateOptions, setDateOptions] = useState([]);
@@ -33,68 +33,54 @@ export function FilterProvider({ children }) {
 
   async function fetchAvailableOptions() {
     try {
-      // 1. Filter spaces by city if city is selected
-      let cityFilteredSpaces = [];
-      if (selectedFilters.city.length > 0) {
-        // Query spaces for only the selected cities
-        const { data: citySpaces, error: citySpacesError } = await supabase
-          .from('spaces')
-          .select('id, city, name')
-          .in('city', selectedFilters.city);
-
-        if (citySpacesError) {
-          console.error('Error fetching city spaces:', citySpacesError);
-          return;
-        }
-        cityFilteredSpaces = citySpaces; // only spaces matching the selected city filter
-      } else {
-        // If no city is selected, all spaces are valid
-        const { data: allSpaces, error: allSpacesError } = await supabase
-          .from('spaces')
-          .select('id, city, name');
-        if (allSpacesError) {
-          console.error('Error fetching all spaces:', allSpacesError);
-          return;
-        }
-        cityFilteredSpaces = allSpaces;
+      // 1. Query spaces from the spaces table.
+      // If a city filter is selected, get only spaces in that city; otherwise, all spaces.
+      let spacesQuery = supabase.from('spaces').select('id, city, name');
+      if (selectedFilters.city && selectedFilters.city.length > 0) {
+        spacesQuery = spacesQuery.in('city', selectedFilters.city);
       }
+      const { data: spacesData, error: spacesError } = await spacesQuery;
+      if (spacesError) {
+        console.error('Error fetching spaces:', spacesError);
+        return;
+      }
+      // spacesData is an array of spaces that pass the city filter.
+      // If a space filter is also selected, filter further by space name.
+      let filteredSpaces = spacesData;
+      if (selectedFilters.space && selectedFilters.space.length > 0) {
+        filteredSpaces = spacesData.filter((s) =>
+          selectedFilters.space.includes(s.name)
+        );
+      }
+      // Extract valid space IDs from the filtered spaces.
+      const validSpaceIds = filteredSpaces.map((s) => s.id);
 
-      // Extract the space IDs that pass the city filter
-      const citySpaceIds = cityFilteredSpaces.map((s) => s.id);
-
-      // 2. Filter events by the resulting space IDs
+      // 2. Build events query.
       let eventsQuery = supabase
         .from('events')
         .select('id, space_id, date, category, designer');
 
-      // Only keep events whose space_id is in citySpaceIds
-      if (citySpaceIds.length > 0) {
-        eventsQuery = eventsQuery.in('space_id', citySpaceIds);
-      } else {
-        // If citySpaceIds is empty, no spaces match city => no events
-        // but let's see if user actually wants no city filter or it's truly empty
-        if (selectedFilters.city.length > 0) {
-          // If city filter is chosen but no spaces found, we can short-circuit
-          setCityOptions([]); // no city
-          setSpaceOptions([]); // no space
-          setCategoryOptions([]);
-          setDesignerOptions([]);
-          setDateOptions([]);
-          return;
+      // Filter events by space_id (if we have any valid ones).
+      if (validSpaceIds.length > 0) {
+        eventsQuery = eventsQuery.in('space_id', validSpaceIds);
+      } else if (
+        selectedFilters.city.length > 0 ||
+        selectedFilters.space.length > 0
+      ) {
+        // If filters for city or space are set but yield no valid space IDs, there are no events.
+        setCityOptions([]);
+        setSpaceOptions([]);
+        setCategoryOptions([]);
+        setDesignerOptions([]);
+        setDateOptions([]);
+        return;
+      }
+      // Apply additional filters for flat fields (date, category, designer)
+      ['date', 'category', 'designer'].forEach((key) => {
+        if (selectedFilters[key] && selectedFilters[key].length > 0) {
+          eventsQuery = eventsQuery.in(key, selectedFilters[key]);
         }
-        // If city filter is empty, then all spaces are allowed, so no .in('space_id', []) is needed
-      }
-
-      // 3. Apply other event filters: date, category, designer
-      if (selectedFilters.date.length > 0) {
-        eventsQuery = eventsQuery.in('date', selectedFilters.date);
-      }
-      if (selectedFilters.category.length > 0) {
-        eventsQuery = eventsQuery.in('category', selectedFilters.category);
-      }
-      if (selectedFilters.designer.length > 0) {
-        eventsQuery = eventsQuery.in('designer', selectedFilters.designer);
-      }
+      });
 
       const { data: eventsData, error: eventsError } = await eventsQuery;
       if (eventsError) {
@@ -102,41 +88,33 @@ export function FilterProvider({ children }) {
         return;
       }
 
-      // 4. Re-derive space options from the final set of events
-      // Collect all space IDs from these events
-      const finalSpaceIds = Array.from(
+      // 3. Now re-derive available options:
+      // For city & space, we base on the spaces table but only for spaces that are referenced by these events.
+      const eventSpaceIds = Array.from(
         new Set(eventsData.map((e) => e.space_id).filter(Boolean))
       );
 
-      // The final spaces we want are the intersection of citySpaceIds and finalSpaceIds
-      // because we might have city filter + other filters
-      const usedSpaceIds = finalSpaceIds.filter((id) =>
-        citySpaceIds.includes(id)
-      );
-
-      // Now fetch the used spaces from the spaces table
-      let usedSpacesData = [];
-      if (usedSpaceIds.length > 0) {
+      // Query spaces table to get details for these event space IDs.
+      let finalSpacesData = [];
+      if (eventSpaceIds.length > 0) {
         const { data: usedSpaces, error: usedSpacesError } = await supabase
           .from('spaces')
-          .select('id, city, name')
-          .in('id', usedSpaceIds);
-
+          .select('id, city, name');
         if (usedSpacesError) {
           console.error('Error fetching used spaces:', usedSpacesError);
           return;
         }
-        usedSpacesData = usedSpaces;
+        finalSpacesData = usedSpaces.filter((s) =>
+          eventSpaceIds.includes(s.id)
+        );
       }
-
-      // 5. Derive unique sets for city, space, category, designer, date
       const uniqueCities = Array.from(
-        new Set(usedSpacesData.map((s) => s.city).filter(Boolean))
+        new Set(finalSpacesData.map((s) => s.city).filter(Boolean))
       );
       const uniqueSpaces = Array.from(
-        new Set(usedSpacesData.map((s) => s.name).filter(Boolean))
+        new Set(finalSpacesData.map((s) => s.name).filter(Boolean))
       );
-
+      // For flat fields, extract unique values from eventsData.
       const uniqueCategories = Array.from(
         new Set(eventsData.map((e) => e.category).filter(Boolean))
       );
@@ -147,13 +125,12 @@ export function FilterProvider({ children }) {
         new Set(eventsData.map((e) => e.date).filter(Boolean))
       );
 
-      // Sort them
+      // Sort text options alphabetically and dates descending.
       const sortAlpha = (arr) => [...arr].sort((a, b) => a.localeCompare(b));
       setCityOptions(sortAlpha(uniqueCities));
       setSpaceOptions(sortAlpha(uniqueSpaces));
       setCategoryOptions(sortAlpha(uniqueCategories));
       setDesignerOptions(sortAlpha(uniqueDesigners));
-
       uniqueDates.sort((a, b) => new Date(b) - new Date(a));
       setDateOptions(uniqueDates);
     } catch (err) {
