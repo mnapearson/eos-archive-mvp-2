@@ -15,21 +15,59 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchEvents() {
-      // Only fetch events that are approved
-      let query = supabase.from('events').select('*').eq('approved', true);
+      try {
+        // 1. Start with events that are approved.
+        let query = supabase.from('events').select('*').eq('approved', true);
 
-      // Apply multi-select filters if values exist.
-      Object.entries(selectedFilters || {}).forEach(([key, value]) => {
-        if (Array.isArray(value) && value.length > 0) {
-          query = query.in(key, value);
+        // 2. Apply filters for fields that are directly on events (date, category, designer).
+        ['date', 'category', 'designer'].forEach((key) => {
+          if (selectedFilters[key] && selectedFilters[key].length > 0) {
+            query = query.in(key, selectedFilters[key]);
+          }
+        });
+
+        // 3. For city and space filters (which live on the spaces table), first query the spaces table.
+        let spaceIds = null;
+        if (
+          (selectedFilters.city && selectedFilters.city.length > 0) ||
+          (selectedFilters.space && selectedFilters.space.length > 0)
+        ) {
+          let spacesQuery = supabase.from('spaces').select('id, city, name');
+          if (selectedFilters.city && selectedFilters.city.length > 0) {
+            spacesQuery = spacesQuery.in('city', selectedFilters.city);
+          }
+          if (selectedFilters.space && selectedFilters.space.length > 0) {
+            spacesQuery = spacesQuery.in('name', selectedFilters.space);
+          }
+          const { data: spacesData, error: spacesError } = await spacesQuery;
+          if (spacesError) {
+            console.error('Error fetching spaces for filters:', spacesError);
+            return;
+          }
+          spaceIds = spacesData.map((s) => s.id);
         }
-      });
 
-      const { data, error } = await query;
-      if (error) {
-        console.error(error);
-      } else {
-        setEvents(data || []);
+        // 4. If we have a list of space IDs, filter events by those IDs.
+        if (spaceIds && spaceIds.length > 0) {
+          query = query.in('space_id', spaceIds);
+        } else if (
+          (selectedFilters.city && selectedFilters.city.length > 0) ||
+          (selectedFilters.space && selectedFilters.space.length > 0)
+        ) {
+          // If filters are set for city/space but no matching spaces found, then no events match.
+          setEvents([]);
+          return;
+        }
+
+        // 5. Execute the events query.
+        const { data, error } = await query;
+        if (error) {
+          console.error('Error fetching events:', error);
+        } else {
+          setEvents(data || []);
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching events:', err);
       }
     }
     fetchEvents();
