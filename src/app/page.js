@@ -15,12 +15,21 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchEvents() {
-      let query = supabase.from('events').select('*');
+      // Perform an inner join between events and spaces.
+      // The syntax "spaces!inner(city, name)" tells Supabase to join
+      // the related record from the "spaces" table.
+      let query = supabase.from('events').select('*, spaces!inner(city, name)');
 
-      // Apply multi-select filters if values exist
+      // Apply filters – for "city" and "space" we refer to the joined fields.
       Object.entries(selectedFilters || {}).forEach(([key, value]) => {
         if (Array.isArray(value) && value.length > 0) {
-          query = query.in(key, value);
+          if (key === 'city') {
+            query = query.in('spaces.city', value);
+          } else if (key === 'space') {
+            query = query.in('spaces.name', value);
+          } else {
+            query = query.in(key, value);
+          }
         }
       });
 
