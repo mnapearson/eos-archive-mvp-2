@@ -33,11 +33,13 @@ export default function Menu({ menuOpen, toggleMenu }) {
     setSelectedFilters((prev) => {
       const current = prev[category] || [];
       if (current.includes(value)) {
+        // remove it
         return {
           ...prev,
           [category]: current.filter((v) => v !== value),
         };
       } else {
+        // add it
         return {
           ...prev,
           [category]: [...current, value],
@@ -68,16 +70,25 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
   // "Save" navigates to the homepage with the selected filters if not already on it
   function handleSave() {
+    // Build query parameters from the selectedFilters
     const params = new URLSearchParams();
     Object.entries(selectedFilters).forEach(([key, values]) => {
-      if (values.length > 0) {
+      if (Array.isArray(values) && values.length > 0) {
         values.forEach((val) => params.append(key, val));
       }
     });
+
     // If not on the homepage, navigate there with query parameters.
     if (pathname !== '/') {
       router.push(`/?${params.toString()}`);
+    } else {
+      // If we're already on the homepage, we can either:
+      //  - just rely on the context (which triggers a re-fetch automatically),
+      //  - or manually update the query string if you want it reflected in the URL:
+      router.push(`/?${params.toString()}`);
     }
+
+    toggleMenu();
   }
 
   // Helper to render a filter section with accordion behavior
@@ -136,7 +147,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
                 CLEAR
               </button>
               <button
-                onClick={handleSave && toggleMenu}
+                onClick={handleSave}
                 className='text-sm'>
                 SAVE
               </button>
@@ -152,12 +163,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
           {/* Navigation Links */}
           <div className='mt-6'>
-            {/* <Link
-              onClick={toggleMenu}
-              href='/news'
-              className='block py-1'>
-              NEWS
-            </Link> */}
             <Link
               onClick={toggleMenu}
               href='/about'

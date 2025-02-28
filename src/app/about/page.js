@@ -1,6 +1,6 @@
 export default function AboutPage() {
   return (
-    <div className='flex justify-center min-h-screen px-8'>
+    <div className='flex justify-center min-h-screen'>
       <div className='max-w-3xl text-[var(--foreground)]'>
         <h1 className='text-2xl font-semibold mb-6'>about eos</h1>
         <p className='mb-4'>

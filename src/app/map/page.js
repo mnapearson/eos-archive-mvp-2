@@ -53,8 +53,6 @@ export default function SpacesPage() {
 
   return (
     <div className='max-w-3xl mx-auto'>
-      <h1 className='font-semibold mb-6'>spaces in the archive</h1>
-
       {/* Legend placed outside the map */}
       <div className='mb-4 flex flex-wrap gap-2'>
         {uniqueTypes.map((type) => (

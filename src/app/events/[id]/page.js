@@ -29,12 +29,38 @@ function formatDateTime(dateString, timeString) {
 export default function EventPage() {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
+  // We'll store a "spaceAddress" in state if we need to do reverse geocoding
+  const [spaceAddress, setSpaceAddress] = useState('');
 
   useEffect(() => {
     async function fetchEvent() {
       if (!id) return;
       const response = await fetch(`/api/events/${id}`);
       const data = await response.json();
+
+      // If the API returns a nested space object with lat/long but no address,
+      // we can do reverse geocoding to display that address in the event details.
+      if (data.space && !data.space.address) {
+        const { latitude, longitude } = data.space;
+        if (latitude && longitude) {
+          // Reverse geocode
+          try {
+            const geoRes = await fetch(
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+            );
+            const geoData = await geoRes.json();
+            if (geoData.features && geoData.features.length > 0) {
+              setSpaceAddress(geoData.features[0].place_name);
+            } else {
+              setSpaceAddress('UNKNOWN ADDRESS');
+            }
+          } catch (error) {
+            console.error('Reverse geocoding error:', error);
+            setSpaceAddress('UNKNOWN ADDRESS');
+          }
+        }
+      }
+
       setEvent(data);
     }
     fetchEvent();
@@ -45,16 +71,19 @@ export default function EventPage() {
   }
 
   // Use joined space data if available
-  // For example, if your API returns the related space data under "space"
   const eventTitle = (event.title || 'UNTITLED').toUpperCase();
   const eventCategory = event.category || '';
   const dateTimeDisplay = formatDateTime(event.date, event.time);
   const eventDescription =
     event.description ||
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt vehicula turpis.';
-  // Use the space's address if available, otherwise fallback to city.
-  const fallbackAddress =
-    event.space?.name || event.space?.city || 'UNKNOWN ADDRESS';
+
+  // If the space already has an address from the API, use it; otherwise fallback to city or the reverse-geocoded address
+  const displayedAddress =
+    event.space?.address ||
+    spaceAddress ||
+    event.space?.city ||
+    'UNKNOWN ADDRESS';
 
   const handleShare = async (e) => {
     e.preventDefault();
@@ -114,24 +143,19 @@ export default function EventPage() {
             {dateTimeDisplay && (
               <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
-            {fallbackAddress && (
-              <p className='text-sm mb-4'>
-                {fallbackAddress}, {event.space.city}
-              </p>
-            )}
+
+            {/* Display the final address (spaceAddress or city or "UNKNOWN ADDRESS") */}
+            <p className='text-sm mb-4'>{displayedAddress}</p>
 
             <p className='text-sm whitespace-pre-line'>{eventDescription}</p>
           </div>
         </div>
       </div>
 
-      {/* Full-width Map below event info.
-          Pass fallbackAddress to MapComponent so that its markers can use it if needed.
-          Also, if you need the event's space data for the markers (like type, lat, lng),
-          ensure your API endpoint returns those fields within the "space" object. */}
+      {/* Full-width Map below event info. */}
       <MapComponent
         eventId={id}
-        address={fallbackAddress}
+        address={displayedAddress}
       />
     </div>
   );
