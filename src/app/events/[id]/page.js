@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import MapComponent from '@/components/MapComponent';
 import Link from 'next/link';
+import Spinner from '@/components/Spinner';
 
 // Format the date/time: "DD.MM.YY @ HH.MM"
 function formatDateTime(dateString, timeString) {
@@ -33,41 +34,46 @@ export default function EventPage() {
   const [spaceAddress, setSpaceAddress] = useState('');
   // Controls whether the map panel is visible.
   const [mapOpen, setMapOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchEvent() {
-      if (!id) return;
-      const response = await fetch(`/api/events/${id}`);
-      const data = await response.json();
+      setLoading(true);
+      try {
+        if (!id) return;
+        const response = await fetch(`/api/events/${id}`);
+        const data = await response.json();
 
-      // If the API returns a nested space without an address, do reverse geocoding.
-      if (data.space && !data.space.address) {
-        const { latitude, longitude } = data.space;
-        if (latitude && longitude) {
-          try {
-            const geoRes = await fetch(
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
-            );
-            const geoData = await geoRes.json();
-            if (geoData.features && geoData.features.length > 0) {
-              setSpaceAddress(geoData.features[0].place_name);
-            } else {
+        // If the API returns a nested space without an address, do reverse geocoding.
+        if (data.space && !data.space.address) {
+          const { latitude, longitude } = data.space;
+          if (latitude && longitude) {
+            try {
+              const geoRes = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+              );
+              const geoData = await geoRes.json();
+              if (geoData.features && geoData.features.length > 0) {
+                setSpaceAddress(geoData.features[0].place_name);
+              } else {
+                setSpaceAddress('UNKNOWN ADDRESS');
+              }
+            } catch (error) {
+              console.error('Reverse geocoding error:', error);
               setSpaceAddress('UNKNOWN ADDRESS');
             }
-          } catch (error) {
-            console.error('Reverse geocoding error:', error);
-            setSpaceAddress('UNKNOWN ADDRESS');
           }
         }
+        setEvent(data);
+      } finally {
+        setLoading(false);
       }
-
-      setEvent(data);
     }
     fetchEvent();
   }, [id]);
 
   if (!event) {
-    return <p className='p-16'>Loading event details...</p>;
+    return <Spinner />;
   }
 
   // Use joined space data if available.

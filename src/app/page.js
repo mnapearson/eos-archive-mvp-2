@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { FilterContext } from '@/contexts/FilterContext';
 import { createClient } from '@supabase/supabase-js';
 import MasonryGrid from '@/components/MasonryGrid';
+import Spinner from '@/components/Spinner';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -12,9 +13,12 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export default function HomePage() {
   const { selectedFilters } = useContext(FilterContext);
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchEvents() {
+      setLoading(true);
+
       try {
         // 1. Start with events that are approved.
         let query = supabase.from('events').select('*').eq('approved', true);
@@ -68,6 +72,8 @@ export default function HomePage() {
         }
       } catch (err) {
         console.error('Unexpected error fetching events:', err);
+      } finally {
+        setLoading(false);
       }
     }
     fetchEvents();
@@ -75,7 +81,7 @@ export default function HomePage() {
 
   return (
     <div className='max-w-6xl mx-auto'>
-      <MasonryGrid items={events} />
+      {loading ? <Spinner /> : <MasonryGrid items={events} />}
     </div>
   );
 }
