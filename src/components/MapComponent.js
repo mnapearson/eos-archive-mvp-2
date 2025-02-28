@@ -201,7 +201,7 @@ export default function MapComponent({
   }, []);
 
   return (
-    <div className='w-full h-[400px]'>
+    <div className='w-full h-full'>
       <div
         ref={mapContainerRef}
         className='w-full h-full'

@@ -94,7 +94,9 @@ export default function SpacesPage() {
   };
 
   return (
-    <div className='max-w-3xl mx-auto'>
+    <div className='max-w-3xl mx-auto h-screen'>
+      {' '}
+      {/* set desired height */}
       {/* Legend for marker types */}
       <div className='mb-4 flex flex-wrap gap-2'>
         {uniqueTypes.map((type) => (
@@ -115,12 +117,12 @@ export default function SpacesPage() {
           </button>
         ))}
       </div>
-
-      {/* Pass the final spaces array and the active types to MapComponent */}
-      <MapComponent
-        spaces={spaces}
-        activeTypes={activeTypes}
-      />
+      <div className='h-full'>
+        <MapComponent
+          spaces={spaces}
+          activeTypes={activeTypes}
+        />
+      </div>
     </div>
   );
 }

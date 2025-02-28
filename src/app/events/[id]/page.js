@@ -29,8 +29,10 @@ function formatDateTime(dateString, timeString) {
 export default function EventPage() {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
-  // We'll store a "spaceAddress" in state if we need to do reverse geocoding
+  // We'll store a "spaceAddress" if reverse geocoding is needed.
   const [spaceAddress, setSpaceAddress] = useState('');
+  // Controls whether the map panel is visible.
+  const [mapOpen, setMapOpen] = useState(false);
 
   useEffect(() => {
     async function fetchEvent() {
@@ -38,12 +40,10 @@ export default function EventPage() {
       const response = await fetch(`/api/events/${id}`);
       const data = await response.json();
 
-      // If the API returns a nested space object with lat/long but no address,
-      // we can do reverse geocoding to display that address in the event details.
+      // If the API returns a nested space without an address, do reverse geocoding.
       if (data.space && !data.space.address) {
         const { latitude, longitude } = data.space;
         if (latitude && longitude) {
-          // Reverse geocode
           try {
             const geoRes = await fetch(
               `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
@@ -70,15 +70,14 @@ export default function EventPage() {
     return <p className='p-16'>Loading event details...</p>;
   }
 
-  // Use joined space data if available
+  // Use joined space data if available.
   const eventTitle = (event.title || 'UNTITLED').toUpperCase();
   const eventCategory = event.category || '';
   const dateTimeDisplay = formatDateTime(event.date, event.time);
   const eventDescription =
     event.description ||
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt vehicula turpis.';
-
-  // If the space already has an address from the API, use it; otherwise fallback to city or the reverse-geocoded address
+  // Display address: prefer a stored address; otherwise use reverse-geocoded spaceAddress; or fallback to the space's city.
   const displayedAddress =
     event.space?.address ||
     spaceAddress ||
@@ -95,15 +94,18 @@ export default function EventPage() {
           url: window.location.href,
         });
       } catch (error) {
-        // If user cancels, do nothing.
+        // Do nothing if user cancels.
       }
     } else {
       alert('Sharing not supported in this browser.');
     }
   };
 
+  // Toggle the map panel open/closed.
+  const toggleMap = () => setMapOpen((prev) => !prev);
+
   return (
-    <div className='max-w-screen-lg mx-auto text-[var(--foreground)]'>
+    <div className='max-w-screen-lg mx-auto text-[var(--foreground)] relative'>
       {/* Return Link */}
       <div className='mb-4'>
         <Link
@@ -130,33 +132,58 @@ export default function EventPage() {
         {/* Right Column: Event Info */}
         <div className='md:w-1/4 flex flex-col justify-between'>
           <div>
-            <div className='flex items-center justify-between mb-1'>
+            <div className='mb-1'>
               <h1 className='font-bold'>{eventTitle}</h1>
-              <Link
-                href='#'
-                onClick={handleShare}
-                className='text-sm'>
-                SHARE
-              </Link>
+              {/* Make the space name clickable to open the map panel */}
+              {event.space && (
+                <p
+                  className='text-sm mb-4 cursor-pointer underline hover:text-gray-400'
+                  onClick={toggleMap}>
+                  {event.space.name}, {event.space.city}
+                </p>
+              )}
             </div>
             <p className='text-sm italic mb-2'>{eventCategory}</p>
             {dateTimeDisplay && (
               <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
 
-            {/* Display the final address (spaceAddress or city or "UNKNOWN ADDRESS") */}
-            <p className='text-sm mb-4'>{displayedAddress}</p>
-
             <p className='text-sm whitespace-pre-line'>{eventDescription}</p>
           </div>
+          <Link
+            href='#'
+            onClick={handleShare}
+            className='text-sm'>
+            SHARE
+          </Link>
         </div>
       </div>
 
-      {/* Full-width Map below event info. */}
-      <MapComponent
-        eventId={id}
-        address={displayedAddress}
-      />
+      {/* Slide-out Map Panel */}
+      {mapOpen && (
+        <div className='fixed inset-0 z-50 flex justify-end'>
+          {/* Semi-transparent overlay */}
+          <div
+            className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
+            onClick={toggleMap}
+            aria-hidden='true'
+          />
+          {/* Slide-out panel from the right */}
+          <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
+            {/* Close button */}
+            <button
+              className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
+              onClick={toggleMap}
+              aria-label='Close map'>
+              ✕
+            </button>
+            <MapComponent
+              eventId={id}
+              address={displayedAddress}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
