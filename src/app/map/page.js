@@ -8,7 +8,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Marker colors for the legend (matching your MapComponent logic)
 const markerColors = {
   'off-space': '#FF6EC7',
   bar: '#1F51FF',
@@ -24,6 +23,8 @@ export default function SpacesPage() {
   const [activeTypes, setActiveTypes] = useState([]);
   // Toggle between list and map view
   const [isListView, setIsListView] = useState(false);
+  // Search query for filtering (only used in list view)
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchSpacesForApprovedEvents() {
@@ -37,30 +38,23 @@ export default function SpacesPage() {
           console.error('Error fetching approved events:', eventsError);
           return;
         }
-
-        // 2. Extract unique space IDs
+        // 2. Extract unique space IDs from these approved events
         const approvedSpaceIds = Array.from(
           new Set(eventsData.map((e) => e.space_id).filter(Boolean))
         );
-
         if (approvedSpaceIds.length === 0) {
-          // No approved events => no spaces
           setSpaces([]);
           return;
         }
-
-        // 3. Query the spaces table (including website)
+        // 3. Query the spaces table for these space IDs (including website)
         const { data: spacesData, error: spacesError } = await supabase
           .from('spaces')
           .select('id, name, type, latitude, longitude, city, website')
           .in('id', approvedSpaceIds);
-
         if (spacesError) {
           console.error('Error fetching spaces:', spacesError);
           return;
         }
-
-        // 4. Update state
         setSpaces(spacesData);
       } catch (err) {
         console.error(
@@ -72,28 +66,24 @@ export default function SpacesPage() {
     fetchSpacesForApprovedEvents();
   }, []);
 
-  // Compute unique marker types
+  // Compute unique marker types.
   const uniqueTypes = Array.from(
     new Set(
       spaces.map((space) => (space.type ? space.type.toLowerCase() : 'default'))
     )
   );
 
-  // Toggle the activeTypes array
+  // Toggle activeTypes.
   const toggleType = (type) => {
     setActiveTypes((prev) => {
-      if (prev.length === 0) {
-        return [type];
-      } else if (prev.includes(type)) {
-        return prev.filter((t) => t !== type);
-      } else {
-        return [...prev, type];
-      }
+      if (prev.length === 0) return [type];
+      else if (prev.includes(type)) return prev.filter((t) => t !== type);
+      else return [...prev, type];
     });
   };
 
-  // Filter spaces for the list view by activeTypes
-  const filteredSpaces =
+  // Filter spaces by activeTypes.
+  const filteredByType =
     activeTypes.length > 0
       ? spaces.filter((space) => {
           const typeKey = space.type ? space.type.toLowerCase() : 'default';
@@ -101,11 +91,23 @@ export default function SpacesPage() {
         })
       : spaces;
 
+  // Apply search filter (only in list view).
+  const finalFilteredSpaces = isListView
+    ? filteredByType.filter((space) => {
+        const query = searchQuery.toLowerCase();
+        if (!query) return true;
+        return (
+          (space.name && space.name.toLowerCase().includes(query)) ||
+          (space.city && space.city.toLowerCase().includes(query)) ||
+          (space.website && space.website.toLowerCase().includes(query))
+        );
+      })
+    : filteredByType;
+
   return (
     <div className='max-w-3xl mx-auto h-screen flex flex-col'>
-      {/* Top row: Legend + Toggle button */}
-      <div className='mb-4 flex flex-wrap items-center gap-2'>
-        {/* Legend for marker types */}
+      {/* Top row: Legend and Toggle button */}
+      <div className='mb-2 flex flex-wrap items-center gap-2'>
         {uniqueTypes.map((type) => (
           <button
             key={type}
@@ -123,18 +125,28 @@ export default function SpacesPage() {
             <span>{type.toUpperCase()}</span>
           </button>
         ))}
-        {/* Toggle between list and map view */}
         <button
           onClick={() => setIsListView(!isListView)}
           className='ml-auto px-3 py-1 border border-[var(--foreground)] rounded text-xs'>
           {isListView ? 'SHOW MAP' : 'SHOW LIST'}
         </button>
       </div>
-
-      {/* Main Content: Either list of spaces or the map */}
+      {/* Render search field only in list view (in its own row) */}
+      {isListView && (
+        <div className='mb-2'>
+          <input
+            type='text'
+            placeholder='Search by name, city, or website'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className='w-full my-3 p-2 border border-[var(--foreground)] rounded text-xs'
+          />
+        </div>
+      )}
+      {/* Main content: List or Map view */}
       <div className='flex-grow'>
         {isListView ? (
-          <SpacesList spaces={filteredSpaces} />
+          <SpacesList spaces={finalFilteredSpaces} />
         ) : (
           <MapComponent
             spaces={spaces}
@@ -146,14 +158,10 @@ export default function SpacesPage() {
   );
 }
 
-/**
- * Renders a list of spaces, each in its own item
- */
 function SpacesList({ spaces }) {
   if (spaces.length === 0) {
     return <p className='text-sm italic'>No spaces found.</p>;
   }
-
   return (
     <div className='space-y-4 overflow-auto h-full pr-2'>
       {spaces.map((space) => (
@@ -166,15 +174,9 @@ function SpacesList({ spaces }) {
   );
 }
 
-/**
- * Individual list item that reverse-geocodes lat/lng for an address,
- * and shows a website link if available
- */
 function SpaceListItem({ space }) {
   const [address, setAddress] = useState('');
-
   useEffect(() => {
-    // If we have lat/lng, perform reverse geocoding
     if (space.latitude && space.longitude) {
       const lng = Number(space.longitude);
       const lat = Number(space.latitude);
@@ -209,12 +211,8 @@ function SpaceListItem({ space }) {
 
   return (
     <div className='border-b border-gray-300 pb-2'>
-      {' '}
       <h2 className='text-sm font-semibold'>{space.name}</h2>
-      <p className='text-xs italic'>
-        {space.type ? space.type.toLowerCase() : 'default'}
-      </p>
-      {/* Reverse-geocoded address as a clickable uppercase link */}
+      <p className='text-xs'>{space.city}</p>
       {address && (
         <button
           onClick={handleCopy}
@@ -222,13 +220,16 @@ function SpaceListItem({ space }) {
           {address}
         </button>
       )}
+      <p className='text-xs italic'>
+        {space.type ? space.type.toLowerCase() : 'default'}
+      </p>
       {space.website && (
         <p className='mt-1'>
           <a
             href={space.website}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-xs underline'>
+            className='text-xs underline uppercase'>
             VISIT WEBSITE
           </a>
         </p>
