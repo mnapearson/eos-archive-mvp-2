@@ -21,8 +21,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function SpacesPage() {
   const [spaces, setSpaces] = useState([]);
-  // Start with no filters selected – meaning show all markers for those spaces
   const [activeTypes, setActiveTypes] = useState([]);
+  // State to toggle between List and Map view
+  const [isListView, setIsListView] = useState(false);
 
   useEffect(() => {
     async function fetchSpacesForApprovedEvents() {
@@ -71,15 +72,14 @@ export default function SpacesPage() {
     fetchSpacesForApprovedEvents();
   }, []);
 
-  // 5. Compute unique marker types from the returned spaces
+  // Compute unique marker types from the returned spaces
   const uniqueTypes = Array.from(
     new Set(
       spaces.map((space) => (space.type ? space.type.toLowerCase() : 'default'))
     )
   );
 
-  // 6. Toggle the activeTypes array
-  // If empty, clicking sets it to [type]. Otherwise, toggle the clicked type
+  // Toggle the activeTypes array
   const toggleType = (type) => {
     setActiveTypes((prev) => {
       if (prev.length === 0) {
@@ -93,12 +93,20 @@ export default function SpacesPage() {
     });
   };
 
+  // Filter spaces by activeTypes for the list view
+  const filteredSpaces =
+    activeTypes.length > 0
+      ? spaces.filter((space) => {
+          const typeKey = space.type ? space.type.toLowerCase() : 'default';
+          return activeTypes.includes(typeKey);
+        })
+      : spaces;
+
   return (
-    <div className='max-w-3xl mx-auto h-screen'>
-      {' '}
-      {/* set desired height */}
-      {/* Legend for marker types */}
-      <div className='mb-4 flex flex-wrap gap-2'>
+    <div className='max-w-3xl mx-auto h-screen flex flex-col'>
+      {/* Top row: Legend + Toggle button */}
+      <div className='mb-4 flex flex-wrap items-center gap-2'>
+        {/* Legend for marker types */}
         {uniqueTypes.map((type) => (
           <button
             key={type}
@@ -116,13 +124,53 @@ export default function SpacesPage() {
             <span>{type.toUpperCase()}</span>
           </button>
         ))}
+        {/* Toggle between list and map view */}
+        <button
+          onClick={() => setIsListView(!isListView)}
+          className='ml-auto px-3 py-1 border border-[var(--foreground)] rounded text-xs'>
+          {isListView ? 'Show Map' : 'Show List'}
+        </button>
       </div>
-      <div className='h-full'>
-        <MapComponent
-          spaces={spaces}
-          activeTypes={activeTypes}
-        />
+
+      {/* Main Content: Either list of spaces or the map */}
+      <div className='flex-grow'>
+        {isListView ? (
+          <SpacesList spaces={filteredSpaces} />
+        ) : (
+          <MapComponent
+            spaces={spaces}
+            activeTypes={activeTypes}
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * A simple list view for the spaces
+ */
+function SpacesList({ spaces }) {
+  if (spaces.length === 0) {
+    return <p className='text-sm italic'>No spaces found.</p>;
+  }
+
+  return (
+    <div className='space-y-4 overflow-auto h-full pr-2'>
+      {spaces.map((space) => (
+        <div
+          key={space.id}
+          className='border-b border-gray-300 pb-2'>
+          <h2 className='text-sm font-semibold'>{space.name}</h2>
+          <p className='text-xs'>
+            {space.city}
+            {space.latitude && space.longitude
+              ? ` (${space.latitude}, ${space.longitude})`
+              : ''}
+          </p>
+          <p className='text-xs italic'>{space.type || 'Default'}</p>
+        </div>
+      ))}
     </div>
   );
 }
