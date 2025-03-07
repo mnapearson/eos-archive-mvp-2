@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import MapComponent from '@/components/MapComponent';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 // Marker colors for the legend (matching your MapComponent logic)
 const markerColors = {
   'off-space': '#FF6EC7',
@@ -15,14 +19,10 @@ const markerColors = {
   default: '#F8F8F8',
 };
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 export default function SpacesPage() {
   const [spaces, setSpaces] = useState([]);
   const [activeTypes, setActiveTypes] = useState([]);
-  // State to toggle between List and Map view
+  // Toggle between list and map view
   const [isListView, setIsListView] = useState(false);
 
   useEffect(() => {
@@ -32,13 +32,13 @@ export default function SpacesPage() {
         const { data: eventsData, error: eventsError } = await supabase
           .from('events')
           .select('space_id')
-          .eq('approved', true); // only approved events
+          .eq('approved', true);
         if (eventsError) {
           console.error('Error fetching approved events:', eventsError);
           return;
         }
 
-        // 2. Extract unique space IDs from these approved events
+        // 2. Extract unique space IDs
         const approvedSpaceIds = Array.from(
           new Set(eventsData.map((e) => e.space_id).filter(Boolean))
         );
@@ -49,10 +49,10 @@ export default function SpacesPage() {
           return;
         }
 
-        // 3. Query the spaces table for these space IDs
+        // 3. Query the spaces table (including website)
         const { data: spacesData, error: spacesError } = await supabase
           .from('spaces')
-          .select('id, name, type, latitude, longitude, city')
+          .select('id, name, type, latitude, longitude, city, website')
           .in('id', approvedSpaceIds);
 
         if (spacesError) {
@@ -60,7 +60,7 @@ export default function SpacesPage() {
           return;
         }
 
-        // 4. Update state with the final list of spaces
+        // 4. Update state
         setSpaces(spacesData);
       } catch (err) {
         console.error(
@@ -72,7 +72,7 @@ export default function SpacesPage() {
     fetchSpacesForApprovedEvents();
   }, []);
 
-  // Compute unique marker types from the returned spaces
+  // Compute unique marker types
   const uniqueTypes = Array.from(
     new Set(
       spaces.map((space) => (space.type ? space.type.toLowerCase() : 'default'))
@@ -85,15 +85,14 @@ export default function SpacesPage() {
       if (prev.length === 0) {
         return [type];
       } else if (prev.includes(type)) {
-        const updated = prev.filter((t) => t !== type);
-        return updated; // If it becomes empty, show all
+        return prev.filter((t) => t !== type);
       } else {
         return [...prev, type];
       }
     });
   };
 
-  // Filter spaces by activeTypes for the list view
+  // Filter spaces for the list view by activeTypes
   const filteredSpaces =
     activeTypes.length > 0
       ? spaces.filter((space) => {
@@ -128,7 +127,7 @@ export default function SpacesPage() {
         <button
           onClick={() => setIsListView(!isListView)}
           className='ml-auto px-3 py-1 border border-[var(--foreground)] rounded text-xs'>
-          {isListView ? 'Show Map' : 'Show List'}
+          {isListView ? 'SHOW MAP' : 'SHOW LIST'}
         </button>
       </div>
 
@@ -148,7 +147,7 @@ export default function SpacesPage() {
 }
 
 /**
- * A simple list view for the spaces
+ * Renders a list of spaces, each in its own item
  */
 function SpacesList({ spaces }) {
   if (spaces.length === 0) {
@@ -158,19 +157,81 @@ function SpacesList({ spaces }) {
   return (
     <div className='space-y-4 overflow-auto h-full pr-2'>
       {spaces.map((space) => (
-        <div
+        <SpaceListItem
           key={space.id}
-          className='border-b border-gray-300 pb-2'>
-          <h2 className='text-sm font-semibold'>{space.name}</h2>
-          <p className='text-xs'>
-            {space.city}
-            {space.latitude && space.longitude
-              ? ` (${space.latitude}, ${space.longitude})`
-              : ''}
-          </p>
-          <p className='text-xs italic'>{space.type || 'Default'}</p>
-        </div>
+          space={space}
+        />
       ))}
+    </div>
+  );
+}
+
+/**
+ * Individual list item that reverse-geocodes lat/lng for an address,
+ * and shows a website link if available
+ */
+function SpaceListItem({ space }) {
+  const [address, setAddress] = useState('');
+
+  useEffect(() => {
+    // If we have lat/lng, perform reverse geocoding
+    if (space.latitude && space.longitude) {
+      const lng = Number(space.longitude);
+      const lat = Number(space.latitude);
+      if (!isNaN(lng) && !isNaN(lat)) {
+        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+        fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`
+        )
+          .then((res) => res.json())
+          .then((geoData) => {
+            if (geoData.features && geoData.features.length > 0) {
+              setAddress(geoData.features[0].place_name);
+            } else {
+              setAddress('UNKNOWN ADDRESS');
+            }
+          })
+          .catch((err) => {
+            console.error('Reverse geocoding error:', err);
+            setAddress('UNKNOWN ADDRESS');
+          });
+      }
+    }
+  }, [space.latitude, space.longitude]);
+
+  const handleCopy = () => {
+    if (address) {
+      navigator.clipboard.writeText(address).then(() => {
+        alert('Address copied to clipboard.');
+      });
+    }
+  };
+
+  return (
+    <div className='border-b border-gray-300 pb-2'>
+      <h2 className='text-sm font-semibold'>{space.name}</h2>
+      {/* Reverse-geocoded address as a clickable uppercase link */}
+      {address && (
+        <button
+          onClick={handleCopy}
+          className='block text-xs underline uppercase mt-1'>
+          {address}
+        </button>
+      )}
+      <p className='text-xs italic'>
+        {space.type ? space.type.toLowerCase() : 'default'}
+      </p>
+      {space.website && (
+        <p className='mt-1'>
+          <a
+            href={space.website}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-xs underline'>
+            VISIT WEBSITE
+          </a>
+        </p>
+      )}
     </div>
   );
 }
