@@ -209,7 +209,11 @@ function SpaceListItem({ space }) {
 
   return (
     <div className='border-b border-gray-300 pb-2'>
+      {' '}
       <h2 className='text-sm font-semibold'>{space.name}</h2>
+      <p className='text-xs italic'>
+        {space.type ? space.type.toLowerCase() : 'default'}
+      </p>
       {/* Reverse-geocoded address as a clickable uppercase link */}
       {address && (
         <button
@@ -218,9 +222,6 @@ function SpaceListItem({ space }) {
           {address}
         </button>
       )}
-      <p className='text-xs italic'>
-        {space.type ? space.type.toLowerCase() : 'default'}
-      </p>
       {space.website && (
         <p className='mt-1'>
           <a
