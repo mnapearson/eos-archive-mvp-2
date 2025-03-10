@@ -117,8 +117,8 @@ export default function EventPage() {
       <div className='mb-4'>
         <Link
           href='/'
-          className='underline text-sm hover:text-gray-600'>
-          return to archive
+          className='text-sm hover:text-gray-600'>
+          ← return to archive
         </Link>
       </div>
 

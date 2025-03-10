@@ -70,8 +70,8 @@ export default function SpacePage() {
     <div className='max-w-screen-lg mx-auto p-4'>
       <Link
         href='/map'
-        className='underline text-sm'>
-        ← Back to Spaces
+        className='text-sm hover:text-gray-600'>
+        ← return to spaces
       </Link>
       <div className='mt-4'>
         {/* Use the reusable SpaceListItem in detailed mode */}

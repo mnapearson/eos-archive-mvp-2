@@ -3,9 +3,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import MapComponent from '@/components/MapComponent';
 
 export default function SpaceListItem({ space, detailed = false }) {
   const [address, setAddress] = useState('');
+  // Local state to control whether the map panel is open
+  const [mapOpen, setMapOpen] = useState(false);
 
   useEffect(() => {
     if (space.latitude && space.longitude) {
@@ -32,49 +35,62 @@ export default function SpaceListItem({ space, detailed = false }) {
     }
   }, [space.latitude, space.longitude]);
 
-  const handleCopy = (e) => {
-    // Prevent navigation when clicking the copy button
+  // Toggle the map panel open/closed
+  const toggleMap = (e) => {
+    // Stop any parent link navigation from happening
     e.stopPropagation();
-    if (address) {
-      navigator.clipboard.writeText(address).then(() => {
-        alert('Address copied to clipboard.');
-      });
-    }
+    setMapOpen((prev) => !prev);
   };
 
+  // The portion that navigates to the space detail page
+  const mainContent = (
+    <div className='cursor-pointer'>
+      <h2 className='text-sm font-semibold'>{space.name}</h2>
+      <p className='text-xs'>{space.city}</p>
+      {address && (
+        <button
+          onClick={toggleMap}
+          className='block text-xs underline uppercase mt-1'>
+          {address}
+        </button>
+      )}
+      <p className='text-xs italic'>
+        {space.type ? space.type.toLowerCase() : 'default'}
+      </p>
+    </div>
+  );
+
   return (
-    <div className='border-b border-gray-200 pb-2 text-left'>
-      {/* Clickable portion to navigate to space details */}
-      <Link
-        href={`/spaces/${space.id}`}
-        passHref>
-        <div className='cursor-pointer'>
-          <h2 className='text-sm font-semibold'>{space.name}</h2>
-          <p className='text-xs italic mb-1'>
-            {space.type ? space.type.toLowerCase() : 'default'}
-          </p>
-          <p className='text-xs'>{space.city}</p>
-          {address && (
-            <button
-              onClick={handleCopy}
-              className='block text-xs underline uppercase mt-1'>
-              {address}
-            </button>
-          )}
-        </div>
-      </Link>
-      {/* Website link rendered separately */}
+    <div className='border-b border-gray-300 pb-2 text-left relative'>
+      {/* 
+        If we're not in 'detailed' mode, wrap the main content in a Link
+        that navigates to /spaces/[id]. If in detailed mode, we skip the link 
+        so we can show extended info in place. 
+      */}
+      {detailed ? (
+        mainContent
+      ) : (
+        <Link
+          href={`/spaces/${space.id}`}
+          passHref>
+          {mainContent}
+        </Link>
+      )}
+
+      {/* If a website is available, render it outside the main clickable block */}
       {space.website && (
-        <p className='mt-2'>
+        <p className='mt-1'>
           <a
             href={space.website}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-xs uppercase'>
+            className='text-xs underline uppercase'>
             VISIT WEBSITE
           </a>
         </p>
       )}
+
+      {/* If in detailed mode, optionally show featured image / description */}
       {detailed && space.featured_image && (
         <div className='mt-2'>
           <img
@@ -86,6 +102,33 @@ export default function SpaceListItem({ space, detailed = false }) {
       )}
       {detailed && space.description && (
         <p className='mt-2 text-sm'>{space.description}</p>
+      )}
+
+      {/* Slide-out Map Panel (similar to your event page) */}
+      {mapOpen && (
+        <div className='fixed inset-0 z-50 flex justify-end'>
+          {/* Semi-transparent overlay */}
+          <div
+            className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
+            onClick={toggleMap}
+            aria-hidden='true'
+          />
+          {/* Slide-out panel */}
+          <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
+            {/* Close button */}
+            <button
+              className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
+              onClick={toggleMap}
+              aria-label='Close map'>
+              ✕
+            </button>
+            {/* 
+              Use the MapComponent with the single space 
+              so it centers on this space's lat/long
+            */}
+            <MapComponent spaces={[space]} />
+          </div>
+        </div>
       )}
     </div>
   );
