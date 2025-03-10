@@ -79,6 +79,7 @@ export default function EventPage() {
   // Use joined space data if available.
   const eventTitle = (event.title || 'UNTITLED').toUpperCase();
   const eventCategory = event.category || '';
+  const eventDesigner = event.designer || '';
   const dateTimeDisplay = formatDateTime(event.date, event.time);
   const eventDescription =
     event.description ||
@@ -134,12 +135,15 @@ export default function EventPage() {
           ) : (
             <p className='text-gray-500'>No flyer available</p>
           )}
+          <p className='text-[var(--foreground)] italic mt-1'>
+            design: {event.designer}
+          </p>
         </div>
         {/* Right Column: Event Info */}
         <div className='md:w-1/4 flex flex-col justify-between'>
           <div>
             <div className='mb-1'>
-              <h1 className='font-bold'>{eventTitle}</h1>
+              <h1 className='font-bold'>{eventTitle}</h1>{' '}
               {/* Make the space name clickable to open the map panel */}
               {event.space && (
                 <p
@@ -153,15 +157,16 @@ export default function EventPage() {
             {dateTimeDisplay && (
               <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
-
-            <p className='text-sm whitespace-pre-line'>{eventDescription}</p>
-          </div>
-          <Link
-            href='#'
-            onClick={handleShare}
-            className='text-sm'>
-            SHARE
-          </Link>
+            <p className='text-sm whitespace-pre-line mb-2'>
+              {eventDescription}
+            </p>{' '}
+            <Link
+              href='#'
+              onClick={handleShare}
+              className='text-sm'>
+              SHARE
+            </Link>
+          </div>{' '}
         </div>
       </div>
 
