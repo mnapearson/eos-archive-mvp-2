@@ -3,19 +3,21 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import MapComponent from '@/components/MapComponent';
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const markerColors = {
-  'off-space': '#FF6EC7',
-  bar: '#1F51FF',
-  club: '#9D00FF',
-  gallery: '#FFFF00',
-  studio: '#39FF14',
-  kino: '#FF073A',
-  default: '#F8F8F8',
+  'off-space': '#FF6EC7', // neon pink
+  bar: '#1F51FF', // neon blue
+  leico: '#9D00FF', // purple for LEICO
+  gallery: '#FFFF00', // neon yellow
+  studio: '#39FF14', // neon green
+  kino: '#FF073A', // neon red
+  club: '#F8F8F8', // off white for club
+  default: '#000000', // default black
 };
 
 export default function SpacesPage() {
@@ -211,18 +213,22 @@ function SpaceListItem({ space }) {
 
   return (
     <div className='border-b border-gray-300 pb-2'>
-      <h2 className='text-sm font-semibold'>{space.name}</h2>
-      <p className='text-xs'>{space.city}</p>
-      {address && (
-        <button
-          onClick={handleCopy}
-          className='block text-xs underline uppercase mt-1'>
-          {address}
-        </button>
-      )}
-      <p className='text-xs italic'>
-        {space.type ? space.type.toLowerCase() : 'default'}
-      </p>
+      <Link
+        href={`/spaces/${space.id}`}
+        passHref>
+        <h2 className='text-sm font-semibold'>{space.name}</h2>
+        <p className='text-xs'>{space.city}</p>
+        {address && (
+          <button
+            onClick={handleCopy}
+            className='block text-xs underline uppercase mt-1'>
+            {address}
+          </button>
+        )}
+        <p className='text-xs italic'>
+          {space.type ? space.type.toLowerCase() : 'default'}
+        </p>{' '}
+      </Link>
       {space.website && (
         <p className='mt-1'>
           <a

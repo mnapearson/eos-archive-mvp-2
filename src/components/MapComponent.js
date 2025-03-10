@@ -10,11 +10,12 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const markerColors = {
   'off-space': '#FF6EC7', // neon pink
   bar: '#1F51FF', // neon blue
-  club: '#9D00FF', // neon purple
+  leico: '#9D00FF', // purple for LEICO
   gallery: '#FFFF00', // neon yellow
   studio: '#39FF14', // neon green
   kino: '#FF073A', // neon red
-  default: '#F8F8F8', // off-white
+  club: '#F8F8F8', // off white for club
+  default: '#000000', // default black
 };
 
 export default function MapComponent({
@@ -129,11 +130,17 @@ export default function MapComponent({
       markerEl.style.backgroundColor =
         markerColors[typeKey] || markerColors.default;
 
+      const spaceId = item.id || (item.space && item.space.id);
+
       const popupTitle = (
         item.name ||
         (item.space && item.space.name) ||
         'UNKNOWN'
       ).toUpperCase();
+
+      const popupTitleHtml = spaceId
+        ? `<a href="/spaces/${spaceId}" target="_blank" style="text-decoration:underline; color:inherit;">${popupTitle}</a>`
+        : popupTitle;
 
       let initialAddress = item.address || fallbackAddress;
       if (!initialAddress) {
@@ -142,7 +149,7 @@ export default function MapComponent({
 
       const popupContent = `
         <div style="color:#000; font-size:12px; line-height:1.4;">
-          <strong>${popupTitle}</strong>
+          <strong>${popupTitleHtml}</strong>
           ${
             initialAddress && initialAddress !== 'Loading address...'
               ? `<br/><a href="#" class="copy-address" data-address="${initialAddress}" style="text-decoration:underline; color:inherit;">${initialAddress}</a>`
