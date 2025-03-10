@@ -112,7 +112,7 @@ export default function SpacePage() {
                 {events.map((event) => (
                   <li
                     key={event.id}
-                    className='border-b border-gray-300 pb-2'>
+                    className='border-b border-gray-200 pb-2'>
                     <Link
                       href={`/events/${event.id}`}
                       className='underline text-sm'>

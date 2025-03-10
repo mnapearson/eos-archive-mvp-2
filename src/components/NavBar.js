@@ -52,7 +52,7 @@ export default function NavBar() {
   return (
     <>
       <header
-        className={`fixed top-0 w-full z-50 px-4 border-b border-[var(--foreground)] text-[var(--foreground)] backdrop-blur-md transition-all ${
+        className={`fixed top-0 w-full z-50 px-4 border-b border-gray-200 text-[var(--foreground)] backdrop-blur-md transition-all ${
           isScrolled ? 'bg-[var(--background)]/80' : 'bg-transparent'
         }`}>
         <div className='max-w-6xl mx-auto py-4 flex items-center justify-between'>

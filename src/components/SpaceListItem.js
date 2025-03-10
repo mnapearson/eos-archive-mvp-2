@@ -43,7 +43,7 @@ export default function SpaceListItem({ space, detailed = false }) {
   };
 
   return (
-    <div className='border-b border-gray-300 pb-2 text-left'>
+    <div className='border-b border-gray-200 pb-2 text-left'>
       {/* Clickable portion to navigate to space details */}
       <Link
         href={`/spaces/${space.id}`}
