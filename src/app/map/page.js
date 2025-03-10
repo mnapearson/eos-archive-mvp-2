@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import MapComponent from '@/components/MapComponent';
+import SpaceListItem from '@/components/SpaceListItem';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -172,74 +173,6 @@ function SpacesList({ spaces }) {
           space={space}
         />
       ))}
-    </div>
-  );
-}
-
-function SpaceListItem({ space }) {
-  const [address, setAddress] = useState('');
-  useEffect(() => {
-    if (space.latitude && space.longitude) {
-      const lng = Number(space.longitude);
-      const lat = Number(space.latitude);
-      if (!isNaN(lng) && !isNaN(lat)) {
-        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-        fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`
-        )
-          .then((res) => res.json())
-          .then((geoData) => {
-            if (geoData.features && geoData.features.length > 0) {
-              setAddress(geoData.features[0].place_name);
-            } else {
-              setAddress('UNKNOWN ADDRESS');
-            }
-          })
-          .catch((err) => {
-            console.error('Reverse geocoding error:', err);
-            setAddress('UNKNOWN ADDRESS');
-          });
-      }
-    }
-  }, [space.latitude, space.longitude]);
-
-  const handleCopy = () => {
-    if (address) {
-      navigator.clipboard.writeText(address).then(() => {
-        alert('Address copied to clipboard.');
-      });
-    }
-  };
-
-  return (
-    <div className='border-b border-gray-300 pb-2'>
-      <Link
-        href={`/spaces/${space.id}`}
-        passHref>
-        <h2 className='text-sm font-semibold'>{space.name}</h2>
-        <p className='text-xs'>{space.city}</p>
-        {address && (
-          <button
-            onClick={handleCopy}
-            className='block text-xs underline uppercase mt-1'>
-            {address}
-          </button>
-        )}
-        <p className='text-xs italic'>
-          {space.type ? space.type.toLowerCase() : 'default'}
-        </p>{' '}
-      </Link>
-      {space.website && (
-        <p className='mt-1'>
-          <a
-            href={space.website}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-xs underline uppercase'>
-            VISIT WEBSITE
-          </a>
-        </p>
-      )}
     </div>
   );
 }
