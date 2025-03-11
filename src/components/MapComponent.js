@@ -181,7 +181,7 @@ export default function MapComponent({
             }
             const newPopupContent = `
               <div style="color:#000; font-size:12px; line-height:1.4;">
-                <strong>${popupTitle}</strong><br/>
+                <strong>${popupTitleHtml}</strong><br/>
                 <a href="#" class="copy-address" data-address="${address}" style="text-decoration:underline; color:inherit;">${address}</a>
               </div>
             `;
