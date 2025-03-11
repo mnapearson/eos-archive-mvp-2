@@ -46,22 +46,22 @@ export default function SpaceListItem({ space, detailed = false }) {
   const mainContent = (
     <div className='cursor-pointer'>
       <h2 className='text-sm font-semibold'>{space.name}</h2>
-      <p className='text-xs'>{space.city}</p>
-      {address && (
-        <button
-          onClick={toggleMap}
-          className='block text-xs underline uppercase mt-1'>
-          {address}
-        </button>
-      )}
       <p className='text-xs italic'>
         {space.type ? space.type.toLowerCase() : 'default'}
       </p>
+      <p className='text-xs mb-1 text-left'>{space.city}</p>
+      {address && (
+        <button
+          onClick={toggleMap}
+          className='block text-xs underline uppercase mt-1 text-left'>
+          {address}
+        </button>
+      )}
     </div>
   );
 
   return (
-    <div className='border-b border-gray-300 pb-2 text-left relative'>
+    <div className='border-b border-gray-200 pb-2 text-left relative'>
       {/* 
         If we're not in 'detailed' mode, wrap the main content in a Link
         that navigates to /spaces/[id]. If in detailed mode, we skip the link 
@@ -84,7 +84,7 @@ export default function SpaceListItem({ space, detailed = false }) {
             href={space.website}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-xs underline uppercase'>
+            className='text-xs uppercase'>
             VISIT WEBSITE
           </a>
         </p>

@@ -139,7 +139,7 @@ export default function SpacesPage() {
         <div className='mb-2'>
           <input
             type='text'
-            placeholder='Search by name, city, or website'
+            placeholder='Search spaces list by name or city'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className='w-full my-3 p-2 border border-[var(--foreground)] rounded text-xs'

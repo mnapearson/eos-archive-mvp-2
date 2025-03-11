@@ -6,6 +6,7 @@ import Link from 'next/link';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import { createClient } from '@supabase/supabase-js';
+import Spinner from '@/components/Spinner';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -63,15 +64,15 @@ export default function SpacePage() {
   }, [id]);
 
   if (!space) {
-    return <p className='p-16'>Loading space details...</p>;
+    return <Spinner />;
   }
 
   return (
-    <div className='max-w-screen-lg mx-auto p-4'>
+    <div className='max-w-screen-lg mx-auto'>
       <Link
         href='/map'
         className='text-sm hover:text-gray-600'>
-        ← return to spaces
+        ← return to spaces map
       </Link>
       <div className='mt-4'>
         {/* Use the reusable SpaceListItem in detailed mode */}
@@ -83,29 +84,28 @@ export default function SpacePage() {
           <MapComponent spaces={[space]} />
         </div>
         <div className='mt-8'>
-          <div className='flex justify-between'>
-            <h2 className='font-semibold'>{space.name} event archive</h2>
-            <div className='mt-2 mb-4 flex gap-2'>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-1 text-xs border rounded ${
-                  viewMode === 'list'
-                    ? 'bg-[var(--foreground)] text-[var(--background)]'
-                    : 'bg-transparent text-[var(--foreground)]'
-                }`}>
-                LIST VIEW
-              </button>
-              <button
-                onClick={() => setViewMode('flyers')}
-                className={`px-3 py-1 text-xs border rounded ${
-                  viewMode === 'flyers'
-                    ? 'bg-[var(--foreground)] text-[var(--background)]'
-                    : 'bg-transparent text-[var(--foreground)]'
-                }`}>
-                FLYER VIEW
-              </button>
-            </div>
+          <h2 className='font-semibold'>{space.name} event archive</h2>
+          <div className='mt-2 mb-4 flex gap-2'>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1 text-xs border rounded ${
+                viewMode === 'list'
+                  ? 'bg-[var(--foreground)] text-[var(--background)]'
+                  : 'bg-transparent text-[var(--foreground)]'
+              }`}>
+              LIST VIEW
+            </button>
+            <button
+              onClick={() => setViewMode('flyers')}
+              className={`px-3 py-1 text-xs border rounded ${
+                viewMode === 'flyers'
+                  ? 'bg-[var(--foreground)] text-[var(--background)]'
+                  : 'bg-transparent text-[var(--foreground)]'
+              }`}>
+              FLYER VIEW
+            </button>
           </div>
+
           {events.length > 0 ? (
             viewMode === 'list' ? (
               <ul className='space-y-2'>
@@ -143,9 +143,7 @@ export default function SpacePage() {
               </div>
             )
           ) : (
-            <p className='text-sm italic'>
-              No approved events found for this space.
-            </p>
+            <p className='text-sm italic'>No events found for this space.</p>
           )}
         </div>
       </div>
