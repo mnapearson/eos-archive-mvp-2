@@ -13,7 +13,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const markerColors = {
   'off-space': '#FF6EC7', // neon pink
   bar: '#1F51FF', // neon blue
-  leico: '#9D00FF', // purple for LEICO
+  cafe: '#9D00FF', // neon purple
   gallery: '#FFFF00', // neon yellow
   studio: '#39FF14', // neon green
   kino: '#FF073A', // neon red

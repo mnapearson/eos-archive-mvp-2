@@ -119,9 +119,10 @@ export default function SpacePage() {
                       {event.title}
                     </Link>
                     <p className='text-sm italic mb-1'>{event.category}</p>
-                    <p className='text-sm'>
+                    <p className='text-sm mb-1'>
                       {formatDateTime(event.date, event.time)}
                     </p>
+                    <p className='text-sm'>{event.description}</p>
                   </li>
                 ))}
               </ul>

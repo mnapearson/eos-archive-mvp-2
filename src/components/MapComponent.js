@@ -10,11 +10,11 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const markerColors = {
   'off-space': '#FF6EC7', // neon pink
   bar: '#1F51FF', // neon blue
-  leico: '#9D00FF', // purple for LEICO
+  cafe: '#9D00FF', // neon purple
   gallery: '#FFFF00', // neon yellow
   studio: '#39FF14', // neon green
   kino: '#FF073A', // neon red
-  club: '#F8F8F8', // off white for club
+  club: '#F8F8F8', // off-white
   default: '#000000', // default black
 };
 
