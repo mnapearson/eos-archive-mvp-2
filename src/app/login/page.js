@@ -64,14 +64,12 @@ export default function LoginPage() {
         </button>
       </form>
       <p className='mt-4 text-sm'>
-        Are you part of a subcultural space, but don't have an account? Get in
-        touch with us,{' '}
+        Are you part of a subcultural space, but don't have an account?{' '}
         <a
-          href='mailto:hello@eosarchive.app'
-          className='hover:underline'>
-          hello@eosarchive.app
+          href='/spaces/signup'
+          className='underline'>
+          Sign up
         </a>
-        .
       </p>
     </div>
   );

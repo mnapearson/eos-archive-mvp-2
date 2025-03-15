@@ -65,7 +65,7 @@ export default function SpaceAdminDashboard() {
             await supabase.auth.signOut();
             router.push('/login');
           }}
-          className='text-sm '>
+          className='text-sm'>
           LOGOUT
         </button>
       </div>

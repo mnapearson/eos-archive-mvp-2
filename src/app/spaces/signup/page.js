@@ -110,7 +110,7 @@ export default function SpaceSignUpPage() {
 
   return (
     <div className='max-w-md mx-auto p-4'>
-      <h1 className='text-xl font-bold mb-4'>Sign Up as a Space</h1>
+      <h1 className='font-bold mb-4'>sign up as a space</h1>
       <form
         onSubmit={handleSignUp}
         className='space-y-4'>
