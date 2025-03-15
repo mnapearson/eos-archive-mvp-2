@@ -1,9 +1,22 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+// Simple custom hook to retrieve the current user session
+function useUserSimple() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const supabase = createClientComponentClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+  }, []);
+  return user;
+}
 
 export default function Menu({ menuOpen, toggleMenu }) {
   const {
@@ -18,6 +31,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
   const router = useRouter();
   const pathname = usePathname();
+  const user = useUserSimple();
 
   // State to control accordion open/close for each filter category
   const [openFilters, setOpenFilters] = useState({
@@ -32,19 +46,9 @@ export default function Menu({ menuOpen, toggleMenu }) {
   function toggleValue(category, value) {
     setSelectedFilters((prev) => {
       const current = prev[category] || [];
-      if (current.includes(value)) {
-        // remove it
-        return {
-          ...prev,
-          [category]: current.filter((v) => v !== value),
-        };
-      } else {
-        // add it
-        return {
-          ...prev,
-          [category]: [...current, value],
-        };
-      }
+      return current.includes(value)
+        ? { ...prev, [category]: current.filter((v) => v !== value) }
+        : { ...prev, [category]: [...current, value] };
     });
   }
 
@@ -68,26 +72,15 @@ export default function Menu({ menuOpen, toggleMenu }) {
     toggleMenu();
   }
 
-  // "Save" navigates to the homepage with the selected filters if not already on it
+  // "Save" navigates to the homepage with the selected filters.
   function handleSave() {
-    // Build query parameters from the selectedFilters
     const params = new URLSearchParams();
     Object.entries(selectedFilters).forEach(([key, values]) => {
       if (Array.isArray(values) && values.length > 0) {
         values.forEach((val) => params.append(key, val));
       }
     });
-
-    // If not on the homepage, navigate there with query parameters.
-    if (pathname !== '/') {
-      router.push(`/?${params.toString()}`);
-    } else {
-      // If we're already on the homepage, we can either:
-      //  - just rely on the context (which triggers a re-fetch automatically),
-      //  - or manually update the query string if you want it reflected in the URL:
-      router.push(`/?${params.toString()}`);
-    }
-
+    router.push(`/?${params.toString()}`);
     toggleMenu();
   }
 
@@ -183,8 +176,23 @@ export default function Menu({ menuOpen, toggleMenu }) {
             </Link>
           </div>
         </div>
-
-        {/* Footer (always at the bottom) */}
+        {/* Conditionally render "DASHBOARD" or "LOGIN" link */}
+        <div className='m-6'>
+          {user ? (
+            <Link
+              href='/spaces/admin'
+              onClick={toggleMenu}>
+              ACCOUNT INFO
+            </Link>
+          ) : (
+            <Link
+              href='/login'
+              onClick={toggleMenu}>
+              LOGIN
+            </Link>
+          )}
+        </div>
+        {/* Footer */}
         <footer className='w-full border-t border-[var(--foreground)] px-4 py-4'>
           <div className='max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between'>
             <p className='text-sm'>© {new Date().getFullYear()} eos archive</p>
