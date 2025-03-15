@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 import Spinner from '@/components/Spinner';
+import EventSubmissionForm from '@/components/EventSubmissionForm';
 
 export default function SpaceAdminDashboard() {
   const router = useRouter();
@@ -15,17 +16,14 @@ export default function SpaceAdminDashboard() {
   useEffect(() => {
     async function fetchSpace() {
       setLoading(true);
-      // Get the current session
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session) {
-        // If not logged in, redirect to login page
         router.push('/login');
         return;
       }
       const userId = session.user.id;
-      // Fetch the space record associated with this user
       const { data, error } = await supabase
         .from('spaces')
         .select('*')
@@ -61,19 +59,21 @@ export default function SpaceAdminDashboard() {
   return (
     <div className='max-w-4xl mx-auto p-4'>
       <div className='flex items-center justify-between mb-4'>
-        <h1 className='text-2xl font-bold'>account info</h1>{' '}
+        <h1 className='font-bold'>dashboard</h1>
         <button
           onClick={async () => {
             await supabase.auth.signOut();
             router.push('/login');
-          }}>
+          }}
+          className='text-sm '>
           LOGOUT
         </button>
       </div>
 
-      <div className='border p-4 rounded-md shadow'>
-        <h2 className='text-xl font-semibold'>{space.name}</h2>
-        <p className='text-sm'>
+      <div className='border p-4 rounded-md shadow mb-6'>
+        <h2 className='font-semibold'>{space.name}</h2>
+        <p className='text-xs italic'>{space.type}</p>
+        <p className='text-sm mt-1'>
           {space.address}, {space.city} {space.zipcode}
         </p>
         {space.website && (
@@ -82,14 +82,19 @@ export default function SpaceAdminDashboard() {
               href={space.website}
               target='_blank'
               rel='noopener noreferrer'
-              className='underline'>
-              Visit Website
+              className='text-sm'>
+              VISIT WEBSITE
             </a>
           </p>
         )}
         {space.description && (
           <p className='mt-2 text-sm'>{space.description}</p>
         )}
+      </div>
+
+      {/* Event Submission Form */}
+      <div className='mb-6'>
+        <EventSubmissionForm spaceId={space.id} />
       </div>
 
       <div className='mt-6'>

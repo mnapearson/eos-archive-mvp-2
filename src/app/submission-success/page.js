@@ -5,6 +5,13 @@ import Link from 'next/link';
 export default function SubmissionSuccess() {
   return (
     <div className='max-w-2xl mx-auto text-justify'>
+      <div className='mb-4'>
+        <Link
+          href='/spaces/admin'
+          className='text-sm hover:text-gray-600'>
+          ← return to dashboard
+        </Link>
+      </div>
       <h1 className='font-semibold mb-4'>submission received</h1>
       <p className='mb-4'>
         thank you for contributing to eos archive and supporting the subculture
@@ -31,20 +38,6 @@ export default function SubmissionSuccess() {
           hello@eosarchive.app.
         </a>
       </p>
-
-      {/* Navigation Buttons */}
-      <div className='mt-10 flex flex-col gap-4'>
-        <Link
-          href='/'
-          className='underline text-sm hover:text-gray-600'>
-          return to archive
-        </Link>
-        <Link
-          href='/submission'
-          className='underline text-sm hover:text-gray-600'>
-          submit another event
-        </Link>
-      </div>
     </div>
   );
 }
