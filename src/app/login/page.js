@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   return (
     <div className='max-w-md mx-auto p-4'>
-      <h1 className='text-xl font-bold mb-4'>Login</h1>
+      <h1 className='font-bold mb-4'>login</h1>
       <form
         onSubmit={handleLogin}
         className='space-y-4'>
@@ -64,12 +64,14 @@ export default function LoginPage() {
         </button>
       </form>
       <p className='mt-4 text-sm'>
-        Don't have an account?{' '}
+        Are you part of a subcultural space, but don't have an account? Get in
+        touch with us,{' '}
         <a
-          href='/signup'
-          className='underline'>
-          Sign up
+          href='mailto:hello@eosarchive.app'
+          className='hover:underline'>
+          hello@eosarchive.app
         </a>
+        .
       </p>
     </div>
   );
