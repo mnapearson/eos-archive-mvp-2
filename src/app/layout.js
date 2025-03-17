@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
 
           {/* Page Content */}
           {/* Page Content */}
-          <main className='flex-grow py-20 px-6 mt-10 mb-10'>{children}</main>
+          <main className='flex-grow py-20 px-6 mt-5 mb-10'>{children}</main>
 
           <footer className='w-full border-t border-gray-200 px-4'>
             <div className='max-w-6xl mx-auto py-4 flex flex-col md:flex-row items-center justify-between'>

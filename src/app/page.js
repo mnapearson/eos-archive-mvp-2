@@ -11,26 +11,37 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function HomePage() {
-  const { selectedFilters } = useContext(FilterContext);
+  const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to remove a single value from a multi-select filter
+  function removeFilterValue(filterKey, value) {
+    setSelectedFilters((prev) => {
+      const updated = { ...prev };
+      // Filter out the clicked value
+      const newValues = (updated[filterKey] || []).filter((v) => v !== value);
+      updated[filterKey] = newValues;
+      return updated;
+    });
+  }
+
+  // Fetch events whenever filters change
   useEffect(() => {
     async function fetchEvents() {
       setLoading(true);
-
       try {
         // 1. Start with events that are approved.
         let query = supabase.from('events').select('*').eq('approved', true);
 
-        // 2. Apply filters for fields that are directly on events (date, category, designer).
+        // 2. Apply filters for fields directly on events (date, category, designer).
         ['date', 'category', 'designer'].forEach((key) => {
           if (selectedFilters[key] && selectedFilters[key].length > 0) {
             query = query.in(key, selectedFilters[key]);
           }
         });
 
-        // 3. For city and space filters (which live on the spaces table), first query the spaces table.
+        // 3. For city and space filters (which live on the spaces table), query the spaces table first.
         let spaceIds = null;
         if (
           (selectedFilters.city && selectedFilters.city.length > 0) ||
@@ -51,14 +62,14 @@ export default function HomePage() {
           spaceIds = spacesData.map((s) => s.id);
         }
 
-        // 4. If we have a list of space IDs, filter events by those IDs.
+        // 4. If we have space IDs, filter events by those IDs.
         if (spaceIds && spaceIds.length > 0) {
           query = query.in('space_id', spaceIds);
         } else if (
           (selectedFilters.city && selectedFilters.city.length > 0) ||
           (selectedFilters.space && selectedFilters.space.length > 0)
         ) {
-          // If filters are set for city/space but no matching spaces found, then no events match.
+          // If filters for city/space are set but no matching spaces found, then no events match.
           setEvents([]);
           return;
         }
@@ -76,11 +87,58 @@ export default function HomePage() {
         setLoading(false);
       }
     }
+
     fetchEvents();
   }, [selectedFilters]);
 
+  // Render a top bar showing active filters
+  function renderFilterBar() {
+    // Flatten all filter values into a single array of {key, value} pairs
+    const activeFilterPairs = [];
+    Object.entries(selectedFilters).forEach(([filterKey, filterValues]) => {
+      if (Array.isArray(filterValues) && filterValues.length > 0) {
+        filterValues.forEach((val) => {
+          activeFilterPairs.push({ filterKey, val });
+        });
+      }
+    });
+
+    return (
+      <div className='py-2 text-sm flex items-center flex-wrap gap-2'>
+        <button
+          onClick={() =>
+            setSelectedFilters({
+              city: [],
+              space: [],
+              date: [],
+              category: [],
+              designer: [],
+            })
+          }
+          className='text-gray-500'>
+          ARCHIVE
+        </button>
+        {activeFilterPairs.map(({ filterKey, val }, idx) => (
+          <div
+            key={`${filterKey}-${val}-${idx}`}
+            className='flex items-center'>
+            <span className='ml-1'>×</span>
+            <button
+              onClick={() => removeFilterValue(filterKey, val)}
+              className='hover:text-gray-600 uppercase'>
+              {val}
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className='max-w-6xl mx-auto'>
+    <div className='max-w-6xl mx-auto px-4'>
+      {/* Filter Bar at the top */}
+      {renderFilterBar()}
+
       {loading ? <Spinner /> : <MasonryGrid items={events} />}
     </div>
   );
