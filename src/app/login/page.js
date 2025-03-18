@@ -68,7 +68,7 @@ export default function LoginPage() {
         <a
           href='/spaces/signup'
           className='underline'>
-          Sign up
+          Register here.
         </a>
       </p>
     </div>

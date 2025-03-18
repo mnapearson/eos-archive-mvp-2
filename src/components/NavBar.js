@@ -57,20 +57,30 @@ export default function NavBar() {
   return (
     <>
       <header className='fixed top-0 w-full z-50 text-[var(--foreground)] pointer-events-none'>
-        <div className='max-w-6xl mx-auto py-4 px-4 flex items-center justify-between'>
+        <div className='max-w-6xl mx-auto py-4 flex items-center justify-between'>
           {/* Left: EOS logo that toggles the menu */}
           <div className='pointer-events-auto bg-[var(--background)]/90 backdrop-blur-xl px-4 py-2 rounded-full'>
             <button
               onClick={toggleMenu}
               aria-label='Toggle menu'
               className='flex items-center justify-center'>
-              <Image
-                src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets/EOS24_metal_blue_transparent.png'
-                alt='Toggle menu'
-                width={80}
-                height={40}
-                priority
-              />
+              <svg
+                className='mr-2'
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'>
+                <path
+                  fill='none'
+                  stroke='currentColor'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='1'
+                  d='M11.953 2C17.502 2 22 6.477 22 12s-4.498 10-10.047 10C-.63 22-1.827 4.018 11.5 5c3.35.247 6.53 3.41 6.53 7c0 4.5-2.794 6.5-6.53 6.5c-7 0-8.31-10.033-.498-9.5c1.506.103 3.014 1.343 3.014 3c0 1.928-1.016 3-2.895 3'
+                  color='currentColor'
+                />
+              </svg>
+              eos archive
             </button>
           </div>
 
@@ -91,7 +101,19 @@ export default function NavBar() {
 
           {/* Right: Theme Toggle */}
           <div className='pointer-events-auto bg-[var(--background)]/90 backdrop-blur-xl px-4 py-2 rounded-full'>
-            <button
+            <Link href='/login'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'>
+                <path
+                  fill='currentColor'
+                  d='M10.5 13h-7c-.3 0-.5.2-.5.5v7c0 .3.2.5.5.5h7c.3 0 .5-.2.5-.5v-7c0-.3-.2-.5-.5-.5m-.5 7H4v-6h6zm.5-17h-7c-.3 0-.5.2-.5.5v7c0 .3.2.5.5.5h7c.3 0 .5-.2.5-.5v-7c0-.3-.2-.5-.5-.5m-.5 7H4V4h6zm10.5-7h-7c-.3 0-.5.2-.5.5v7c0 .3.2.5.5.5h7c.3 0 .5-.2.5-.5v-7c0-.3-.2-.5-.5-.5m-.5 7h-6V4h6zm.5 6.5h-3v-3c0-.3-.2-.5-.5-.5s-.5.2-.5.5v3h-3c-.3 0-.5.2-.5.5s.2.5.5.5h3v3c0 .3.2.5.5.5s.5-.2.5-.5v-3h3c.3 0 .5-.2.5-.5s-.2-.5-.5-.5'
+                />
+              </svg>
+            </Link>
+            {/*  <button
               onClick={toggleTheme}
               aria-label='Toggle Theme'
               className='text-sm font-semibold flex items-center p-1'>
@@ -107,7 +129,7 @@ export default function NavBar() {
                   d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2m0 2v4a4 4 0 1 0 0 8v4a8 8 0 1 0 0-16'
                   clipRule='evenodd'></path>
               </svg>
-            </button>
+            </button>*/}
           </div>
         </div>
       </header>

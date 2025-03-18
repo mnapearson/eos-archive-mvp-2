@@ -166,13 +166,24 @@ function SpacesList({ spaces }) {
     return <p className='text-sm italic'>No spaces found.</p>;
   }
   return (
-    <div className='space-y-4 overflow-auto h-full pr-2'>
-      {spaces.map((space) => (
-        <SpaceListItem
-          key={space.id}
-          space={space}
-        />
-      ))}
+    <div>
+      <div className='space-y-4 overflow-auto h-full pr-2'>
+        {spaces.map((space) => (
+          <SpaceListItem
+            key={space.id}
+            space={space}
+          />
+        ))}
+      </div>
+      <p className='text-sm italic mt-4'>No more spaces found.</p>
+      <p className='mt-4 text-sm'>
+        Are you part of a subcultural space, but don't have an account?{' '}
+        <a
+          href='/spaces/signup'
+          className='underline'>
+          Register here.
+        </a>
+      </p>
     </div>
   );
 }

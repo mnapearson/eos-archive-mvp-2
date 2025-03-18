@@ -104,8 +104,8 @@ export default function HomePage() {
     });
 
     return (
-      <div className='py-2 text-sm flex items-center flex-wrap gap-2'>
-        <button
+      <div className='py-2 px-4 text-sm flex items-center flex-wrap gap-2'>
+        {/* <button
           onClick={() =>
             setSelectedFilters({
               city: [],
@@ -117,25 +117,22 @@ export default function HomePage() {
           }
           className='text-gray-500'>
           ARCHIVE
-        </button>
+        </button> */}
         {activeFilterPairs.map(({ filterKey, val }, idx) => (
-          <div
+          <button
             key={`${filterKey}-${val}-${idx}`}
-            className='flex items-center'>
-            <span className='ml-1'>×</span>
-            <button
-              onClick={() => removeFilterValue(filterKey, val)}
-              className='hover:text-gray-600 uppercase'>
-              {val}
-            </button>
-          </div>
+            onClick={() => removeFilterValue(filterKey, val)}
+            className='flex items-center gap-1 px-3 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition'>
+            <span className='uppercase'>{val}</span>
+            <span>×</span>
+          </button>
         ))}
       </div>
     );
   }
 
   return (
-    <div className='max-w-6xl mx-auto px-4'>
+    <div className='max-w-6xl mx-auto'>
       {/* Filter Bar at the top */}
       {renderFilterBar()}
 
