@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { formatDateTime } from '@/utils/dateTime';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import { createClient } from '@supabase/supabase-js';
@@ -11,26 +12,6 @@ import Spinner from '@/components/Spinner';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-function formatDateTime(dateString, timeString) {
-  if (!dateString) return '';
-  const dateObj = new Date(dateString);
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const year = String(dateObj.getFullYear()).slice(-2);
-  let timePart = '';
-  if (timeString) {
-    const segments = timeString.split(':');
-    if (segments.length >= 2) {
-      timePart = `${segments[0]}.${segments[1]}`;
-    } else {
-      timePart = timeString;
-    }
-  }
-  return timePart
-    ? `${day}.${month}.${year} @ ${timePart}`
-    : `${day}.${month}.${year}`;
-}
 
 export default function SpacePage() {
   const { id } = useParams();
