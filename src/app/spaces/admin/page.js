@@ -78,13 +78,13 @@ export default function SpaceAdminDashboard() {
         </p>
         {space.website && (
           <p className='mt-1'>
-            <a
+            <Link
               href={space.website}
               target='_blank'
               rel='noopener noreferrer'
               className='text-sm'>
               VISIT WEBSITE
-            </a>
+            </Link>
           </p>
         )}
         {space.description && (

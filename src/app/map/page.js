@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
@@ -177,11 +178,11 @@ function SpacesList({ spaces }) {
       <p className='text-sm italic mt-4'>No more spaces found.</p>
       <p className='mt-4 text-sm'>
         Are you part of a subcultural space, but don't have an account?{' '}
-        <a
+        <Link
           href='/spaces/signup'
           className='underline'>
           Register here.
-        </a>
+        </Link>
       </p>
     </div>
   );

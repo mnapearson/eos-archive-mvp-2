@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function PrivacyPage() {
   return (
     <div className='flex items-center justify-center min-h-screen px-4'>
@@ -19,11 +21,11 @@ export default function PrivacyPage() {
           <p className='mb-2'>Phone: 01625790189</p>
           <p className='mb-4'>
             Email:{' '}
-            <a
+            <Link
               href='mailto:hello@eosarchive.app'
               className='underline'>
               hello@eosarchive.app
-            </a>
+            </Link>
           </p>
         </section>
 
@@ -69,11 +71,11 @@ export default function PrivacyPage() {
             Under applicable data protection laws (including the GDPR), you have
             the right to request access, correction, or deletion of your
             personal data. For any questions or requests, please contact us at{' '}
-            <a
+            <Link
               href='mailto:hello@eosarchive.app'
               className='underline'>
               hello@eosarchive.app
-            </a>
+            </Link>
             .
           </p>
         </section>

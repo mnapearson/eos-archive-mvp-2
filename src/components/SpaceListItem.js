@@ -80,13 +80,13 @@ export default function SpaceListItem({ space, detailed = false }) {
       {/* If a website is available, render it outside the main clickable block */}
       {space.website && (
         <p className='mt-1'>
-          <a
+          <Link
             href={space.website}
             target='_blank'
             rel='noopener noreferrer'
             className='text-xs uppercase'>
             VISIT WEBSITE
-          </a>
+          </Link>
         </p>
       )}
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
@@ -196,11 +197,11 @@ export default function EventSubmissionForm({ spaceId }) {
             htmlFor='terms'
             className='text-sm'>
             I agree to the{' '}
-            <a
+            <Link
               href='/terms'
               className='underline'>
               Terms and Conditions
-            </a>
+            </Link>
           </label>
         </div>
         {error && <p className='text-red-500 text-sm'>{error}</p>}

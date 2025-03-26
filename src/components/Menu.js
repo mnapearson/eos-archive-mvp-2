@@ -198,11 +198,11 @@ export default function Menu({ menuOpen, toggleMenu }) {
           <div className='max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between'>
             <p className='text-sm'>© {new Date().getFullYear()} eos archive</p>
             <div className='text-sm mt-2 md:mt-0'>
-              <a
+              <Link
                 href='mailto:hello@eosarchive.app'
                 className='hover:underline'>
                 hello@eosarchive.app
-              </a>{' '}
+              </Link>{' '}
               |{' '}
               <Link
                 onClick={toggleMenu}

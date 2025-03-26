@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AboutPage() {
   return (
     <div className='flex justify-center min-h-screen'>
@@ -32,19 +34,19 @@ export default function AboutPage() {
 
         <p className='mb-4'>
           Are you part of a subcultural space, but don't have an account?{' '}
-          <a
+          <Link
             href='/spaces/signup'
             className='underline'>
             Register here.
-          </a>
+          </Link>
         </p>
         <p className='mb-4'>
           you can also email us at any time:{' '}
-          <a
+          <Link
             href='mailto:hello@eosarchive.app'
             className='hover:underline'>
             hello@eosarchive.app
-          </a>
+          </Link>
           .
         </p>
         <p>

@@ -32,11 +32,11 @@ export default function SubmissionSuccess() {
       <p className='mb-4'>eos</p>
       <p>
         ps. need help with your submission? get in touch:{' '}
-        <a
+        <Link
           href='mailto:hello@eosarchive.app'
           className='underline hover:text-gray-600'>
           hello@eosarchive.app.
-        </a>
+        </Link>
       </p>
     </div>
   );

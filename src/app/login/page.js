@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function LoginPage() {
@@ -65,11 +66,11 @@ export default function LoginPage() {
       </form>
       <p className='mt-4 text-sm'>
         Are you part of a subcultural space, but don't have an account?{' '}
-        <a
+        <Link
           href='/spaces/signup'
           className='underline'>
           Register here.
-        </a>
+        </Link>
       </p>
     </div>
   );

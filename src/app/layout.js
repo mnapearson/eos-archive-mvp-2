@@ -28,11 +28,11 @@ export default function RootLayout({ children }) {
                 © {new Date().getFullYear()} eos archive
               </p>
               <div className='text-sm mt-2 md:mt-0'>
-                <a
+                <Link
                   href='mailto:hello@eosarchive.app'
                   className='hover:underline'>
                   hello@eosarchive.app
-                </a>{' '}
+                </Link>{' '}
                 |{' '}
                 <Link
                   href='/privacy'
