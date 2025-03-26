@@ -6,8 +6,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export async function GET(req, { params }) {
-  const { id } = params;
+export async function GET(_req, { params }) {
+  const { id } = await params;
   if (!id) {
     return new Response(JSON.stringify({ error: 'Space ID is required' }), {
       status: 400,
