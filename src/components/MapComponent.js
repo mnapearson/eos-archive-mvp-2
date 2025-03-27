@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import { space } from 'postcss/lib/list';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -70,6 +71,10 @@ export default function MapComponent({
     } else if (initialCenter) {
       centerLat = initialCenter.lat;
       centerLng = initialCenter.lng;
+    } else if (spaces && spaces.length > 0) {
+      const firstSpace = spaces[0];
+      centerLat = Number(firstSpace.latitude) || 51.3397;
+      centerLng = Number(firstSpace.longitude) || 12.3731;
     } else {
       centerLat = 51.3397;
       centerLng = 12.3731;
@@ -79,7 +84,14 @@ export default function MapComponent({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/dark-v10',
       center: [centerLng, centerLat],
-      zoom: eventId ? 14 : initialCenter ? 12 : 6,
+      zoom:
+        typeof initialZoom === 'number'
+          ? initialZoom
+          : eventId
+          ? 14
+          : initialCenter
+          ? 12
+          : 6,
     });
 
     // Add navigation controls.
@@ -130,8 +142,7 @@ export default function MapComponent({
       markerEl.style.backgroundColor =
         markerColors[typeKey] || markerColors.default;
 
-      const spaceId = item.id || (item.space && item.space.id);
-
+      const spaceId = (item.space && item.space.id) || item.id;
       const popupTitle = (
         item.name ||
         (item.space && item.space.name) ||

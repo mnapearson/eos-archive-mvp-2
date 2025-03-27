@@ -2,7 +2,7 @@ export default function AboutPage() {
   return (
     <div className='flex justify-center min-h-screen'>
       <div className='max-w-3xl text-[var(--foreground)]'>
-        <h1 className='font-semibold mb-6'>about this project</h1>
+        <h1 className='font-semibold mb-6'>about eos archive</h1>
         <p className='mb-4'>
           eos archive elevates event art—flyers, posters, and other visuals—from
           ephemeral cultural artefacts to essential citations in the

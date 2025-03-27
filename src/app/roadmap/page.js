@@ -19,9 +19,15 @@ export default function RoadmapPage() {
     fetchTasks();
   }, []);
 
-  const activeTasks = tasks.filter(
-    (task) => task.status === 'upcoming' || task.status === 'in_progress'
-  );
+  const activeTasks = tasks
+    .filter(
+      (task) => task.status === 'upcoming' || task.status === 'in_progress'
+    )
+    .sort((a, b) => {
+      if (a.status === 'in_progress' && b.status === 'upcoming') return -1;
+      if (a.status === 'upcoming' && b.status === 'in_progress') return 1;
+      return 0;
+    });
   const completedTasks = tasks.filter((task) => task.status === 'completed');
 
   return (

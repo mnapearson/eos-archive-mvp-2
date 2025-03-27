@@ -10,6 +10,14 @@ export default function RoadmapManager() {
     status: 'upcoming',
   });
 
+  // New state for editing
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editingTaskValues, setEditingTaskValues] = useState({
+    title: '',
+    description: '',
+    status: 'upcoming',
+  });
+
   useEffect(() => {
     async function fetchTasks() {
       const { data, error } = await supabase.from('roadmap_items').select('*');
@@ -61,6 +69,41 @@ export default function RoadmapManager() {
     }
   }
 
+  // New function to enter edit mode
+  function handleEditTask(task) {
+    setEditingTaskId(task.id);
+    setEditingTaskValues({
+      title: task.title,
+      description: task.description,
+      status: task.status,
+    });
+  }
+
+  function handleCancelEdit() {
+    setEditingTaskId(null);
+    setEditingTaskValues({ title: '', description: '', status: 'upcoming' });
+  }
+
+  async function handleSaveEdit(id) {
+    const { data, error } = await supabase
+      .from('roadmap_items')
+      .update({
+        title: editingTaskValues.title,
+        description: editingTaskValues.description,
+        status: editingTaskValues.status,
+      })
+      .eq('id', id)
+      .select();
+    if (error) {
+      console.error('Error updating roadmap item:', error);
+    } else if (data && data.length > 0) {
+      setTasks(tasks.map((task) => (task.id === id ? data[0] : task)));
+      handleCancelEdit();
+    } else {
+      console.error('No data returned from update');
+    }
+  }
+
   const activeTasks = tasks.filter(
     (task) => task.status === 'upcoming' || task.status === 'in_progress'
   );
@@ -92,7 +135,7 @@ export default function RoadmapManager() {
         <select
           value={newTask.status}
           onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
-          className='w-full border-b border-gray-300 bg-transparent py-2 mb-4 focus:outline-none'>
+          className='w-full border-b text-gray-400 border-gray-300 bg-transparent py-2 mb-4 focus:outline-none'>
           <option value='upcoming'>Upcoming</option>
           <option value='in_progress'>In Progress</option>
           <option value='completed'>Completed</option>
@@ -117,26 +160,85 @@ export default function RoadmapManager() {
               <div
                 key={task.id}
                 className='py-2'>
-                <h3 className='font-normal'>{task.title}</h3>
-                <p className='text-sm text-gray-400'>{task.description}</p>
-                <div className='flex items-center space-x-4 mt-2'>
-                  <select
-                    value={task.status}
-                    onChange={(e) =>
-                      handleUpdateStatus(task.id, e.target.value)
-                    }
-                    className='text-sm border-b border-gray-300 bg-transparent focus:outline-none'>
-                    <option value='upcoming'>Upcoming</option>
-                    <option value='in_progress'>In Progress</option>
-                    <option value='completed'>Completed</option>
-                    <option value='archived'>Archived</option>
-                  </select>
-                  <button
-                    onClick={() => handleDeleteTask(task.id)}
-                    className='text-sm text-gray-600 hover:var(text-color)'>
-                    Delete
-                  </button>
-                </div>
+                {editingTaskId === task.id ? (
+                  <div>
+                    <input
+                      type='text'
+                      value={editingTaskValues.title}
+                      onChange={(e) =>
+                        setEditingTaskValues({
+                          ...editingTaskValues,
+                          title: e.target.value,
+                        })
+                      }
+                      className='w-full border-b border-gray-300 bg-transparent py-2 mb-2 focus:outline-none'
+                    />
+                    <textarea
+                      value={editingTaskValues.description}
+                      onChange={(e) =>
+                        setEditingTaskValues({
+                          ...editingTaskValues,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={2}
+                      className='w-full border-b border-gray-300 bg-transparent py-2 mb-2 focus:outline-none'></textarea>
+                    <select
+                      value={editingTaskValues.status}
+                      onChange={(e) =>
+                        setEditingTaskValues({
+                          ...editingTaskValues,
+                          status: e.target.value,
+                        })
+                      }
+                      className='w-full border-b border-gray-300 bg-transparent py-2 mb-2 focus:outline-none'>
+                      <option value='upcoming'>Upcoming</option>
+                      <option value='in_progress'>In Progress</option>
+                      <option value='completed'>Completed</option>
+                      <option value='archived'>Archived</option>
+                    </select>
+                    <div className='flex items-center space-x-4 mt-2'>
+                      <button
+                        onClick={() => handleSaveEdit(task.id)}
+                        className='text-sm border py-2 px-4'>
+                        Save
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className='text-sm text-gray-600 hover:text-gray-800'>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className='font-normal'>{task.title}</h3>
+                    <p className='text-sm text-gray-400'>{task.description}</p>
+                    <div className='flex items-center space-x-4 mt-2'>
+                      <select
+                        value={task.status}
+                        onChange={(e) =>
+                          handleUpdateStatus(task.id, e.target.value)
+                        }
+                        className='text-sm border-b border-gray-300 bg-transparent focus:outline-none'>
+                        <option value='upcoming'>Upcoming</option>
+                        <option value='in_progress'>In Progress</option>
+                        <option value='completed'>Completed</option>
+                        <option value='archived'>Archived</option>
+                      </select>
+                      <button
+                        onClick={() => handleEditTask(task)}
+                        className='text-sm text-gray-600 hover:text-gray-800'>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className='text-sm text-gray-600 hover:text-gray-800'>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -144,7 +246,7 @@ export default function RoadmapManager() {
       </section>
 
       <section>
-        <h2 className=' font-light border-b border-gray-300 pb-2 mb-4'>
+        <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
           Completed
         </h2>
         {completedTasks.length === 0 ? (
@@ -157,7 +259,6 @@ export default function RoadmapManager() {
                 className='py-2'>
                 <h3 className='font-normal'>{task.title}</h3>
                 <p className='text-sm text-gray-400'>{task.description}</p>
-
                 <button
                   onClick={() => handleDeleteTask(task.id)}
                   className='text-sm text-gray-600 hover:text-gray-800'>
