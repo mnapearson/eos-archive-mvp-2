@@ -58,14 +58,13 @@ export default function NavBar() {
     <>
       <header className='fixed top-0 w-full z-50 text-[var(--foreground)] pointer-events-none'>
         <div className='max-w-6xl mx-auto py-4 flex items-center justify-between'>
-          {/* Left: EOS logo that toggles the menu */}
+          {/* Left: spiral that toggles the menu */}
           <div className='pointer-events-auto bg-[var(--background)]/90 backdrop-blur-xl px-4 py-2 rounded-full'>
             <button
               onClick={toggleMenu}
               aria-label='Toggle menu'
-              className='flex items-center justify-center'>
+              className='flex items-center justify-center gap-2'>
               <svg
-                className='mr-2'
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'
                 height='24'
@@ -80,28 +79,27 @@ export default function NavBar() {
                   color='currentColor'
                 />
               </svg>
-              eos archive
+              menu
             </button>
           </div>
 
-          {/* Center: Search Bar
-          <div className='pointer-events-auto bg-[var(--background)]/80 backdrop-blur-xl px-4 py-2 rounded-full flex-grow mx-4 max-w-lg'>
-            <form
-              onSubmit={handleSearchSubmit}
-              className='w-full px-4 py-2'>
-              <input
-                type='text'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder='Search by city, space, category, or designer'
-                className='w-full bg-transparent outline-none placeholder:text-[var(--foreground)] text-[var(--foreground)]'
-              />
-            </form>
-          </div> */}
+          {/* Center: Logo Homepage */}
+          <div className='pointer-events-auto bg-[var(--background)]/80 backdrop-blur-xl px-4 py-2 rounded-full'>
+            <Link
+              className='flex items-center justify-center'
+              href='/'>
+              <img
+                width='125'
+                src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets//EOS24_metal_blue_transparent.png'></img>
+            </Link>
+          </div>
 
-          {/* Right: Theme Toggle */}
+          {/* Right: Login Button */}
           <div className='pointer-events-auto bg-[var(--background)]/90 backdrop-blur-xl px-4 py-2 rounded-full'>
-            <Link href='/login'>
+            <Link
+              className='flex items-center justify-center gap-2'
+              href='/login'>
+              connect
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'
