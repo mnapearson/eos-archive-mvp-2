@@ -2,13 +2,12 @@
 'use client'; // Required if you're using client-side interactivity
 
 import React from 'react';
-import AdminDashboard from '@/components/AdminDashboard';
+import RoadmapManager from '@/components/RoadmapManager';
 
 export default function AdminPage() {
   return (
     <main>
-      <h1>Admin Dashboard</h1>
-      <AdminDashboard />
+      <RoadmapManager />
     </main>
   );
 }

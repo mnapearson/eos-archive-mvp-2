@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
 
           {/* Page Content */}
           {/* Page Content */}
-          <main className='flex-grow py-20 px-6 mb-10 overflow-auto'>
+          <main className='flex-grow py-20 px-6 mt-3 mb-10 overflow-auto'>
             {children}
           </main>
 

@@ -2,13 +2,9 @@
 
 import { useContext, useEffect, useState } from 'react';
 import { FilterContext } from '@/contexts/FilterContext';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import MasonryGrid from '@/components/MasonryGrid';
 import Spinner from '@/components/Spinner';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function HomePage() {
   const { selectedFilters, setSelectedFilters } = useContext(FilterContext);

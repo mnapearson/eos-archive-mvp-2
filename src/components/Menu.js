@@ -170,6 +170,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
             </Link>
             <Link
               onClick={toggleMenu}
+              href='/roadmap'
+              className='block py-1'>
+              ROADMAP
+            </Link>
+            <Link
+              onClick={toggleMenu}
               target='blank'
               href='https://www.are.na/eos-archive-4vdklofkovq/conversations-1wumw6beixo'
               className='block py-1'>
