@@ -32,48 +32,82 @@ export default function RoadmapPage() {
 
   return (
     <div className='max-w-3xl mx-auto py-8 px-4'>
-      <h1 className='font-light mb-8'>Product Roadmap</h1>
-
-      <section className='mb-8'>
-        <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
-          In progress and upcoming
-        </h2>
-        {activeTasks.length === 0 ? (
-          <p className='italic text-gray-400'>No active tasks.</p>
-        ) : (
-          <div className='space-y-4'>
-            {activeTasks.map((task) => (
-              <div
-                key={task.id}
-                className='py-2'>
-                <h3 className='font-normal'>{task.title}</h3>
-                <p className='text-sm text-gray-400'>{task.description}</p>
-                <small className='text-xs text-gray-500'>{task.status}</small>
+      <h1 className='font-light mb-8'>Roadmap</h1>
+      <p className='mb-8 text-sm text-gray-400'>
+        This roadmap displays our ongoing and completed milestones that shape
+        the future of eos archive. The left panel shows what we're actively
+        working on and planning for the near future, while the right panel
+        highlights our completed achievements. Stay tuned for updates as we
+        progress. Have an idea for a feature? Write to us,{' '}
+        <a
+          href='mailto:hello@eosarchive.app'
+          className='hover:underline'>
+          hello@eosarchive.app
+        </a>
+        .
+      </p>
+      <div className='flex flex-col lg:flex-row gap-8'>
+        {/* Active Tasks Box */}
+        <section
+          className='flex-1 p-4'
+          style={{
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '8px',
+            boxShadow: '0 0 15px rgba(255,255,255,0.2)',
+          }}>
+          <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
+            In progress and upcoming
+          </h2>
+          <div className='max-h-96 overflow-y-auto'>
+            {activeTasks.length === 0 ? (
+              <p className='italic text-gray-400'>No active tasks.</p>
+            ) : (
+              <div className='space-y-4'>
+                {activeTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className='py-2'>
+                    <h3 className='font-normal'>{task.title}</h3>
+                    <p className='text-sm text-gray-400'>{task.description}</p>
+                    <small className='text-xs text-gray-500'>
+                      {task.status}
+                    </small>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </section>
+        </section>
 
-      <section>
-        <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
-          Completed
-        </h2>
-        {completedTasks.length === 0 ? (
-          <p className='italic text-gray-400'>No completed tasks.</p>
-        ) : (
-          <div className='space-y-4'>
-            {completedTasks.map((task) => (
-              <div
-                key={task.id}
-                className='py-2'>
-                <h3 className='font-normal'>{task.title}</h3>
-                <p className='text-sm text-gray-400'>{task.description}</p>
+        {/* Completed Tasks Box */}
+        <section
+          className='flex-1 p-4'
+          style={{
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '8px',
+            boxShadow: '0 0 15px rgba(255,255,255,0.2)',
+          }}>
+          <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
+            Completed
+          </h2>
+          <div className='max-h-96 overflow-y-auto'>
+            {completedTasks.length === 0 ? (
+              <p className='italic text-gray-400'>No completed tasks.</p>
+            ) : (
+              <div className='space-y-4'>
+                {completedTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className='py-2'>
+                    <h3 className='font-normal'>{task.title}</h3>
+                    <p className='text-sm text-gray-400'>{task.description}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </section>
+        </section>
+      </div>
     </div>
   );
 }
