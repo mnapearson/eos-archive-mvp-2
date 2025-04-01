@@ -31,7 +31,7 @@ export default function RoadmapPage() {
   const completedTasks = tasks.filter((task) => task.status === 'completed');
 
   return (
-    <div className='max-w-3xl mx-auto py-8 px-4'>
+    <div>
       <h1 className='font-light mb-8'>Roadmap</h1>
       <p className='mb-8 text-sm text-gray-400'>
         This roadmap displays our ongoing and completed milestones that shape

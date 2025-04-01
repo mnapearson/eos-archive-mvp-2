@@ -45,7 +45,7 @@ export default function SpaceAdminDashboard() {
 
   if (!space) {
     return (
-      <div className='max-w-md mx-auto p-4'>
+      <div className='max-w-lg mx-auto p-4'>
         <p>No space record found for your account.</p>
         <Link
           href='/spaces/signup'
@@ -57,27 +57,15 @@ export default function SpaceAdminDashboard() {
   }
 
   return (
-    <div className='max-w-4xl mx-auto p-4'>
-      <div className='flex items-center justify-between mb-4'>
-        <h1 className='font-bold'>dashboard</h1>
-        <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            router.push('/login');
-          }}
-          className='text-sm'>
-          LOGOUT
-        </button>
-      </div>
-
-      <div className='border p-4 rounded-md shadow mb-6'>
+    <div className='max-w-lg mx-auto p-4'>
+      <div className='border p-4 rounded-md shadow mb-6 glow-box'>
         <h2 className='font-semibold'>{space.name}</h2>
-        <p className='text-xs italic'>{space.type}</p>
-        <p className='text-sm mt-1'>
+        <p className='text-sm italic'>{space.type}</p>
+        <p className='text-sm mb-2'>
           {space.address}, {space.city} {space.zipcode}
         </p>
         {space.website && (
-          <p className='mt-1'>
+          <p className='mb-2'>
             <a
               href={space.website}
               target='_blank'
@@ -88,8 +76,26 @@ export default function SpaceAdminDashboard() {
           </p>
         )}
         {space.description && (
-          <p className='mt-2 text-sm'>{space.description}</p>
+          <p className='mb-2 text-sm'>{space.description}</p>
         )}
+        <div className='flex mt-10 w-3/4 mx-auto'>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push('/login');
+            }}
+            className='glow-button'>
+            Edit details
+          </button>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push('/login');
+            }}
+            className='glow-button'>
+            Disconnect
+          </button>
+        </div>
       </div>
 
       {/* Event Submission Form */}
@@ -104,17 +110,6 @@ export default function SpaceAdminDashboard() {
             href='/spaces/admin/events'
             className='underline'>
             Manage Your Events
-          </Link>
-        </p>
-      </div>
-
-      <div className='mt-6'>
-        <h3 className='text-lg font-semibold'>Edit Your Space Details</h3>
-        <p className='text-sm'>
-          <Link
-            href='/spaces/admin/edit'
-            className='underline'>
-            Edit Space Page
           </Link>
         </p>
       </div>

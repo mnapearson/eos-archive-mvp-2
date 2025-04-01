@@ -30,13 +30,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className='max-w-md mx-auto p-4'>
-      <h1 className='font-bold mb-4'>login</h1>
+    <div className='max-w-lg mx-auto glow-box'>
       <form
         onSubmit={handleLogin}
         className='space-y-4'>
         <div>
-          <label className='block mb-1 text-sm'>Email</label>
+          <label className='block mb-1 text-sm'>email</label>
           <input
             type='email'
             className='border p-2 w-full'
@@ -46,7 +45,7 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className='block mb-1 text-sm'>Password</label>
+          <label className='block mb-1 text-sm'>password</label>
           <input
             type='password'
             className='border p-2 w-full'
@@ -58,13 +57,14 @@ export default function LoginPage() {
         {errorMsg && <p className='text-red-500 text-sm'>{errorMsg}</p>}
         <button
           type='submit'
-          className='w-full py-2 bg-[var(--foreground)] text-[var(--background)] rounded'
+          className='glow-button'
           disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Connecting...' : 'Connect'}
         </button>
       </form>
-      <p className='mt-4 text-sm'>
-        Are you part of a subcultural space, but don't have an account?{' '}
+      <p className='mt-10 text-sm'>
+        Are you part of a subcultural space and want to become a member of the
+        archive?{' '}
         <a
           href='/spaces/signup'
           className='underline'>

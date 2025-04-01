@@ -6,9 +6,9 @@ import Link from 'next/link';
 
 export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
   const breakpointColumnsObj = {
-    default: 4,
-    1100: 3,
-    500: 2, // Ensure a minimum of 2 columns on small screens
+    default: 5,
+    1100: 4,
+    500: 3, // Ensure a minimum of 2 columns on small screens
   };
 
   return (
@@ -24,14 +24,13 @@ export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
       }>
       <Masonry
         breakpointCols={breakpointColumnsObj}
-        className='flex w-full'
-        columnClassName='p-2'>
+        className='flex w-full gap-3'>
         {items.map((item) => (
           <div
             key={item.id}
-            className='m-[10px]'>
+            className='mb-3'>
             <Link href={`/events/${item.id}`}>
-              <div className='overflow-hidden rounded-lg shadow-md transition-none'>
+              <div className='overflow-hidden rounded-sm transition-none'>
                 <img
                   src={item.image_url || '/placeholder.jpg'}
                   alt={item.title}

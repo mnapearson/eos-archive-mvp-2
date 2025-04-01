@@ -3,6 +3,7 @@
 
 import React from 'react';
 import RoadmapManager from '@/components/RoadmapManager';
+import EventApprovals from '@/components/EventApprovals';
 
 export default function AdminPage() {
   return (

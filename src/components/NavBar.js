@@ -56,14 +56,13 @@ export default function NavBar() {
 
   return (
     <>
-      <header className='fixed top-0 w-full z-50 text-[var(--foreground)] pointer-events-none'>
-        <div className='max-w-6xl mx-auto py-4 flex items-center justify-between'>
+      <header className='fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl'>
+        <div className='container py-2 flex items-center justify-between'>
           {/* Left: spiral that toggles the menu */}
-          <div className='pointer-events-auto bg-[var(--background)]/90 backdrop-blur-xl px-4 py-2 rounded-full'>
+          <div>
             <button
               onClick={toggleMenu}
-              aria-label='Toggle menu'
-              className='flex items-center justify-center gap-2'>
+              aria-label='Toggle menu'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'
@@ -79,15 +78,12 @@ export default function NavBar() {
                   color='currentColor'
                 />
               </svg>
-              menu
             </button>
           </div>
 
           {/* Center: Logo Homepage */}
-          <div className='pointer-events-auto bg-[var(--background)]/80 backdrop-blur-xl px-4 py-2 rounded-full'>
-            <Link
-              className='flex items-center justify-center'
-              href='/'>
+          <div>
+            <Link href='/'>
               <img
                 width='125'
                 src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets//EOS24_metal_blue_transparent.png'></img>
@@ -95,11 +91,8 @@ export default function NavBar() {
           </div>
 
           {/* Right: Login Button */}
-          <div className='pointer-events-auto bg-[var(--background)]/90 backdrop-blur-xl px-4 py-2 rounded-full'>
-            <Link
-              className='flex items-center justify-center gap-2'
-              href='/login'>
-              connect
+          <div>
+            <Link href='/login'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'

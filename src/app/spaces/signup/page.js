@@ -109,11 +109,10 @@ export default function SpaceSignUpPage() {
   };
 
   return (
-    <div className='max-w-md mx-auto p-4'>
-      <h1 className='font-bold mb-4'>register as a space</h1>
+    <div className='max-w-lg mx-auto'>
       <form
         onSubmit={handleSignUp}
-        className='space-y-4'>
+        className='space-y-4 glow-box lowercase'>
         {/* Space Information Section */}
         <div>
           <label className='block mb-1 text-sm'>Space Name</label>
@@ -216,8 +215,8 @@ export default function SpaceSignUpPage() {
 
         <button
           type='submit'
-          className='bg-[var(--foreground)] text-[var(--background)] px-4 py-2 rounded'>
-          Create Account &amp; Space
+          className='glow-button'>
+          submit
         </button>
       </form>
     </div>

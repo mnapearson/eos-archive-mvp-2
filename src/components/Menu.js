@@ -120,12 +120,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
     <div
       className={`fixed inset-0 z-50 transition-all duration-300 ${
         menuOpen
-          ? 'bg-[var(--background)]/80 backdrop-blur-md opacity-100'
+          ? 'bg-[var(--background)]/90 backdrop-blur-md opacity-100'
           : 'opacity-0 pointer-events-none'
       }`}>
       {/* Sidebar Panel */}
       <div
-        className={`border-x border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/20 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`border-x border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/10 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Scrollable Content */}

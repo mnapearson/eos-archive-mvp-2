@@ -52,7 +52,7 @@ export default function SpaceListItem({ space, detailed = false }) {
       {address && (
         <button
           onClick={toggleMap}
-          className='block text-xs mt-1 text-left'>
+          className='block text-xs mt-1 text-left underline'>
           {address}
         </button>
       )}
