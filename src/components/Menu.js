@@ -5,16 +5,31 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-
-// Simple custom hook to retrieve the current user session
+// Updated custom hook to subscribe to auth state changes
 function useUserSimple() {
   const [user, setUser] = useState(null);
+
   useEffect(() => {
     const supabase = createClientComponentClient();
+
+    // Initial fetch of the session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
     });
+
+    // Subscribe to auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    // Cleanup the subscription on unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
+
   return user;
 }
 

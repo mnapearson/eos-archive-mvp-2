@@ -79,5 +79,5 @@ body {
 .glow-button {
   @apply block mx-auto flex pointer-events-auto items-center gap-1 px-4 py-2 rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); */
 }

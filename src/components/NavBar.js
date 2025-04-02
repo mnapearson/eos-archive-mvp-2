@@ -6,6 +6,30 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+// Custom hook to subscribe to auth state changes
+function useUserSimple() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const supabase = createClientComponentClient();
+    // Get current session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+    // Listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+  return user;
+}
 
 export default function NavBar() {
   const { setSelectedFilters } = useContext(FilterContext);
@@ -13,6 +37,7 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const user = useUserSimple();
 
   // Load saved theme or system preference
   useEffect(() => {
@@ -92,7 +117,7 @@ export default function NavBar() {
 
           {/* Right: Login Button */}
           <div>
-            <Link href='/login'>
+            <Link href={user ? '/spaces/admin' : '/login'}>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'
@@ -104,23 +129,6 @@ export default function NavBar() {
                 />
               </svg>
             </Link>
-            {/*  <button
-              onClick={toggleTheme}
-              aria-label='Toggle Theme'
-              className='text-sm font-semibold flex items-center p-1'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='30'
-                height='30'
-                fill='currentColor'
-                viewBox='0 0 24 24'>
-                <path d='M12 16a4 4 0 0 0 0-8z'></path>
-                <path
-                  fillRule='evenodd'
-                  d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2m0 2v4a4 4 0 1 0 0 8v4a8 8 0 1 0 0-16'
-                  clipRule='evenodd'></path>
-              </svg>
-            </button>*/}
           </div>
         </div>
       </header>

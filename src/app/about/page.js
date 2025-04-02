@@ -30,7 +30,8 @@ export default function AboutPage() {
       </p>
 
       <p className='mb-4'>
-        Are you part of a subcultural space, but don't have an account?{' '}
+        Are you part of a subcultural space and want to become a member of the
+        archive?{' '}
         <a
           href='/spaces/signup'
           className='underline'>
