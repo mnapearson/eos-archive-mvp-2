@@ -12,15 +12,15 @@
 
 /* Default (Dawn Mode) */
 :root {
-  --background: #f5f1f0;
-  --foreground: #342c2a;
+  --background: #16171e;
+  --foreground: #e7dbf0;
 }
 
 /* System Dark Mode Preference */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #342c2a;
-    --foreground: #f5f1f0;
+    --background: #16171e;
+    --foreground: #e7dbf0;
   }
 }
 
