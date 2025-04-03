@@ -6,6 +6,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 import Spinner from '@/components/Spinner';
 import EventSubmissionForm from '@/components/EventSubmissionForm';
+import SpaceImageUpload from '@/components/SpaceImageUpload';
 
 export default function SpaceAdminDashboard() {
   const router = useRouter();
@@ -186,10 +187,7 @@ export default function SpaceAdminDashboard() {
                 rows={3}
                 placeholder='Describe your space...'
               />
-            </div>
-            {updateError && (
-              <p className='text-red-500 text-sm mb-2'>{updateError}</p>
-            )}
+            </div>{' '}
             <div className='flex justify-between mt-4'>
               <button
                 onClick={handleSave}
@@ -242,6 +240,13 @@ export default function SpaceAdminDashboard() {
             </div>
           </>
         )}
+      </div>
+
+      <div className='mb-2'>
+        {space && <SpaceImageUpload spaceId={space.id} />}{' '}
+        {updateError && (
+          <p className='text-red-500 text-sm mb-2'>{updateError}</p>
+        )}{' '}
       </div>
 
       {/* Event Submission Form */}

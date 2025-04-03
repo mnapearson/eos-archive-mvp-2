@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Combobox } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/solid';
 
 export default function SpaceSignUpPage() {
   const router = useRouter();
@@ -10,7 +12,12 @@ export default function SpaceSignUpPage() {
 
   // Space info fields
   const [spaceName, setSpaceName] = useState('');
-  const [address, setAddress] = useState(''); // Street address
+  // Instead of a plain input, we use a combobox for the space type.
+  const [spaceType, setSpaceType] = useState('');
+  const [typeOptions, setTypeOptions] = useState([]); // Options pulled from DB
+  const [query, setQuery] = useState('');
+
+  const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [zipcode, setZipcode] = useState('');
   const [description, setDescription] = useState('');
@@ -22,6 +29,33 @@ export default function SpaceSignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Fetch existing space types from approved spaces.
+  useEffect(() => {
+    async function fetchTypeOptions() {
+      // Assuming you want to show all existing types from your spaces table.
+      // Adjust the query as needed if you have a "status" column.
+      const { data, error } = await supabase.from('spaces').select('type');
+      if (error) {
+        console.error('Error fetching space types:', error);
+      } else {
+        // Use a Set to extract distinct non-null types
+        const types = Array.from(
+          new Set(data.map((item) => item.type).filter(Boolean))
+        );
+        setTypeOptions(types);
+      }
+    }
+    fetchTypeOptions();
+  }, [supabase]);
+
+  // Filter options based on the current query.
+  const filteredOptions =
+    query === ''
+      ? typeOptions
+      : typeOptions.filter((option) =>
+          option.toLowerCase().includes(query.toLowerCase())
+        );
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -47,10 +81,8 @@ export default function SpaceSignUpPage() {
       return;
     }
 
-    // 2. Combine address fields for geocoding:
-    // Example: "Kotzschauer Str. 2, Leipzig, 04109"
+    // 2. Combine address fields for geocoding.
     const fullAddress = `${address}, ${city}, ${zipcode}`;
-
     let latitude = null;
     let longitude = null;
     try {
@@ -62,7 +94,6 @@ export default function SpaceSignUpPage() {
       );
       const geoData = await geoRes.json();
       if (geoData.features && geoData.features.length > 0) {
-        // Mapbox returns [longitude, latitude]
         [longitude, latitude] = geoData.features[0].center;
       } else {
         setErrorMsg(
@@ -76,18 +107,20 @@ export default function SpaceSignUpPage() {
       return;
     }
 
-    // 3. Insert the space record with the geocoded coordinates.
+    // 3. Insert the space record (with status set to 'pending').
     const { error: spaceError } = await supabase.from('spaces').insert([
       {
         user_id: userId,
         name: spaceName,
+        type: spaceType, // Save the space type (either selected or new)
         city,
-        address, // store street address separately
+        address,
         zipcode,
         description,
         website,
         latitude,
         longitude,
+        status: 'pending',
       },
     ]);
     if (spaceError) {
@@ -96,20 +129,20 @@ export default function SpaceSignUpPage() {
       return;
     }
 
-    // 4. Optionally update the profiles table to store the user's role as "space"
+    // 4. Update the profiles table with role and username.
     const { error: profileError } = await supabase
       .from('profiles')
-      .upsert({ id: userId, role: 'space' });
+      .upsert({ id: userId, role: 'space', username: spaceName });
     if (profileError) {
       console.error('Profile update error:', profileError);
     }
 
-    // 5. Redirect to the space admin page.
-    router.push('/spaces/admin');
+    // 5. Redirect to a confirmation page instructing the user to confirm their email.
+    router.push('/spaces/confirm');
   };
 
   return (
-    <div className='max-w-lg mx-auto'>
+    <div className='max-w-lg mx-auto p-4'>
       <form
         onSubmit={handleSignUp}
         className='space-y-4 glow-box lowercase'>
@@ -123,6 +156,45 @@ export default function SpaceSignUpPage() {
             onChange={(e) => setSpaceName(e.target.value)}
             required
           />
+        </div>
+        <div>
+          <label className='block mb-1 text-sm'>Space Type</label>
+          <Combobox
+            value={spaceType}
+            onChange={setSpaceType}>
+            <div className='relative'>
+              <Combobox.Input
+                className='border p-2 w-full focus:outline-none focus:ring-2 focus:ring-dusk'
+                placeholder='Select or enter a space type...'
+                displayValue={(type) => type || ''}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
+                <ChevronDownIcon
+                  className='w-5 h-5 text-gray-400'
+                  aria-hidden='true'
+                />
+              </Combobox.Button>
+              {filteredOptions.length > 0 && (
+                <Combobox.Options className='absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-[var(--background)] border border-[var(--foreground)]'>
+                  {filteredOptions.map((option, idx) => (
+                    <Combobox.Option
+                      key={idx}
+                      value={option}
+                      className={({ active }) =>
+                        `cursor-pointer select-none p-2 ${
+                          active
+                            ? 'bg-[var(--foreground)] text-[var(--background)]'
+                            : ''
+                        }`
+                      }>
+                      {option}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              )}
+            </div>
+          </Combobox>
         </div>
         <div>
           <label className='block mb-1 text-sm'>Street Address</label>
@@ -216,9 +288,13 @@ export default function SpaceSignUpPage() {
         <button
           type='submit'
           className='glow-button'>
-          submit
+          Submit
         </button>
       </form>
+      <p className='mt-4 text-sm text-gray-500'>
+        Note: Once your registration is approved, you will be able to upload a
+        space image and submit events in your dashboard.
+      </p>
     </div>
   );
 }
