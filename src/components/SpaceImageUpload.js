@@ -3,87 +3,73 @@
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export default function SpaceImageUpload({ spaceId }) {
-  const supabase = createClientComponentClient();
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [error, setError] = useState('');
+const supabase = createClientComponentClient();
+
+export default function SpaceImageUploader({ spaceId }) {
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState(null);
 
   const handleFileChange = (e) => {
-    setError('');
-    const file = e.target.files[0];
-    if (file) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('Only JPEG, PNG, and GIF images are allowed.');
+    const selectedFile = e.target.files[0];
+    // Validate file type and size
+    if (selectedFile) {
+      if (!selectedFile.type.match(/image\/(jpeg|png)/)) {
+        setError('Only JPEG and PNG images are allowed.');
         return;
       }
-      const maxSize = 2 * 1024 * 1024; // 2MB
-      if (file.size > maxSize) {
-        setError('Image size must be less than 2MB.');
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB.');
         return;
       }
-      setSelectedFile(file);
+      setError(null);
+      setFile(selectedFile);
     }
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!file) return;
     setUploading(true);
-    setError('');
-    setSuccess('');
-    try {
-      // Get the current user ID from Supabase auth.
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        setError('User not authenticated.');
-        return;
-      }
-      const userId = user.id;
-      const fileName = selectedFile.name;
-      const filePath = `${userId}/${fileName}`;
+    // Generate a unique file name (e.g., using spaceId and timestamp)
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${spaceId}-${Date.now()}.${fileExt}`;
+    const filePath = `${fileName}`;
 
-      // Upload the file to the "space-images" bucket.
-      const { error: uploadError } = await supabase.storage
-        .from('space-images')
-        .upload(filePath, selectedFile, {
-          contentType: selectedFile.type,
-          upsert: true,
-        });
-      if (uploadError) {
-        setError('Error uploading image: ' + uploadError.message);
-        return;
-      }
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('space-images')
+      .upload(filePath, file);
 
-      // Retrieve the public URL.
-      const {
-        data: { publicUrl },
-        error: publicUrlError,
-      } = supabase.storage.from('space-images').getPublicUrl(filePath);
-      if (publicUrlError) {
-        setError('Error retrieving image URL: ' + publicUrlError.message);
-        return;
-      }
-
-      // Update the space record with the image URL.
-      const { error: updateError } = await supabase
-        .from('spaces')
-        .update({ image_url: publicUrl })
-        .eq('id', spaceId);
-      if (updateError) {
-        setError('Error updating space record: ' + updateError.message);
-        return;
-      }
-
-      setSuccess('Image uploaded successfully.');
-    } catch (err) {
-      setError('Unexpected error: ' + err.message);
-    } finally {
+    if (uploadError) {
+      setError(`Error uploading image: ${uploadError.message}`);
       setUploading(false);
+      return;
     }
+
+    // Construct the public URL for the image using the new API:
+    const { data } = supabase.storage
+      .from('space-images')
+      .getPublicUrl(filePath);
+    const publicUrl = data.publicUrl;
+
+    if (!publicUrl) {
+      setError('Error getting public URL.');
+      setUploading(false);
+      return;
+    }
+
+    // Update the space record in your database with the new image URL
+    const { error: updateError } = await supabase
+      .from('spaces')
+      .update({ image_url: publicUrl })
+      .eq('id', spaceId);
+
+    if (updateError) {
+      setError(`Error updating space: ${updateError.message}`);
+    } else {
+      // Optionally, inform the user of success, refresh the data, etc.
+      alert('Image uploaded and space updated successfully!');
+    }
+    setUploading(false);
   };
 
   return (
@@ -96,10 +82,9 @@ export default function SpaceImageUpload({ spaceId }) {
         className='border p-2 w-full'
       />
       {error && <p className='mt-2 text-sm text-red-400'>{error}</p>}
-      {success && <p className='mt-2 text-sm text-green-400'>{success}</p>}
       <button
         onClick={handleUpload}
-        disabled={!selectedFile || uploading}
+        disabled={!file || uploading}
         className='glow-button mt-4'>
         {uploading ? 'Uploading...' : 'Upload Image'}
       </button>

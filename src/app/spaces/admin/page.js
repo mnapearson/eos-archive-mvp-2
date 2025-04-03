@@ -148,6 +148,17 @@ export default function SpaceAdminDashboard() {
 
   return (
     <div className='max-w-lg mx-auto'>
+      {/* Display the space image if it exists */}
+      {space.image_url && (
+        <div className='mb-4'>
+          <img
+            src={space.image_url}
+            alt={space.name}
+            className='w-full object-cover rounded-md'
+          />
+        </div>
+      )}
+
       <div className='border p-4 rounded-md shadow mb-6 glow-box'>
         <h2 className='font-semibold text-lg'>{space.name}</h2>
         <p className='text-sm italic'>{space.type}</p>
@@ -187,7 +198,7 @@ export default function SpaceAdminDashboard() {
                 rows={3}
                 placeholder='Describe your space...'
               />
-            </div>{' '}
+            </div>
             <div className='flex justify-between mt-4'>
               <button
                 onClick={handleSave}
@@ -243,10 +254,10 @@ export default function SpaceAdminDashboard() {
       </div>
 
       <div className='mb-2'>
-        {space && <SpaceImageUpload spaceId={space.id} />}{' '}
+        {space && <SpaceImageUpload spaceId={space.id} />}
         {updateError && (
           <p className='text-red-500 text-sm mb-2'>{updateError}</p>
-        )}{' '}
+        )}
       </div>
 
       {/* Event Submission Form */}
