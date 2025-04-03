@@ -23,12 +23,6 @@ export default function SpaceAdminDashboard() {
   });
   const [updateError, setUpdateError] = useState(null);
 
-  // ———————————————————————————————————————————
-  // 1) Decide how to fetch the space:
-  //    - If we have no space yet, fetch by user_id.
-  //    - If we do have a space, fetch by space.id
-  //      so we always retrieve the same row after updates.
-  // ———————————————————————————————————————————
   async function fetchSpaceRecord(currentSpace) {
     setLoading(true);
     setUpdateError(null);
@@ -68,23 +62,15 @@ export default function SpaceAdminDashboard() {
     setLoading(false);
   }
 
-  // ———————————————————————————————————————————
-  // 2) On first mount, fetch the space (by user_id).
-  // ———————————————————————————————————————————
   useEffect(() => {
     fetchSpaceRecord(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ———————————————————————————————————————————
-  // 3) Handle saving changes
-  // ———————————————————————————————————————————
   const handleSave = async () => {
     setUpdateError(null);
     setLoading(true);
 
-    // Make sure we do NOT overwrite user_id:
-    // only update website & description
     const { data, error } = await supabase
       .from('spaces')
       .update({
@@ -103,18 +89,11 @@ export default function SpaceAdminDashboard() {
       return;
     }
 
-    // If successful, store the updated record in state
     setSpace(data);
     setIsEditing(false);
-
-    // Optionally re‐fetch to confirm
-    // (Now that we have space.id, we can fetch by ID.)
     fetchSpaceRecord(data);
   };
 
-  // ———————————————————————————————————————————
-  // 4) Handle cancel
-  // ———————————————————————————————————————————
   const handleCancel = () => {
     setFormValues({
       website: space.website || '',
@@ -124,16 +103,11 @@ export default function SpaceAdminDashboard() {
     setUpdateError(null);
   };
 
-  // ———————————————————————————————————————————
-  // 5) Render
-  // ———————————————————————————————————————————
   if (loading) {
     return <Spinner />;
   }
 
   if (!space) {
-    // Means we tried to fetch by user_id or space.id
-    // but found nothing
     return (
       <div className='max-w-lg mx-auto'>
         <p>No space record found for your account.</p>
@@ -147,133 +121,130 @@ export default function SpaceAdminDashboard() {
   }
 
   return (
-    <div className='max-w-lg mx-auto'>
-      {/* Display the space image if it exists */}
-      {space.image_url && (
-        <div className='mb-4'>
-          <img
-            src={space.image_url}
-            alt={space.name}
-            className='w-full object-cover rounded-md'
-          />
+    <div className='max-w-6xl mx-auto px-4 py-6'>
+      <div className='flex flex-col md:flex-row gap-8'>
+        {/* Left Column: Space details */}
+        <div className='flex-1'>
+          {space.image_url && (
+            <div className='mb-4'>
+              <img
+                src={space.image_url}
+                alt={space.name}
+                className='w-full object-cover rounded-md'
+              />
+            </div>
+          )}
+
+          <div className='border p-4 rounded-md shadow mb-6 glow-box'>
+            <h2 className='font-semibold text-lg'>{space.name}</h2>
+            <p className='text-sm italic'>{space.type}</p>
+            <p className='text-sm mb-2'>
+              {space.address}, {space.city} {space.zipcode}
+            </p>
+
+            {isEditing ? (
+              <>
+                <div className='mb-2'>
+                  <label className='block text-sm font-semibold mb-1'>
+                    Website
+                  </label>
+                  <input
+                    type='url'
+                    value={formValues.website}
+                    onChange={(e) =>
+                      setFormValues({ ...formValues, website: e.target.value })
+                    }
+                    className='w-full border border-[var(--foreground)] p-2 rounded bg-transparent text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
+                    placeholder='https://example.com'
+                  />
+                </div>
+                <div className='mb-2'>
+                  <label className='block text-sm font-semibold mb-1'>
+                    Description
+                  </label>
+                  <textarea
+                    value={formValues.description}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        description: e.target.value,
+                      })
+                    }
+                    className='w-full border border-[var(--foreground)] p-2 rounded bg-transparent text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
+                    rows={3}
+                    placeholder='Describe your space...'
+                  />
+                </div>
+                <div className='flex justify-between mt-4'>
+                  <button
+                    onClick={handleSave}
+                    className='glow-button'>
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className='glow-button'>
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {space.website ? (
+                  <p className='mb-2'>
+                    <a
+                      href={space.website}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-sm text-[var(--accent)] underline hover:text-[var(--foreground)] transition'>
+                      VISIT WEBSITE
+                    </a>
+                  </p>
+                ) : (
+                  <p className='mb-2 text-sm text-gray-500'>
+                    No website provided.
+                  </p>
+                )}
+                {space.description ? (
+                  <p className='mb-2 text-sm'>{space.description}</p>
+                ) : (
+                  <p className='mb-2 text-sm text-gray-500'>
+                    No description provided.
+                  </p>
+                )}
+                <div className='flex gap-4 justify-center mt-4'>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className='glow-button'>
+                    Edit details
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      router.push('/login');
+                    }}
+                    className='glow-button'>
+                    Disconnect
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className='mb-2'>
+            {space && <SpaceImageUpload spaceId={space.id} />}
+            {updateError && (
+              <p className='text-red-500 text-sm mb-2'>{updateError}</p>
+            )}
+          </div>
         </div>
-      )}
 
-      <div className='border p-4 rounded-md shadow mb-6 glow-box'>
-        <h2 className='font-semibold text-lg'>{space.name}</h2>
-        <p className='text-sm italic'>{space.type}</p>
-        <p className='text-sm mb-2'>
-          {space.address}, {space.city} {space.zipcode}
-        </p>
-
-        {isEditing ? (
-          <>
-            <div className='mb-2'>
-              <label className='block text-sm font-semibold mb-1'>
-                Website
-              </label>
-              <input
-                type='url'
-                value={formValues.website}
-                onChange={(e) =>
-                  setFormValues({ ...formValues, website: e.target.value })
-                }
-                className='w-full border border-[var(--foreground)] p-2 rounded bg-transparent text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
-                placeholder='https://example.com'
-              />
-            </div>
-            <div className='mb-2'>
-              <label className='block text-sm font-semibold mb-1'>
-                Description
-              </label>
-              <textarea
-                value={formValues.description}
-                onChange={(e) =>
-                  setFormValues({
-                    ...formValues,
-                    description: e.target.value,
-                  })
-                }
-                className='w-full border border-[var(--foreground)] p-2 rounded bg-transparent text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
-                rows={3}
-                placeholder='Describe your space...'
-              />
-            </div>
-            <div className='flex justify-between mt-4'>
-              <button
-                onClick={handleSave}
-                className='glow-button'>
-                Save
-              </button>
-              <button
-                onClick={handleCancel}
-                className='glow-button'>
-                Cancel
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {space.website ? (
-              <p className='mb-2'>
-                <a
-                  href={space.website}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-sm text-[var(--accent)] underline hover:text-[var(--foreground)] transition'>
-                  VISIT WEBSITE
-                </a>
-              </p>
-            ) : (
-              <p className='mb-2 text-sm text-gray-500'>No website provided.</p>
-            )}
-            {space.description ? (
-              <p className='mb-2 text-sm'>{space.description}</p>
-            ) : (
-              <p className='mb-2 text-sm text-gray-500'>
-                No description provided.
-              </p>
-            )}
-            <div className='flex mt-10 mx-auto gap-4'>
-              <button
-                onClick={() => setIsEditing(true)}
-                className='glow-button'>
-                Edit details
-              </button>
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  router.push('/login');
-                }}
-                className='glow-button'>
-                Disconnect
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className='mb-2'>
-        {space && <SpaceImageUpload spaceId={space.id} />}
-        {updateError && (
-          <p className='text-red-500 text-sm mb-2'>{updateError}</p>
-        )}
-      </div>
-
-      {/* Event Submission Form */}
-      <div className='mb-6'>
-        <EventSubmissionForm spaceId={space.id} />
-      </div>
-
-      <div className='mt-6'>
-        <h3 className='text-lg font-semibold'>Your Events</h3>
-        <p className='text-sm'>
-          <Link
-            href='/spaces/admin/events'
-            className='underline'>
-            Manage Your Events
-          </Link>
-        </p>
+        {/* Right Column: Event submission */}
+        <div className='flex-1'>
+          <div className='mb-6'>
+            <EventSubmissionForm spaceId={space.id} />
+          </div>
+        </div>
       </div>
     </div>
   );
