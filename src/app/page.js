@@ -2,13 +2,9 @@
 
 import { useContext, useEffect, useState } from 'react';
 import { FilterContext } from '@/contexts/FilterContext';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import MasonryGrid from '@/components/MasonryGrid';
 import Spinner from '@/components/Spinner';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function HomePage() {
   const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
@@ -104,27 +100,14 @@ export default function HomePage() {
     });
 
     return (
-      <div className='py-2 px-4 text-sm flex items-center flex-wrap gap-2'>
-        {/* <button
-          onClick={() =>
-            setSelectedFilters({
-              city: [],
-              space: [],
-              date: [],
-              category: [],
-              designer: [],
-            })
-          }
-          className='text-gray-500'>
-          ARCHIVE
-        </button> */}
+      <div className='filter-bar'>
         {activeFilterPairs.map(({ filterKey, val }, idx) => (
           <button
             key={`${filterKey}-${val}-${idx}`}
             onClick={() => removeFilterValue(filterKey, val)}
-            className='flex items-center gap-1 px-3 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition'>
-            <span className='uppercase'>{val}</span>
+            className='button'>
             <span>×</span>
+            <span className='uppercase'>{val}</span>
           </button>
         ))}
       </div>
@@ -132,7 +115,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className='max-w-6xl mx-auto'>
+    <div className='w-full'>
       {/* Filter Bar at the top */}
       {renderFilterBar()}
 

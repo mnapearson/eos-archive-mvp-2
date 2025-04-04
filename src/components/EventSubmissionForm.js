@@ -105,7 +105,7 @@ export default function EventSubmissionForm({ spaceId }) {
   };
 
   return (
-    <div className='p-4 border rounded shadow'>
+    <div className='glow-box'>
       <h2 className='font-bold mb-4'>submit an event</h2>
       <form
         onSubmit={handleSubmit}
@@ -208,7 +208,7 @@ export default function EventSubmissionForm({ spaceId }) {
         {message && <p className='text-green-500 text-sm'>{message}</p>}
         <button
           type='submit'
-          className='w-full py-2 bg-[var(--foreground)] text-[var(--background)] rounded'>
+          className='glow-button'>
           Submit Event
         </button>
       </form>

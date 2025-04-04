@@ -92,7 +92,7 @@ export default function EventPage() {
   const toggleMap = () => setMapOpen((prev) => !prev);
 
   return (
-    <div className='max-w-screen-lg mx-auto text-[var(--foreground)] relative'>
+    <div>
       {/* Return Link */}
       <div className='mb-4'>
         <Link
@@ -105,7 +105,7 @@ export default function EventPage() {
       {/* Two-column layout for event details */}
       <div className='flex flex-col md:flex-row gap-8 mb-8'>
         {/* Left Column: Flyer */}
-        <div className='md:w-3/4'>
+        <div className='md:w-2/3'>
           {event.image_url ? (
             <img
               src={event.image_url}
@@ -137,13 +137,13 @@ export default function EventPage() {
             {dateTimeDisplay && (
               <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
-            <p className='text-sm whitespace-pre-line mb-2'>
+            <p className='text-sm whitespace-pre-line mb-6'>
               {eventDescription}
             </p>{' '}
             <Link
               href='#'
               onClick={handleShare}
-              className='text-sm'>
+              className='glow-button'>
               SHARE
             </Link>
           </div>{' '}

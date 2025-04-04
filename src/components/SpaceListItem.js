@@ -1,4 +1,3 @@
-// /src/components/SpaceListItem.js
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -53,7 +52,7 @@ export default function SpaceListItem({ space, detailed = false }) {
       {address && (
         <button
           onClick={toggleMap}
-          className='block text-xs underline uppercase mt-1 text-left'>
+          className='block text-xs mt-1 text-left underline'>
           {address}
         </button>
       )}
@@ -126,7 +125,11 @@ export default function SpaceListItem({ space, detailed = false }) {
               Use the MapComponent with the single space 
               so it centers on this space's lat/long
             */}
-            <MapComponent spaces={[space]} />
+            <MapComponent
+              spaces={[space]}
+              address={address}
+              initialZoom={14}
+            />
           </div>
         </div>
       )}

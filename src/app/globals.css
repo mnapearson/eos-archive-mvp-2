@@ -12,15 +12,15 @@
 
 /* Default (Dawn Mode) */
 :root {
-  --background: #f5f1f0;
-  --foreground: #342c2a;
+  --background: #16171e;
+  --foreground: #e7dbf0;
 }
 
 /* System Dark Mode Preference */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #342c2a;
-    --foreground: #f5f1f0;
+    --background: #16171e;
+    --foreground: #e7dbf0;
   }
 }
 
@@ -41,4 +41,43 @@ body {
 .dawn {
   --background: #f5f1f0;
   --foreground: #342c2a;
+}
+
+/* A container that centers content and sets a max width */
+.container {
+  @apply max-w-7xl mx-auto px-4 py-2;
+}
+
+/* Main page content styling */
+.page-content {
+  @apply flex-grow px-4 p-24 overflow-auto mx-auto;
+}
+
+/* Footer container styling */
+.footer-container {
+  @apply max-w-6xl mx-auto py-4 flex flex-col md:flex-row items-center justify-between;
+}
+
+/* A simple button style that can be reused */
+.button {
+  @apply flex pointer-events-auto items-center gap-1 px-3 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
+}
+
+/* A filter bar style */
+.filter-bar {
+  @apply pb-4 text-sm flex items-center flex-wrap gap-2;
+}
+
+/* Utility class for glowing boxes */
+.glow-box {
+  @apply border rounded-md flex-1 p-4;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Utility class for glowing buttons */
+.glow-button {
+  @apply block mx-auto flex pointer-events-auto items-center gap-1 px-4 py-2 rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); */
 }

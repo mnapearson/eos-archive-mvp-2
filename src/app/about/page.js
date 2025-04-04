@@ -2,57 +2,52 @@ import Link from "next/link";
 
 export default function AboutPage() {
   return (
-    <div className='flex justify-center min-h-screen'>
-      <div className='max-w-3xl text-[var(--foreground)]'>
-        <h1 className='font-semibold mb-6'>about this project</h1>
-        <p className='mb-4'>
-          eos archive elevates event art—flyers, posters, and other visuals—from
-          ephemeral cultural artefacts to essential citations in the
-          (post)digital age. As a platform documenting subcultural creativity,
-          eos archive reimagines knowledge sharing by treating each piece of
-          event art as a reference point for understanding connections between
-          artists, collectives, and spaces.
-        </p>
+    <div>
+      <h1 className="font-semibold mb-6">about eos archive</h1>
+      <p className="mb-4">
+        eos archive elevates event art—flyers, posters, and other visuals—from
+        ephemeral cultural artefacts to essential citations in the (post)digital
+        age. As a platform documenting subcultural creativity, eos archive
+        reimagines knowledge sharing by treating each piece of event art as a
+        reference point for understanding connections between artists,
+        collectives, and spaces.
+      </p>
 
-        <p className='mb-4'>
-          Subcultural events not only reflect the creative pulse of their time
-          but actively shape their scenes, capturing trends in expression, color
-          waves, and aesthetic forms. These events document the movements of the
-          moment, offering invaluable insight into underground and alternative
-          culture. By preserving and curating these artefacts, eos archive
-          creates a resource that future generations can use to trace the
-          histories of subcultural creativity in cities across the globe,
-          fostering inspiration and understanding of the diverse trajectories of
-          the creative underground.
-        </p>
+      <p className="mb-4">
+        Subcultural events not only reflect the creative pulse of their time but
+        actively shape their scenes, capturing trends in expression, color
+        waves, and aesthetic forms. These events document the movements of the
+        moment, offering invaluable insight into underground and alternative
+        culture. By preserving and curating these artefacts, eos archive creates
+        a resource that future generations can use to trace the histories of
+        subcultural creativity in cities across the globe, fostering inspiration
+        and understanding of the diverse trajectories of the creative
+        underground.
+      </p>
 
-        <p className='mb-4'>
-          Built with open-source principles, eos archive offers direct public
-          access for uploading and browsing. This approach ensures transparency,
-          inclusivity, and adaptability for a diverse range of users.
-        </p>
+      <p className="mb-4">
+        Built with open-source principles, eos archive offers direct public
+        access for uploading and browsing. This approach ensures transparency,
+        inclusivity, and adaptability for a diverse range of users.
+      </p>
 
-        <p className='mb-4'>
-          Are you part of a subcultural space, but don't have an account?{' '}
-          <Link
-            href='/spaces/signup'
-            className='underline'>
-            Register here.
-          </Link>
-        </p>
-        <p className='mb-4'>
-          you can also email us at any time:{' '}
-          <Link
-            href='mailto:hello@eosarchive.app'
-            className='hover:underline'>
-            hello@eosarchive.app
-          </Link>
-          .
-        </p>
-        <p>
-          from dusk til dawn, <br /> eos
-        </p>
-      </div>
+      <p className="mb-4">
+        Are you part of a subcultural space and want to become a member of the
+        archive?{" "}
+        <a href="/spaces/signup" className="underline">
+          Register here.
+        </a>
+      </p>
+      <p className="mb-4">
+        you can also email us at any time:{" "}
+        <a href="mailto:hello@eosarchive.app" className="hover:underline">
+          hello@eosarchive.app
+        </a>
+        .
+      </p>
+      <p>
+        from dusk til dawn, <br /> eos
+      </p>
     </div>
   );
 }

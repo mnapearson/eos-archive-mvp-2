@@ -49,7 +49,7 @@ export default function SpacePage() {
   }
 
   return (
-    <div className='max-w-screen-lg mx-auto'>
+    <div>
       <Link
         href='/map'
         className='text-sm hover:text-gray-600'>
