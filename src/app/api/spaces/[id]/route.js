@@ -1,8 +1,6 @@
 "use server";
 
-import { createClient, getSpacesById } from "@/utils/supabase/client";
-
-const supabaseClient = createClient();
+import { getSpacesById } from "@/lib/supabaseClient";
 
 export async function GET(_req, { params }) {
   const { id } = await params;
@@ -12,7 +10,7 @@ export async function GET(_req, { params }) {
     });
   }
 
-  const { data, error } = await getSpacesById(supabaseClient, id);
+  const { data, error } = await getSpacesById(id);
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

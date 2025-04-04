@@ -1,9 +1,7 @@
-import { createClient, getAll } from "@utils/supabase/client";
-
-const supabaseClient = createClient();
+import { getAll } from "@/lib/supabaseClient";
 
 export async function GET() {
-  const { data, error } = await getAll(supabaseClient, "spaces");
+  const { data, error } = await getAll("spaces");
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
