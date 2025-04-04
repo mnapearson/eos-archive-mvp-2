@@ -1,7 +1,9 @@
-import { supabase } from '@/lib/supabaseClient';
+import { createClient, getAll } from "@utils/supabase/client";
+
+const supabaseClient = createClient();
 
 export async function GET() {
-  const { data, error } = await supabase.from('spaces').select('*');
+  const { data, error } = await getAll(supabaseClient, "spaces");
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

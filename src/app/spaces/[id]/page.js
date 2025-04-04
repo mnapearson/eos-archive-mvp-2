@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { formatDateTime } from '@/utils/dateTime';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
-import { createClient } from '@supabase/supabase-js';
 import Spinner from '@/components/Spinner';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
