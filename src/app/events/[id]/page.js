@@ -144,13 +144,13 @@ export default function EventPage() {
           <div>
             <div className='mb-1'>
               <h1 className='font-bold'>{eventTitle}</h1>{' '}
-              {/* Make the space name clickable to open the map panel */}
+              {/* Make the space name clickable to navigate to the space details page */}
               {event.space && (
-                <p
-                  className='text-sm mb-4 cursor-pointer underline hover:text-gray-400'
-                  onClick={toggleMap}>
+                <Link
+                  href={`/spaces/${event.space.id}`}
+                  className='text-sm mb-4 cursor-pointer underline hover:text-gray-400'>
                   {event.space.name}, {event.space.city}
-                </p>
+                </Link>
               )}
             </div>
             <p className='text-sm italic mb-2'>{eventCategory}</p>

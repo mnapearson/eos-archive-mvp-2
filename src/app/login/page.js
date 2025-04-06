@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,11 +12,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [infoMsg, setInfoMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setInfoMsg('');
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -29,8 +32,32 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setInfoMsg('');
+    if (!email) {
+      setErrorMsg('Please enter your email address to reset your password.');
+      return;
+    }
+    setLoading(true);
+    // Customize the redirect URL as needed.
+    const redirectTo = window.location.origin + '/reset-password';
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+    if (error) {
+      setErrorMsg(error.message);
+    } else {
+      setInfoMsg(
+        'A password reset email has been sent. Please check your inbox.'
+      );
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className='max-w-lg mx-auto glow-box'>
+    <div className='max-w-lg mx-auto glow-box mt-10'>
       <form
         onSubmit={handleLogin}
         className='space-y-4'>
@@ -55,21 +82,30 @@ export default function LoginPage() {
           />
         </div>
         {errorMsg && <p className='text-red-500 text-sm'>{errorMsg}</p>}
+        {infoMsg && <p className='text-green-500 text-sm'>{infoMsg}</p>}
+
         <button
           type='submit'
           className='glow-button'
           disabled={loading}>
           {loading ? 'Connecting...' : 'Connect'}
         </button>
+        <button
+          type='button'
+          className='text-xs underline mx-auto w-full'
+          onClick={handleResetPassword}
+          disabled={loading}>
+          {loading ? 'Processing...' : 'Forgot Password?'}
+        </button>
       </form>
       <p className='mt-10 text-sm'>
         Are you part of a subcultural space and want to become a member of the
         archive?{' '}
-        <a
+        <Link
           href='/spaces/signup'
           className='underline'>
           Register here.
-        </a>
+        </Link>
       </p>
     </div>
   );

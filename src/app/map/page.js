@@ -130,7 +130,7 @@ export default function SpacesPage() {
         ))}
         <button
           onClick={() => setIsListView(!isListView)}
-          className='ml-auto px-3 py-1 border border-[var(--foreground)] rounded text-xs'>
+          className='button'>
           {isListView ? 'SHOW MAP' : 'SHOW LIST'}
         </button>
       </div>
@@ -176,7 +176,7 @@ function SpacesList({ spaces }) {
         ))}
       </div>
       <p className='text-sm italic mt-4'>No more spaces found.</p>
-      <p className='mt-4 text-sm'>
+      <p className='mt-10 text-lg'>
         Are you part of a subcultural space, but don't have an account?{' '}
         <a
           href='/spaces/signup'
