@@ -117,7 +117,7 @@ export default function EventSubmissionForm({ spaceId }) {
             value={formData.title}
             onChange={handleInputChange}
             required
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div>
@@ -128,7 +128,7 @@ export default function EventSubmissionForm({ spaceId }) {
             value={formData.date}
             onChange={handleInputChange}
             required
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div>
@@ -138,7 +138,7 @@ export default function EventSubmissionForm({ spaceId }) {
             name='time'
             value={formData.time}
             onChange={handleInputChange}
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div>
@@ -149,7 +149,7 @@ export default function EventSubmissionForm({ spaceId }) {
             value={formData.category}
             onChange={handleInputChange}
             required
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div>
@@ -160,7 +160,7 @@ export default function EventSubmissionForm({ spaceId }) {
             value={formData.designer}
             onChange={handleInputChange}
             required
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div>
@@ -170,7 +170,7 @@ export default function EventSubmissionForm({ spaceId }) {
             value={formData.description}
             onChange={handleInputChange}
             rows='3'
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div>
@@ -180,7 +180,7 @@ export default function EventSubmissionForm({ spaceId }) {
             accept='image/*'
             onChange={handleFileChange}
             required
-            className='w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)'
+            className='input'
           />
         </div>
         <div className='flex items-center'>

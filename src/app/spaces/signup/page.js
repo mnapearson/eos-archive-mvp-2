@@ -148,23 +148,23 @@ export default function SpaceSignUpPage() {
         className='space-y-4 glow-box lowercase'>
         {/* Space Information Section */}
         <div>
-          <label className='block mb-1 text-sm'>Space Name</label>
+          <label className='block my-1 text-sm'>Space Name*</label>
           <input
             type='text'
-            className='border p-2 w-full'
+            className='input'
             value={spaceName}
             onChange={(e) => setSpaceName(e.target.value)}
             required
           />
         </div>
         <div>
-          <label className='block mb-1 text-sm'>Space Type</label>
+          <label className='block mb-1 text-sm'>Space Type*</label>
           <Combobox
             value={spaceType}
             onChange={setSpaceType}>
             <div className='relative'>
               <Combobox.Input
-                className='border p-2 w-full focus:outline-none focus:ring-2 focus:ring-dusk'
+                className='input'
                 placeholder='Select or enter a space type...'
                 displayValue={(type) => type || ''}
                 onChange={(e) => setQuery(e.target.value)}
@@ -200,7 +200,7 @@ export default function SpaceSignUpPage() {
           <label className='block mb-1 text-sm'>Street Address</label>
           <input
             type='text'
-            className='border p-2 w-full'
+            className='input'
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder='e.g., Kotzschauer Str. 2'
@@ -209,20 +209,20 @@ export default function SpaceSignUpPage() {
         </div>
         <div className='flex gap-2'>
           <div className='flex-1'>
-            <label className='block mb-1 text-sm'>City</label>
+            <label className='block mb-1 text-sm'>City*</label>
             <input
               type='text'
-              className='border p-2 w-full'
+              className='input'
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required
             />
           </div>
           <div className='flex-1'>
-            <label className='block mb-1 text-sm'>ZIP Code</label>
+            <label className='block mb-1 text-sm'>ZIP Code*</label>
             <input
               type='text'
-              className='border p-2 w-full'
+              className='input'
               value={zipcode}
               onChange={(e) => setZipcode(e.target.value)}
               placeholder='e.g., 04109'
@@ -233,7 +233,7 @@ export default function SpaceSignUpPage() {
         <div>
           <label className='block mb-1 text-sm'>Description</label>
           <textarea
-            className='border p-2 w-full'
+            className='input'
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
@@ -243,40 +243,39 @@ export default function SpaceSignUpPage() {
           <label className='block mb-1 text-sm'>Website</label>
           <input
             type='url'
-            className='border p-2 w-full'
+            className='input'
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
           />
         </div>
 
-        <hr className='my-4' />
-
         {/* User Account Section */}
+
         <div>
-          <label className='block mb-1 text-sm'>Email Address</label>
+          <label className='block mb-1 text-sm'>Email Address*</label>
           <input
             type='email'
-            className='border p-2 w-full'
+            className='input'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
         <div>
-          <label className='block mb-1 text-sm'>Password</label>
+          <label className='block mb-1 text-sm'>Password*</label>
           <input
             type='password'
-            className='border p-2 w-full'
+            className='input'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
         <div>
-          <label className='block mb-1 text-sm'>Confirm Password</label>
+          <label className='block mb-1 text-sm'>Confirm Password*</label>
           <input
             type='password'
-            className='border p-2 w-full'
+            className='input'
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required

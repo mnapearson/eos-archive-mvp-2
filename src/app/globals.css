@@ -81,3 +81,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); */
 }
+
+.input {
+  @apply w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)];
+}
