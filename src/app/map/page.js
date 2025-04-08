@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
-import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -52,7 +51,9 @@ export default function SpacesPage() {
         // 3. Query the spaces table for these space IDs (including website)
         const { data: spacesData, error: spacesError } = await supabase
           .from('spaces')
-          .select('id, name, type, latitude, longitude, city, website')
+          .select(
+            'id, name, type, latitude, longitude, city, website, description, image_url'
+          )
           .in('id', approvedSpaceIds);
         if (spacesError) {
           console.error('Error fetching spaces:', spacesError);

@@ -90,13 +90,13 @@ export default function LoginPage() {
           disabled={loading}>
           {loading ? 'Connecting...' : 'Connect'}
         </button>
-        <button
+        {/* <button
           type='button'
           className='text-xs underline mx-auto w-full'
           onClick={handleResetPassword}
           disabled={loading}>
           {loading ? 'Processing...' : 'Forgot Password?'}
-        </button>
+        </button> */}
       </form>
       <p className='mt-10 text-sm'>
         Are you part of a subcultural space and want to become a member of the
