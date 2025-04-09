@@ -109,7 +109,7 @@ export default function SpacesPage() {
     : filteredByType;
 
   return (
-    <div className='max-w-3xl mx-auto h-screen flex flex-col'>
+    <div className='mx-auto h-screen flex flex-col'>
       {/* Top row: Legend and Toggle button */}
       <div className='mb-2 flex flex-wrap items-center gap-2'>
         {uniqueTypes.map((type) => (
@@ -140,7 +140,7 @@ export default function SpacesPage() {
         <div className='mb-2'>
           <input
             type='text'
-            placeholder='Search spaces list by name or city'
+            placeholder='Search list by space name or city'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className='w-full my-3 p-2 border border-[var(--foreground)] rounded text-xs'
@@ -154,6 +154,8 @@ export default function SpacesPage() {
         ) : (
           <MapComponent
             spaces={spaces}
+            initialCenter={{ lat: 51.3397, lng: 12.3731 }}
+            initialZoom={12} // set the default zoom level for spaces here
             activeTypes={activeTypes}
           />
         )}

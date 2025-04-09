@@ -18,8 +18,14 @@ export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
       hasMore={hasMore}
       loader={<p className='text-center py-4'>Loading more items...</p>}
       endMessage={
-        <p className='text-center py-16'>
-          <b>No more events to display.</b>
+        <p className='text-center py-16 italic gap-2'>
+          <b>No more events to display.</b> <br /> Are you part of a subcultural
+          space, but don't have an account?{' '}
+          <a
+            href='/spaces/signup'
+            className='underline'>
+            Register here.
+          </a>
         </p>
       }>
       <Masonry

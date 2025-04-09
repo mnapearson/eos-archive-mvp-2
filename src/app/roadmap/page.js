@@ -33,7 +33,7 @@ export default function RoadmapPage() {
   return (
     <div>
       <h1 className='font-light mb-8'>Roadmap</h1>
-      <p className='mb-8 text-sm text-gray-400'>
+      <p className='mb-8 text-sm'>
         This roadmap displays our ongoing and completed milestones that shape
         the future of eos archive. The left panel shows what we're actively
         working on and planning for the near future, while the right panel
@@ -55,12 +55,12 @@ export default function RoadmapPage() {
             borderRadius: '8px',
             boxShadow: '0 0 15px rgba(255,255,255,0.2)',
           }}>
-          <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
+          <h2 className='border-b border-[var(--foreground)] pb-2 mb-4'>
             In progress and upcoming
           </h2>
           <div className='max-h-96 overflow-y-auto'>
             {activeTasks.length === 0 ? (
-              <p className='italic text-gray-400'>No active tasks.</p>
+              <p className='italic'>No active tasks.</p>
             ) : (
               <div className='space-y-4'>
                 {activeTasks.map((task) => (
@@ -68,7 +68,7 @@ export default function RoadmapPage() {
                     key={task.id}
                     className='py-2'>
                     <h3 className='font-normal'>{task.title}</h3>
-                    <p className='text-sm text-gray-400'>{task.description}</p>
+                    <p className='text-sm text-gray-600'>{task.description}</p>
                     <small className='text-xs text-gray-500'>
                       {task.status}
                     </small>
@@ -87,12 +87,12 @@ export default function RoadmapPage() {
             borderRadius: '8px',
             boxShadow: '0 0 15px rgba(255,255,255,0.2)',
           }}>
-          <h2 className='font-light border-b border-gray-300 pb-2 mb-4'>
+          <h2 className='border-b border-[var(--foreground)] pb-2 mb-4'>
             Completed
           </h2>
           <div className='max-h-96 overflow-y-auto'>
             {completedTasks.length === 0 ? (
-              <p className='italic text-gray-400'>No completed tasks.</p>
+              <p className='italic'>No completed tasks.</p>
             ) : (
               <div className='space-y-4'>
                 {completedTasks.map((task) => (
@@ -100,7 +100,7 @@ export default function RoadmapPage() {
                     key={task.id}
                     className='py-2'>
                     <h3 className='font-normal'>{task.title}</h3>
-                    <p className='text-sm text-gray-400'>{task.description}</p>
+                    <p className='text-sm text-gray-600'>{task.description}</p>
                   </div>
                 ))}
               </div>

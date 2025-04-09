@@ -86,6 +86,7 @@ export default function NavBar() {
           {/* Left: spiral that toggles the menu */}
           <div>
             <button
+              className='flex flex-row gap-1'
               onClick={toggleMenu}
               aria-label='Toggle menu'>
               <svg
@@ -103,6 +104,7 @@ export default function NavBar() {
                   color='currentColor'
                 />
               </svg>
+              <p>menu</p>
             </button>
           </div>
 
@@ -117,7 +119,10 @@ export default function NavBar() {
 
           {/* Right: Login Button */}
           <div>
-            <Link href={user ? '/spaces/admin' : '/login'}>
+            <Link
+              href={user ? '/spaces/admin' : '/login'}
+              className='flex flex-row gap-1'>
+              connect
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'

@@ -135,7 +135,7 @@ export default function SpaceListItem({ space }) {
   const mainContent = <div onClick={handleNavigation}>{infoContent}</div>;
 
   return (
-    <div className='border-b border-gray-200 pb-2 text-left relative flex flex-col-reverse md:flex-row md:justify-between md:items-stretch'>
+    <div className='border-b border-[var(--foreground)] pb-2 text-left relative flex flex-col-reverse md:flex-row md:justify-between md:items-stretch'>
       <div className='flex-1'>{mainContent}</div>
       {space.image_url && (
         <div className='my-2 md:mt-0 md:ml-4'>

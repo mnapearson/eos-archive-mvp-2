@@ -25,6 +25,7 @@ export default function MapComponent({
   address: fallbackAddress,
   activeTypes,
   initialCenter,
+  initialZoom,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -80,18 +81,17 @@ export default function MapComponent({
       centerLng = 12.3731;
     }
 
+    // Determine the zoom level based on props and context.
+    // If an initialZoom is passed in, use that.
+    // Otherwise, if this is an event detail, use 14, or a default for spaces like 12.
+    const finalZoom =
+      typeof initialZoom === 'number' ? initialZoom : eventId ? 14 : 12; // change 12 to whatever default you prefer for spaces
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/dark-v10',
       center: [centerLng, centerLat],
-      zoom:
-        typeof initialZoom === 'number'
-          ? initialZoom
-          : eventId
-          ? 14
-          : initialCenter
-          ? 12
-          : 6,
+      zoom: finalZoom,
     });
 
     // Add navigation controls.
@@ -107,7 +107,7 @@ export default function MapComponent({
 
     mapRef.current = map;
     return () => map.remove();
-  }, [mapData, eventId, initialCenter]);
+  }, [mapData, eventId, initialCenter, initialZoom, spaces]);
 
   const clearMarkers = () => {
     markersRef.current.forEach((marker) => marker.remove());

@@ -1,7 +1,6 @@
 export default function AboutPage() {
   return (
     <div>
-      <h1 className='font-semibold mb-6'>about eos archive</h1>
       <p className='mb-4'>
         eos archive elevates event art—flyers, posters, and other visuals—from
         ephemeral cultural artefacts to essential citations in the (post)digital
@@ -39,7 +38,7 @@ export default function AboutPage() {
         </a>
       </p>
       <p className='mb-4'>
-        you can also email us at any time:{' '}
+        You can also email us at any time:{' '}
         <a
           href='mailto:hello@eosarchive.app'
           className='hover:underline'>

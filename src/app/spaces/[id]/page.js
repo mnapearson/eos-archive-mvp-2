@@ -88,7 +88,7 @@ export default function SpacePage() {
           <div className='mt-2 mb-4 flex gap-2'>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-3 py-1 text-xs border rounded ${
+              className={`button ${
                 viewMode === 'list'
                   ? 'bg-[var(--foreground)] text-[var(--background)]'
                   : 'bg-transparent text-[var(--foreground)]'
@@ -97,7 +97,7 @@ export default function SpacePage() {
             </button>
             <button
               onClick={() => setViewMode('flyers')}
-              className={`px-3 py-1 text-xs border rounded ${
+              className={`button ${
                 viewMode === 'flyers'
                   ? 'bg-[var(--foreground)] text-[var(--background)]'
                   : 'bg-transparent text-[var(--foreground)]'
@@ -112,7 +112,7 @@ export default function SpacePage() {
                 {events.map((event) => (
                   <li
                     key={event.id}
-                    className='border-b border-gray-200 pb-2'>
+                    className='border-b border-[var(--foreground)] pb-2'>
                     <Link
                       href={`/events/${event.id}`}
                       className='underline text-sm'>

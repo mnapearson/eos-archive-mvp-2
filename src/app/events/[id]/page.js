@@ -81,10 +81,7 @@ export default function EventPage() {
   const eventCategory = event.category || '';
   const eventDesigner = event.designer || '';
   const dateTimeDisplay = formatDateTime(event.date, event.time);
-  const eventDescription =
-    event.description ||
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt vehicula turpis.';
-  // Display address: prefer a stored address; otherwise use reverse-geocoded spaceAddress; or fallback to the space's city.
+  const eventDescription = event.description || 'No description provided.'; // Display address: prefer a stored address; otherwise use reverse-geocoded spaceAddress; or fallback to the space's city.
   const displayedAddress =
     event.space?.address ||
     spaceAddress ||
@@ -133,7 +130,7 @@ export default function EventPage() {
               className='w-full h-auto rounded-lg shadow'
             />
           ) : (
-            <p className='text-gray-500'>No flyer available</p>
+            <p className='italic text-gray-600'>No flyer available.</p>
           )}
           <p className='text-[var(--foreground)] italic mt-1'>
             design: {event.designer}
@@ -143,17 +140,22 @@ export default function EventPage() {
         <div className='md:w-1/4 flex flex-col justify-between'>
           <div>
             <div className='mb-1'>
-              <h1 className='font-bold'>{eventTitle}</h1>{' '}
               {/* Make the space name clickable to navigate to the space details page */}
               {event.space && (
-                <Link
-                  href={`/spaces/${event.space.id}`}
-                  className='text-sm mb-4 cursor-pointer underline hover:text-gray-400'>
-                  {event.space.name}, {event.space.city}
-                </Link>
+                <div>
+                  <div className='flex flex-row text-sm uppercase italic mb-4 gap-2'>
+                    <p>{event.space.city}</p>|<p>{event.category}</p>
+                  </div>
+                  <Link href={`/spaces/${event.space.id}`}>
+                    <p className='text-lg font-bold cursor-pointer hover:underline'>
+                      {event.space.name}
+                    </p>
+                  </Link>
+                </div>
               )}
+
+              <h1 className='text-sm font-bold'>{eventTitle}</h1>
             </div>
-            <p className='text-sm italic mb-2'>{eventCategory}</p>
             {dateTimeDisplay && (
               <p className='text-sm mb-2'>{dateTimeDisplay}</p>
             )}
@@ -163,7 +165,7 @@ export default function EventPage() {
             <Link
               href='#'
               onClick={handleShare}
-              className='glow-button'>
+              className='button'>
               SHARE
             </Link>
           </div>{' '}
