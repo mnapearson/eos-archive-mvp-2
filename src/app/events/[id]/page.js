@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import MapComponent from '@/components/MapComponent';
+import { useContext, useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Spinner from '@/components/Spinner';
+import MapComponent from '@/components/MapComponent';
+import { FilterContext } from '@/contexts/FilterContext';
 
 // Format the date/time: "DD.MM.YY @ HH.MM"
 function formatDateTime(dateString, timeString) {
@@ -35,6 +36,8 @@ export default function EventPage() {
   // Controls whether the map panel is visible.
   const [mapOpen, setMapOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { setSelectedFilters } = useContext(FilterContext);
 
   useEffect(() => {
     async function fetchEvent() {
@@ -81,12 +84,23 @@ export default function EventPage() {
   const eventCategory = event.category || '';
   const eventDesigner = event.designer || '';
   const dateTimeDisplay = formatDateTime(event.date, event.time);
-  const eventDescription = event.description || 'No description provided.'; // Display address: prefer a stored address; otherwise use reverse-geocoded spaceAddress; or fallback to the space's city.
+  const eventDescription = event.description || 'No description provided.';
   const displayedAddress =
     event.space?.address ||
     spaceAddress ||
     event.space?.city ||
     'UNKNOWN ADDRESS';
+
+  // These functions update the global filters and route to the homepage.
+  const handleCityClick = (city) => {
+    setSelectedFilters((prev) => ({ ...prev, city: [city] }));
+    router.push('/');
+  };
+
+  const handleCategoryClick = (category) => {
+    setSelectedFilters((prev) => ({ ...prev, category: [category] }));
+    router.push('/');
+  };
 
   const handleShare = async (e) => {
     e.preventDefault();
@@ -98,7 +112,7 @@ export default function EventPage() {
           url: window.location.href,
         });
       } catch (error) {
-        // Do nothing if user cancels.
+        // Do nothing if the user cancels.
       }
     } else {
       alert('Sharing not supported in this browser.');
@@ -133,27 +147,36 @@ export default function EventPage() {
             <p className='italic text-gray-600'>No flyer available.</p>
           )}
           <p className='text-[var(--foreground)] italic mt-1'>
-            design: {event.designer}
+            design: {eventDesigner}
           </p>
         </div>
         {/* Right Column: Event Info */}
         <div className='md:w-1/4 flex flex-col justify-between'>
           <div>
             <div className='mb-1'>
-              {/* Make the space name clickable to navigate to the space details page */}
-              {event.space && (
-                <div>
-                  <div className='flex flex-row text-sm uppercase italic mb-4 gap-2'>
-                    <p>{event.space.city}</p>|<p>{event.category}</p>
-                  </div>
-                  <Link href={`/spaces/${event.space.id}`}>
-                    <p className='text-lg font-bold cursor-pointer hover:underline'>
-                      {event.space.name}
-                    </p>
-                  </Link>
+              {/* Render clickable city and category buttons */}
+              {event.space && event.space.city && (
+                <div className='flex flex-row mb-4 gap-2'>
+                  <button
+                    onClick={() => handleCityClick(event.space.city)}
+                    className='button'>
+                    {event.space.city}
+                  </button>
+
+                  {eventCategory && (
+                    <button
+                      onClick={() => handleCategoryClick(eventCategory)}
+                      className='button'>
+                      {eventCategory}
+                    </button>
+                  )}
                 </div>
               )}
-
+              <Link href={`/spaces/${event.space.id}`}>
+                <p className='text-lg font-bold cursor-pointer hover:underline'>
+                  {event.space?.name || 'UNKNOWN SPACE'}
+                </p>
+              </Link>
               <h1 className='text-sm font-bold'>{eventTitle}</h1>
             </div>
             {dateTimeDisplay && (
@@ -161,14 +184,14 @@ export default function EventPage() {
             )}
             <p className='text-sm whitespace-pre-line mb-6'>
               {eventDescription}
-            </p>{' '}
+            </p>
             <Link
               href='#'
               onClick={handleShare}
               className='button'>
               SHARE
             </Link>
-          </div>{' '}
+          </div>
         </div>
       </div>
 
