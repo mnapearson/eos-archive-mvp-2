@@ -91,7 +91,7 @@ export default function EventPage() {
     event.space?.city ||
     'UNKNOWN ADDRESS';
 
-  // These functions update the global filters and route to the homepage.
+  // Functions to update the global filters and route to the homepage.
   const handleCityClick = (city) => {
     setSelectedFilters((prev) => ({ ...prev, city: [city] }));
     router.push('/');
@@ -99,6 +99,12 @@ export default function EventPage() {
 
   const handleCategoryClick = (category) => {
     setSelectedFilters((prev) => ({ ...prev, category: [category] }));
+    router.push('/');
+  };
+
+  // New function: clicking on the designer filters for that designer.
+  const handleDesignerClick = (designer) => {
+    setSelectedFilters((prev) => ({ ...prev, designer: [designer] }));
     router.push('/');
   };
 
@@ -112,7 +118,7 @@ export default function EventPage() {
           url: window.location.href,
         });
       } catch (error) {
-        // Do nothing if the user cancels.
+        // User cancelled sharing.
       }
     } else {
       alert('Sharing not supported in this browser.');
@@ -146,9 +152,6 @@ export default function EventPage() {
           ) : (
             <p className='italic text-gray-600'>No flyer available.</p>
           )}
-          <p className='text-[var(--foreground)] italic mt-1'>
-            design: {eventDesigner}
-          </p>
         </div>
         {/* Right Column: Event Info */}
         <div className='md:w-1/4 flex flex-col justify-between'>
@@ -162,14 +165,18 @@ export default function EventPage() {
                     className='button'>
                     {event.space.city}
                   </button>
-
                   {eventCategory && (
                     <button
                       onClick={() => handleCategoryClick(eventCategory)}
                       className='button'>
                       {eventCategory}
                     </button>
-                  )}
+                  )}{' '}
+                  <button
+                    onClick={() => handleDesignerClick(eventDesigner)}
+                    className='button'>
+                    {eventDesigner}
+                  </button>
                 </div>
               )}
               <Link href={`/spaces/${event.space.id}`}>

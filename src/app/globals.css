@@ -48,7 +48,7 @@ body {
 
 /* A simple button style that can be reused */
 .button {
-  @apply flex pointer-events-auto items-center gap-1 px-3 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
+  @apply uppercase flex pointer-events-auto items-center gap-1 px-3 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
 }
 
 /* A filter bar style */
