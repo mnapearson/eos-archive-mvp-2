@@ -142,7 +142,7 @@ export default function SpaceSignUpPage() {
   };
 
   return (
-    <div className='max-w-lg mx-auto p-4'>
+    <div className='max-w-lg mx-auto'>
       <form
         onSubmit={handleSignUp}
         className='space-y-4 glow-box lowercase'>
@@ -165,13 +165,12 @@ export default function SpaceSignUpPage() {
             <div className='relative'>
               <Combobox.Input
                 className='input'
-                placeholder='Select or enter a space type...'
                 displayValue={(type) => type || ''}
                 onChange={(e) => setQuery(e.target.value)}
               />
               <Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
                 <ChevronDownIcon
-                  className='w-5 h-5 text-gray-400'
+                  className='w-5 h-5'
                   aria-hidden='true'
                 />
               </Combobox.Button>
@@ -203,8 +202,6 @@ export default function SpaceSignUpPage() {
             className='input'
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder='e.g., Kotzschauer Str. 2'
-            required
           />
         </div>
         <div className='flex gap-2'>
@@ -225,7 +222,6 @@ export default function SpaceSignUpPage() {
               className='input'
               value={zipcode}
               onChange={(e) => setZipcode(e.target.value)}
-              placeholder='e.g., 04109'
               required
             />
           </div>
@@ -290,7 +286,7 @@ export default function SpaceSignUpPage() {
           Submit
         </button>
       </form>
-      <p className='mt-4 text-sm text-gray-500'>
+      <p className='mt-4 text-sm text-gray-600'>
         Note: Once your registration is approved, you will be able to upload a
         space image and submit events in your dashboard.
       </p>
