@@ -108,6 +108,11 @@ export default function SpacesPage() {
       })
     : filteredByType;
 
+  // Sort the final spaces list alphabetically by the space name.
+  const sortedSpaces = [...finalFilteredSpaces].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  );
+
   return (
     <div className='mx-auto h-screen flex flex-col'>
       {/* Top row: Legend and Toggle button */}
@@ -150,7 +155,7 @@ export default function SpacesPage() {
       {/* Main content: List or Map view */}
       <div className='flex-grow'>
         {isListView ? (
-          <SpacesList spaces={finalFilteredSpaces} />
+          <SpacesList spaces={sortedSpaces} />
         ) : (
           <MapComponent
             spaces={spaces}
@@ -179,8 +184,9 @@ function SpacesList({ spaces }) {
         ))}
       </div>
       <p className='text-sm italic mt-4'>No more spaces found.</p>
-      <p className='mt-10 text-lg'>
-        Are you part of a subcultural space, but don't have an account?{' '}
+      <p className='mt-20 text-lg'>
+        Are you part of a subcultural space, and want to become a member of eos
+        archive?{' '}
         <a
           href='/spaces/signup'
           className='underline'>

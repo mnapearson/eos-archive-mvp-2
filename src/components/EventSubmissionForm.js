@@ -53,6 +53,7 @@ export default function EventSubmissionForm({ spaceId }) {
       space_id: spaceId,
       approved: false,
       image_url: null,
+      terms_accepted: true, // <-- Track that the user accepted the terms
     };
 
     // Upload image if provided
@@ -138,8 +139,8 @@ export default function EventSubmissionForm({ spaceId }) {
             name='time'
             value={formData.time}
             onChange={handleInputChange}
-            className='input'
             required
+            className='input'
           />
         </div>
         <div>
@@ -199,6 +200,8 @@ export default function EventSubmissionForm({ spaceId }) {
             I agree to the{' '}
             <a
               href='/terms'
+              target='_blank'
+              rel='noopener noreferrer'
               className='underline'>
               Terms and Conditions
             </a>
