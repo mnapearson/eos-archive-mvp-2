@@ -127,7 +127,7 @@ export default function SpacePage() {
                 ))}
               </ul>
             ) : (
-              <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+              <div className='grid grid-cols-3 gap-4'>
                 {events.map((event) => (
                   <Link
                     key={event.id}

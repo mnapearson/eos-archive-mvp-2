@@ -23,6 +23,16 @@ export default function SpaceAdminDashboard() {
   });
   const [updateError, setUpdateError] = useState(null);
 
+  // Helper function to check if a URL is valid
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
   async function fetchSpaceRecord(currentSpace) {
     setLoading(true);
     setUpdateError(null);
@@ -69,6 +79,14 @@ export default function SpaceAdminDashboard() {
 
   const handleSave = async () => {
     setUpdateError(null);
+    // Validate website URL (if provided)
+    if (formValues.website && !isValidUrl(formValues.website)) {
+      setUpdateError(
+        'Please enter a valid website URL starting with http:// or https://'
+      );
+      return;
+    }
+
     setLoading(true);
 
     const { data, error } = await supabase
@@ -121,20 +139,10 @@ export default function SpaceAdminDashboard() {
   }
 
   return (
-    <div className='max-w-6xl mx-auto px-4 py-6'>
+    <div className='mx-auto'>
       <div className='flex flex-col md:flex-row gap-8'>
         {/* Left Column: Space details */}
-        <div className='flex-1'>
-          {space.image_url && (
-            <div className='mb-4'>
-              <img
-                src={space.image_url}
-                alt={space.name}
-                className='w-full object-cover rounded-md'
-              />
-            </div>
-          )}
-
+        <div className='flex-1 '>
           <div className='border p-4 rounded-md shadow mb-6 glow-box'>
             <h2 className='font-semibold text-lg'>{space.name}</h2>
             <p className='text-sm italic'>{space.type}</p>
@@ -154,10 +162,13 @@ export default function SpaceAdminDashboard() {
                     onChange={(e) =>
                       setFormValues({ ...formValues, website: e.target.value })
                     }
-                    className='w-full border border-[var(--foreground)] p-2 rounded bg-transparent text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
+                    className='input'
                     placeholder='https://example.com'
                   />
                 </div>
+                {updateError && (
+                  <p className='text-red-500 text-sm mb-2'>{updateError}</p>
+                )}
                 <div className='mb-2'>
                   <label className='block text-sm font-semibold mb-1'>
                     Description
@@ -170,8 +181,8 @@ export default function SpaceAdminDashboard() {
                         description: e.target.value,
                       })
                     }
-                    className='w-full border border-[var(--foreground)] p-2 rounded bg-transparent text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]'
-                    rows={3}
+                    className='input'
+                    rows={4}
                     placeholder='Describe your space...'
                   />
                 </div>
@@ -230,7 +241,15 @@ export default function SpaceAdminDashboard() {
               </>
             )}
           </div>
-
+          {space.image_url && (
+            <div className='mb-4'>
+              <img
+                src={space.image_url}
+                alt={space.name}
+                className='w-full object-cover rounded-md'
+              />
+            </div>
+          )}
           <div className='mb-2'>
             {space && <SpaceImageUpload spaceId={space.id} />}
             {updateError && (

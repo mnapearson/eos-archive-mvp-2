@@ -105,12 +105,12 @@ export default function EventSubmissionForm({ spaceId }) {
 
   return (
     <div className='glow-box'>
-      <h2 className='font-bold mb-4'>submit an event</h2>
+      <h2 className='text-lg font-bold mb-4'>submit an event</h2>
       <form
         onSubmit={handleSubmit}
         className='space-y-4'>
         <div>
-          <label className='block text-sm mb-1'>Title</label>
+          <label className='block text-sm mb-1'>Title*</label>
           <input
             type='text'
             name='title'
@@ -121,7 +121,7 @@ export default function EventSubmissionForm({ spaceId }) {
           />
         </div>
         <div>
-          <label className='block text-sm mb-1'>Date</label>
+          <label className='block text-sm mb-1'>Date*</label>
           <input
             type='date'
             name='date'
@@ -132,17 +132,18 @@ export default function EventSubmissionForm({ spaceId }) {
           />
         </div>
         <div>
-          <label className='block text-sm mb-1'>Time</label>
+          <label className='block text-sm mb-1'>Time*</label>
           <input
             type='time'
             name='time'
             value={formData.time}
             onChange={handleInputChange}
             className='input'
+            required
           />
         </div>
         <div>
-          <label className='block text-sm mb-1'>Category</label>
+          <label className='block text-sm mb-1'>Category*</label>
           <input
             type='text'
             name='category'
@@ -153,7 +154,7 @@ export default function EventSubmissionForm({ spaceId }) {
           />
         </div>
         <div>
-          <label className='block text-sm mb-1'>Designer</label>
+          <label className='block text-sm mb-1'>Designer*</label>
           <input
             type='text'
             name='designer'
@@ -174,7 +175,7 @@ export default function EventSubmissionForm({ spaceId }) {
           />
         </div>
         <div>
-          <label className='block text-sm mb-1'>Event Art</label>
+          <label className='block text-sm mb-1'>Event Art*</label>
           <input
             type='file'
             accept='image/*'
@@ -201,6 +202,7 @@ export default function EventSubmissionForm({ spaceId }) {
               className='underline'>
               Terms and Conditions
             </a>
+            *
           </label>
         </div>
         {error && <p className='text-red-500 text-sm'>{error}</p>}

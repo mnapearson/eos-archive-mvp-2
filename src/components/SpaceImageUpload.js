@@ -74,12 +74,12 @@ export default function SpaceImageUploader({ spaceId }) {
 
   return (
     <div className='glow-box'>
-      <label className='block text-sm font-semibold mb-1'>Space Image</label>
+      <label className='block text-lg font-semibold mb-1'>space image</label>
       <input
         type='file'
         accept='image/jpeg, image/png, image/gif'
         onChange={handleFileChange}
-        className='border p-2 w-full'
+        className='input'
       />
       {error && <p className='mt-2 text-sm text-red-400'>{error}</p>}
       <button

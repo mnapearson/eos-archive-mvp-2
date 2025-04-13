@@ -138,7 +138,7 @@ export default function SpaceSignUpPage() {
     }
 
     // 5. Redirect to a confirmation page instructing the user to confirm their email.
-    router.push('/spaces/confirm');
+    router.push('/spaces/admin');
   };
 
   return (
@@ -196,7 +196,7 @@ export default function SpaceSignUpPage() {
           </Combobox>
         </div>
         <div>
-          <label className='block mb-1 text-sm'>Street Address</label>
+          <label className='block mb-1 text-sm'>Street Address*</label>
           <input
             type='text'
             className='input'
@@ -287,7 +287,7 @@ export default function SpaceSignUpPage() {
         </button>
       </form>
       <p className='mt-4 text-sm text-gray-600'>
-        Note: Once your registration is approved, you will be able to upload a
+        Note: Once you submit your registration, you will be able to upload a
         space image and submit events in your dashboard.
       </p>
     </div>
