@@ -38,7 +38,8 @@ export default function AboutPage() {
         </a>
       </p>
       <p className='mb-4'>
-        You can also email us at any time:{' '}
+        You can also email us at any time, we would love to hear your feedback
+        or ideas for features—{' '}
         <a
           href='mailto:hello@eosarchive.app'
           className='hover:underline'>

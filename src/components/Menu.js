@@ -135,12 +135,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
     <div
       className={`fixed inset-0 z-50 transition-all duration-300 ${
         menuOpen
-          ? 'bg-[var(--background)]/90 backdrop-blur-md opacity-100'
+          ? 'bg-[var(--background)]/100 opacity-100'
           : 'opacity-0 pointer-events-none'
       }`}>
       {/* Sidebar Panel */}
       <div
-        className={`border-x border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/10 backdrop-blur-md text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`border-x border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/10 backdrop-blur-xl text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Scrollable Content */}
@@ -151,12 +151,12 @@ export default function Menu({ menuOpen, toggleMenu }) {
             <div className='flex gap-4'>
               <button
                 onClick={handleClear}
-                className='text-sm'>
+                className='button'>
                 CLEAR
               </button>
               <button
                 onClick={handleSave}
-                className='text-sm'>
+                className='button'>
                 SAVE
               </button>
             </div>
@@ -170,49 +170,30 @@ export default function Menu({ menuOpen, toggleMenu }) {
           {renderFilterSection('Designer', 'designer', designerOptions)}
 
           {/* Navigation Links */}
-          <div className='mt-6'>
+        </div>
+        {/* Conditionally render "DASHBOARD" or "LOGIN" link */}
+        <div className='m-6'>
+          <div>
             <Link
               onClick={toggleMenu}
               href='/map'
-              className='block py-1'>
-              SPACES MAP
-            </Link>
-            <Link
-              onClick={toggleMenu}
-              href='/about'
-              className='block py-1'>
-              ABOUT EOS
-            </Link>
-            <Link
-              onClick={toggleMenu}
-              href='/roadmap'
-              className='block py-1'>
-              ROADMAP
+              className='block py-1 hover:underline'>
+              spaces map
             </Link>
             <Link
               onClick={toggleMenu}
               target='blank'
               href='https://www.are.na/eos-archive-4vdklofkovq/conversations-1wumw6beixo'
-              className='block py-1'>
-              CONVERSATIONS
+              className='block py-1 hover:underline'>
+              conversations
+            </Link>
+            <Link
+              onClick={toggleMenu}
+              href='/about'
+              className='block py-1 hover:underline'>
+              about eos archive
             </Link>
           </div>
-        </div>
-        {/* Conditionally render "DASHBOARD" or "LOGIN" link */}
-        <div className='m-6'>
-          {user ? (
-            <Link
-              href='/spaces/admin'
-              onClick={toggleMenu}>
-              DASHBOARD
-            </Link>
-          ) : (
-            <Link
-              href='/login'
-              onClick={toggleMenu}>
-              LOGIN
-            </Link>
-          )}
         </div>
         {/* Footer */}
         <footer className='w-full border-t border-[var(--foreground)] px-4 py-4'>

@@ -160,7 +160,7 @@ export default function SpacesPage() {
           <MapComponent
             spaces={spaces}
             initialCenter={{ lat: 51.3397, lng: 12.3731 }}
-            initialZoom={12} // set the default zoom level for spaces here
+            initialZoom={11} // set the default zoom level for spaces here
             activeTypes={activeTypes}
           />
         )}

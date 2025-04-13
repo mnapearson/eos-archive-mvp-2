@@ -83,13 +83,20 @@ export default function LoginPage() {
         </div>
         {errorMsg && <p className='text-red-500 text-sm'>{errorMsg}</p>}
         {infoMsg && <p className='text-green-500 text-sm'>{infoMsg}</p>}
-
         <button
           type='submit'
           className='glow-button'
           disabled={loading}>
           {loading ? 'Connecting...' : 'Connect'}
-        </button>
+        </button>{' '}
+        <p className='mt-10 text-sm italic text-center'>
+          Need help connecting? Get in touch with us,{' '}
+          <a
+            href='mailto:hello@eosarchive.app'
+            className='hover:underline'>
+            hello@eosarchive.app
+          </a>
+        </p>
         {/* <button
           type='button'
           className='text-xs underline mx-auto w-full'
@@ -98,7 +105,7 @@ export default function LoginPage() {
           {loading ? 'Processing...' : 'Forgot Password?'}
         </button> */}
       </form>
-      <p className='mt-10 text-sm'>
+      <p className='mt-10 text-lg'>
         Are you part of a subcultural space and want to become a member of the
         archive?{' '}
         <Link
@@ -106,7 +113,7 @@ export default function LoginPage() {
           className='underline'>
           Register here.
         </Link>
-      </p>
+      </p>{' '}
     </div>
   );
 }

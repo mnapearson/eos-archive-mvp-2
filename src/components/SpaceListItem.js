@@ -64,7 +64,7 @@ export default function SpaceListItem({ space }) {
   // Render description with read more / read less toggling
   const renderDescription = () => {
     if (!space.description) return null;
-    const limit = 350;
+    const limit = 400;
     if (space.description.length <= limit) {
       return <p className='mt-2 text-sm'>{space.description}</p>;
     }

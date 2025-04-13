@@ -12,15 +12,15 @@
 
 /* Default (Dusk Mode) */
 :root {
-  --background: #a8aabb;
-  --foreground: black;
+  --background: #212121;
+  --foreground: #dce4ef;
 }
 
 /* System Dark Mode Preference */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #a8aabb;
-    --foreground: black;
+    --background: #212121;
+    --foreground: #dce4ef;
   }
 }
 

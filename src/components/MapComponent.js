@@ -131,8 +131,8 @@ export default function MapComponent({
 
     filteredData.forEach((item) => {
       const markerEl = document.createElement('div');
-      markerEl.style.width = '15px';
-      markerEl.style.height = '15px';
+      markerEl.style.width = '12px';
+      markerEl.style.height = '12px';
       markerEl.style.borderRadius = '50%';
       const typeKey = item.type
         ? item.type.toLowerCase()
