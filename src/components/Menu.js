@@ -195,26 +195,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
             </Link>
           </div>
         </div>
-        {/* Footer */}
-        <footer className='w-full border-t border-[var(--foreground)] px-4 py-4'>
-          <div className='max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between'>
-            <p className='text-sm'>© {new Date().getFullYear()} eos archive</p>
-            <div className='text-sm mt-2 md:mt-0'>
-              <a
-                href='mailto:hello@eosarchive.app'
-                className='hover:underline'>
-                hello@eosarchive.app
-              </a>{' '}
-              |{' '}
-              <Link
-                onClick={toggleMenu}
-                href='/privacy'
-                className='hover:underline'>
-                privacy
-              </Link>
-            </div>
-          </div>
-        </footer>
       </div>
 
       {/* Clicking outside the menu closes it */}

@@ -10,13 +10,15 @@
   }
 }
 
-/* Default (Dusk Mode) */
+/* -- Default Light Mode -- */
 :root {
-  --background: #212121;
-  --foreground: #dce4ef;
+  /* Use a very light background with dark text for accessibility */
+  --background: #f5f5f5;
+  --foreground: #212121;
+  /* Optionally add any accent colors if needed */
 }
 
-/* System Dark Mode Preference */
+/* -- Dark Mode Preference -- */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #212121;
@@ -24,14 +26,14 @@
   }
 }
 
-/* Apply variables */
+/* Apply global colors and fonts */
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* A container that centers content and sets a max width */
+/* Container to center content */
 .container {
   @apply max-w-7xl mx-auto px-4 py-2;
 }
@@ -46,30 +48,48 @@ body {
   @apply max-w-6xl mx-auto py-4 flex flex-col md:flex-row items-center justify-between;
 }
 
-/* A simple button style that can be reused */
+/* Simple reusable button styling */
 .button {
   @apply uppercase flex pointer-events-auto items-center gap-1 px-3 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
 }
 
-/* A filter bar style */
+/* Filter bar styling */
 .filter-bar {
   @apply pb-4 text-sm flex items-center flex-wrap gap-2;
 }
 
-/* Utility class for glowing boxes */
 .glow-box {
   @apply border rounded-md flex-1 p-4;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Utility class for glowing buttons */
+@media (prefers-color-scheme: dark) {
+  .glow-box {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  }
+}
+
 .glow-button {
-  @apply block mx-auto flex pointer-events-auto items-center gap-1 px-4 py-2 rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); */
+  @apply block mx-auto flex pointer-events-auto items-center gap-1 px-4 py-2 rounded transition;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: transparent;
+  color: var(--foreground);
 }
 
+@media (prefers-color-scheme: dark) {
+  .glow-button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+.glow-button:hover {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* Input styling */
 .input {
   @apply w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)];
 }

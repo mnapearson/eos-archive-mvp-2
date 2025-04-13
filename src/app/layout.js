@@ -5,6 +5,7 @@ import './globals.css';
 import NavBar from '@/components/NavBar';
 import CookieConsentBar from '@/components/CookieConsentBar';
 import { FilterProvider } from '@/contexts/FilterContext';
+import Footer from '@/components/Footer';
 
 export default function RootLayout({ children }) {
   // State for theme (default to system preference)
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
           <main className='container'>
             <div className='page-content'>{children}</div>
           </main>
+          <Footer />
         </FilterProvider>
         <CookieConsentBar />
       </body>
