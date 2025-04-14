@@ -6,6 +6,8 @@ import Link from 'next/link';
 import Spinner from '@/components/Spinner';
 import MapComponent from '@/components/MapComponent';
 import { FilterContext } from '@/contexts/FilterContext';
+import Head from 'next/head';
+import ShareButton from '@/components/ShareButton';
 
 // Format the date/time: "DD.MM.YY @ HH.MM"
 function formatDateTime(dateString, timeString) {
@@ -129,104 +131,134 @@ export default function EventPage() {
   const toggleMap = () => setMapOpen((prev) => !prev);
 
   return (
-    <div>
-      {/* Return Link */}
-      <div className='mb-4'>
-        <Link
-          href='/'
-          className='text-sm hover:text-gray-600'>
-          ← return to archive
-        </Link>
-      </div>
-
-      {/* Two-column layout for event details */}
-      <div className='flex flex-col md:flex-row gap-8 mb-8'>
-        {/* Left Column: Flyer */}
-        <div className='md:w-2/3'>
-          {event.image_url ? (
-            <img
-              src={event.image_url}
-              alt={`Flyer for ${event.title}`}
-              className='w-full h-auto rounded-lg shadow'
-            />
-          ) : (
-            <p className='italic text-gray-600'>No flyer available.</p>
-          )}
-        </div>
-        {/* Right Column: Event Info */}
-        <div className='md:w-1/4 flex flex-col justify-between'>
-          <div>
-            <div className='mb-1'>
-              {/* Render clickable city and category buttons */}
-              {event.space && event.space.city && (
-                <div className='flex flex-row mb-4 gap-2'>
-                  <button
-                    onClick={() => handleCityClick(event.space.city)}
-                    className='button'>
-                    {event.space.city}
-                  </button>
-                  {eventCategory && (
-                    <button
-                      onClick={() => handleCategoryClick(eventCategory)}
-                      className='button'>
-                      {eventCategory}
-                    </button>
-                  )}{' '}
-                  <button
-                    onClick={() => handleDesignerClick(eventDesigner)}
-                    className='button'>
-                    {eventDesigner}
-                  </button>
-                </div>
-              )}
-              <Link href={`/spaces/${event.space.id}`}>
-                <p className='text-lg font-bold cursor-pointer hover:underline'>
-                  {event.space?.name || 'UNKNOWN SPACE'}
-                </p>
-              </Link>
-              <h1 className='text-sm font-bold'>{eventTitle}</h1>
-            </div>
-            {dateTimeDisplay && (
-              <p className='text-sm mb-2'>{dateTimeDisplay}</p>
-            )}
-            <p className='text-sm whitespace-pre-line mb-6'>
-              {eventDescription}
-            </p>
+    <>
+      {' '}
+      <Head>
+        <title>{event.title} - eos archive</title>
+        <meta
+          property='og:title'
+          content={event.title}
+        />
+        <meta
+          property='og:description'
+          content={event.description}
+        />
+        <meta
+          property='og:image'
+          content={event.image_url}
+        />
+        <meta
+          property='og:url'
+          content={`https://eosarchivemvp.netlify.app/events/${event.id}`}
+        />
+        <meta
+          name='twitter:card'
+          content='summary_large_image'
+        />
+        {/* You can add other OG tags as needed */}
+      </Head>
+      <main>
+        <div>
+          {/* Return Link */}
+          <div className='mb-4'>
             <Link
-              href='#'
-              onClick={handleShare}
-              className='button'>
-              SHARE
+              href='/'
+              className='text-sm hover:text-gray-600'>
+              ← return to archive
             </Link>
           </div>
-        </div>
-      </div>
 
-      {/* Slide-out Map Panel */}
-      {mapOpen && (
-        <div className='fixed inset-0 z-50 flex justify-end'>
-          {/* Semi-transparent overlay */}
-          <div
-            className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
-            onClick={toggleMap}
-            aria-hidden='true'
-          />
-          {/* Slide-out panel from the right */}
-          <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
-            {/* Close button */}
-            <button
-              className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
-              onClick={toggleMap}
-              aria-label='Close map'>
-              ✕
-            </button>
-            <MapComponent
-              eventId={id}
-              address={displayedAddress}
-            />
+          {/* Two-column layout for event details */}
+          <div className='flex flex-col md:flex-row gap-8 mb-8'>
+            {/* Left Column: Flyer */}
+            <div className='md:w-2/3'>
+              {event.image_url ? (
+                <img
+                  src={event.image_url}
+                  alt={`Flyer for ${event.title}`}
+                  className='w-full h-auto rounded-lg shadow'
+                />
+              ) : (
+                <p className='italic text-gray-600'>No flyer available.</p>
+              )}
+            </div>
+            {/* Right Column: Event Info */}
+            <div className='md:w-1/4 flex flex-col justify-between'>
+              <div>
+                <div className='mb-1'>
+                  {/* Render clickable city and category buttons */}
+                  {event.space && event.space.city && (
+                    <div className='flex flex-row mb-4 gap-2'>
+                      <button
+                        onClick={() => handleCityClick(event.space.city)}
+                        className='button'>
+                        {event.space.city}
+                      </button>
+                      {eventCategory && (
+                        <button
+                          onClick={() => handleCategoryClick(eventCategory)}
+                          className='button'>
+                          {eventCategory}
+                        </button>
+                      )}{' '}
+                      <button
+                        onClick={() => handleDesignerClick(eventDesigner)}
+                        className='button'>
+                        {eventDesigner}
+                      </button>
+                    </div>
+                  )}
+                  <Link href={`/spaces/${event.space.id}`}>
+                    <p className='text-lg font-bold cursor-pointer hover:underline'>
+                      {event.space?.name || 'UNKNOWN SPACE'}
+                    </p>
+                  </Link>
+                  <h1 className='text-sm font-bold'>{eventTitle}</h1>
+                </div>
+                {dateTimeDisplay && (
+                  <p className='text-sm mb-2'>{dateTimeDisplay}</p>
+                )}
+                <p className='text-sm whitespace-pre-line mb-6'>
+                  {eventDescription}
+                </p>
+                <ShareButton
+                  title={event.title}
+                  text={`Event: ${event.title}\nDate: ${event.date} at ${event.time}\nCategory: ${event.category}`}
+                  url={`https://eosarchivemvp.netlify.app/events/${event.id}`}
+                  buttonText='Share Event'
+                  className='button'
+                />
+              </div>
+            </div>
           </div>
+
+          {/* Slide-out Map Panel */}
+          {mapOpen && (
+            <div className='fixed inset-0 z-50 flex justify-end'>
+              {/* Semi-transparent overlay */}
+              <div
+                className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
+                onClick={toggleMap}
+                aria-hidden='true'
+              />
+              {/* Slide-out panel from the right */}
+              <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
+                {/* Close button */}
+                <button
+                  className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
+                  onClick={toggleMap}
+                  aria-label='Close map'>
+                  ✕
+                </button>
+                <MapComponent
+                  eventId={id}
+                  address={displayedAddress}
+                />
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </main>
+    </>
   );
 }

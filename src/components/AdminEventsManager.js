@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
+import ShareButton from '@/components/ShareButton';
 
 export default function AdminEventsManager({
   initialEvents,
@@ -386,11 +387,13 @@ export default function AdminEventsManager({
                     </button>
                   ) : (
                     filter === 'approved' && (
-                      <button
-                        onClick={() => handleShare(ev)}
-                        className='glow-button text-sm bg-indigo-600 text-white'>
-                        Share
-                      </button>
+                      <ShareButton
+                        title={ev.title}
+                        text={`Event: ${ev.title}\nDate: ${ev.date} at ${ev.time}\nCategory: ${ev.category}`}
+                        url={`https://eosarchivemvp.netlify.app/events/${ev.id}`}
+                        buttonText='Share'
+                        className='glow-button text-sm'
+                      />
                     )
                   )}
                   <button
