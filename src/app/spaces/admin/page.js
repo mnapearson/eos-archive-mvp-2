@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Spinner from '@/components/Spinner';
 import EventSubmissionForm from '@/components/EventSubmissionForm';
 import SpaceImageUpload from '@/components/SpaceImageUpload';
+import AdminEventsManager from '@/components/AdminEventsManager';
 
 export default function SpaceAdminDashboard() {
   const router = useRouter();
@@ -262,6 +263,9 @@ export default function SpaceAdminDashboard() {
         <div className='flex-1'>
           <div className='mb-6'>
             <EventSubmissionForm spaceId={space.id} />
+          </div>
+          <div className='mb-6'>
+            <AdminEventsManager spaceId={space.id} />
           </div>
         </div>
       </div>

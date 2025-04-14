@@ -93,3 +93,10 @@ body {
 .input {
   @apply w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)];
 }
+
+/* Pending Approval Overlay */
+.overlay {
+  @apply absolute inset-0 z-10;
+  @apply flex items-center justify-center;
+  @apply bg-black bg-opacity-10 text-lg font-bold;
+}
