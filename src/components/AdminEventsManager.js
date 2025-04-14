@@ -5,7 +5,12 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
-export default function AdminEventsManager({ initialEvents, spaceId }) {
+export default function AdminEventsManager({
+  initialEvents,
+  spaceId,
+  filter = '',
+  editable,
+}) {
   const supabase = createClientComponentClient();
   const router = useRouter();
   const [events, setEvents] = useState(initialEvents || []);
@@ -16,23 +21,39 @@ export default function AdminEventsManager({ initialEvents, spaceId }) {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+  const gridClass =
+    filter === 'pending'
+      ? 'grid grid-cols-1 gap-6'
+      : 'grid grid-cols-1 md:grid-cols-2 gap-6';
+
   useEffect(() => {
     if (spaceId) {
       async function fetchEvents() {
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('space_id', spaceId);
+        let query = supabase.from('events').select('*').eq('space_id', spaceId);
+
+        if (filter) {
+          if (filter === 'pending') {
+            query = query.eq('approved', false);
+          } else if (filter === 'approved' || filter === 'archive') {
+            query = query.eq('approved', true);
+          }
+        }
+
+        const { data, error } = await query;
         if (error) {
-          console.error('Error fetching events:', error);
-          setError('Error fetching events.');
+          const errorMessage = error.message || JSON.stringify(error);
+          const errorDetails = error.details
+            ? ` Details: ${error.details}`
+            : '';
+          console.error('Error fetching events:', errorMessage + errorDetails);
+          setError('Error fetching events: ' + errorMessage + errorDetails);
         } else {
           setEvents(data);
         }
       }
       fetchEvents();
     }
-  }, [spaceId]);
+  }, [spaceId, filter]);
 
   // When the user clicks edit, load the event data into our state
   const handleEditClick = (ev) => {
@@ -165,22 +186,38 @@ export default function AdminEventsManager({ initialEvents, spaceId }) {
     setEvents(updatedEvents);
   };
 
+  const handleShare = async (ev) => {
+    // Construct the shareable URL for the event; adjust your domain as necessary
+    const shareUrl = `https://your-domain.com/events/${ev.id}`;
+    // Construct a share message with desired event information
+    const shareText = `Event: ${ev.title}\nDate: ${ev.date} at ${
+      ev.time
+    }\nCategory: ${ev.category}\nSpace: ${ev.space_name || 'N/A'}`;
+    try {
+      // Use Web Share API if available (mobile browsers typically support this)
+      if (navigator.share) {
+        await navigator.share({
+          title: ev.title,
+          text: shareText,
+          url: shareUrl,
+        });
+      } else {
+        // If Web Share API is not available, copy the URL to the clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Event link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing event:', err);
+      alert('Error sharing event. Please try again.');
+    }
+  };
+
   return (
-    <div className='space-y-6'>
+    <div className={gridClass}>
       {events.map((ev) => (
         <div
           key={ev.id}
           className='relative glow-box'>
-          {/* Status badge for the event */}
-          {!ev.approved ? (
-            <span className='absolute top-2 right-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded'>
-              Pending Approval
-            </span>
-          ) : (
-            <span className='absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded'>
-              Approved
-            </span>
-          )}
           {editingEventId === ev.id ? (
             <form
               onSubmit={handleSaveEdit}
@@ -305,13 +342,14 @@ export default function AdminEventsManager({ initialEvents, spaceId }) {
               </div>
             </form>
           ) : (
-            <div className='flex flex-col md:flex-row gap-4 relative z-20'>
-              <div className='w-full md:w-1/3'>
+            <div className='flex flex-col md:flex-row items-stretch gap-4 relative z-20 h-auto md:h-64'>
+              {/* Image Container */}
+              <div className='w-full md:w-2/5 h-auto md:h-full overflow-hidden relative'>
                 {ev.image_url ? (
                   <img
                     src={ev.image_url}
                     alt={ev.title}
-                    className='object-cover w-full h-full rounded'
+                    className='object-contain w-full h-full rounded'
                   />
                 ) : (
                   <div className='w-full h-full bg-gray-200 flex items-center justify-center rounded'>
@@ -319,25 +357,58 @@ export default function AdminEventsManager({ initialEvents, spaceId }) {
                   </div>
                 )}
               </div>
-              <div className='w-full md:w-2/3'>
-                <h3 className='text-xl font-bold'>{ev.title}</h3>
-                <p className='text-sm text-gray-600'>
-                  {ev.date} at {ev.time}
-                </p>
-                <p className='text-sm text-gray-600'>Category: {ev.category}</p>
-                <p className='text-sm text-gray-600'>Designer: {ev.designer}</p>
-                <p className='mt-2'>{ev.description}</p>
+
+              {/* Info Container */}
+              <div className='md:w-3/5 flex flex-col justify-between p-2'>
+                <div>
+                  <h3 className='text-md font-bold'>{ev.title}</h3>
+                  <p className='text-sm text-gray-400 mt-2'>
+                    {ev.date} at {ev.time}
+                  </p>
+                  <p className='text-sm text-gray-400 mt-2'>
+                    Category: {ev.category}
+                  </p>
+                  <p className='text-sm text-gray-400'>
+                    Designer: {ev.designer}
+                  </p>
+                  <p className='text-sm text-gray-400'>
+                    Description: {ev.description}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
                 <div className='flex gap-2 mt-4'>
-                  <button
-                    onClick={() => handleEditClick(ev)}
-                    className='glow-button text-sm'>
-                    Edit
-                  </button>
+                  {editable ? (
+                    <button
+                      onClick={() => handleEditClick(ev)}
+                      className='glow-button text-sm'>
+                      Edit
+                    </button>
+                  ) : (
+                    filter === 'approved' && (
+                      <button
+                        onClick={() => handleShare(ev)}
+                        className='glow-button text-sm bg-indigo-600 text-white'>
+                        Share
+                      </button>
+                    )
+                  )}
                   <button
                     onClick={() => handleDelete(ev.id)}
                     className='glow-button text-sm bg-red-600'>
                     Delete
                   </button>
+                  {!editable && filter === 'archive' && (
+                    <button
+                      onClick={() =>
+                        alert(
+                          'Please request an edit by emailing hello@eosarchive.app'
+                        )
+                      }
+                      className='glow-button text-xs mt-2'>
+                      Request Edit
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
