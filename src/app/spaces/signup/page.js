@@ -166,7 +166,11 @@ export default function SpaceSignUpPage() {
               <Combobox.Input
                 className='input'
                 displayValue={(type) => type || ''}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setQuery(value);
+                  setSpaceType(value);
+                }}
               />
               <Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
                 <ChevronDownIcon
