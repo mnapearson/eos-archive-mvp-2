@@ -82,32 +82,45 @@ export default function NavBar() {
   return (
     <>
       <header className='fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl'>
-        <div className='container py-2 flex items-center justify-between'>
+        <div className='container py-2 m-2 flex items-center justify-between'>
           {/* Left: spiral that toggles the menu */}
-          <div>
-            <button
-              className='button'
-              onClick={toggleMenu}
-              aria-label='Toggle menu'>
-              <p>MENU</p>
-            </button>
-          </div>
 
           {/* Center: Logo Homepage */}
           <div>
-            <Link href='/'>
-              <img
-                width='125'
-                src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets//EOS24_metal_blue_transparent.png'></img>
-            </Link>
+            <Link href='/'>eos archive</Link>
           </div>
 
           {/* Right: Login Button */}
-          <div>
+          <div className='flex flex-row gap-3 mt-1'>
+            <div>
+              <button
+                onClick={toggleMenu}
+                aria-label='Toggle menu'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'>
+                  <path
+                    fill='currentColor'
+                    d='M3 4h18v2H3zm2 15h14v2H5zm-2-5h18v2H3zm2-5h14v2H5z'
+                  />
+                </svg>
+              </button>
+            </div>
             <Link
               href={user ? '/spaces/admin' : '/login'}
-              className='button'>
-              {user ? 'Dashboard' : 'Connect'}
+              aria-label='Login or Register'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'>
+                <path
+                  fill='currentColor'
+                  d='M5 20h14v2H5zm7-2a8 8 0 1 1 0-16a8 8 0 0 1 0 16m0-2a6 6 0 1 0 0-12a6 6 0 0 0 0 12'
+                />
+              </svg>
             </Link>
           </div>
         </div>

@@ -105,8 +105,8 @@ export default function LoginPage() {
           {loading ? 'Processing...' : 'Forgot Password?'}
         </button> */}
       </form>
-      <p className='mt-10 text-lg'>
-        Are you part of a subcultural space and want to become a member of the
+      <p className='mt-10'>
+        Are you part of a cultural space and want to become a member of the
         archive?{' '}
         <Link
           href='/spaces/signup'
