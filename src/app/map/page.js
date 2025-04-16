@@ -14,7 +14,7 @@ const markerColors = {
   bar: '#1F51FF', // neon blue
   cafe: '#9D00FF', // neon purple
   gallery: '#FFFF00', // neon yellow
-  studio: '#39FF14', // neon green
+  kunstverein: '#39FF14', // neon green
   kino: '#FF073A', // neon red
   club: '#F8F8F8', // off white for club
   default: '#000000', // default black
