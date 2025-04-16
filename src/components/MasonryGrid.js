@@ -22,7 +22,7 @@ export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
           <p className='text-sm italic mt-4 text-center'>
             No more events found.
           </p>
-          <p className='mt-20 text-lg'>
+          <p className='mt-20 text-center'>
             Are you part of a subcultural space, and want to become a member of
             eos archive?{' '}
             <a

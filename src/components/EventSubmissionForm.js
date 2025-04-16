@@ -105,11 +105,11 @@ export default function EventSubmissionForm({ spaceId }) {
   };
 
   return (
-    <div className='glow-box'>
-      <h2 className='text-lg font-bold mb-4'>submit an event</h2>
+    <div>
+      <h2 className='font-bold mb-2'>submit an event</h2>
       <form
         onSubmit={handleSubmit}
-        className='space-y-4'>
+        className='space-y-4 glow-box'>
         <div>
           <label className='block text-sm mb-1'>Title*</label>
           <input

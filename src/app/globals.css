@@ -35,17 +35,17 @@ body {
 
 /* Container to center content */
 .container {
-  @apply max-w-7xl mx-auto px-4 py-2;
+  @apply mx-auto px-4 py-2;
 }
 
 /* Main page content styling */
 .page-content {
-  @apply flex-grow px-4 p-24 overflow-auto mx-auto my-5;
+  @apply mt-16 flex-grow overflow-auto mx-auto;
 }
 
 /* Footer container styling */
 .footer-container {
-  @apply max-w-6xl mx-auto py-4 flex flex-col md:flex-row items-center justify-between;
+  @apply mx-auto py-4 flex flex-col md:flex-row items-center justify-between;
 }
 
 /* Simple reusable button styling */
@@ -99,4 +99,11 @@ body {
   @apply absolute inset-0 z-10;
   @apply flex items-center justify-center;
   @apply bg-black bg-opacity-10 text-lg font-bold;
+}
+
+/* If you only want a special override for the event page: */
+.event-page-fullwidth {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }

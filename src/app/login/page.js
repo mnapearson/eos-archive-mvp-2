@@ -27,7 +27,7 @@ export default function LoginPage() {
     if (error) {
       setErrorMsg(error.message);
     } else {
-      router.push('/');
+      router.push('/spaces/admin');
     }
     setLoading(false);
   };

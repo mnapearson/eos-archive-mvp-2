@@ -11,7 +11,7 @@ export default function Spinner() {
           src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets/EOS24_metal_blue_transparent.png'
           alt='eos archive logo'
           width={300}
-          height={600}
+          height={300}
           priority
         />
       </div>

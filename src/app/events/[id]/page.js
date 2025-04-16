@@ -16,6 +16,7 @@ function formatDateTime(dateString, timeString) {
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const year = String(dateObj.getFullYear()).slice(-2);
+
   let timePart = '';
   if (timeString) {
     const segments = timeString.split(':');
@@ -33,9 +34,7 @@ function formatDateTime(dateString, timeString) {
 export default function EventPage() {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
-  // We'll store a "spaceAddress" if reverse geocoding is needed.
   const [spaceAddress, setSpaceAddress] = useState('');
-  // Controls whether the map panel is visible.
   const [mapOpen, setMapOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -49,7 +48,7 @@ export default function EventPage() {
         const response = await fetch(`/api/events/${id}`);
         const data = await response.json();
 
-        // If the API returns a nested space without an address, do reverse geocoding.
+        // If no space address, attempt reverse geocoding:
         if (data.space && !data.space.address) {
           const { latitude, longitude } = data.space;
           if (latitude && longitude) {
@@ -77,15 +76,22 @@ export default function EventPage() {
     fetchEvent();
   }, [id]);
 
-  if (!event) {
+  if (loading) {
     return <Spinner />;
   }
 
-  // Use joined space data if available.
-  const eventTitle = (event.title || 'UNTITLED').toUpperCase();
-  const eventCategory = event.category || '';
-  const eventDesigner = event.designer || '';
-  const dateTimeDisplay = formatDateTime(event.date, event.time);
+  if (!event) {
+    return (
+      <div className='py-20 px-4 text-center'>
+        <p className='text-sm text-gray-500'>Event not found.</p>
+      </div>
+    );
+  }
+
+  // Basic info
+  const eventTitle = event.title || 'Untitled';
+  const eventCategory = event.category || '—';
+  const eventDateTime = formatDateTime(event.date, event.time);
   const eventDescription = event.description || 'No description provided.';
   const displayedAddress =
     event.space?.address ||
@@ -93,46 +99,11 @@ export default function EventPage() {
     event.space?.city ||
     'UNKNOWN ADDRESS';
 
-  // Functions to update the global filters and route to the homepage.
-  const handleCityClick = (city) => {
-    setSelectedFilters((prev) => ({ ...prev, city: [city] }));
-    router.push('/');
-  };
-
-  const handleCategoryClick = (category) => {
-    setSelectedFilters((prev) => ({ ...prev, category: [category] }));
-    router.push('/');
-  };
-
-  // New function: clicking on the designer filters for that designer.
-  const handleDesignerClick = (designer) => {
-    setSelectedFilters((prev) => ({ ...prev, designer: [designer] }));
-    router.push('/');
-  };
-
-  const handleShare = async (e) => {
-    e.preventDefault();
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: event.title,
-          text: 'Check out this event I found on eos archive.',
-          url: window.location.href,
-        });
-      } catch (error) {
-        // User cancelled sharing.
-      }
-    } else {
-      alert('Sharing not supported in this browser.');
-    }
-  };
-
-  // Toggle the map panel open/closed.
+  // Toggle the map overlay
   const toggleMap = () => setMapOpen((prev) => !prev);
 
   return (
     <>
-      {' '}
       <Head>
         <title>{event.title} - eos archive</title>
         <meta
@@ -155,110 +126,122 @@ export default function EventPage() {
           name='twitter:card'
           content='summary_large_image'
         />
-        {/* You can add other OG tags as needed */}
       </Head>
-      <main>
+
+      {/* Container for entire layout */}
+      <div className='flex flex-col'>
+        {/* Return to archive link */}
         <div>
-          {/* Return Link */}
-          <div className='mb-4'>
-            <Link
-              href='/'
-              className='text-sm hover:text-gray-600'>
-              ← return to archive
-            </Link>
+          <Link
+            href='/'
+            className='text-sm hover:underline'>
+            ← return to archive
+          </Link>
+        </div>
+
+        {/* Two-column layout */}
+        <div className='flex flex-col md:flex-row flex-1 '>
+          {/* Left column: Flyer/Image */}
+          <div className='md:w-1/2  flex items-center justify-center p-4 md:p-8'>
+            {event.image_url ? (
+              <img
+                src={event.image_url}
+                alt={`Flyer for ${eventTitle}`}
+                className='max-w-full max-h-full object-contain'
+              />
+            ) : (
+              <p className='italic text-gray-600'>No flyer available</p>
+            )}
           </div>
 
-          {/* Two-column layout for event details */}
-          <div className='flex flex-col md:flex-row gap-8 mb-8'>
-            {/* Left Column: Flyer */}
-            <div className='md:w-2/3'>
-              {event.image_url ? (
-                <img
-                  src={event.image_url}
-                  alt={`Flyer for ${event.title}`}
-                  className='w-full h-auto rounded-lg shadow'
-                />
+          {/* Right column: text details */}
+          <div className='md:w-1/2 p-4 md:p-8 space-y-4 flex flex-col'>
+            {/* EVENT TITLE */}
+
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>Event Title</h3>
+              <p className='whitespace-pre-line'>{eventTitle}</p>
+            </div>
+
+            {/* DATE */}
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>Date</h3>
+              <p>{eventDateTime}</p>
+            </div>
+
+            {/* CATEGORY */}
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>Category</h3>
+              <p>{eventCategory}</p>
+            </div>
+
+            {/* SPACE NAME */}
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>Space</h3>
+              {event.space ? (
+                <Link
+                  href={`/spaces/${event.space.id}`}
+                  className='hover:underline'>
+                  {event.space.name || 'UNKNOWN SPACE'}
+                </Link>
               ) : (
-                <p className='italic text-gray-600'>No flyer available.</p>
+                <p>UNKNOWN SPACE</p>
               )}
             </div>
-            {/* Right Column: Event Info */}
-            <div className='md:w-1/4 flex flex-col justify-between'>
-              <div>
-                <div className='mb-1'>
-                  {/* Render clickable city and category buttons */}
-                  {event.space && event.space.city && (
-                    <div className='flex flex-row mb-4 gap-2'>
-                      <button
-                        onClick={() => handleCityClick(event.space.city)}
-                        className='button'>
-                        {event.space.city}
-                      </button>
-                      {eventCategory && (
-                        <button
-                          onClick={() => handleCategoryClick(eventCategory)}
-                          className='button'>
-                          {eventCategory}
-                        </button>
-                      )}{' '}
-                      <button
-                        onClick={() => handleDesignerClick(eventDesigner)}
-                        className='button'>
-                        {eventDesigner}
-                      </button>
-                    </div>
-                  )}
-                  <Link href={`/spaces/${event.space.id}`}>
-                    <p className='text-lg font-bold cursor-pointer hover:underline'>
-                      {event.space?.name || 'UNKNOWN SPACE'}
-                    </p>
-                  </Link>
-                  <h1 className='text-sm font-bold'>{eventTitle}</h1>
-                </div>
-                {dateTimeDisplay && (
-                  <p className='text-sm mb-2'>{dateTimeDisplay}</p>
-                )}
-                <p className='text-sm whitespace-pre-line mb-6'>
-                  {eventDescription}
-                </p>
-                <ShareButton
-                  title={event.title}
-                  text={`Event: ${event.title}\nDate: ${event.date} at ${event.time}\nCategory: ${event.category}`}
-                  url={`https://eosarchivemvp.netlify.app/events/${event.id}`}
-                  buttonText='Share Event'
-                  className='button'
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Slide-out Map Panel */}
-          {mapOpen && (
-            <div className='fixed inset-0 z-50 flex justify-end'>
-              {/* Semi-transparent overlay */}
-              <div
-                className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
+            {/* ADDRESS */}
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>Address</h3>
+              <button
                 onClick={toggleMap}
-                aria-hidden='true'
-              />
-              {/* Slide-out panel from the right */}
-              <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
-                {/* Close button */}
-                <button
-                  className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
-                  onClick={toggleMap}
-                  aria-label='Close map'>
-                  ✕
-                </button>
-                <MapComponent
-                  eventId={id}
-                  address={displayedAddress}
-                />
-              </div>
+                className='text-sm hover:underline text-left'>
+                {displayedAddress}
+              </button>
             </div>
-          )}
+
+            {/* DESCRIPTION */}
+            <div>
+              {' '}
+              <h3 className='uppercase text-xs font-bold mb-1'>Description</h3>
+              <p className='whitespace-pre-line text-sm leading-relaxed'>
+                {eventDescription}
+              </p>
+            </div>
+            <ShareButton
+              title={eventTitle}
+              text={`Event: ${event.title}\nDate: ${event.date} @ ${event.time}\nCategory: ${event.category}`}
+              url={`https://eosarchivemvp.netlify.app/events/${event.id}`}
+              buttonText='SHARE'
+              className='uppercase tracking-wide border border-[var(--foreground)] px-4 py-2 hover:bg-[var(--foreground)] hover:text-[var(--background)] transition'
+            />
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Slide-out Map Panel */}
+      {mapOpen && (
+        <div className='fixed inset-0 z-50 flex justify-end'>
+          {/* Semi-transparent overlay */}
+          <div
+            className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
+            onClick={toggleMap}
+            aria-hidden='true'
+          />
+          {/* Slide-out panel from the right */}
+          <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/90 backdrop-blur-md flex flex-col transition-transform duration-300 border-l border-[var(--foreground)]'>
+            <button
+              className='absolute top-2 left-2 text-lg z-30 px-2 py-1 border border-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition'
+              onClick={toggleMap}
+              aria-label='Close map'>
+              Close
+            </button>
+            <MapComponent
+              eventId={id}
+              address={displayedAddress}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

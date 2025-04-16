@@ -283,7 +283,7 @@ export default function SpaceAdminDashboard() {
               <EventSubmissionForm spaceId={space.id} />
             </div>
             <div>
-              <h3 className='text-lg font-bold mb-2'>pending events</h3>
+              <h3 className='font-bold mb-2'>pending events</h3>
               <AdminEventsManager
                 spaceId={space.id}
                 filter='pending'
