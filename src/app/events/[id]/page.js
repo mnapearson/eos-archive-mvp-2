@@ -33,12 +33,12 @@ function formatDateTime(dateString, timeString) {
 
 export default function EventPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { setSelectedFilters } = useContext(FilterContext);
   const [event, setEvent] = useState(null);
   const [spaceAddress, setSpaceAddress] = useState('');
   const [mapOpen, setMapOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const { setSelectedFilters } = useContext(FilterContext);
 
   useEffect(() => {
     async function fetchEvent() {
@@ -90,14 +90,21 @@ export default function EventPage() {
 
   // Basic info
   const eventTitle = event.title || 'Untitled';
+  // Use original values for filtering
   const eventCategory = event.category || '—';
+  const eventDesigner = event.designer || '-';
   const eventDateTime = formatDateTime(event.date, event.time);
-  const eventDescription = event.description || 'No description provided.';
   const displayedAddress =
     event.space?.address ||
     spaceAddress ||
     event.space?.city ||
     'UNKNOWN ADDRESS';
+  // Function to handle filter clicks:
+  const handleFilterClick = (filterKey, value) => {
+    // Update the global filter context. Here we override the filter for that key.
+    setSelectedFilters((prev) => ({ ...prev, [filterKey]: [value] }));
+    router.push('/');
+  };
 
   // Toggle the map overlay
   const toggleMap = () => setMapOpen((prev) => !prev);
@@ -142,7 +149,7 @@ export default function EventPage() {
         {/* Two-column layout */}
         <div className='flex flex-col md:flex-row flex-1 '>
           {/* Left column: Flyer/Image */}
-          <div className='md:w-1/2  flex items-center justify-center p-4 md:p-8'>
+          <div className='md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8'>
             {event.image_url ? (
               <img
                 src={event.image_url}
@@ -157,22 +164,28 @@ export default function EventPage() {
           {/* Right column: text details */}
           <div className='md:w-1/2 p-4 md:p-8 space-y-4 flex flex-col'>
             {/* EVENT TITLE */}
-
             <div>
-              <h3 className='uppercase text-xs font-bold mb-1'>Event Title</h3>
               <p className='whitespace-pre-line'>{eventTitle}</p>
             </div>
 
             {/* DATE */}
             <div>
               <h3 className='uppercase text-xs font-bold mb-1'>Date</h3>
-              <p>{eventDateTime}</p>
+              <button
+                onClick={() => handleFilterClick('date', event.date)}
+                className='hover:underline'>
+                {eventDateTime}
+              </button>
             </div>
 
             {/* CATEGORY */}
             <div>
               <h3 className='uppercase text-xs font-bold mb-1'>Category</h3>
-              <p>{eventCategory}</p>
+              <button
+                onClick={() => handleFilterClick('category', eventCategory)}
+                className='hover:underline'>
+                {eventCategory}
+              </button>
             </div>
 
             {/* SPACE NAME */}
@@ -194,19 +207,29 @@ export default function EventPage() {
               <h3 className='uppercase text-xs font-bold mb-1'>Address</h3>
               <button
                 onClick={toggleMap}
-                className='text-sm hover:underline text-left'>
+                className='hover:underline text-left'>
                 {displayedAddress}
               </button>
             </div>
 
             {/* DESCRIPTION */}
             <div>
-              {' '}
               <h3 className='uppercase text-xs font-bold mb-1'>Description</h3>
-              <p className='whitespace-pre-line text-sm leading-relaxed'>
-                {eventDescription}
+              <p className='whitespace-pre-line leading-relaxed'>
+                {event.description || 'No description provided.'}
               </p>
             </div>
+
+            {/* DESIGNER */}
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>Flyer Design</h3>
+              <button
+                onClick={() => handleFilterClick('designer', eventDesigner)}
+                className='hover:underline'>
+                {eventDesigner}
+              </button>
+            </div>
+
             <ShareButton
               title={eventTitle}
               text={`Event: ${event.title}\nDate: ${event.date} @ ${event.time}\nCategory: ${event.category}`}

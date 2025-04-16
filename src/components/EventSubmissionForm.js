@@ -154,17 +154,7 @@ export default function EventSubmissionForm({ spaceId }) {
             className='input'
           />
         </div>
-        <div>
-          <label className='block text-sm mb-1'>Designer*</label>
-          <input
-            type='text'
-            name='designer'
-            value={formData.designer}
-            onChange={handleInputChange}
-            required
-            className='input'
-          />
-        </div>
+
         <div>
           <label className='block text-sm mb-1'>Description</label>
           <textarea
@@ -176,11 +166,22 @@ export default function EventSubmissionForm({ spaceId }) {
           />
         </div>
         <div>
-          <label className='block text-sm mb-1'>Event Art*</label>
+          <label className='block text-sm mb-1'>Event Flyer*</label>
           <input
             type='file'
             accept='image/*'
             onChange={handleFileChange}
+            required
+            className='input'
+          />
+        </div>
+        <div>
+          <label className='block text-sm mb-1'>Flyer Designer*</label>
+          <input
+            type='text'
+            name='designer'
+            value={formData.designer}
+            onChange={handleInputChange}
             required
             className='input'
           />
