@@ -4,20 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { space } from 'postcss/lib/list';
+import markerColors from '@/lib/markerColors';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-
-const markerColors = {
-  'off-space': '#FF6EC7', // neon pink
-  bar: '#1F51FF', // neon blue
-  cafe: '#9D00FF', // neon purple
-  gallery: '#FFFF00', // neon yellow
-  kunstverein: '#39FF14', // neon green
-  kino: '#FF073A', // neon red
-  club: '#F8F8F8', // off-white
-  default: '#000000', // default black
-};
 
 export default function MapComponent({
   eventId,
@@ -81,11 +70,8 @@ export default function MapComponent({
       centerLng = 12.3731;
     }
 
-    // Determine the zoom level based on props and context.
-    // If an initialZoom is passed in, use that.
-    // Otherwise, if this is an event detail, use 14, or a default for spaces like 12.
     const finalZoom =
-      typeof initialZoom === 'number' ? initialZoom : eventId ? 14 : 12; // change 12 to whatever default you prefer for spaces
+      typeof initialZoom === 'number' ? initialZoom : eventId ? 14 : 12;
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -94,14 +80,12 @@ export default function MapComponent({
       zoom: finalZoom,
     });
 
-    // Add navigation controls.
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Add Mapbox Geocoder control at the top-left.
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       mapboxgl: mapboxgl,
-      marker: false, // we already add markers manually
+      marker: false,
     });
     map.addControl(geocoder, 'top-left');
 

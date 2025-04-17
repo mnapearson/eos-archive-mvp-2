@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Combobox } from '@headlessui/react';
+import markerColors from '@/lib/markerColors';
+
+const SPACE_TYPES = Object.keys(markerColors);
 import { ChevronDownIcon } from '@heroicons/react/solid';
 
 export default function SpaceSignUpPage() {
@@ -14,8 +17,6 @@ export default function SpaceSignUpPage() {
   const [spaceName, setSpaceName] = useState('');
   // Instead of a plain input, we use a combobox for the space type.
   const [spaceType, setSpaceType] = useState('');
-  const [typeOptions, setTypeOptions] = useState([]); // Options pulled from DB
-  const [query, setQuery] = useState('');
 
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -29,33 +30,6 @@ export default function SpaceSignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [errorMsg, setErrorMsg] = useState('');
-
-  // Fetch existing space types from approved spaces.
-  useEffect(() => {
-    async function fetchTypeOptions() {
-      // Assuming you want to show all existing types from your spaces table.
-      // Adjust the query as needed if you have a "status" column.
-      const { data, error } = await supabase.from('spaces').select('type');
-      if (error) {
-        console.error('Error fetching space types:', error);
-      } else {
-        // Use a Set to extract distinct non-null types
-        const types = Array.from(
-          new Set(data.map((item) => item.type).filter(Boolean))
-        );
-        setTypeOptions(types);
-      }
-    }
-    fetchTypeOptions();
-  }, [supabase]);
-
-  // Filter options based on the current query.
-  const filteredOptions =
-    query === ''
-      ? typeOptions
-      : typeOptions.filter((option) =>
-          option.toLowerCase().includes(query.toLowerCase())
-        );
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -159,45 +133,24 @@ export default function SpaceSignUpPage() {
         </div>
         <div>
           <label className='block mb-1 text-sm'>Space Type*</label>
-          <Combobox
+          <select
+            className='input'
             value={spaceType}
-            onChange={setSpaceType}>
-            <div className='relative'>
-              <Combobox.Input
-                className='input'
-                displayValue={(type) => type || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setQuery(value);
-                  setSpaceType(value);
-                }}
-              />
-              <Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
-                <ChevronDownIcon
-                  className='w-5 h-5'
-                  aria-hidden='true'
-                />
-              </Combobox.Button>
-              {filteredOptions.length > 0 && (
-                <Combobox.Options className='absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-[var(--background)] border border-[var(--foreground)]'>
-                  {filteredOptions.map((option, idx) => (
-                    <Combobox.Option
-                      key={idx}
-                      value={option}
-                      className={({ active }) =>
-                        `cursor-pointer select-none p-2 ${
-                          active
-                            ? 'bg-[var(--foreground)] text-[var(--background)]'
-                            : ''
-                        }`
-                      }>
-                      {option}
-                    </Combobox.Option>
-                  ))}
-                </Combobox.Options>
-              )}
-            </div>
-          </Combobox>
+            onChange={(e) => setSpaceType(e.target.value)}
+            required>
+            <option
+              value=''
+              disabled>
+              Select a space type
+            </option>
+            {SPACE_TYPES.map((type) => (
+              <option
+                key={type}
+                value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className='block mb-1 text-sm'>Street Address*</label>

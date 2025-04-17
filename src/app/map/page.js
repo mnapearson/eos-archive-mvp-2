@@ -4,21 +4,11 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
+import markerColors from '@/lib/markerColors';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-const markerColors = {
-  'off-space': '#FF6EC7', // neon pink
-  bar: '#1F51FF', // neon blue
-  cafe: '#9D00FF', // neon purple
-  gallery: '#FFFF00', // neon yellow
-  kunstverein: '#39FF14', // neon green
-  kino: '#FF073A', // neon red
-  club: '#F8F8F8', // off white for club
-  default: '#000000', // default black
-};
 
 export default function SpacesPage() {
   const [spaces, setSpaces] = useState([]);

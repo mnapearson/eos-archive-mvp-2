@@ -9,26 +9,31 @@ import { FilterContext } from '@/contexts/FilterContext';
 import Head from 'next/head';
 import ShareButton from '@/components/ShareButton';
 
-// Format the date/time: "DD.MM.YY @ HH.MM"
-function formatDateTime(dateString, timeString) {
-  if (!dateString) return '';
-  const dateObj = new Date(dateString);
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const year = String(dateObj.getFullYear()).slice(-2);
+// Format a date and time range: "DD.MM-DD.MM.YY @ HH.MM-HH.MM"
+function formatDateTime(
+  startDateString,
+  endDateString,
+  startTimeString,
+  endTimeString
+) {
+  if (!startDateString || !endDateString) return '';
+  const startDate = new Date(startDateString);
+  const endDate = new Date(endDateString);
+
+  const d1 = String(startDate.getDate()).padStart(2, '0');
+  const m1 = String(startDate.getMonth() + 1).padStart(2, '0');
+  const d2 = String(endDate.getDate()).padStart(2, '0');
+  const m2 = String(endDate.getMonth() + 1).padStart(2, '0');
+  const y = String(startDate.getFullYear()).slice(-2);
 
   let timePart = '';
-  if (timeString) {
-    const segments = timeString.split(':');
-    if (segments.length >= 2) {
-      timePart = `${segments[0]}.${segments[1]}`;
-    } else {
-      timePart = timeString;
-    }
+  if (startTimeString && endTimeString) {
+    const [h1, min1] = startTimeString.split(':');
+    const [h2, min2] = endTimeString.split(':');
+    timePart = ` @ ${h1}.${min1}-${h2}.${min2}`;
   }
-  return timePart
-    ? `${day}.${month}.${year} @ ${timePart}`
-    : `${day}.${month}.${year}`;
+
+  return `${d1}.${m1}-${d2}.${m2}.${y}${timePart}`;
 }
 
 export default function EventPage() {
@@ -93,7 +98,12 @@ export default function EventPage() {
   // Use original values for filtering
   const eventCategory = event.category || '—';
   const eventDesigner = event.designer || '-';
-  const eventDateTime = formatDateTime(event.date, event.time);
+  const eventDateTime = formatDateTime(
+    event.start_date,
+    event.end_date,
+    event.start_time,
+    event.end_time
+  );
   const displayedAddress =
     event.space?.address ||
     spaceAddress ||
@@ -172,7 +182,7 @@ export default function EventPage() {
             <div>
               <h3 className='uppercase text-xs font-bold mb-1'>Date</h3>
               <button
-                onClick={() => handleFilterClick('date', event.date)}
+                onClick={() => handleFilterClick('date', event.start_date)}
                 className='hover:underline'>
                 {eventDateTime}
               </button>
@@ -232,7 +242,7 @@ export default function EventPage() {
 
             <ShareButton
               title={eventTitle}
-              text={`Event: ${event.title}\nDate: ${event.date} @ ${event.time}\nCategory: ${event.category}`}
+              text={`Event: ${event.title}\nDate: ${event.start_date} @ ${event.start_time}\nCategory: ${event.category}`}
               url={`https://eosarchivemvp.netlify.app/events/${event.id}`}
               buttonText='SHARE'
               className='uppercase tracking-wide border border-[var(--foreground)] px-4 py-2 hover:bg-[var(--foreground)] hover:text-[var(--background)] transition'
