@@ -61,8 +61,10 @@ export default function AdminEventsManager({
     setEditingEventId(ev.id);
     setEditFormData({
       title: ev.title,
-      date: ev.date,
-      time: ev.time,
+      start_date: ev.start_date,
+      end_date: ev.end_date,
+      start_time: ev.start_time,
+      end_time: ev.end_time,
       category: ev.category,
       designer: ev.designer,
       description: ev.description,
@@ -236,22 +238,50 @@ export default function AdminEventsManager({
               </div>
               <div className='flex gap-4'>
                 <div className='w-1/2'>
-                  <label className='block text-sm font-medium'>Date</label>
+                  <label className='block text-sm font-medium'>
+                    Start Date
+                  </label>
                   <input
                     type='date'
-                    name='date'
-                    value={editFormData.date}
+                    name='start_date'
+                    value={editFormData.start_date}
                     onChange={handleInputChange}
                     required
                     className='input mt-1'
                   />
                 </div>
                 <div className='w-1/2'>
-                  <label className='block text-sm font-medium'>Time</label>
+                  <label className='block text-sm font-medium'>End Date</label>
+                  <input
+                    type='date'
+                    name='end_date'
+                    value={editFormData.end_date}
+                    onChange={handleInputChange}
+                    required
+                    className='input mt-1'
+                  />
+                </div>
+              </div>
+              <div className='flex gap-4'>
+                <div className='w-1/2'>
+                  <label className='block text-sm font-medium'>
+                    Start Time
+                  </label>
                   <input
                     type='time'
-                    name='time'
-                    value={editFormData.time}
+                    name='start_time'
+                    value={editFormData.start_time}
+                    onChange={handleInputChange}
+                    required
+                    className='input mt-1'
+                  />
+                </div>
+                <div className='w-1/2'>
+                  <label className='block text-sm font-medium'>End Time</label>
+                  <input
+                    type='time'
+                    name='end_time'
+                    value={editFormData.end_time}
                     onChange={handleInputChange}
                     required
                     className='input mt-1'
