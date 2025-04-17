@@ -364,9 +364,11 @@ export default function AdminEventsManager({
                 <div>
                   <h3 className='text-md font-bold'>{ev.title}</h3>
                   <p className='text-sm text-gray-400 mt-2'>
-                    {ev.date} at {ev.time}
+                    Start: {ev.start_date} at {ev.start_time}
+                    <br />
+                    End: {ev.end_date} at {ev.end_time}
                   </p>
-                  <p className='text-sm text-gray-400 mt-2'>
+                  <p className='text-sm text-gray-400'>
                     Category: {ev.category}
                   </p>
                   <p className='text-sm text-gray-400'>

@@ -10,8 +10,10 @@ export default function EventSubmissionForm({ spaceId }) {
 
   const [formData, setFormData] = useState({
     title: '',
-    date: '',
-    time: '',
+    start_date: '',
+    end_date: '',
+    start_time: '',
+    end_time: '',
     category: '',
     designer: '',
     description: '',
@@ -94,8 +96,10 @@ export default function EventSubmissionForm({ spaceId }) {
     // Optionally, reset the form and redirect after a delay
     setFormData({
       title: '',
-      date: '',
-      time: '',
+      start_date: '',
+      end_date: '',
+      start_time: '',
+      end_time: '',
       category: '',
       designer: '',
       description: '',
@@ -121,27 +125,53 @@ export default function EventSubmissionForm({ spaceId }) {
             className='input'
           />
         </div>
-        <div>
-          <label className='block text-sm mb-1'>Date*</label>
-          <input
-            type='date'
-            name='date'
-            value={formData.date}
-            onChange={handleInputChange}
-            required
-            className='input'
-          />
+        <div className='flex gap-4'>
+          <div className='w-1/2'>
+            <label className='block text-sm mb-1'>Start Date*</label>
+            <input
+              type='date'
+              name='start_date'
+              value={formData.start_date}
+              onChange={handleInputChange}
+              required
+              className='input'
+            />
+          </div>
+          <div className='w-1/2'>
+            <label className='block text-sm mb-1'>End Date*</label>
+            <input
+              type='date'
+              name='end_date'
+              value={formData.end_date}
+              onChange={handleInputChange}
+              required
+              className='input'
+            />
+          </div>
         </div>
-        <div>
-          <label className='block text-sm mb-1'>Time*</label>
-          <input
-            type='time'
-            name='time'
-            value={formData.time}
-            onChange={handleInputChange}
-            required
-            className='input'
-          />
+        <div className='flex gap-4'>
+          <div className='w-1/2'>
+            <label className='block text-sm mb-1'>Start Time*</label>
+            <input
+              type='time'
+              name='start_time'
+              value={formData.start_time}
+              onChange={handleInputChange}
+              required
+              className='input'
+            />
+          </div>
+          <div className='w-1/2'>
+            <label className='block text-sm mb-1'>End Time*</label>
+            <input
+              type='time'
+              name='end_time'
+              value={formData.end_time}
+              onChange={handleInputChange}
+              required
+              className='input'
+            />
+          </div>
         </div>
         <div>
           <label className='block text-sm mb-1'>Category*</label>
