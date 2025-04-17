@@ -36,13 +36,14 @@ export function FilterProvider({ children }) {
       // 1. Query the events table for approved events only.
       let eventsQuery = supabase
         .from('events')
-        .select('id, space_id, date, category, designer')
+        .select('id, space_id, start_date, category, designer')
         .eq('approved', true);
 
       // 2. Apply event-based filters (date, category, designer) if any.
       // We do NOT filter by city or space here because those live in the spaces table.
       ['date', 'category', 'designer'].forEach((key) => {
         if (selectedFilters[key] && selectedFilters[key].length > 0) {
+          const column = key === 'date' ? 'start_date' : key;
           eventsQuery = eventsQuery.in(key, selectedFilters[key]);
         }
       });
@@ -116,7 +117,7 @@ export function FilterProvider({ children }) {
 
       // For date, category, designer, we use the finalEvents
       const uniqueDates = Array.from(
-        new Set(finalEvents.map((e) => e.date).filter(Boolean))
+        new Set(finalEvents.map((e) => e.start_date).filter(Boolean))
       );
       const uniqueCategories = Array.from(
         new Set(finalEvents.map((e) => e.category).filter(Boolean))

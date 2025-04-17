@@ -140,7 +140,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
       }`}>
       {/* Sidebar Panel */}
       <div
-        className={`border-x border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/10 backdrop-blur-xl text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`border-r border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/10 backdrop-blur-xl text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Scrollable Content */}
