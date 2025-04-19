@@ -1,42 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import { createClient } from '@supabase/supabase-js';
 import Spinner from '@/components/Spinner';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-function formatDateTime(dateString, timeString) {
-  if (!dateString) return '';
-  const dateObj = new Date(dateString);
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const year = String(dateObj.getFullYear()).slice(-2);
-  let timePart = '';
-  if (timeString) {
-    const segments = timeString.split(':');
-    if (segments.length >= 2) {
-      timePart = `${segments[0]}.${segments[1]}`;
-    } else {
-      timePart = timeString;
-    }
-  }
-  return timePart
-    ? `${day}.${month}.${year} @ ${timePart}`
-    : `${day}.${month}.${year}`;
-}
+import { formatDateRange } from '@/lib/metadata';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function SpacePage() {
   const { id } = useParams();
   const [space, setSpace] = useState(null);
   const [events, setEvents] = useState([]);
-  const [viewMode, setViewMode] = useState('flyers');
+
+  // Local filter and sort state
+  const [categoryFilter, setCategoryFilter] = useState(null);
+
+  // Derive unique categories from fetched events
+  const categories = useMemo(
+    () => Array.from(new Set(events.map((e) => e.category).filter(Boolean))),
+    [events]
+  );
+
+  const displayEvents = useMemo(() => {
+    const today = new Date();
+    let evs = events;
+
+    // Category filter, if any
+    if (categoryFilter) {
+      evs = evs.filter((e) => e.category === categoryFilter);
+    }
+
+    // Keep only events whose end_date (or start_date) is today or in future
+    evs = evs.filter((e) => {
+      const end = e.end_date ? new Date(e.end_date) : new Date(e.start_date);
+      return end >= today;
+    });
+
+    // Sort ascending by start_date
+    return evs
+      .slice()
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+  }, [events, categoryFilter]);
 
   useEffect(() => {
     async function fetchSpaceDetails() {
@@ -84,66 +91,66 @@ export default function SpacePage() {
         <div className='mt-4'>
           <MapComponent spaces={[space]} />
         </div>
-        <div className='mt-8'>
-          <h2 className='font-semibold'>{space.name} event archive</h2>
-          <div className='mt-2 mb-4 flex gap-2'>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`button ${
-                viewMode === 'list'
-                  ? 'bg-[var(--foreground)] text-[var(--background)]'
-                  : 'bg-transparent text-[var(--foreground)]'
-              }`}>
-              LIST VIEW
-            </button>
-            <button
-              onClick={() => setViewMode('flyers')}
-              className={`button ${
-                viewMode === 'flyers'
-                  ? 'bg-[var(--foreground)] text-[var(--background)]'
-                  : 'bg-transparent text-[var(--foreground)]'
-              }`}>
-              FLYER VIEW
-            </button>
+        <div className='mb-8'>
+          <h2 className='font-semibold mb-6'>{space.name} events</h2>
+
+          {/* Filter and sort controls */}
+          <div className='mt-4 mb-4 flex flex-wrap items-center gap-4 justify-between'>
+            {/* Category filters */}
+            <div className='flex flex-wrap items-center gap-2'>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() =>
+                    setCategoryFilter(categoryFilter === cat ? null : cat)
+                  }
+                  className={`button ${
+                    categoryFilter === cat
+                      ? 'bg-[var(--accent)] text-[var(--background)]'
+                      : ''
+                  }`}>
+                  {cat}
+                  {categoryFilter === cat && (
+                    <span className='ml-1'>&times;</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           {events.length > 0 ? (
-            viewMode === 'list' ? (
-              <ul className='space-y-2'>
-                {events.map((event) => (
-                  <li
-                    key={event.id}
-                    className='border-b border-[var(--foreground)] pb-2'>
+            <ul className='space-y-4'>
+              {displayEvents.map((event) => (
+                <li
+                  key={event.id}
+                  className='flex flex-col md:flex-row items-start gap-2 pb-4 border-b border-[var(--foreground)]'>
+                  <div className='w-1/3'>
+                    <img
+                      src={event.image_url || '/placeholder.jpg'}
+                      alt={event.title}
+                      className='w-full max-w-xs h-auto rounded shadow'
+                    />
+                  </div>
+                  <div className='flex-1 space-y-1'>
                     <Link
                       href={`/events/${event.id}`}
-                      className='underline text-sm'>
+                      className='underline text-lg font-semibold'>
                       {event.title}
                     </Link>
-                    <p className='text-sm italic mb-1'>{event.category}</p>
+                    <p className='text-sm italic'>{event.category}</p>
                     <p className='text-sm mb-1'>
-                      {formatDateTime(event.date, event.time)}
+                      {formatDateRange(
+                        event.start_date,
+                        event.end_date,
+                        event.start_time,
+                        event.end_time
+                      )}
                     </p>
                     <p className='text-sm'>{event.description}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className='grid grid-cols-3 gap-4'>
-                {events.map((event) => (
-                  <Link
-                    key={event.id}
-                    href={`/events/${event.id}`}>
-                    <div className='cursor-pointer'>
-                      <img
-                        src={event.image_url || '/placeholder.jpg'}
-                        alt={event.title}
-                        className='w-full h-auto rounded shadow'
-                      />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
             <p className='text-sm italic'>No events found for this space.</p>
           )}
