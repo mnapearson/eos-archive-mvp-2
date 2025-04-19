@@ -21,6 +21,7 @@ export async function generateMetadata({ params }) {
 }
 
 // This page simply delegates to the client component
-export default function Page({ params }) {
-  return <EventPageClient eventId={params.id} />;
+export default async function Page({ params }) {
+  const { id } = params;
+  return <EventPageClient eventId={id} />;
 }
