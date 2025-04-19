@@ -32,7 +32,7 @@ export default function AdminPage() {
         .single();
 
       if (error || profile?.role !== 'admin') {
-        router.push('/');
+        router.push('/', { scroll: false });
         return;
       }
 

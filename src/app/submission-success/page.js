@@ -8,7 +8,8 @@ export default function SubmissionSuccess() {
       <div className='mb-4'>
         <Link
           href='/spaces/admin'
-          className='text-sm hover:text-gray-600'>
+          className='text-sm hover:text-gray-600'
+          scroll={false}>
           ← return to dashboard
         </Link>
       </div>

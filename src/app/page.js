@@ -33,7 +33,8 @@ export default function HomePage() {
         // 2. Apply filters for fields directly on events (date, category, designer).
         ['date', 'category', 'designer'].forEach((key) => {
           if (selectedFilters[key] && selectedFilters[key].length > 0) {
-            query = query.in(key, selectedFilters[key]);
+            const column = key === 'date' ? 'start_date' : key;
+            query = query.in(column, selectedFilters[key]);
           }
         });
 

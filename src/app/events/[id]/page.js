@@ -6,10 +6,11 @@ import { buildEventMetadata } from '@/lib/metadata';
 
 export async function generateMetadata({ params }) {
   // Fetch event + space name for metadata
+  const { id } = await params;
   const { data: event, error } = await supabase
     .from('events')
     .select('*, space:spaces(id, name)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !event) {
@@ -22,6 +23,6 @@ export async function generateMetadata({ params }) {
 
 // This page simply delegates to the client component
 export default async function Page({ params }) {
-  const { id } = params;
+  const { id } = await params;
   return <EventPageClient eventId={id} />;
 }

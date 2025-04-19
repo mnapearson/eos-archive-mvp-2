@@ -13,6 +13,7 @@ export default function Spinner() {
           width={300}
           height={300}
           priority
+          style={{ width: 'auto', height: 'auto' }}
         />
       </div>
     </div>

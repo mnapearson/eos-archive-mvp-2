@@ -1,4 +1,4 @@
-// CookieConsentBar.js
+// src/components/CookieConsentBar.js
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -21,10 +21,7 @@ export default function CookieConsentBar() {
   if (!visible) return null;
 
   return (
-    <div
-      className='fixed bottom-0 left-0 right-0 bg-[var(--background)]/80 backdrop-blur-md
-      border-t border-[var(--foreground)] text-[var(--foreground)] p-6 z-50 flex
-      items-center justify-between'>
+    <div className='fixed bottom-0 left-0 right-0 bg-[var(--background)]/80 backdrop-blur-md border-t border-[var(--foreground)] text-[var(--foreground)] p-6 z-50 flex items-center justify-between'>
       <p className='text-sm mr-4'>
         We use only essential cookies necessary for site functionality.
       </p>

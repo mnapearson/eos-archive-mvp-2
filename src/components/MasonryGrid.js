@@ -40,7 +40,9 @@ export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
           <div
             key={item.id}
             className='mb-3'>
-            <Link href={`/events/${item.id}`}>
+            <Link
+              href={`/events/${item.id}`}
+              scroll={false}>
               <div className='overflow-hidden rounded-sm transition-none'>
                 <img
                   src={item.image_url || '/placeholder.jpg'}

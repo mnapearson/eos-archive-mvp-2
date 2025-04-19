@@ -45,8 +45,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
   } = useContext(FilterContext);
 
   const router = useRouter();
-  const pathname = usePathname();
-  const user = useUserSimple();
 
   // State to control accordion open/close for each filter category
   const [openFilters, setOpenFilters] = useState({
@@ -95,7 +93,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
         values.forEach((val) => params.append(key, val));
       }
     });
-    router.push(`/?${params.toString()}`);
+    router.push(`/?${params.toString()}`, { scroll: false });
     toggleMenu();
   }
 

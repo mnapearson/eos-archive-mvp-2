@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import './globals.css';
 import NavBar from '@/components/NavBar';
 import CookieConsentBar from '@/components/CookieConsentBar';

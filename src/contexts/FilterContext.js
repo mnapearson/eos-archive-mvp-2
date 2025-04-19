@@ -44,7 +44,7 @@ export function FilterProvider({ children }) {
       ['date', 'category', 'designer'].forEach((key) => {
         if (selectedFilters[key] && selectedFilters[key].length > 0) {
           const column = key === 'date' ? 'start_date' : key;
-          eventsQuery = eventsQuery.in(key, selectedFilters[key]);
+          eventsQuery = eventsQuery.in(column, selectedFilters[key]);
         }
       });
 

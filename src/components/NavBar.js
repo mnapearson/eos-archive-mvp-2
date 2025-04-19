@@ -2,18 +2,15 @@
 
 import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-
+import { supabase } from '@/lib/supabaseClient';
 // Custom hook to subscribe to auth state changes
 function useUserSimple() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const supabase = createClientComponentClient();
     // Get current session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);

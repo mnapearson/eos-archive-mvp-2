@@ -85,6 +85,7 @@ export default function EventPageClient({ eventId }) {
   return (
     <div className='flex flex-col'>
       <Link
+        scroll={false}
         href='/'
         className='text-sm hover:underline mb-4'>
         ← return to archive

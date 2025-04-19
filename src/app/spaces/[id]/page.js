@@ -71,7 +71,8 @@ export default function SpacePage() {
     <div>
       <Link
         href='/map'
-        className='text-sm hover:text-gray-600'>
+        className='text-sm hover:text-gray-600'
+        scroll={false}>
         ← return to spaces map
       </Link>
       <div className='mt-4'>
