@@ -138,7 +138,7 @@ export default function SpacesPage() {
             placeholder='Search list by space name or city'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='w-full my-3 p-2 border border-[var(--foreground)] rounded text-xs'
+            className='input'
           />
         </div>
       )}

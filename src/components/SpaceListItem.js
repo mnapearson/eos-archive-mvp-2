@@ -142,7 +142,7 @@ export default function SpaceListItem({ space }) {
           <img
             src={space.image_url}
             alt={space.name}
-            className='h-[300px] w-auto object-cover rounded-sm'
+            className='h-auto w-[300px] object-cover rounded-sm'
           />
         </div>
       )}
