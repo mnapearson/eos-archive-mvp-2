@@ -146,7 +146,9 @@ export default function SpacePage() {
                         event.end_time
                       )}
                     </p>
-                    <p className='text-sm'>{event.description}</p>
+                    <p className='text-sm whitespace-pre-line'>
+                      {event.description}
+                    </p>
                   </div>
                 </li>
               ))}
