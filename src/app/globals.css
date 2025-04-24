@@ -35,12 +35,12 @@ body {
 
 /* Container to center content */
 .container {
-  @apply mx-auto px-4 py-2;
+  @apply mx-auto px-4 py-2 flex-1;
 }
 
 /* Main page content styling */
 .page-content {
-  @apply mt-20 flex-grow overflow-auto mx-auto;
+  @apply mt-20 flex-grow overflow-auto mx-auto flex-1;
 }
 
 /* Footer container styling */

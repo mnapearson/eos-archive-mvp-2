@@ -143,18 +143,17 @@ export default function SpacesPage() {
         </div>
       )}
       {/* Main content: List or Map view */}
-      <div className='flex-grow'>
-        {isListView ? (
-          <SpacesList spaces={sortedSpaces} />
-        ) : (
-          <MapComponent
-            spaces={spaces}
-            initialCenter={{ lat: 51.3397, lng: 12.3731 }}
-            initialZoom={11} // set the default zoom level for spaces here
-            activeTypes={activeTypes}
-          />
-        )}
-      </div>
+
+      {isListView ? (
+        <SpacesList spaces={sortedSpaces} />
+      ) : (
+        <MapComponent
+          spaces={spaces}
+          initialCenter={{ lat: 51.3397, lng: 12.3731 }}
+          initialZoom={11} // set the default zoom level for spaces here
+          activeTypes={activeTypes}
+        />
+      )}
     </div>
   );
 }
@@ -164,8 +163,8 @@ function SpacesList({ spaces }) {
     return <p className='text-sm italic'>No spaces found.</p>;
   }
   return (
-    <div>
-      <div className='space-y-4 overflow-auto h-full pr-2'>
+    <>
+      <div className='space-y-4'>
         {spaces.map((space) => (
           <SpaceListItem
             key={space.id}
@@ -183,6 +182,6 @@ function SpacesList({ spaces }) {
           Register here.
         </a>
       </p>
-    </div>
+    </>
   );
 }
