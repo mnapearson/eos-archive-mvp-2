@@ -91,7 +91,7 @@ export default function EventPageClient({ eventId }) {
         ← return to archive
       </Link>
 
-      <div className='flex flex-col md:flex-row flex-1'>
+      <div className='flex flex-col md:flex-row flex-1 items-start'>
         {/* Flyer */}
         <div className='md:w-1/2 flex items-center justify-center p-4 md:p-8'>
           {event.image_url ? (
@@ -113,7 +113,7 @@ export default function EventPageClient({ eventId }) {
             <h3 className='uppercase text-xs font-bold mb-1'>Date</h3>
             <button
               onClick={() => handleFilterClick('date', event.start_date)}
-              className='hover:underline'>
+              className='hover:underline text-left'>
               {eventDateTime}
             </button>
           </div>
