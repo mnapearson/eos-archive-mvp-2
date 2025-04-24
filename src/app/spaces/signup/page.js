@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Combobox } from '@headlessui/react';
 import markerColors from '@/lib/markerColors';
 
 const SPACE_TYPES = Object.keys(markerColors);
-import { ChevronDownIcon } from '@heroicons/react/solid';
 
 export default function SpaceSignUpPage() {
   const router = useRouter();

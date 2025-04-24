@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
-import { createClient } from '@supabase/supabase-js';
 import Spinner from '@/components/Spinner';
 import { formatDateRange } from '@/lib/date';
 import { supabase } from '@/lib/supabaseClient';
