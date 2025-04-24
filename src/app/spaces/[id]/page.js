@@ -13,9 +13,11 @@ export default function SpacePage() {
   const { id } = useParams();
   const [space, setSpace] = useState(null);
   const [events, setEvents] = useState([]);
+  const [timeFilter, setTimeFilter] = useState('upcoming');
 
   // Local filter and sort state
   const [categoryFilter, setCategoryFilter] = useState(null);
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
 
   // Derive unique categories from fetched events
   const categories = useMemo(
@@ -32,17 +34,30 @@ export default function SpacePage() {
       evs = evs.filter((e) => e.category === categoryFilter);
     }
 
-    // Keep only events whose end_date (or start_date) is today or in future
-    evs = evs.filter((e) => {
-      const end = e.end_date ? new Date(e.end_date) : new Date(e.start_date);
-      return end >= today;
-    });
+    // Time-based filter (only if selected)
+    if (timeFilter) {
+      evs = evs.filter((e) => {
+        const start = new Date(e.start_date);
+        const end = e.end_date ? new Date(e.end_date) : start;
+
+        if (timeFilter === 'upcoming') {
+          return end >= today;
+        }
+        if (timeFilter === 'current') {
+          return start <= today && end >= today;
+        }
+        if (timeFilter === 'archive') {
+          return end < today;
+        }
+        return true;
+      });
+    }
 
     // Sort ascending by start_date
     return evs
       .slice()
       .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
-  }, [events, categoryFilter]);
+  }, [events, categoryFilter, timeFilter]);
 
   useEffect(() => {
     async function fetchSpaceDetails() {
@@ -94,30 +109,74 @@ export default function SpacePage() {
           <h2 className='font-semibold mb-6'>{space.name} events</h2>
 
           {/* Filter and sort controls */}
-          <div className='mt-4 mb-4 flex flex-wrap items-center gap-4 justify-between'>
-            {/* Category filters */}
-            <div className='flex flex-wrap items-center gap-2'>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() =>
-                    setCategoryFilter(categoryFilter === cat ? null : cat)
-                  }
-                  className={`button ${
-                    categoryFilter === cat
-                      ? 'bg-[var(--accent)] text-[var(--background)]'
-                      : ''
-                  }`}>
-                  {cat}
-                  {categoryFilter === cat && (
-                    <span className='ml-1'>&times;</span>
-                  )}
-                </button>
-              ))}
+          <div className='mt-4 mb-4 flex flex-wrap items-center gap-4 justify-between overflow-visible'>
+            <div className='flex gap-2'>
+              {['upcoming', 'current', 'archive'].map((tf) => {
+                const active = timeFilter === tf;
+                return (
+                  <button
+                    key={tf}
+                    onClick={() => setTimeFilter(active ? null : tf)}
+                    className={`button ${
+                      active
+                        ? 'bg-[var(--accent)] text-[var(--background)] border-transparent'
+                        : ''
+                    }`}>
+                    {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                    {active ? ' ×' : ''}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Category filter dropdown */}
+            <div className='relative overflow-visible'>
+              <button
+                onClick={() => setShowCategoryMenu((open) => !open)}
+                className='button'>
+                {categoryFilter || 'Filter'} ▼
+              </button>
+              {showCategoryMenu && (
+                <div
+                  className='
+  absolute mt-2 bg-[var(--background)] border border-[var(--foreground)] rounded shadow-lg z-10
+  left-0 right-0 sm:left-auto sm:right-0
+  w-full sm:w-[200px]
+  max-h-60 overflow-y-auto
+'>
+                  <ul className='flex flex-col'>
+                    {categories.map((cat) => (
+                      <li key={cat}>
+                        <button
+                          className={`w-full text-xs text-left px-3 py-1 hover:bg-[var(--foreground)] hover:text-[var(--background)] uppercase ${
+                            categoryFilter === cat ? 'font-semibold' : ''
+                          }`}
+                          onClick={() => {
+                            setCategoryFilter(
+                              categoryFilter === cat ? null : cat
+                            );
+                            setShowCategoryMenu(false);
+                          }}>
+                          {cat}
+                        </button>
+                      </li>
+                    ))}
+                    <li>
+                      <button
+                        className='w-full text-left text-xs px-3 py-1 hover:bg-[var(--foreground)] hover:text-[var(--background)]'
+                        onClick={() => {
+                          setCategoryFilter(null);
+                          setShowCategoryMenu(false);
+                        }}>
+                        ALL
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 
-          {events.length > 0 ? (
+          {displayEvents.length > 0 ? (
             <ul className='space-y-4'>
               {displayEvents.map((event) => (
                 <li
@@ -156,7 +215,7 @@ export default function SpacePage() {
               ))}
             </ul>
           ) : (
-            <p className='text-sm italic'>No events found for this space.</p>
+            <p className='text-sm italic'>No events found.</p>
           )}
         </div>
       </div>
