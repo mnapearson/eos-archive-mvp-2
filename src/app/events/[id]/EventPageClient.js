@@ -169,7 +169,7 @@ export default function EventPageClient({ eventId }) {
             title={eventTitle}
             text={`${event.space?.name || ''} · ${eventDateTime}`}
             buttonText='Share'
-            className='uppercase tracking-wide border border-[var(--foreground)] px-4 py-2 hover:bg-[var(--foreground)] hover:text-[var(--background)] transition'
+            className='glow-button'
           />
         </div>
       </div>

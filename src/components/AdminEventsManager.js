@@ -11,6 +11,7 @@ export default function AdminEventsManager({
   spaceId,
   filter = '',
   editable,
+  emptyMessage = 'No events found yet for this space.',
 }) {
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -189,267 +190,252 @@ export default function AdminEventsManager({
     setEvents(updatedEvents);
   };
 
-  const handleShare = async (ev) => {
-    // Construct the shareable URL for the event; adjust your domain as necessary
-    const shareUrl = `https://your-domain.com/events/${ev.id}`;
-    // Construct a share message with desired event information
-    const shareText = `Event: ${ev.title}\nDate: ${ev.date} at ${
-      ev.time
-    }\nCategory: ${ev.category}\nSpace: ${ev.space_name || 'N/A'}`;
-    try {
-      // Use Web Share API if available (mobile browsers typically support this)
-      if (navigator.share) {
-        await navigator.share({
-          title: ev.title,
-          text: shareText,
-          url: shareUrl,
-        });
-      } else {
-        // If Web Share API is not available, copy the URL to the clipboard
-        await navigator.clipboard.writeText(shareUrl);
-        alert('Event link copied to clipboard!');
-      }
-    } catch (err) {
-      console.error('Error sharing event:', err);
-      alert('Error sharing event. Please try again.');
-    }
-  };
-
   return (
-    <div className={gridClass}>
-      {events.map((ev) => (
-        <div
-          key={ev.id}
-          className='relative glow-box'>
-          {editingEventId === ev.id ? (
-            <form
-              onSubmit={handleSaveEdit}
-              className='space-y-4 relative z-20'>
-              <div>
-                <label className='block text-sm font-medium'>Title</label>
-                <input
-                  type='text'
-                  name='title'
-                  value={editFormData.title}
-                  onChange={handleInputChange}
-                  required
-                  className='input mt-1'
-                />
-              </div>
-              <div className='flex gap-4'>
-                <div className='w-1/2'>
-                  <label className='block text-sm font-medium'>
-                    Start Date
-                  </label>
-                  <input
-                    type='date'
-                    name='start_date'
-                    value={editFormData.start_date}
-                    onChange={handleInputChange}
-                    required
-                    className='input mt-1'
-                  />
-                </div>
-                <div className='w-1/2'>
-                  <label className='block text-sm font-medium'>End Date</label>
-                  <input
-                    type='date'
-                    name='end_date'
-                    value={editFormData.end_date}
-                    onChange={handleInputChange}
-                    required
-                    className='input mt-1'
-                  />
-                </div>
-              </div>
-              <div className='flex gap-4'>
-                <div className='w-1/2'>
-                  <label className='block text-sm font-medium'>
-                    Start Time
-                  </label>
-                  <input
-                    type='time'
-                    name='start_time'
-                    value={editFormData.start_time}
-                    onChange={handleInputChange}
-                    required
-                    className='input mt-1'
-                  />
-                </div>
-                <div className='w-1/2'>
-                  <label className='block text-sm font-medium'>End Time</label>
-                  <input
-                    type='time'
-                    name='end_time'
-                    value={editFormData.end_time}
-                    onChange={handleInputChange}
-                    required
-                    className='input mt-1'
-                  />
-                </div>
-              </div>
-              <div>
-                <label className='block text-sm font-medium'>Category</label>
-                <input
-                  type='text'
-                  name='category'
-                  value={editFormData.category}
-                  onChange={handleInputChange}
-                  required
-                  className='input mt-1'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium'>Designer</label>
-                <input
-                  type='text'
-                  name='designer'
-                  value={editFormData.designer}
-                  onChange={handleInputChange}
-                  required
-                  className='input mt-1'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium'>Description</label>
-                <textarea
-                  name='description'
-                  value={editFormData.description}
-                  onChange={handleInputChange}
-                  rows='3'
-                  className='input mt-1'
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium'>
-                  Update Event Image
-                </label>
-                <input
-                  type='file'
-                  accept='image/*'
-                  onChange={handleFileChange}
-                  className='input mt-1'
-                />
-              </div>
-              {newImageFile && (
+    // Empty state
+    events.length === 0 ? (
+      <p className='text-sm italic'>{emptyMessage}</p>
+    ) : (
+      <div className={gridClass}>
+        {events.map((ev) => (
+          <div
+            key={ev.id}
+            className='relative glow-box'>
+            {editingEventId === ev.id ? (
+              <form
+                onSubmit={handleSaveEdit}
+                className='space-y-4 relative z-20'>
                 <div>
-                  <p className='text-sm'>
-                    New image selected: {newImageFile.name}
-                  </p>
-                </div>
-              )}
-              <div className='flex items-center'>
-                <input
-                  type='checkbox'
-                  checked={agreed}
-                  onChange={(e) => setAgreed(e.target.checked)}
-                  className='mr-2'
-                />
-                <label className='text-sm'>
-                  I agree to the{' '}
-                  <a
-                    href='/terms'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='underline'>
-                    Terms and Conditions
-                  </a>
-                </label>
-              </div>
-              {error && <p className='text-red-500 text-sm'>{error}</p>}
-              {message && <p className='text-green-500 text-sm'>{message}</p>}
-              <div className='flex gap-4'>
-                <button
-                  type='submit'
-                  className='glow-button'>
-                  Save
-                </button>
-                <button
-                  type='button'
-                  onClick={handleCancelEdit}
-                  className='glow-button bg-gray-400'>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className='flex flex-col md:flex-row items-stretch gap-4 relative z-20 h-auto md:h-64'>
-              {/* Image Container */}
-              <div className='w-full md:w-2/5 h-auto md:h-full overflow-hidden relative'>
-                {ev.image_url ? (
-                  <img
-                    src={ev.image_url}
-                    alt={ev.title}
-                    className='object-contain w-full h-full rounded'
+                  <label className='block text-sm font-medium'>Title</label>
+                  <input
+                    type='text'
+                    name='title'
+                    value={editFormData.title}
+                    onChange={handleInputChange}
+                    required
+                    className='input mt-1'
                   />
-                ) : (
-                  <div className='w-full h-full bg-gray-200 flex items-center justify-center rounded'>
-                    <span>No image</span>
+                </div>
+                <div className='flex gap-4'>
+                  <div className='w-1/2'>
+                    <label className='block text-sm font-medium'>
+                      Start Date
+                    </label>
+                    <input
+                      type='date'
+                      name='start_date'
+                      value={editFormData.start_date}
+                      onChange={handleInputChange}
+                      required
+                      className='input mt-1'
+                    />
+                  </div>
+                  <div className='w-1/2'>
+                    <label className='block text-sm font-medium'>
+                      End Date
+                    </label>
+                    <input
+                      type='date'
+                      name='end_date'
+                      value={editFormData.end_date}
+                      onChange={handleInputChange}
+                      required
+                      className='input mt-1'
+                    />
+                  </div>
+                </div>
+                <div className='flex gap-4'>
+                  <div className='w-1/2'>
+                    <label className='block text-sm font-medium'>
+                      Start Time
+                    </label>
+                    <input
+                      type='time'
+                      name='start_time'
+                      value={editFormData.start_time}
+                      onChange={handleInputChange}
+                      required
+                      className='input mt-1'
+                    />
+                  </div>
+                  <div className='w-1/2'>
+                    <label className='block text-sm font-medium'>
+                      End Time
+                    </label>
+                    <input
+                      type='time'
+                      name='end_time'
+                      value={editFormData.end_time}
+                      onChange={handleInputChange}
+                      required
+                      className='input mt-1'
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className='block text-sm font-medium'>Category</label>
+                  <input
+                    type='text'
+                    name='category'
+                    value={editFormData.category}
+                    onChange={handleInputChange}
+                    required
+                    className='input mt-1'
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium'>Designer</label>
+                  <input
+                    type='text'
+                    name='designer'
+                    value={editFormData.designer}
+                    onChange={handleInputChange}
+                    required
+                    className='input mt-1'
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium'>
+                    Description
+                  </label>
+                  <textarea
+                    name='description'
+                    value={editFormData.description}
+                    onChange={handleInputChange}
+                    rows='3'
+                    className='input mt-1'
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium'>
+                    Update Event Image
+                  </label>
+                  <input
+                    type='file'
+                    accept='image/*'
+                    onChange={handleFileChange}
+                    className='input mt-1'
+                  />
+                </div>
+                {newImageFile && (
+                  <div>
+                    <p className='text-sm'>
+                      New image selected: {newImageFile.name}
+                    </p>
                   </div>
                 )}
-              </div>
-
-              {/* Info Container */}
-              <div className='md:w-3/5 flex flex-col justify-between p-2'>
-                <div>
-                  <h3 className='text-md font-bold'>{ev.title}</h3>
-                  <p className='text-sm text-gray-400 mt-2'>
-                    Start: {ev.start_date} at {ev.start_time}
-                    <br />
-                    End: {ev.end_date} at {ev.end_time}
-                  </p>
-                  <p className='text-sm text-gray-400'>
-                    Category: {ev.category}
-                  </p>
-                  <p className='text-sm text-gray-400'>
-                    Designer: {ev.designer}
-                  </p>
-                  <p className='text-sm text-gray-400'>
-                    Description: {ev.description}
-                  </p>
+                <div className='flex items-center'>
+                  <input
+                    type='checkbox'
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className='mr-2'
+                  />
+                  <label className='text-sm'>
+                    I agree to the{' '}
+                    <a
+                      href='/terms'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='underline'>
+                      Terms and Conditions
+                    </a>
+                  </label>
                 </div>
-
-                {/* Action Buttons */}
-                <div className='flex gap-2 mt-4'>
-                  {editable ? (
-                    <button
-                      onClick={() => handleEditClick(ev)}
-                      className='glow-button text-sm'>
-                      Edit
-                    </button>
-                  ) : (
-                    filter === 'approved' && (
-                      <ShareButton
-                        title={ev.title}
-                        text={`Event: ${ev.title}\nDate: ${ev.date} at ${ev.time}\nCategory: ${ev.category}`}
-                        url={`https://eosarchivemvp.netlify.app/events/${ev.id}`}
-                        buttonText='Share'
-                        className='glow-button text-sm'
-                      />
-                    )
-                  )}
+                {error && <p className='text-red-500 text-sm'>{error}</p>}
+                {message && <p className='text-green-500 text-sm'>{message}</p>}
+                <div className='flex gap-4'>
                   <button
-                    onClick={() => handleDelete(ev.id)}
-                    className='glow-button text-sm bg-red-600'>
-                    Delete
+                    type='submit'
+                    className='glow-button'>
+                    Save
                   </button>
-                  {!editable && filter === 'archive' && (
-                    <button
-                      onClick={() =>
-                        alert(
-                          'Please request an edit by emailing hello@eosarchive.app'
-                        )
-                      }
-                      className='glow-button text-xs mt-2'>
-                      Request Edit
-                    </button>
+                  <button
+                    type='button'
+                    onClick={handleCancelEdit}
+                    className='glow-button bg-gray-400'>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className='flex flex-col md:flex-row items-stretch gap-4 relative z-20 h-auto md:h-64'>
+                {/* Image Container */}
+                <div className='w-full md:w-2/5 h-auto md:h-full overflow-hidden relative'>
+                  {ev.image_url ? (
+                    <img
+                      src={ev.image_url}
+                      alt={ev.title}
+                      className='object-contain w-full h-full rounded'
+                    />
+                  ) : (
+                    <div className='w-full h-full bg-gray-200 flex items-center justify-center rounded'>
+                      <span>No image</span>
+                    </div>
                   )}
                 </div>
+
+                {/* Info Container */}
+                <div className='md:w-3/5 flex flex-col justify-between p-2'>
+                  <div>
+                    <h3 className='text-md font-bold'>{ev.title}</h3>
+                    <p className='text-sm text-gray-400 mt-2'>
+                      Start: {ev.start_date} at {ev.start_time}
+                      <br />
+                      End: {ev.end_date} at {ev.end_time}
+                    </p>
+                    <p className='text-sm text-gray-400'>
+                      Category: {ev.category}
+                    </p>
+                    <p className='text-sm text-gray-400'>
+                      Designer: {ev.designer}
+                    </p>
+                    <p className='text-sm text-gray-400'>
+                      Description: {ev.description}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className='flex gap-2 mt-4'>
+                    {editable ? (
+                      <button
+                        onClick={() => handleEditClick(ev)}
+                        className='glow-button text-sm'>
+                        Edit
+                      </button>
+                    ) : (
+                      filter === 'approved' && (
+                        <ShareButton
+                          title={ev.title}
+                          text={`Event: ${ev.title}\nDate: ${ev.date} at ${ev.time}\nCategory: ${ev.category}`}
+                          url={`https://eosarchivemvp.netlify.app/events/${ev.id}`}
+                          buttonText='Share'
+                          className='glow-button text-sm'
+                        />
+                      )
+                    )}
+                    <button
+                      onClick={() => handleDelete(ev.id)}
+                      className='glow-button text-sm bg-red-600'>
+                      Delete
+                    </button>
+                    {!editable && filter === 'archive' && (
+                      <button
+                        onClick={() =>
+                          alert(
+                            'Please request an edit by emailing hello@eosarchive.app'
+                          )
+                        }
+                        className='glow-button text-xs mt-2'>
+                        Request Edit
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )
   );
 }
