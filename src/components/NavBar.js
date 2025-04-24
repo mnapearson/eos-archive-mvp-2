@@ -84,7 +84,11 @@ export default function NavBar() {
 
           {/* Center: Logo Homepage */}
           <div>
-            <Link href='/'>eos archive</Link>
+            <Link
+              title='Navigate to homepage'
+              href='/'>
+              eos archive
+            </Link>
           </div>
 
           {/* Right: Login Button */}
@@ -106,6 +110,7 @@ export default function NavBar() {
               </button>
             </div>
             <Link
+              title='Navigate to login page'
               href={user ? '/spaces/admin' : '/login'}
               aria-label='Login or Register'>
               <svg
@@ -125,6 +130,7 @@ export default function NavBar() {
 
       {/* Menu Component */}
       <Menu
+        title='Open navigation menu'
         menuOpen={menuOpen}
         toggleMenu={toggleMenu}
       />
