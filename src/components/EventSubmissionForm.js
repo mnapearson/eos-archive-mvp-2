@@ -53,7 +53,7 @@ export default function EventSubmissionForm({ spaceId }) {
     const dataToInsert = {
       ...formData,
       space_id: spaceId,
-      approved: false,
+      approved: true,
       image_url: null,
       terms_accepted: true, // <-- Track that the user accepted the terms
     };
