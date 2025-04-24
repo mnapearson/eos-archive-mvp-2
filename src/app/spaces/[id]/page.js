@@ -131,12 +131,15 @@ export default function SpacePage() {
                     />
                   </div>
                   <div className='flex-1 space-y-1'>
-                    <Link
-                      href={`/events/${event.id}`}
-                      className='underline text-lg font-semibold'>
-                      {event.title}
-                    </Link>
-                    <p className='text-sm italic'>{event.category}</p>
+                    <div className='flex items-center gap-2'>
+                      <Link
+                        href={`/events/${event.id}`}
+                        className='hover:underline text-lg font-semibold'>
+                        {event.title}
+                      </Link>
+                      <p className='text-sm italic'>({event.category})</p>
+                    </div>
+
                     <p className='text-sm mb-1'>
                       {formatDateRange(
                         event.start_date,
