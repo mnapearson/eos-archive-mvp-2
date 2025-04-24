@@ -7,7 +7,7 @@ import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import { createClient } from '@supabase/supabase-js';
 import Spinner from '@/components/Spinner';
-import { formatDateRange } from '@/lib/metadata';
+import { formatDateRange } from '@/lib/date';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function SpacePage() {

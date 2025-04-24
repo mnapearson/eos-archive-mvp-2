@@ -8,7 +8,7 @@ import Spinner from '@/components/Spinner';
 import MapComponent from '@/components/MapComponent';
 import { FilterContext } from '@/contexts/FilterContext';
 import ShareButton from '@/components/ShareButton';
-import { formatDateRange } from '@/lib/metadata';
+import { formatDateRange } from '@/lib/date';
 
 export default function EventPageClient({ eventId }) {
   const router = useRouter();
