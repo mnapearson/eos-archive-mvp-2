@@ -16,13 +16,23 @@ export default function SubmissionSuccess() {
       <h1 className='font-semibold mb-4'>submission received</h1>
       <p className='mb-4'>
         thank you for contributing to eos archive and supporting the subculture
-        scene. your event has been submitted and will be reviewed soon.{' '}
+        scene. your event has been automatically approved and is now live across
+        the archive: you can view it on the homepage, on your space page, and
+        the <strong>Archive</strong> tab in your dashboard.
       </p>
       <p className='mb-4'>
-        once approved, it will become part of the archive, helping to document
-        and share the creative spaces, artists, and movements shaping
-        independent culture. eos archive exists because of the people who create
-        and participate in these events.{' '}
+        if you need to make any edits or corrections, please get in touch with
+        us at{' '}
+        <a
+          href='mailto:hello@eosarchive.app'
+          className='underline hover:text-gray-600'>
+          hello@eosarchive.app
+        </a>
+        . we’re here to help ensure your event is accurately represented.
+      </p>
+      <p className='mb-4 italic'>
+        according to our terms and conditions, we reserve the right to remove
+        any event after it has been approved.
       </p>
       <p className='mb-4'>
         by using the archive, sharing it, and continuing to submit events, you
@@ -32,7 +42,7 @@ export default function SubmissionSuccess() {
       <p>from dusk til dawn,</p>
       <p className='mb-4'>eos</p>
       <p>
-        ps. need help with your submission? get in touch:{' '}
+        ps. have other feedback or questions? get in touch:{' '}
         <a
           href='mailto:hello@eosarchive.app'
           className='underline hover:text-gray-600'>
