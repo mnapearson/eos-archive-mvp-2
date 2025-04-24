@@ -13,7 +13,7 @@ export default function SpacePage() {
   const { id } = useParams();
   const [space, setSpace] = useState(null);
   const [events, setEvents] = useState([]);
-  const [timeFilter, setTimeFilter] = useState('upcoming');
+  const [timeFilter, setTimeFilter] = useState(null);
 
   // Local filter and sort state
   const [categoryFilter, setCategoryFilter] = useState(null);
@@ -41,12 +41,12 @@ export default function SpacePage() {
         const end = e.end_date ? new Date(e.end_date) : start;
 
         if (timeFilter === 'upcoming') {
-          return end >= today;
+          return start > today;
         }
         if (timeFilter === 'current') {
           return start <= today && end >= today;
         }
-        if (timeFilter === 'archive') {
+        if (timeFilter === 'past') {
           return end < today;
         }
         return true;
@@ -111,7 +111,7 @@ export default function SpacePage() {
           {/* Filter and sort controls */}
           <div className='mt-4 mb-4 flex flex-wrap items-center gap-4 justify-between overflow-visible'>
             <div className='flex gap-2'>
-              {['upcoming', 'current', 'archive'].map((tf) => {
+              {['upcoming', 'current', 'past'].map((tf) => {
                 const active = timeFilter === tf;
                 return (
                   <button
@@ -122,7 +122,9 @@ export default function SpacePage() {
                         ? 'bg-[var(--accent)] text-[var(--background)] border-transparent'
                         : ''
                     }`}>
-                    {tf.charAt(0).toUpperCase() + tf.slice(1)}
+                    {tf === 'past'
+                      ? 'Past'
+                      : tf.charAt(0).toUpperCase() + tf.slice(1)}
                     {active ? ' ×' : ''}
                   </button>
                 );
