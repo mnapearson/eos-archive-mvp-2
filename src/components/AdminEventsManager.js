@@ -408,39 +408,32 @@ export default function AdminEventsManager({
 
                   {/* Action Buttons */}
                   <div className='flex gap-2 mt-4'>
-                    {editable ? (
+                    {/* Edit button if editable */}
+                    {editable && (
                       <button
                         onClick={() => handleEditClick(ev)}
                         className='glow-button text-sm'>
                         Edit
                       </button>
-                    ) : (
-                      filter === 'approved' && (
-                        <ShareButton
-                          title={ev.title}
-                          text={`Event: ${ev.title}\nDate: ${ev.date} at ${ev.time}\nCategory: ${ev.category}`}
-                          url={`https://eosarchivemvp.netlify.app/events/${ev.id}`}
-                          buttonText='Share'
-                          className='glow-button text-sm'
-                        />
-                      )
                     )}
+
+                    {/* Share button for approved events */}
+                    {filter === 'approved' && (
+                      <ShareButton
+                        title={ev.title}
+                        text={`Event: ${ev.title}\nStart: ${ev.start_date} ${ev.start_time}\nEnd: ${ev.end_date} ${ev.end_time}\nCategory: ${ev.category}`}
+                        url={`https://eosarchivemvp.netlify.app/events/${ev.id}`}
+                        buttonText='Share'
+                        className='glow-button text-sm'
+                      />
+                    )}
+
+                    {/* Always show delete */}
                     <button
                       onClick={() => handleDelete(ev.id)}
                       className='glow-button text-sm bg-red-600'>
                       Delete
                     </button>
-                    {!editable && filter === 'archive' && (
-                      <button
-                        onClick={() =>
-                          alert(
-                            'Please request an edit by emailing hello@eosarchive.app'
-                          )
-                        }
-                        className='glow-button text-xs mt-2'>
-                        Request Edit
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

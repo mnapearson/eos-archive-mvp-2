@@ -300,7 +300,7 @@ export default function SpaceAdminDashboard() {
           <AdminEventsManager
             spaceId={space.id}
             filter='approved'
-            editable={false}
+            editable={true}
             emptyMessage='No approved events yet for this space.'
           />
         </div>
