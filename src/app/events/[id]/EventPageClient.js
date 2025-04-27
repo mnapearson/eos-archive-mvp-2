@@ -165,6 +165,19 @@ export default function EventPageClient({ eventId }) {
             </button>
           </div>
 
+          {event.document_url && (
+            <div>
+              <h3 className='uppercase text-xs font-bold mb-1'>More Info</h3>
+              <a
+                href={event.document_url}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='underline hover:text-gray-600'>
+                Download PDF
+              </a>
+            </div>
+          )}
+
           <ShareButton
             title={eventTitle}
             text={`${event.space?.name || ''} · ${eventDateTime}`}

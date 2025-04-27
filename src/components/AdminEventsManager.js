@@ -392,6 +392,18 @@ export default function AdminEventsManager({
                     <p className='text-sm text-gray-400'>
                       Description: {ev.description}
                     </p>
+                    {ev.document_url && (
+                      <p className='text-sm mt-1'>
+                        Document:{' '}
+                        <a
+                          href={ev.document_url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='underline hover:text-gray-600'>
+                          Download PDF
+                        </a>
+                      </p>
+                    )}
                   </div>
 
                   {/* Action Buttons */}

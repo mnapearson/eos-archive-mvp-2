@@ -19,6 +19,7 @@ export default function EventSubmissionForm({ spaceId }) {
     description: '',
   });
   const [imageFile, setImageFile] = useState(null);
+  const [documentFile, setDocumentFile] = useState(null);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -40,6 +41,18 @@ export default function EventSubmissionForm({ spaceId }) {
     }
   };
 
+  const handleDocumentChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        alert('Document exceeds 10MB. Please choose a smaller file.');
+        return;
+      }
+      setDocumentFile(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -55,7 +68,8 @@ export default function EventSubmissionForm({ spaceId }) {
       space_id: spaceId,
       approved: true,
       image_url: null,
-      terms_accepted: true, // <-- Track that the user accepted the terms
+      document_url: null,
+      terms_accepted: true, // Track that the user accepted the terms
     };
 
     // Upload image if provided
@@ -81,6 +95,31 @@ export default function EventSubmissionForm({ spaceId }) {
         return;
       }
       dataToInsert.image_url = publicData.publicUrl;
+    }
+
+    // Upload document if provided
+    if (documentFile) {
+      const docExt = documentFile.name.split('.').pop();
+      const docName = `${Date.now()}.${docExt}`;
+      const docPath = docName;
+
+      const { error: docError } = await supabase.storage
+        .from('event-documents')
+        .upload(docPath, documentFile);
+      if (docError) {
+        console.error('Error uploading document:', docError);
+        setError('Error uploading the document.');
+        return;
+      }
+      const { data: docPublic, error: docUrlError } = supabase.storage
+        .from('event-documents')
+        .getPublicUrl(docPath);
+      if (docUrlError) {
+        console.error('Error getting document URL:', docUrlError);
+        setError('Error retrieving the document URL.');
+        return;
+      }
+      dataToInsert.document_url = docPublic.publicUrl;
     }
 
     const { error: insertError } = await supabase
@@ -202,6 +241,17 @@ export default function EventSubmissionForm({ spaceId }) {
             accept='image/*'
             onChange={handleFileChange}
             required
+            className='input'
+          />
+        </div>
+        <div>
+          <label className='block text-sm mb-1'>
+            Event Document (PDF, optional)
+          </label>
+          <input
+            type='file'
+            accept='application/pdf'
+            onChange={handleDocumentChange}
             className='input'
           />
         </div>

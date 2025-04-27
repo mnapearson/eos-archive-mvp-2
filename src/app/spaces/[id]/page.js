@@ -212,6 +212,17 @@ export default function SpacePage() {
                     <p className='text-sm whitespace-pre-line'>
                       {event.description}
                     </p>
+                    {event.document_url && (
+                      <p className='text-sm mt-1'>
+                        <a
+                          href={event.document_url}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='underline hover:text-gray-600'>
+                          Download PDF
+                        </a>
+                      </p>
+                    )}
                   </div>
                 </li>
               ))}
