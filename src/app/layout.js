@@ -5,6 +5,7 @@ import NavBar from '@/components/NavBar';
 import CookieConsentBar from '@/components/CookieConsentBar';
 import { FilterProvider } from '@/contexts/FilterContext';
 import Footer from '@/components/Footer';
+import ToastProvider from '@/components/ToastProvider';
 
 export default function RootLayout({ children }) {
   // State for theme (default to system preference)
@@ -19,6 +20,8 @@ export default function RootLayout({ children }) {
             <div className='page-content'>{children}</div>
           </main>
           <Footer />
+          {/* global toast container */}
+          <ToastProvider />
         </FilterProvider>
         <CookieConsentBar />
       </body>

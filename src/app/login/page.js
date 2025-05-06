@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,22 +12,19 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [infoMsg, setInfoMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    setInfoMsg('');
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) {
-      setErrorMsg(error.message);
+      toast.error(error.message);
     } else {
+      toast.success('Logged in successfully!');
       router.push('/spaces/admin');
     }
     setLoading(false);
@@ -34,10 +32,8 @@ export default function LoginPage() {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    setInfoMsg('');
     if (!email) {
-      setErrorMsg('Please enter your email address to reset your password.');
+      toast.error('Please enter your email address to reset your password.');
       return;
     }
     setLoading(true);
@@ -47,9 +43,9 @@ export default function LoginPage() {
       redirectTo,
     });
     if (error) {
-      setErrorMsg(error.message);
+      toast.error(error.message);
     } else {
-      setInfoMsg(
+      toast.success(
         'A password reset email has been sent. Please check your inbox.'
       );
     }
@@ -81,8 +77,6 @@ export default function LoginPage() {
             required
           />
         </div>
-        {errorMsg && <p className='text-red-500 text-sm'>{errorMsg}</p>}
-        {infoMsg && <p className='text-green-500 text-sm'>{infoMsg}</p>}
         <button
           type='submit'
           className='glow-button'
