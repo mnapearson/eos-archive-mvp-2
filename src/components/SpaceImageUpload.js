@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const supabase = createClientComponentClient();
 
 export default function SpaceImageUploader({ spaceId }) {
+  const router = useRouter();
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,10 +19,12 @@ export default function SpaceImageUploader({ spaceId }) {
     if (selectedFile) {
       if (!selectedFile.type.match(/image\/(jpeg|png)/)) {
         setError('Only JPEG and PNG images are allowed.');
+        toast.error('Only JPEG and PNG images are allowed.');
         return;
       }
       if (selectedFile.size > 5 * 1024 * 1024) {
         setError('File size must be less than 5MB.');
+        toast.error('File size must be less than 5MB.');
         return;
       }
       setError(null);
@@ -40,7 +45,9 @@ export default function SpaceImageUploader({ spaceId }) {
       .upload(filePath, file);
 
     if (uploadError) {
-      setError(`Error uploading image: ${uploadError.message}`);
+      const msg = uploadError.message || 'Error uploading image';
+      setError(msg);
+      toast.error(msg);
       setUploading(false);
       return;
     }
@@ -53,6 +60,7 @@ export default function SpaceImageUploader({ spaceId }) {
 
     if (!publicUrl) {
       setError('Error getting public URL.');
+      toast.error('Error getting public URL.');
       setUploading(false);
       return;
     }
@@ -64,10 +72,13 @@ export default function SpaceImageUploader({ spaceId }) {
       .eq('id', spaceId);
 
     if (updateError) {
-      setError(`Error updating space: ${updateError.message}`);
+      const msg = updateError.message || 'Error updating space';
+      setError(msg);
+      toast.error(msg);
     } else {
       // Optionally, inform the user of success, refresh the data, etc.
-      alert('Image uploaded and space updated successfully!');
+      toast.success('Image uploaded and space updated successfully!');
+      router.refresh();
     }
     setUploading(false);
   };

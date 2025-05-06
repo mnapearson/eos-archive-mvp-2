@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 
 // Custom error icon (neon pink border variant)
 function ErrorIcon() {
@@ -46,7 +46,7 @@ export default function ToastProvider() {
         className:
           'backdrop-blur-md bg-white/70 dark:bg-black/70 ' +
           'rounded-2xl px-6 py-4 shadow-lg text-gray-900 dark:text-gray-100 ' +
-          'max-w-xs w-full mx-auto text-center',
+          'max-w-xs w-full mx-auto text-center relative overflow-visible',
         duration: 4000,
         icon: null,
         // Success variant: neon green border + custom icon
@@ -59,17 +59,23 @@ export default function ToastProvider() {
           icon: <ErrorIcon />,
           style: { border: '2px solid #ff1493' },
         },
+        // custom render wrapper to insert close button & progress bar
+        render({ id, message, type }) {
+          return (
+            <div className='toast-render'>
+              {type === 'success' ? <SuccessIcon /> : <ErrorIcon />}
+              <div className='toast-message'>{message}</div>
+              <button
+                onClick={() => toast.dismiss(id)}
+                className='toast-close'>
+                CLOSE
+              </button>
+              <div className='toast-progress'></div>
+            </div>
+          );
+        },
       }}
-      containerStyle={{
-        // center in viewport
-        top: '50%',
-        bottom: 'auto',
-        left: '50%',
-        right: 'auto',
-        transform: 'translate(-50%, -50%)',
-        width: '100%',
-        pointerEvents: 'none',
-      }}
+      containerClassName='toast-container'
     />
   );
 }

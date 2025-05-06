@@ -8,6 +8,7 @@ import Spinner from '@/components/Spinner';
 import EventSubmissionForm from '@/components/EventSubmissionForm';
 import SpaceImageUpload from '@/components/SpaceImageUpload';
 import AdminEventsManager from '@/components/AdminEventsManager';
+import { toast } from 'react-hot-toast';
 
 export default function SpaceAdminDashboard() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function SpaceAdminDashboard() {
   const handleSave = async () => {
     setUpdateError(null);
     if (formValues.website && !isValidUrl(formValues.website)) {
-      setUpdateError(
+      toast.error(
         'Please enter a valid website URL starting with http:// or https://'
       );
       return;
@@ -104,6 +105,7 @@ export default function SpaceAdminDashboard() {
     setSpace(data);
     setIsEditing(false);
     fetchSpaceRecord(data);
+    toast.success('Space details updated successfully');
   };
 
   const handleCancel = () => {
@@ -181,9 +183,6 @@ export default function SpaceAdminDashboard() {
                         placeholder='https://example.com'
                       />
                     </div>
-                    {updateError && (
-                      <p className='text-red-500 text-sm mb-2'>{updateError}</p>
-                    )}
                     <div className='mb-2'>
                       <label className='block text-sm font-semibold mb-1'>
                         Description
@@ -258,9 +257,6 @@ export default function SpaceAdminDashboard() {
               </div>
               <div className='mb-2'>
                 {space && <SpaceImageUpload spaceId={space.id} />}
-                {updateError && (
-                  <p className='text-red-500 text-sm mb-2'>{updateError}</p>
-                )}
               </div>
             </div>
             {space.image_url && (
@@ -278,11 +274,11 @@ export default function SpaceAdminDashboard() {
 
       {activeTab === 'events' && (
         <div className='events-management space-y-8'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <EventSubmissionForm spaceId={space.id} />
-            </div>
-            {/* <div>
+          {/* <div className='grid grid-cols-1 md:grid-cols-2 gap-4'> */}
+          <div>
+            <EventSubmissionForm spaceId={space.id} />
+          </div>
+          {/* <div>
               <h3 className='font-bold mb-2'>pending events</h3>
               <AdminEventsManager
                 spaceId={space.id}
@@ -290,18 +286,18 @@ export default function SpaceAdminDashboard() {
                 editable={true}
               />
             </div> */}
-          </div>
+          {/* </div> */}
         </div>
       )}
 
       {activeTab === 'archive' && (
         <div className='archive-events'>
-          <h3 className='text-lg font-bold mb-2'>approved events</h3>
+          <h3 className='text-lg font-bold mb-2'>archived events</h3>
           <AdminEventsManager
             spaceId={space.id}
             filter='approved'
             editable={true}
-            emptyMessage='No approved events yet for this space.'
+            emptyMessage='No archived events yet for this space.'
           />
         </div>
       )}

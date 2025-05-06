@@ -149,7 +149,6 @@ export default function EventSubmissionForm({ spaceId }) {
 
   return (
     <div>
-      <h2 className='font-bold mb-2'>submit an event</h2>
       <form
         onSubmit={handleSubmit}
         className='space-y-4 glow-box'>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import markerColors from '@/lib/markerColors';
+import toast from 'react-hot-toast';
 
 const SPACE_TYPES = Object.keys(markerColors);
 
@@ -27,14 +28,11 @@ export default function SpaceSignUpPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [errorMsg, setErrorMsg] = useState('');
-
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
 
     if (password !== confirmPassword) {
-      setErrorMsg('Passwords do not match.');
+      toast.error('Passwords do not match.');
       return;
     }
 
@@ -44,12 +42,12 @@ export default function SpaceSignUpPage() {
       password,
     });
     if (error) {
-      setErrorMsg(error.message);
+      toast.error(error.message);
       return;
     }
     const userId = data.user?.id;
     if (!userId) {
-      setErrorMsg('Please check your email to confirm your account.');
+      toast.error('Please check your email to confirm your account.');
       return;
     }
 
@@ -68,14 +66,14 @@ export default function SpaceSignUpPage() {
       if (geoData.features && geoData.features.length > 0) {
         [longitude, latitude] = geoData.features[0].center;
       } else {
-        setErrorMsg(
+        toast.error(
           'Unable to geocode the address. Please check your address.'
         );
         return;
       }
     } catch (err) {
       console.error('Geocoding error:', err);
-      setErrorMsg('Error during geocoding. Please try again.');
+      toast.error('Error during geocoding. Please try again.');
       return;
     }
 
@@ -97,7 +95,7 @@ export default function SpaceSignUpPage() {
     ]);
     if (spaceError) {
       console.error('Error inserting space:', spaceError);
-      setErrorMsg('Error creating space record. Please try again.');
+      toast.error('Error creating space record. Please try again.');
       return;
     }
 
@@ -108,6 +106,10 @@ export default function SpaceSignUpPage() {
     if (profileError) {
       console.error('Profile update error:', profileError);
     }
+
+    toast.success(
+      'Your space registration was submitted! Please check your email to confirm your account.'
+    );
 
     // 5. Redirect to a confirmation page instructing the user to confirm their email.
     router.push('/spaces/admin');
@@ -232,8 +234,6 @@ export default function SpaceSignUpPage() {
             required
           />
         </div>
-
-        {errorMsg && <p className='text-red-500 text-sm'>{errorMsg}</p>}
 
         <button
           type='submit'
