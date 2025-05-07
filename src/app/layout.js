@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
         <FilterProvider>
           <NavBar />
           {/* Page Content */}
-          <main className='container'>
+          <main className='w-full px-4 py-2 flex-1'>
             <div className='page-content'>{children}</div>
           </main>
           <Footer />

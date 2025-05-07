@@ -1,20 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
+
+// 4) Define your static categories
+const EVENT_CATEGORIES = [
+  'exhibition',
+  'opening',
+  'closing',
+  'concert',
+  'live music',
+  'dj night',
+  'day party',
+  'festival',
+  'performance',
+  'workshop',
+  'market',
+  'film',
+  'talk',
+  'community',
+  'other',
+];
 
 export default function EventSubmissionForm({ spaceId }) {
   const router = useRouter();
   const supabase = createClientComponentClient();
 
   const [formData, setFormData] = useState({
+    space_id: spaceId || '',
     title: '',
     start_date: '',
     end_date: '',
     start_time: '',
     end_time: '',
-    category: '',
+    category: 'other', // default to 'other'
     designer: '',
     description: '',
   });
@@ -23,6 +44,18 @@ export default function EventSubmissionForm({ spaceId }) {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [spacesList, setSpacesList] = useState([]);
+
+  useEffect(() => {
+    async function loadSpaces() {
+      const { data, error } = await supabase.from('spaces').select('id, name');
+      if (!error) setSpacesList(data);
+    }
+    loadSpaces();
+  }, [supabase]);
+
+  // Determine the logged-in space (for admin dashboard context)
+  const currentSpace = spacesList.find((s) => s.id === spaceId);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -57,19 +90,37 @@ export default function EventSubmissionForm({ spaceId }) {
     e.preventDefault();
     setError('');
     setMessage('');
+    // get current user for created_by
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) {
+      toast.error('Authentication error. Please sign in again.');
+      return;
+    }
+    // Ensure a profile row exists so created_by FK will not fail
+    const { error: upsertProfileError } = await supabase
+      .from('profiles')
+      .upsert({ id: user.id });
+    if (upsertProfileError) {
+      console.error('Profile upsert error:', upsertProfileError);
+      toast.error('Error preparing your user profile. Please try again.');
+      return;
+    }
 
     if (!agreed) {
-      setError('You must agree to the Terms and Conditions to submit.');
+      toast.error('You must agree to the Terms and Conditions to submit.');
       return;
     }
 
     const dataToInsert = {
       ...formData,
-      space_id: spaceId,
       approved: true,
       image_url: null,
       document_url: null,
-      terms_accepted: true, // Track that the user accepted the terms
+      terms_accepted: true,
+      created_by: user.id,
     };
 
     // Upload image if provided
@@ -83,7 +134,7 @@ export default function EventSubmissionForm({ spaceId }) {
         .upload(filePath, imageFile);
       if (storageError) {
         console.error('Error uploading image:', storageError);
-        setError('Error uploading the image.');
+        toast.error('Error uploading the image.');
         return;
       }
       const { data: publicData, error: urlError } = supabase.storage
@@ -91,7 +142,7 @@ export default function EventSubmissionForm({ spaceId }) {
         .getPublicUrl(filePath);
       if (urlError) {
         console.error('Error getting public URL:', urlError);
-        setError('Error retrieving the image URL.');
+        toast.error('Error retrieving the image URL.');
         return;
       }
       dataToInsert.image_url = publicData.publicUrl;
@@ -108,7 +159,7 @@ export default function EventSubmissionForm({ spaceId }) {
         .upload(docPath, documentFile);
       if (docError) {
         console.error('Error uploading document:', docError);
-        setError('Error uploading the document.');
+        toast.error('Error uploading the document.');
         return;
       }
       const { data: docPublic, error: docUrlError } = supabase.storage
@@ -116,7 +167,7 @@ export default function EventSubmissionForm({ spaceId }) {
         .getPublicUrl(docPath);
       if (docUrlError) {
         console.error('Error getting document URL:', docUrlError);
-        setError('Error retrieving the document URL.');
+        toast.error('Error retrieving the document URL.');
         return;
       }
       dataToInsert.document_url = docPublic.publicUrl;
@@ -127,19 +178,20 @@ export default function EventSubmissionForm({ spaceId }) {
       .insert([dataToInsert]);
     if (insertError) {
       console.error('Error inserting event:', insertError);
-      setError('Error submitting your event. Please try again.');
+      toast.error('Error submitting your event. Please try again.');
       return;
     }
 
-    setMessage('Event submitted successfully!');
+    toast.success('Event submitted successfully!');
     // Optionally, reset the form and redirect after a delay
     setFormData({
+      space_id: spaceId || '',
       title: '',
       start_date: '',
       end_date: '',
       start_time: '',
       end_time: '',
-      category: '',
+      category: 'other',
       designer: '',
       description: '',
     });
@@ -152,6 +204,42 @@ export default function EventSubmissionForm({ spaceId }) {
       <form
         onSubmit={handleSubmit}
         className='space-y-4 glow-box'>
+        {spaceId ? (
+          // Read-only for space-owner context
+          <div>
+            <label className='block text-sm mb-1'>Space</label>
+            <input
+              type='text'
+              value={currentSpace?.name || ''}
+              readOnly
+              className='input bg-gray-100 cursor-not-allowed'
+            />
+          </div>
+        ) : (
+          // Dropdown for other contexts
+          <div>
+            <label className='block text-sm mb-1'>Space*</label>
+            <select
+              name='space_id'
+              value={formData.space_id}
+              onChange={handleInputChange}
+              required
+              className='input'>
+              <option
+                value=''
+                disabled>
+                Select a space
+              </option>
+              {spacesList.map((s) => (
+                <option
+                  key={s.id}
+                  value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <label className='block text-sm mb-1'>Title*</label>
           <input
@@ -213,14 +301,25 @@ export default function EventSubmissionForm({ spaceId }) {
         </div>
         <div>
           <label className='block text-sm mb-1'>Category*</label>
-          <input
-            type='text'
+          <select
             name='category'
             value={formData.category}
             onChange={handleInputChange}
             required
-            className='input'
-          />
+            className='input'>
+            <option
+              value=''
+              disabled>
+              Select a category
+            </option>
+            {EVENT_CATEGORIES.map((cat) => (
+              <option
+                key={cat}
+                value={cat}>
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -288,8 +387,6 @@ export default function EventSubmissionForm({ spaceId }) {
             *
           </label>
         </div>
-        {error && <p className='text-red-500 text-sm'>{error}</p>}
-        {message && <p className='text-green-500 text-sm'>{message}</p>}
         <button
           type='submit'
           className='glow-button'>

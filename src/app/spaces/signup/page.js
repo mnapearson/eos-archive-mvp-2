@@ -108,7 +108,7 @@ export default function SpaceSignUpPage() {
     }
 
     toast.success(
-      'Your space registration was submitted! Please check your email to confirm your account.'
+      'You have successfully registered the space in the archive. Please upload a space image and submit your first event.'
     );
 
     // 5. Redirect to a confirmation page instructing the user to confirm their email.

@@ -195,11 +195,11 @@ export default function AdminEventsManager({
     events.length === 0 ? (
       <p className='text-sm italic'>{emptyMessage}</p>
     ) : (
-      <div className={gridClass}>
+      <div className={`${gridClass}`}>
         {events.map((ev) => (
           <div
             key={ev.id}
-            className='relative glow-box'>
+            className='relative glow-box p-4'>
             {editingEventId === ev.id ? (
               <form
                 onSubmit={handleSaveEdit}
@@ -358,7 +358,7 @@ export default function AdminEventsManager({
                 </div>
               </form>
             ) : (
-              <div className='flex flex-col md:flex-row items-stretch gap-4 relative z-20 h-auto md:h-64'>
+              <div className='flex flex-col md:flex-row gap-4 relative z-20 h-auto md:h-64'>
                 {/* Image Container */}
                 <div className='w-full md:w-2/5 h-auto md:h-full overflow-hidden relative'>
                   {ev.image_url ? (
@@ -368,14 +368,14 @@ export default function AdminEventsManager({
                       className='object-contain w-full h-full rounded'
                     />
                   ) : (
-                    <div className='w-full h-full bg-gray-200 flex items-center justify-center rounded'>
+                    <div className='w-full h-full bg-gray-200 flex rounded'>
                       <span>No image</span>
                     </div>
                   )}
                 </div>
 
                 {/* Info Container */}
-                <div className='md:w-3/5 flex flex-col justify-between p-2'>
+                <div className='md:w-3/5 flex flex-col justify-between p-1'>
                   <div>
                     <h3 className='text-md font-bold'>{ev.title}</h3>
                     <p className='text-sm text-gray-400 mt-2'>
@@ -407,7 +407,7 @@ export default function AdminEventsManager({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className='flex gap-2 mt-4'>
+                  <div className='flex max-w-xs gap-2 mt-4'>
                     {/* Edit button if editable */}
                     {editable && (
                       <button

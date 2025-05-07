@@ -78,8 +78,8 @@ export default function NavBar() {
 
   return (
     <>
-      <header className='fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b'>
-        <div className='container py-2 m-2 flex items-center justify-between'>
+      <header className='px-4 fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b'>
+        <div className='py-2 m-2 flex items-center justify-between'>
           {/* Left: spiral that toggles the menu */}
 
           {/* Center: Logo Homepage */}
