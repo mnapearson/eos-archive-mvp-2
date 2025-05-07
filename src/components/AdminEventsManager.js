@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
+import { toast } from 'react-hot-toast';
 
 export default function AdminEventsManager({
   initialEvents,
@@ -48,7 +49,7 @@ export default function AdminEventsManager({
             ? ` Details: ${error.details}`
             : '';
           console.error('Error fetching events:', errorMessage + errorDetails);
-          setError('Error fetching events: ' + errorMessage + errorDetails);
+          toast.error('Error fetching events: ' + errorMessage);
         } else {
           setEvents(data);
         }
@@ -109,7 +110,7 @@ export default function AdminEventsManager({
 
     // If a new image was selected, require T&C re-acceptance
     if (newImageFile && !agreed) {
-      setError(
+      toast.error(
         'You must agree to the Terms and Conditions when updating the image.'
       );
       return;
@@ -130,7 +131,7 @@ export default function AdminEventsManager({
         .upload(filePath, newImageFile, { upsert: true });
       if (storageError) {
         console.error('Error uploading new image:', storageError);
-        setError('Error uploading new image.');
+        toast.error('Error uploading new image.');
         return;
       }
 
@@ -139,7 +140,7 @@ export default function AdminEventsManager({
         .getPublicUrl(filePath);
       if (urlError) {
         console.error('Error getting public URL for new image:', urlError);
-        setError('Error retrieving new image URL.');
+        toast.error('Error retrieving new image URL.');
         return;
       }
       updatedData.image_url = publicData.publicUrl;
@@ -157,7 +158,7 @@ export default function AdminEventsManager({
       .eq('space_id', spaceId);
     if (updateError) {
       console.error('Error updating event:', updateError);
-      setError('Error updating event. Please try again.');
+      toast.error('Error updating event. Please try again.');
       return;
     }
 
@@ -166,7 +167,7 @@ export default function AdminEventsManager({
       ev.id === editingEventId ? { ...ev, ...updatedData } : ev
     );
     setEvents(updatedEvents);
-    setMessage('Event updated successfully and is pending approval.');
+    toast.success('Event updated successfully and is pending approval.');
     // Exit edit mode
     setEditingEventId(null);
     setEditFormData({});
@@ -174,20 +175,41 @@ export default function AdminEventsManager({
     setAgreed(false);
   };
 
-  const handleDelete = async (eventId) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-    const { error: deleteError } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', eventId)
-      .eq('space_id', spaceId);
-    if (deleteError) {
-      console.error('Error deleting event:', deleteError);
-      setError('Error deleting event.');
-      return;
-    }
-    const updatedEvents = events.filter((ev) => ev.id !== eventId);
-    setEvents(updatedEvents);
+  const handleDelete = (eventId) => {
+    toast(
+      (t) => (
+        <div className='p-4'>
+          <p className='mb-2'>Are you sure you want to delete this event?</p>
+          <div className='flex justify-end gap-2'>
+            <button
+              className='px-3 py-1 '
+              onClick={() => toast.dismiss(t.id)}>
+              No
+            </button>
+            <button
+              className='px-3 py-1 bg-red-600 text-white'
+              onClick={async () => {
+                toast.dismiss(t.id);
+                const { error: deleteError } = await supabase
+                  .from('events')
+                  .delete()
+                  .eq('id', eventId)
+                  .eq('space_id', spaceId);
+                if (deleteError) {
+                  console.error('Error deleting event:', deleteError);
+                  toast.error('Error deleting event.');
+                } else {
+                  setEvents((evs) => evs.filter((ev) => ev.id !== eventId));
+                  toast.success('Event deleted successfully.');
+                }
+              }}>
+              Yes
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
   };
 
   return (
@@ -341,8 +363,8 @@ export default function AdminEventsManager({
                     </a>
                   </label>
                 </div>
-                {error && <p className='text-red-500 text-sm'>{error}</p>}
-                {message && <p className='text-green-500 text-sm'>{message}</p>}
+                {/* {error && <p className='text-red-500 text-sm'>{error}</p>} */}
+                {/* {message && <p className='text-green-500 text-sm'>{message}</p>} */}
                 <div className='flex gap-4'>
                   <button
                     type='submit'
