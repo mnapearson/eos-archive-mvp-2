@@ -36,28 +36,27 @@ export default function OrganizerRegistrationForm({ user }) {
 
     const userId = user.id;
 
-    // 3. Insert into organizers table
+    // 3. Upsert profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({ id: userId, role: 'organizer', username: organizerName });
+    if (profileError) {
+      console.error('Profile update error:', profileError);
+    }
+
+    // 4. Insert into organizers table
     const { error: orgError } = await supabase.from('organizers').insert([
       {
         user_id: userId,
         name: organizerName,
-        description,
         website,
-        status: 'pending',
+        bio: description,
       },
     ]);
     if (orgError) {
       console.error('Error inserting organizer:', orgError);
       toast.error('Error registering organizer. Please try again.');
       return;
-    }
-
-    // 4. Upsert profile
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({ id: userId, role: 'organizer', username: organizerName });
-    if (profileError) {
-      console.error('Profile update error:', profileError);
     }
 
     // 5. Success
