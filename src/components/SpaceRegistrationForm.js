@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import markerColors from '@/lib/markerColors';
@@ -8,81 +8,71 @@ import toast from 'react-hot-toast';
 
 const SPACE_TYPES = Object.keys(markerColors);
 
-export default function SpaceSignUpPage() {
+export default function SpaceRegistrationForm({ user }) {
   const router = useRouter();
   const supabase = createClientComponentClient();
 
   // Space info fields
   const [spaceName, setSpaceName] = useState('');
-  // Instead of a plain input, we use a combobox for the space type.
   const [spaceType, setSpaceType] = useState('');
-
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [zipcode, setZipcode] = useState('');
   const [description, setDescription] = useState('');
   const [website, setWebsite] = useState('');
 
-  // User account fields
-  const [email, setEmail] = useState('');
+  // Account fields
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignUp = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate passwords
     if (password !== confirmPassword) {
       toast.error('Passwords do not match.');
       return;
     }
 
-    // 1. Create user account
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    const userId = data.user?.id;
-    if (!userId) {
-      toast.error('Please check your email to confirm your account.');
+    // 1. Update user password
+    const { error: authError } = await supabase.auth.updateUser({ password });
+    if (authError) {
+      toast.error(authError.message);
       return;
     }
 
-    // 2. Combine address fields for geocoding.
+    const userId = user.id;
+
+    // 2. Geocode address
     const fullAddress = `${address}, ${city}, ${zipcode}`;
-    let latitude = null;
-    let longitude = null;
+    let latitude = null,
+      longitude = null;
     try {
       const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-      const geoRes = await fetch(
+      const res = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           fullAddress
         )}.json?access_token=${token}`
       );
-      const geoData = await geoRes.json();
-      if (geoData.features && geoData.features.length > 0) {
-        [longitude, latitude] = geoData.features[0].center;
+      const data = await res.json();
+      if (data.features?.length) {
+        [longitude, latitude] = data.features[0].center;
       } else {
-        toast.error(
-          'Unable to geocode the address. Please check your address.'
-        );
+        toast.error('Unable to geocode the address. Please check it.');
         return;
       }
     } catch (err) {
-      console.error('Geocoding error:', err);
+      console.error(err);
       toast.error('Error during geocoding. Please try again.');
       return;
     }
 
-    // 3. Insert the space record (with status set to 'pending').
+    // 3. Insert space record
     const { error: spaceError } = await supabase.from('spaces').insert([
       {
         user_id: userId,
         name: spaceName,
-        type: spaceType, // Save the space type (either selected or new)
+        type: spaceType,
         city,
         address,
         zipcode,
@@ -94,35 +84,35 @@ export default function SpaceSignUpPage() {
       },
     ]);
     if (spaceError) {
-      console.error('Error inserting space:', spaceError);
-      toast.error('Error creating space record. Please try again.');
+      console.error(spaceError);
+      toast.error('Error creating space. Please try again.');
       return;
     }
 
-    // 4. Update the profiles table with role and username.
+    // 4. Upsert profile
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({ id: userId, role: 'space', username: spaceName });
     if (profileError) {
-      console.error('Profile update error:', profileError);
+      console.error(profileError);
     }
 
     toast.success(
       'You have successfully registered the space in the archive. Please upload a space image and submit your first event.'
     );
 
-    // 5. Redirect to a confirmation page instructing the user to confirm their email.
+    // 5. Redirect to space admin
     router.push('/spaces/admin');
   };
 
   return (
     <div className='max-w-lg mx-auto'>
       <form
-        onSubmit={handleSignUp}
-        className='space-y-4 glow-box lowercase'>
-        {/* Space Information Section */}
+        onSubmit={handleSubmit}
+        className='space-y-4 glow-box'>
+        {/* Space Info */}
         <div>
-          <label className='block my-1 text-sm'>Space Name*</label>
+          <label className='block mb-1 text-sm'>Space Name*</label>
           <input
             type='text'
             className='input'
@@ -159,6 +149,7 @@ export default function SpaceSignUpPage() {
             className='input'
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            required
           />
         </div>
         <div className='flex gap-2'>
@@ -187,9 +178,9 @@ export default function SpaceSignUpPage() {
           <label className='block mb-1 text-sm'>Description</label>
           <textarea
             className='input'
+            rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={3}
           />
         </div>
         <div>
@@ -202,16 +193,14 @@ export default function SpaceSignUpPage() {
           />
         </div>
 
-        {/* User Account Section */}
-
+        {/* Account Info */}
         <div>
-          <label className='block mb-1 text-sm'>Email Address*</label>
+          <label className='block mb-1 text-sm'>Email</label>
           <input
             type='email'
             className='input'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            value={user.email}
+            readOnly
           />
         </div>
         <div>
@@ -238,12 +227,12 @@ export default function SpaceSignUpPage() {
         <button
           type='submit'
           className='glow-button'>
-          Submit
+          Register Space
         </button>
       </form>
       <p className='mt-4 text-sm text-gray-600'>
-        Note: Once you submit your registration, you will be able to upload a
-        space image and submit events in your dashboard.
+        Note: After registering, you can upload a space image and submit events
+        in your dashboard.
       </p>
     </div>
   );

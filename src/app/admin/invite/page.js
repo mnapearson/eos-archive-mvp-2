@@ -11,6 +11,7 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState('space'); // default role
   const [link, setLink] = useState('');
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function InvitePage() {
       const res = await fetch('/api/generate-signup-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, role }),
       });
       if (!res.ok) throw new Error(await res.text());
       const { link: magicLink } = await res.json();
@@ -69,6 +70,18 @@ export default function InvitePage() {
       <form
         onSubmit={handleSubmit}
         className='space-y-4'>
+        <div>
+          <label className='block text-sm'>Role</label>
+          <select
+            className='input mt-1 w-full'
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required>
+            <option value='space'>Space</option>
+            <option value='organizer'>Organizer</option>
+            <option value='supporter'>Supporter</option>
+          </select>
+        </div>
         <div>
           <label className='block text-sm'>Email</label>
           <input
