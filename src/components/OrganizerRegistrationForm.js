@@ -65,7 +65,7 @@ export default function OrganizerRegistrationForm({ user }) {
     );
 
     // 6. Redirect to organizer dashboard
-    router.push('/organizer/dashboard');
+    router.push('/organizers/admin');
   };
 
   return (

@@ -17,7 +17,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -25,7 +25,20 @@ export default function LoginPage() {
       toast.error(error.message);
     } else {
       toast.success('Logged in successfully!');
-      router.push('/spaces/admin');
+      const user = data.user;
+      // Fetch profile role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      let dest = '/';
+      if (!profileError && profile?.role) {
+        if (profile.role === 'space') dest = '/spaces/admin';
+        else if (profile.role === 'organizer') dest = '/organizers/admin';
+        else if (profile.role === 'member') dest = '/members/dashboard';
+      }
+      router.push(dest);
     }
     setLoading(false);
   };

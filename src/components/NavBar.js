@@ -35,6 +35,22 @@ export default function NavBar() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const user = useUserSimple();
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (data?.role) setRole(data.role);
+        });
+    } else {
+      setRole(null);
+    }
+  }, [user]);
 
   // Load saved theme or system preference
   useEffect(() => {
@@ -76,6 +92,16 @@ export default function NavBar() {
     router.push(`/?search=${encodeURIComponent(searchTerm)}`);
   };
 
+  const dashboardUrl = !user
+    ? '/login'
+    : role === 'space'
+    ? '/spaces/admin'
+    : role === 'organizer'
+    ? '/organizers/admin'
+    : role === 'member'
+    ? '/members/dashboard'
+    : '/';
+
   return (
     <>
       <header className='px-4 fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b'>
@@ -110,9 +136,9 @@ export default function NavBar() {
               </button>
             </div>
             <Link
-              title='Navigate to login page'
-              href={user ? '/spaces/admin' : '/login'}
-              aria-label='Login or Register'>
+              title='Navigate to login or dashboard'
+              href={dashboardUrl}
+              aria-label='Login or Dashboard'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'

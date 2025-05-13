@@ -1,16 +1,9 @@
 'use client';
 
-import Masonry from 'react-masonry-css';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Link from 'next/link';
 
 export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
-  const breakpointColumnsObj = {
-    default: 5,
-    1100: 4,
-    500: 3, // Ensure a minimum of 2 columns on small screens
-  };
-
   return (
     <InfiniteScroll
       dataLength={items.length}
@@ -33,27 +26,40 @@ export default function MasonryGrid({ items, fetchMoreData, hasMore }) {
           </p>
         </div>
       }>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className='flex w-full gap-3'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4'>
         {items.map((item) => (
-          <div
+          <Link
             key={item.id}
-            className='mb-3'>
-            <Link
-              href={`/events/${item.id}`}
-              scroll={false}>
-              <div className='overflow-hidden rounded-sm transition-none'>
-                <img
-                  src={item.image_url || '/placeholder.jpg'}
-                  alt={item.title}
-                  className='w-full h-auto object-cover'
-                />
-              </div>
-            </Link>
-          </div>
+            href={`/events/${item.id}`}
+            scroll={false}
+            className='relative group block overflow-hidden rounded-sm'>
+            <img
+              src={item.image_url || '/placeholder.jpg'}
+              alt={item.title}
+              className='w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105'
+            />
+            <div className='absolute inset-0 bg-black bg-opacity-80 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end space-y-1'>
+              <h3 className='text-white font-semibold text-base'>
+                {item.title}
+              </h3>
+              {item.start_date && (
+                <p className='text-white text-sm'>
+                  {new Date(item.start_date).toLocaleDateString(undefined, {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </p>
+              )}
+              {item.category && (
+                <p className='text-white text-sm italic capitalize'>
+                  {item.category}
+                </p>
+              )}
+            </div>
+          </Link>
         ))}
-      </Masonry>
+      </div>
     </InfiniteScroll>
   );
 }
