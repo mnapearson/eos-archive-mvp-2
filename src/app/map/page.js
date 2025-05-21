@@ -19,45 +19,23 @@ export default function SpacesPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    async function fetchSpacesForApprovedEvents() {
+    async function fetchAllSpaces() {
       try {
-        // 1. Query the events table for approved events
-        const { data: eventsData, error: eventsError } = await supabase
-          .from('events')
-          .select('space_id')
-          .eq('approved', true);
-        if (eventsError) {
-          console.error('Error fetching approved events:', eventsError);
-          return;
-        }
-        // 2. Extract unique space IDs from these approved events
-        const approvedSpaceIds = Array.from(
-          new Set(eventsData.map((e) => e.space_id).filter(Boolean))
-        );
-        if (approvedSpaceIds.length === 0) {
-          setSpaces([]);
-          return;
-        }
-        // 3. Query the spaces table for these space IDs (including website)
-        const { data: spacesData, error: spacesError } = await supabase
+        const { data: spacesData, error } = await supabase
           .from('spaces')
           .select(
             'id, name, type, latitude, longitude, city, website, description, image_url'
-          )
-          .in('id', approvedSpaceIds);
-        if (spacesError) {
-          console.error('Error fetching spaces:', spacesError);
+          );
+        if (error) {
+          console.error('Error fetching spaces:', error);
           return;
         }
         setSpaces(spacesData);
       } catch (err) {
-        console.error(
-          'Unexpected error fetching spaces for approved events:',
-          err
-        );
+        console.error('Unexpected error fetching spaces:', err);
       }
     }
-    fetchSpacesForApprovedEvents();
+    fetchAllSpaces();
   }, []);
 
   // Compute unique marker types.

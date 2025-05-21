@@ -17,6 +17,7 @@ export default function MapComponent({
   initialZoom,
 }) {
   const [mapData, setMapData] = useState([]);
+  const [selectedSpace, setSelectedSpace] = useState(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -137,17 +138,23 @@ export default function MapComponent({
         ? `<a href="/spaces/${spaceId}" target="_blank" style="text-decoration:underline; color:inherit;">${popupTitle}</a>`
         : popupTitle;
 
-      let initialAddress = item.address || fallbackAddress;
-      if (!initialAddress) {
-        initialAddress = 'Loading address...';
-      }
+      // compute full address for marker popups
+      const addrParts = [];
+      if (item.address) addrParts.push(item.address);
+      else if (item.space?.address) addrParts.push(item.space.address);
+      if (item.city) addrParts.push(item.city);
+      else if (item.space?.city) addrParts.push(item.space.city);
+      if (item.zipcode) addrParts.push(item.zipcode);
+      else if (item.space?.zipcode) addrParts.push(item.space.zipcode);
+      const fullAddress = addrParts.join(', ');
 
       const popupContent = `
         <div style="color:#000; font-size:12px; line-height:1.4;">
           <strong>${popupTitleHtml}</strong>
+          <br/><em style="font-size:10px; color:#555;">${typeKey}</em>
           ${
-            initialAddress && initialAddress !== 'Loading address...'
-              ? `<br/><a href="#" class="copy-address" data-address="${initialAddress}" style="text-decoration:underline; color:inherit;">${initialAddress}</a>`
+            fullAddress
+              ? `<br/><a href="#" class="copy-address" data-address="${fullAddress}" style="text-decoration:underline; color:inherit;">${fullAddress}</a>`
               : ''
           }
         </div>
@@ -162,6 +169,9 @@ export default function MapComponent({
         .setLngLat([markerLng, markerLat])
         .setPopup(new mapboxgl.Popup().setHTML(popupContent))
         .addTo(mapRef.current);
+      marker
+        .getElement()
+        .addEventListener('click', () => setSelectedSpace(item));
       markersRef.current.push(marker);
 
       if (!item.address && !fallbackAddress) {
@@ -174,10 +184,14 @@ export default function MapComponent({
             if (geoData.features && geoData.features.length > 0) {
               address = geoData.features[0].place_name;
             }
+            // update fullAddress with new address from reverse geocoding
+            const newFullAddress = address;
             const newPopupContent = `
               <div style="color:#000; font-size:12px; line-height:1.4;">
-                <strong>${popupTitleHtml}</strong><br/>
-                <a href="#" class="copy-address" data-address="${address}" style="text-decoration:underline; color:inherit;">${address}</a>
+                <strong>${popupTitleHtml}</strong>
+                <br/><em style="font-size:10px; color:#555;">${typeKey}</em>
+                <br/>
+                <a href="#" class="copy-address" data-address="${newFullAddress}" style="text-decoration:underline; color:inherit;">${newFullAddress}</a>
               </div>
             `;
             marker.getPopup().setHTML(newPopupContent);
@@ -215,12 +229,80 @@ export default function MapComponent({
     return () => document.removeEventListener('click', handleCopy);
   }, []);
 
+  // compute full address for selectedSpace bottom panel
+  const selectedAddrParts = [];
+  if (selectedSpace?.address) selectedAddrParts.push(selectedSpace.address);
+  else if (selectedSpace?.space?.address)
+    selectedAddrParts.push(selectedSpace.space.address);
+  if (selectedSpace?.city) selectedAddrParts.push(selectedSpace.city);
+  else if (selectedSpace?.space?.city)
+    selectedAddrParts.push(selectedSpace.space.city);
+  if (selectedSpace?.zipcode) selectedAddrParts.push(selectedSpace.zipcode);
+  else if (selectedSpace?.space?.zipcode)
+    selectedAddrParts.push(selectedSpace.space.zipcode);
+  const selectedFullAddress = selectedAddrParts.join(', ');
+
   return (
     <div className='w-full h-full'>
       <div
         ref={mapContainerRef}
         className='w-full h-full'
       />
+      {selectedSpace && (
+        <div className='fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[var(--accent)] p-4 z-50'>
+          <div className='container mx-auto flex flex-col gap-4 justify-between items-center flex-wrap'>
+            <div>
+              <h3 className='font-semibold text-lg'>
+                {selectedSpace.name ||
+                  (selectedSpace.space && selectedSpace.space.name)}
+              </h3>
+              {(selectedSpace.type || selectedSpace.space?.type) && (
+                <p className='text-sm italic'>
+                  {(
+                    selectedSpace.type || selectedSpace.space?.type
+                  )?.toLowerCase()}
+                </p>
+              )}
+              <p className='text-sm'>
+                {selectedFullAddress || 'Address unknown'}
+              </p>
+              {selectedSpace.eventCount ||
+              (selectedSpace.space && selectedSpace.space.eventCount) ? (
+                <p className='text-sm'>
+                  {selectedSpace.eventCount || selectedSpace.space.eventCount}{' '}
+                  events
+                </p>
+              ) : (
+                <p className='text-sm italic'>No events listed yet</p>
+              )}
+            </div>
+            <div className='flex gap-2 flex-wrap'>
+              {selectedSpace.website && (
+                <a
+                  href={selectedSpace.website}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='button'>
+                  Website
+                </a>
+              )}
+              <a
+                href={`/spaces/${
+                  (selectedSpace.space && selectedSpace.space.id) ||
+                  selectedSpace.id
+                }`}
+                className='button'>
+                Archive
+              </a>
+            </div>
+            <button
+              onClick={() => setSelectedSpace(null)}
+              className='mt-2 text-[var(--accent)]'>
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
