@@ -121,17 +121,18 @@ export default function SpacesPage() {
         </div>
       )}
       {/* Main content: List or Map view */}
-
-      {isListView ? (
-        <SpacesList spaces={sortedSpaces} />
-      ) : (
-        <MapComponent
-          spaces={spaces}
-          initialCenter={{ lat: 51.3397, lng: 12.3731 }}
-          initialZoom={11} // set the default zoom level for spaces here
-          activeTypes={activeTypes}
-        />
-      )}
+      <div className='flex-1 overflow-auto pb-20'>
+        {isListView ? (
+          <SpacesList spaces={sortedSpaces} />
+        ) : (
+          <MapComponent
+            spaces={spaces}
+            initialCenter={{ lat: 51.3397, lng: 12.3731 }}
+            initialZoom={11} // set the default zoom level for spaces here
+            activeTypes={activeTypes}
+          />
+        )}
+      </div>
     </div>
   );
 }
