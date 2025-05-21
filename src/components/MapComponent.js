@@ -150,11 +150,28 @@ export default function MapComponent({
 
       const popupContent = `
         <div style="color:#000; font-size:12px; line-height:1.4;">
-          <strong>${popupTitleHtml}</strong>
-          <br/><em style="font-size:10px; color:#555;">${typeKey}</em>
+          <strong>
+            <a href="/spaces/${spaceId}" target="_blank" style=" color:inherit;">
+              ${popupTitle}
+            </a>
+          </strong>
+          
           ${
             fullAddress
-              ? `<br/><a href="#" class="copy-address" data-address="${fullAddress}" style="text-decoration:underline; color:inherit;">${fullAddress}</a>`
+              ? `<br/>
+            <a href="#" class="copy-address" data-address="${fullAddress}"
+               style="color:inherit;">
+              ${fullAddress}
+            </a>
+            <br/>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+              fullAddress
+            )}"
+               target="_blank"
+               style="text-decoration:underline; color:inherit;">
+              Directions
+            </a>
+          `
               : ''
           }
         </div>
@@ -191,7 +208,7 @@ export default function MapComponent({
                 <strong>${popupTitleHtml}</strong>
                 <br/><em style="font-size:10px; color:#555;">${typeKey}</em>
                 <br/>
-                <a href="#" class="copy-address" data-address="${newFullAddress}" style="text-decoration:underline; color:inherit;">${newFullAddress}</a>
+                <a href="#" class="copy-address" data-address="${newFullAddress}" style=" color:inherit;">${newFullAddress}</a>
               </div>
             `;
             marker.getPopup().setHTML(newPopupContent);
@@ -249,57 +266,59 @@ export default function MapComponent({
         className='w-full h-full'
       />
       {selectedSpace && (
-        <div className='fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[var(--accent)] p-4 z-50'>
-          <div className='container mx-auto flex flex-col gap-4 justify-between items-center flex-wrap'>
-            <div>
-              <h3 className='font-semibold text-lg'>
-                {selectedSpace.name ||
-                  (selectedSpace.space && selectedSpace.space.name)}
-              </h3>
-              {(selectedSpace.type || selectedSpace.space?.type) && (
-                <p className='text-sm italic'>
-                  {(
-                    selectedSpace.type || selectedSpace.space?.type
-                  )?.toLowerCase()}
-                </p>
-              )}
-              <p className='text-sm'>
-                {selectedFullAddress || 'Address unknown'}
-              </p>
-              {selectedSpace.eventCount ||
-              (selectedSpace.space && selectedSpace.space.eventCount) ? (
-                <p className='text-sm'>
-                  {selectedSpace.eventCount || selectedSpace.space.eventCount}{' '}
-                  events
-                </p>
-              ) : (
-                <p className='text-sm italic'>No events listed yet</p>
-              )}
-            </div>
-            <div className='flex gap-2 flex-wrap'>
-              {selectedSpace.website && (
+        <div className='fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[var(--accent)] p-6 z-50 max-h-[40vh] overflow-auto'>
+          <div className='container mx-auto flex flex-col md:flex-row gap-6 md:gap-12 items-start'>
+            <div className='flex-shrink-0 w-full md:w-1/3'>
+              <h3 className='font-bold text-xl mb-1'>
                 <a
-                  href={selectedSpace.website}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='button'>
-                  Website
-                </a>
+                  href={`/spaces/${
+                    selectedSpace.space?.id || selectedSpace.id
+                  }`}
+                  className='hover:text-[var(--accent)]'>
+                  {selectedSpace.name || selectedSpace.space?.name}
+                </a>{' '}
+              </h3>
+              <p className='text-sm mb-2'>{selectedFullAddress}</p>
+              {selectedSpace.eventCount > 0 && (
+                <p className='text-sm mb-2'>
+                  {selectedSpace.eventCount} event
+                  {selectedSpace.eventCount > 1 ? 's' : ''}
+                </p>
               )}
-              <a
-                href={`/spaces/${
-                  (selectedSpace.space && selectedSpace.space.id) ||
-                  selectedSpace.id
-                }`}
-                className='button'>
-                Archive
-              </a>
+              {/* <p className='text-sm italic mb-1'>No events listed yet</p> */}
             </div>
-            <button
-              onClick={() => setSelectedSpace(null)}
-              className='mt-2 text-[var(--accent)]'>
-              ×
-            </button>
+            <div className='flex-grow w-full md:w-2/3'>
+              {selectedSpace.description && (
+                <p className='mb-4 text-sm text-[var(--text-secondary)] whitespace-pre-wrap'>
+                  {selectedSpace.description}
+                </p>
+              )}
+              <div className='flex flex-wrap gap-3'>
+                {selectedSpace.website && (
+                  <a
+                    href={selectedSpace.website}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='button'>
+                    Website
+                  </a>
+                )}
+                <a
+                  href={`/spaces/${
+                    (selectedSpace.space && selectedSpace.space.id) ||
+                    selectedSpace.id
+                  }`}
+                  className='button'>
+                  Archive
+                </a>
+                <button
+                  onClick={() => setSelectedSpace(null)}
+                  className='ml-auto text-[var(--accent)] text-2xl font-bold leading-none p-0 border-none bg-transparent cursor-pointer'
+                  aria-label='Close details panel'>
+                  ×
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
