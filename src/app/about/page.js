@@ -29,15 +29,6 @@ export default function AboutPage() {
       </p>
 
       <p className='mb-4'>
-        Are you part of a subcultural space and want to become a member of the
-        archive?{' '}
-        <a
-          href='/spaces/signup'
-          className='underline'>
-          Register here.
-        </a>
-      </p>
-      <p className='mb-4'>
         You can also email us at any time, we would love to hear your feedback
         or ideas for features—{' '}
         <a

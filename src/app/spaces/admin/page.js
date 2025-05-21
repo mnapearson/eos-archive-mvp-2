@@ -125,11 +125,6 @@ export default function SpaceAdminDashboard() {
     return (
       <div className='max-w-lg mx-auto'>
         <p>No space record found for your account.</p>
-        <Link
-          href='/spaces/signup'
-          className='underline'>
-          Register to become a member of eos archive.
-        </Link>
       </div>
     );
   }

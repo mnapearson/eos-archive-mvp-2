@@ -173,15 +173,6 @@ function SpacesList({ spaces }) {
         ))}
       </div>
       <p className='text-sm italic mt-4'>No more spaces found.</p>
-      <p className='mt-20 text-lg'>
-        Are you part of a subcultural space, and want to become a member of eos
-        archive?{' '}
-        <a
-          href='/spaces/signup'
-          className='underline'>
-          Register here.
-        </a>
-      </p>
     </>
   );
 }
