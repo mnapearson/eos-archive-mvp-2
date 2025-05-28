@@ -6,7 +6,7 @@ const markerColors = {
   kino: '#FF073A', // neon red
   club: '#9D00FF', // neon purple
   studio: '#FF5F1F', // neon orange
-  other: '#000000', // default black
+  other: '#FFFFFF', // default white
   theatre: '#04FFF7', // neon turquoise
 };
 
