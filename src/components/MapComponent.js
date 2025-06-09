@@ -264,8 +264,8 @@ export default function MapComponent({
       />
       {selectedSpace && (
         <div className='fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[var(--accent)] p-6 z-50 max-h-[40vh] overflow-auto'>
-          <div className='container mx-auto flex flex-col md:flex-row gap-6 md:gap-12 items-start'>
-            <div className='flex-shrink-0 w-full md:w-1/3'>
+          <div className='container mx-auto flex flex-col items-start'>
+            <div className='flex-shrink-0 w-full'>
               <h3 className='font-bold text-xl mb-1'>
                 <a
                   href={`/spaces/${
@@ -284,7 +284,7 @@ export default function MapComponent({
               )}
               {/* <p className='text-sm italic mb-1'>No events listed yet</p> */}
             </div>
-            <div className='flex-grow w-full md:w-2/3'>
+            <div className='flex-grow w-full '>
               {selectedSpace.description && (
                 <p className='mb-4 text-sm text-[var(--text-secondary)] whitespace-pre-wrap'>
                   {selectedSpace.description}
