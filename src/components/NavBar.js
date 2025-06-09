@@ -83,15 +83,6 @@ export default function NavBar() {
           {/* Left: spiral that toggles the menu */}
 
           {/* Center: Logo Homepage */}
-          <div>
-            <Link
-              title='Navigate to homepage'
-              href='/'>
-              eos archive
-            </Link>
-          </div>
-
-          {/* Right: Login Button */}
           <div className='flex flex-row gap-3 mt-1'>
             <div>
               <button
@@ -109,6 +100,29 @@ export default function NavBar() {
                 </svg>
               </button>
             </div>
+            <Link
+              title='Navigate to homepage'
+              href='/'>
+              eos archive
+            </Link>
+          </div>
+
+          {/* Right: Login Button */}
+          <div className='flex flex-row gap-3 mt-1'>
+            <Link
+              title='Show map view'
+              href='/map'
+              aria-label='Show map view'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='currentColor'>
+                <path d='M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z' />
+              </svg>
+            </Link>
+
             <Link
               title='Navigate to login page'
               href={user ? '/spaces/admin' : '/login'}

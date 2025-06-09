@@ -176,7 +176,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
               onClick={toggleMenu}
               href='/map'
               className='block py-1 hover:underline'>
-              spaces map
+              spaces
             </Link>
             <Link
               onClick={toggleMenu}
