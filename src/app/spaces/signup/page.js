@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import markerColors from '@/lib/markerColors';
+import { allowedCities } from '@/lib/cities';
 import toast from 'react-hot-toast';
 
 const SPACE_TYPES = Object.keys(markerColors);
@@ -164,13 +165,24 @@ export default function SpaceSignUpPage() {
         <div className='flex gap-2'>
           <div className='flex-1'>
             <label className='block mb-1 text-sm'>City*</label>
-            <input
-              type='text'
+            <select
               className='input'
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              required
-            />
+              required>
+              <option
+                value=''
+                disabled>
+                Select your city
+              </option>
+              {allowedCities.map((c) => (
+                <option
+                  key={c}
+                  value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </div>
           <div className='flex-1'>
             <label className='block mb-1 text-sm'>ZIP Code*</label>

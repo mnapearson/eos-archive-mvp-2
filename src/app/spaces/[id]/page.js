@@ -71,7 +71,6 @@ export default function SpacePage() {
       const { data: eventsData, error } = await supabase
         .from('events')
         .select('*')
-
         .eq('space_id', id);
       if (error) {
         console.error('Error fetching events:', error);
