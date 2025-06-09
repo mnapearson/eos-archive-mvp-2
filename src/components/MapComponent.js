@@ -144,8 +144,7 @@ export default function MapComponent({
       else if (item.space?.address) addrParts.push(item.space.address);
       if (item.city) addrParts.push(item.city);
       else if (item.space?.city) addrParts.push(item.space.city);
-      if (item.zipcode) addrParts.push(item.zipcode);
-      else if (item.space?.zipcode) addrParts.push(item.space.zipcode);
+
       const fullAddress = addrParts.join(', ');
 
       const popupContent = `
@@ -254,9 +253,7 @@ export default function MapComponent({
   if (selectedSpace?.city) selectedAddrParts.push(selectedSpace.city);
   else if (selectedSpace?.space?.city)
     selectedAddrParts.push(selectedSpace.space.city);
-  if (selectedSpace?.zipcode) selectedAddrParts.push(selectedSpace.zipcode);
-  else if (selectedSpace?.space?.zipcode)
-    selectedAddrParts.push(selectedSpace.space.zipcode);
+
   const selectedFullAddress = selectedAddrParts.join(', ');
 
   return (

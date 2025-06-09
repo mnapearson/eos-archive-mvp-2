@@ -20,7 +20,7 @@ export default function SpaceSignUpPage() {
 
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
-  const [zipcode, setZipcode] = useState('');
+
   const [description, setDescription] = useState('');
   const [website, setWebsite] = useState('');
 
@@ -53,7 +53,7 @@ export default function SpaceSignUpPage() {
     }
 
     // 2. Combine address fields for geocoding.
-    const fullAddress = `${address}, ${city}, ${zipcode}`;
+    const fullAddress = `${address}, ${city}`;
     let latitude = null;
     let longitude = null;
     try {
@@ -86,7 +86,7 @@ export default function SpaceSignUpPage() {
         type: spaceType, // Save the space type (either selected or new)
         city,
         address,
-        zipcode,
+
         description,
         website,
         latitude,
@@ -132,27 +132,7 @@ export default function SpaceSignUpPage() {
             required
           />
         </div>
-        <div>
-          <label className='block mb-1 text-sm'>Space Type*</label>
-          <select
-            className='input'
-            value={spaceType}
-            onChange={(e) => setSpaceType(e.target.value)}
-            required>
-            <option
-              value=''
-              disabled>
-              Select a space type
-            </option>
-            {SPACE_TYPES.map((type) => (
-              <option
-                key={type}
-                value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
+
         <div>
           <label className='block mb-1 text-sm'>Street Address*</label>
           <input
@@ -184,16 +164,27 @@ export default function SpaceSignUpPage() {
               ))}
             </select>
           </div>
-          <div className='flex-1'>
-            <label className='block mb-1 text-sm'>ZIP Code*</label>
-            <input
-              type='text'
-              className='input'
-              value={zipcode}
-              onChange={(e) => setZipcode(e.target.value)}
-              required
-            />
-          </div>
+        </div>
+        <div>
+          <label className='block mb-1 text-sm'>Space Type*</label>
+          <select
+            className='input'
+            value={spaceType}
+            onChange={(e) => setSpaceType(e.target.value)}
+            required>
+            <option
+              value=''
+              disabled>
+              Select a space type
+            </option>
+            {SPACE_TYPES.map((type) => (
+              <option
+                key={type}
+                value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className='block mb-1 text-sm'>Description</label>

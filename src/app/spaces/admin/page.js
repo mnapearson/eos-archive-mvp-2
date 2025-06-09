@@ -157,7 +157,7 @@ export default function SpaceAdminDashboard() {
                 <h2 className='font-semibold text-lg'>{space.name}</h2>
                 <p className='text-sm italic'>{space.type}</p>
                 <p className='text-sm mb-2'>
-                  {space.address}, {space.city} {space.zipcode}
+                  {space.address}, {space.city}
                 </p>
                 {isEditing ? (
                   <>
