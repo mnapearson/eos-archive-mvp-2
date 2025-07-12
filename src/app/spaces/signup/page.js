@@ -28,6 +28,7 @@ export default function SpaceSignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLeico, setIsLeico] = useState(false);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -89,6 +90,7 @@ export default function SpaceSignUpPage() {
 
         description,
         website,
+        leico: isLeico,
         latitude,
         longitude,
         status: 'pending',
@@ -120,7 +122,7 @@ export default function SpaceSignUpPage() {
     <div className='max-w-lg mx-auto'>
       <form
         onSubmit={handleSignUp}
-        className='space-y-4 glow-box lowercase'>
+        className='space-y-4 glow-box '>
         {/* Space Information Section */}
         <div>
           <label className='block my-1 text-sm'>Space Name*</label>
@@ -203,6 +205,20 @@ export default function SpaceSignUpPage() {
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
           />
+        </div>
+        <div className='flex items-center space-x-2'>
+          <input
+            id='isLeico'
+            type='checkbox'
+            checked={isLeico}
+            onChange={(e) => setIsLeico(e.target.checked)}
+            className='h-4 w-4'
+          />
+          <label
+            htmlFor='isLeico'
+            className='text-sm'>
+            This is a LEICO space
+          </label>
         </div>
 
         {/* User Account Section */}

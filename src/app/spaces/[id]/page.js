@@ -89,13 +89,7 @@ export default function SpacePage() {
 
   return (
     <div>
-      <Link
-        href='/map'
-        className='text-sm hover:text-gray-600'
-        scroll={false}>
-        ← return to spaces map
-      </Link>
-      <div className='mt-4'>
+      <div>
         {/* Use the reusable SpaceListItem in detailed mode */}
         <SpaceListItem
           space={space}

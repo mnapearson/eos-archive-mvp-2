@@ -14,7 +14,7 @@ export default function SpacesPage() {
   const [spaces, setSpaces] = useState([]);
   const [activeTypes, setActiveTypes] = useState([]);
   // Toggle between list and map view
-  const [isListView, setIsListView] = useState(false);
+  const [isListView, setIsListView] = useState(true);
   // Search query for filtering (only used in list view)
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -102,22 +102,22 @@ export default function SpacesPage() {
             <span>{type.toUpperCase()}</span>
           </button>
         ))}
-        <button
-          onClick={() => setIsListView(!isListView)}
-          className='button'>
-          {isListView ? 'SHOW MAP' : 'SHOW LIST'}
-        </button>
       </div>
       {/* Render search field only in list view (in its own row) */}
       {isListView && (
-        <div className='mb-2'>
+        <div className='mb-2 flex items-center gap-2'>
           <input
             type='text'
             placeholder='Search list by space name or city'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='input'
+            className='input flex-grow'
           />
+          <button
+            onClick={() => setIsListView(!isListView)}
+            className='button whitespace-nowrap'>
+            SHOW MAP
+          </button>
         </div>
       )}
       {/* Main content: List or Map view */}
