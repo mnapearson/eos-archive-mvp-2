@@ -10,6 +10,23 @@ export default function HomePage() {
   const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scope, setScope] = useState('all'); // 'all' | 'upcoming' | 'current' | 'past'
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    async function fetchCities() {
+      const { data, error } = await supabase.from('spaces').select('city');
+      if (error) {
+        console.error('Error fetching cities:', error);
+        return;
+      }
+      const unique = Array.from(
+        new Set((data || []).map((d) => d.city).filter(Boolean))
+      ).sort((a, b) => a.localeCompare(b));
+      setCities(unique);
+    }
+    fetchCities();
+  }, []);
 
   // Helper function to remove a single value from a multi-select filter
   function removeFilterValue(filterKey, value) {
@@ -77,8 +94,28 @@ export default function HomePage() {
         if (error) {
           console.error('Error fetching events:', error);
         } else {
-          // Fallback client-side sort to guarantee newest-first
-          const sorted = (data || []).sort(
+          const today = new Date().toISOString().slice(0, 10);
+          const filteredByScope = (data || []).filter((ev) => {
+            const sd = ev.start_date ? ev.start_date.slice(0, 10) : null;
+            const ed = ev.end_date ? ev.end_date.slice(0, 10) : null;
+            if (!sd) return false;
+            if (scope === 'all') {
+              return true;
+            }
+            if (scope === 'upcoming') {
+              return sd > today;
+            }
+            if (scope === 'current') {
+              return ed ? sd <= today && ed >= today : sd === today;
+            }
+            if (scope === 'past') {
+              return ed ? ed < today : sd < today;
+            }
+            return true;
+          });
+
+          // Ensure newest-first by submission
+          const sorted = filteredByScope.sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
           setEvents(sorted);
@@ -91,7 +128,7 @@ export default function HomePage() {
     }
 
     fetchEvents();
-  }, [selectedFilters]);
+  }, [selectedFilters, scope]);
 
   // Render a top bar showing active filters
   function renderFilterBar() {
@@ -122,6 +159,68 @@ export default function HomePage() {
 
   return (
     <div className='w-full'>
+      {/* Scope tabs + City dropdown */}
+      <div className='mb-3 flex items-center gap-20 '>
+        <div className='flex gap-2'>
+          <button
+            onClick={() => setScope('all')}
+            className={`button ${
+              scope === 'all'
+                ? 'bg-[var(--foreground)] text-[var(--background)]'
+                : ''
+            }`}>
+            ALL
+          </button>
+          <button
+            onClick={() => setScope('upcoming')}
+            className={`button ${
+              scope === 'upcoming'
+                ? 'bg-[var(--foreground)] text-[var(--background)]'
+                : ''
+            }`}>
+            UPCOMING
+          </button>
+          <button
+            onClick={() => setScope('current')}
+            className={`button ${
+              scope === 'current'
+                ? 'bg-[var(--foreground)] text-[var(--background)]'
+                : ''
+            }`}>
+            CURRENT
+          </button>
+          <button
+            onClick={() => setScope('past')}
+            className={`button ${
+              scope === 'past'
+                ? 'bg-[var(--foreground)] text-[var(--background)]'
+                : ''
+            }`}>
+            PAST
+          </button>
+        </div>
+
+        {/* <select
+          className='input ml-auto'
+          value={(selectedFilters.city && selectedFilters.city[0]) || ''}
+          onChange={(e) => {
+            const val = e.target.value;
+            setSelectedFilters((prev) => ({
+              ...prev,
+              city: val ? [val] : [],
+            }));
+          }}>
+          <option value=''>Cities</option>
+          {cities.map((c) => (
+            <option
+              key={c}
+              value={c}>
+              {c}
+            </option>
+          ))}
+        </select> */}
+      </div>
+
       {/* Filter Bar at the top */}
       {renderFilterBar()}
 

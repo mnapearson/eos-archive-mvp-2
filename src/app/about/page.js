@@ -39,7 +39,7 @@ export default function AboutPage() {
         .
       </p>
       <p>
-        from dusk til dawn, <br /> eos
+        til dawn, <br /> eos
       </p>
     </div>
   );
