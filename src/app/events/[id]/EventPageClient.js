@@ -7,8 +7,8 @@ import Link from 'next/link';
 import Spinner from '@/components/Spinner';
 import MapComponent from '@/components/MapComponent';
 import { FilterContext } from '@/contexts/FilterContext';
-import ShareButton from '@/components/ShareButton';
 import { formatDateRange } from '@/lib/date';
+import AddToCalendar from '@/components/AddToCalendar';
 
 export default function EventPageClient({ eventId }) {
   const router = useRouter();
@@ -76,6 +76,14 @@ export default function EventPageClient({ eventId }) {
     event.space?.city ||
     'UNKNOWN ADDRESS';
 
+  const calendarLocation = [
+    event.space?.name,
+    event.space?.address || spaceAddress,
+    event.space?.city,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
   const handleFilterClick = (key, val) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: [val] }));
     router.push('/');
@@ -108,7 +116,11 @@ export default function EventPageClient({ eventId }) {
         {/* Details */}
         <div className='md:w-1/2 p-4 md:p-8 space-y-4 flex flex-col'>
           <h1 className='text-2xl font-bold'>{eventTitle}</h1>
-
+          <AddToCalendar
+            event={event}
+            overrides={{ location: calendarLocation }}
+            className='mt-2'
+          />
           <div>
             <h3 className='uppercase text-xs font-bold mb-1'>Date</h3>
             <button
@@ -177,13 +189,6 @@ export default function EventPageClient({ eventId }) {
               </a>
             </div>
           )}
-
-          <ShareButton
-            title={eventTitle}
-            text={`${event.space?.name || ''} · ${eventDateTime}`}
-            buttonText='Share'
-            className='glow-button'
-          />
         </div>
       </div>
 
