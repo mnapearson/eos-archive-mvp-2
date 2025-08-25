@@ -1,7 +1,10 @@
 import { supabase } from '@/lib/supabaseClient';
 
 export async function GET() {
-  const { data, error } = await supabase.from('events').select('*');
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

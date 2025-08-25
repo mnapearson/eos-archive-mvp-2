@@ -71,12 +71,17 @@ export default function HomePage() {
           return;
         }
 
-        // 5. Execute the events query.
+        // 5. Execute the events query (newest submission first).
+        query = query.order('created_at', { ascending: false });
         const { data, error } = await query;
         if (error) {
           console.error('Error fetching events:', error);
         } else {
-          setEvents(data || []);
+          // Fallback client-side sort to guarantee newest-first
+          const sorted = (data || []).sort(
+            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+          );
+          setEvents(sorted);
         }
       } catch (err) {
         console.error('Unexpected error fetching events:', err);
