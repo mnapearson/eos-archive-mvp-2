@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
-import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import markerColors from '@/lib/markerColors';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -82,13 +80,6 @@ export default function MapComponent({
     });
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl: mapboxgl,
-      marker: false,
-    });
-    map.addControl(geocoder, 'top-left');
 
     mapRef.current = map;
     return () => map.remove();

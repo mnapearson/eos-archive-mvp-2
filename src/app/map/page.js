@@ -15,7 +15,7 @@ export default function SpacesPage() {
   const [activeTypes, setActiveTypes] = useState([]);
   // Toggle between list and map view
   const [isListView, setIsListView] = useState(true);
-  // Search query for filtering (only used in list view)
+  // Search query for filtering (used in both views now)
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -63,18 +63,16 @@ export default function SpacesPage() {
         })
       : spaces;
 
-  // Apply search filter (only in list view).
-  const finalFilteredSpaces = isListView
-    ? filteredByType.filter((space) => {
-        const query = searchQuery.toLowerCase();
-        if (!query) return true;
-        return (
-          (space.name && space.name.toLowerCase().includes(query)) ||
-          (space.city && space.city.toLowerCase().includes(query)) ||
-          (space.website && space.website.toLowerCase().includes(query))
-        );
-      })
-    : filteredByType;
+  // Apply search filter for BOTH views (list & map)
+  const finalFilteredSpaces = filteredByType.filter((space) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      (space.name && space.name.toLowerCase().includes(query)) ||
+      (space.city && space.city.toLowerCase().includes(query)) ||
+      (space.website && space.website.toLowerCase().includes(query))
+    );
+  });
 
   // Sort the final spaces list alphabetically by the space name.
   const sortedSpaces = [...finalFilteredSpaces].sort((a, b) =>
@@ -83,53 +81,58 @@ export default function SpacesPage() {
 
   return (
     <div className='mx-auto h-screen flex flex-col'>
-      {/* Top row: Legend and Toggle button */}
-      <div className='mb-2 flex flex-wrap items-center gap-2'>
-        {uniqueTypes.map((type) => (
-          <button
-            key={type}
-            onClick={() => toggleType(type)}
-            className={`flex items-center gap-1 px-2 py-1 text-xs rounded ${
-              activeTypes.length === 0 || activeTypes.includes(type)
-                ? 'border border-[var(--foreground)]'
-                : 'opacity-50'
-            }`}>
-            <span
-              className='w-3 h-3 rounded-full border border-[var(--foreground)]'
-              style={{
-                backgroundColor: markerColors[type] || markerColors.default,
-              }}></span>
-            <span>{type.toUpperCase()}</span>
-          </button>
-        ))}
-      </div>
       <div className='mb-2 flex items-center gap-2'>
-        {isListView && (
-          <input
-            type='text'
-            placeholder='Search list by space name or city'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className='input flex-grow'
-          />
-        )}
+        <input
+          type='text'
+          placeholder='Search list by space name or city'
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className='input flex-grow'
+        />
+
         <button
           onClick={() => setIsListView(!isListView)}
-          className='button whitespace-nowrap'>
+          className='button whitespace-nowrap ml-auto'>
           {isListView ? 'SHOW MAP' : 'SHOW LIST'}
         </button>
       </div>
       {/* Main content: List or Map view */}
-      <div className='flex-1 overflow-auto pb-20'>
+      <div className='flex-1 overflow-hidden pb-20 relative'>
         {isListView ? (
           <SpacesList spaces={sortedSpaces} />
         ) : (
-          <MapComponent
-            spaces={spaces}
-            initialCenter={{ lat: 51.3397, lng: 12.3731 }}
-            initialZoom={11} // set the default zoom level for spaces here
-            activeTypes={activeTypes}
-          />
+          <>
+            <MapComponent
+              spaces={sortedSpaces}
+              initialCenter={{ lat: 51.3397, lng: 12.3731 }}
+              initialZoom={11}
+              activeTypes={activeTypes}
+            />
+            {/* Map legend + search overlay (top-left) */}
+            <div className='absolute top-2 left-2 z-10 flex flex-col gap-2 bg-[var(--background)]/80 backdrop-blur-md border rounded px-2 py-2'>
+              <div className='flex flex-wrap items-center gap-2'>
+                {uniqueTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => toggleType(type)}
+                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded ${
+                      activeTypes.length === 0 || activeTypes.includes(type)
+                        ? 'border border-[var(--foreground)]'
+                        : 'opacity-50'
+                    }`}>
+                    <span
+                      className='w-3 h-3 rounded-full border border-[var(--foreground)]'
+                      style={{
+                        backgroundColor:
+                          markerColors[type] || markerColors.default,
+                      }}
+                    />
+                    <span>{type.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
