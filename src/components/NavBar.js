@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
 import { supabase } from '@/lib/supabaseClient';
@@ -35,6 +35,12 @@ export default function NavBar() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const user = useUserSimple();
+
+  const pathname = usePathname();
+  const isSpacesActive =
+    pathname.startsWith('/map') || pathname.startsWith('/spaces');
+  const isLoginActive =
+    pathname.startsWith('/login') || pathname.startsWith('/spaces/admin');
 
   // Load saved theme or system preference
   useEffect(() => {
@@ -86,10 +92,10 @@ export default function NavBar() {
           Skip to content
         </a>
 
-        {/* Mobile: 3-col grid; md+: flex like before */}
-        <div className='py-2 mx-2 grid grid-cols-3 items-center md:flex md:justify-between'>
-          {/* Left: Menu */}
-          <div className='justify-self-start md:order-1'>
+        {/* Single-row flex: left (menu + brand), right (actions) */}
+        <div className='py-2 mx-2 flex items-center justify-between'>
+          {/* Left: Menu + Brand */}
+          <div className='flex items-center gap-3'>
             <button
               onClick={toggleMenu}
               aria-label='Open menu'
@@ -97,14 +103,11 @@ export default function NavBar() {
               className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]'>
               menu
             </button>
-          </div>
-
-          {/* Center: Brand */}
-          <div className='justify-self-center md:order-2'>
             <Link
               href='/'
               title='Navigate to homepage'
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]'>
+              onClick={handleLogoClick}
+              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] tracking-wide font-semibold'>
               eos archive
             </Link>
           </div>
@@ -112,19 +115,23 @@ export default function NavBar() {
           {/* Right: Actions */}
           <nav
             aria-label='Primary'
-            className='justify-self-end flex gap-3 mt-0 md:order-3'>
+            className='flex gap-3'>
             <Link
               href='/map'
-              title='Show map view'
-              aria-label='Show map view'
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]'>
+              title='Browse spaces on map/list'
+              aria-label='Browse spaces on map/list'
+              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
+                isSpacesActive ? 'underline' : ''
+              }`}>
               spaces
             </Link>
             <Link
               href={user ? '/spaces/admin' : '/login'}
               title='Login or Register'
               aria-label='Login or Register'
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]'>
+              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
+                isLoginActive ? 'underline' : ''
+              }`}>
               login
             </Link>
           </nav>
