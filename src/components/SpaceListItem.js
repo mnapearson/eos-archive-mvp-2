@@ -3,12 +3,30 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MapComponent from '@/components/MapComponent';
+import Image from 'next/image';
 
 export default function SpaceListItem({ space }) {
   const router = useRouter();
   const [address, setAddress] = useState('');
   const [mapOpen, setMapOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Build an optimized image URL when coming from Supabase Storage
+  const buildOptimizedSrc = (url, width = 600) => {
+    if (!url) return '';
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes('supabase.co')) {
+        u.searchParams.set('width', String(width));
+        u.searchParams.set('quality', '70');
+        u.searchParams.set('format', 'webp');
+        return u.toString();
+      }
+      return url;
+    } catch {
+      return url;
+    }
+  };
 
   useEffect(() => {
     if (space.latitude && space.longitude) {
@@ -139,10 +157,13 @@ export default function SpaceListItem({ space }) {
       <div className='flex-1'>{mainContent}</div>
       {space.image_url && (
         <div className='my-2 md:mt-0 md:ml-4'>
-          <img
-            src={space.image_url}
-            alt={space.name}
-            className='h-auto w-[300px] object-cover rounded-sm'
+          <Image
+            src={buildOptimizedSrc(space.image_url, 600)}
+            alt={space.name || 'space image'}
+            width={300}
+            height={400}
+            sizes='(max-width: 768px) 100vw, 300px'
+            className='object-cover rounded-sm'
           />
         </div>
       )}

@@ -9,6 +9,7 @@ import MapComponent from '@/components/MapComponent';
 import { FilterContext } from '@/contexts/FilterContext';
 import { formatDateRange } from '@/lib/date';
 import AddToCalendar from '@/components/AddToCalendar';
+import Image from 'next/image';
 
 export default function EventPageClient({ eventId }) {
   const router = useRouter();
@@ -84,6 +85,25 @@ export default function EventPageClient({ eventId }) {
     .filter(Boolean)
     .join(', ');
 
+  // Build an optimized image URL when coming from Supabase Storage
+  const buildOptimizedSrc = (url, width = 1600) => {
+    if (!url) return '';
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes('supabase.co')) {
+        u.searchParams.set('width', String(width));
+        u.searchParams.set('quality', '70');
+        u.searchParams.set('format', 'webp');
+        return u.toString();
+      }
+      return url;
+    } catch {
+      return url;
+    }
+  };
+
+  const flyerSrc = buildOptimizedSrc(event.image_url, 1600);
+
   const handleFilterClick = (key, val) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: [val] }));
     router.push('/');
@@ -103,10 +123,14 @@ export default function EventPageClient({ eventId }) {
         {/* Flyer */}
         <div className='md:w-1/2 flex items-center justify-center p-4 md:p-8'>
           {event.image_url ? (
-            <img
-              src={event.image_url}
+            <Image
+              src={flyerSrc}
               alt={`Flyer for ${eventTitle}`}
-              className='max-w-full max-h-full object-contain'
+              width={1600}
+              height={2000}
+              sizes='(max-width: 768px) 100vw, 50vw'
+              priority
+              className='max-w-full h-auto object-contain'
             />
           ) : (
             <p className='italic text-gray-600'>No flyer available</p>

@@ -118,8 +118,8 @@ export default function NavBar() {
             className='flex gap-3'>
             <Link
               href='/map'
-              title='Browse spaces on map/list'
-              aria-label='Browse spaces on map/list'
+              title='Browse spaces on map'
+              aria-label='Browse spaces on map'
               className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
                 isSpacesActive ? 'underline' : ''
               }`}>
