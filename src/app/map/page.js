@@ -18,6 +18,15 @@ export default function SpacesPage() {
   // Search query for filtering (used in both views now)
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Legend open/closed (mobile defaults to closed)
+  const [legendOpen, setLegendOpen] = useState(true);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const small = window.matchMedia('(max-width: 640px)').matches;
+      setLegendOpen(!small); // open on desktop, closed on mobile
+    }
+  }, []);
+
   useEffect(() => {
     async function fetchAllSpaces() {
       try {
@@ -84,7 +93,7 @@ export default function SpacesPage() {
       <div className='mb-2 flex items-center gap-2'>
         <input
           type='text'
-          placeholder='Search list by space name or city'
+          placeholder='Search by space name or city'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className='input flex-grow'
@@ -108,29 +117,43 @@ export default function SpacesPage() {
               initialZoom={11}
               activeTypes={activeTypes}
             />
-            {/* Map legend + search overlay (top-left) */}
-            <div className='absolute top-2 left-2 z-10 flex flex-col gap-2 bg-[var(--background)]/80 backdrop-blur-md border rounded px-2 py-2'>
-              <div className='flex flex-wrap items-center gap-2'>
-                {uniqueTypes.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => toggleType(type)}
-                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded ${
-                      activeTypes.length === 0 || activeTypes.includes(type)
-                        ? 'border border-[var(--foreground)]'
-                        : 'opacity-50'
-                    }`}>
-                    <span
-                      className='w-3 h-3 rounded-full border border-[var(--foreground)]'
-                      style={{
-                        backgroundColor:
-                          markerColors[type] || markerColors.default,
-                      }}
-                    />
-                    <span>{type.toUpperCase()}</span>
-                  </button>
-                ))}
-              </div>
+            {/* Map legend (top-left) with mobile-friendly pill toggle */}
+            <div className='absolute top-2 left-2 z-10'>
+              <button
+                onClick={() => setLegendOpen((o) => !o)}
+                className='button'
+                aria-expanded={legendOpen}
+                aria-controls='map-legend-panel'>
+                {legendOpen ? 'Legend ▾' : 'Legend ▸'}
+              </button>
+
+              {legendOpen && (
+                <div
+                  id='map-legend-panel'
+                  className='mt-2 bg-[var(--background)]/80 backdrop-blur-md border rounded px-2 py-2 shadow-md w-[min(70vw,150px)] sm:w-auto'>
+                  <div className='flex flex-col gap-2 max-h-[40vh] overflow-auto sm:max-h-none sm:flex-row sm:flex-wrap'>
+                    {uniqueTypes.map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => toggleType(type)}
+                        className={`flex items-center gap-2 px-2 py-1 text-xs rounded w-full sm:w-auto ${
+                          activeTypes.length === 0 || activeTypes.includes(type)
+                            ? 'border border-[var(--foreground)]'
+                            : 'opacity-50'
+                        }`}>
+                        <span
+                          className='w-3 h-3 rounded-full border border-[var(--foreground)] flex-shrink-0'
+                          style={{
+                            backgroundColor:
+                              markerColors[type] || markerColors.default,
+                          }}
+                        />
+                        <span className='truncate'>{type.toUpperCase()}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
