@@ -103,9 +103,8 @@ export default function SpacesPage() {
           </button>
         ))}
       </div>
-      {/* Render search field only in list view (in its own row) */}
-      {isListView && (
-        <div className='mb-2 flex items-center gap-2'>
+      <div className='mb-2 flex items-center gap-2'>
+        {isListView && (
           <input
             type='text'
             placeholder='Search list by space name or city'
@@ -113,13 +112,13 @@ export default function SpacesPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className='input flex-grow'
           />
-          <button
-            onClick={() => setIsListView(!isListView)}
-            className='button whitespace-nowrap'>
-            SHOW MAP
-          </button>
-        </div>
-      )}
+        )}
+        <button
+          onClick={() => setIsListView(!isListView)}
+          className='button whitespace-nowrap'>
+          {isListView ? 'SHOW MAP' : 'SHOW LIST'}
+        </button>
+      </div>
       {/* Main content: List or Map view */}
       <div className='flex-1 overflow-auto pb-20'>
         {isListView ? (
