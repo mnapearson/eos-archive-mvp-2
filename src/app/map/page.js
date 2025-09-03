@@ -89,7 +89,7 @@ export default function SpacesPage() {
   );
 
   return (
-    <div className='mx-auto h-screen flex flex-col'>
+    <div className='mx-auto h-screen min-h-0 flex flex-col'>
       <div className='mb-2 flex items-center gap-2'>
         <input
           type='text'
@@ -106,7 +106,10 @@ export default function SpacesPage() {
         </button>
       </div>
       {/* Main content: List or Map view */}
-      <div className='flex-1 overflow-hidden pb-20 relative'>
+      <div
+        className={`flex-1 pb-20 relative min-h-0 ${
+          isListView ? 'overflow-auto' : 'overflow-hidden'
+        }`}>
         {isListView ? (
           <SpacesList spaces={sortedSpaces} />
         ) : (
@@ -130,7 +133,7 @@ export default function SpacesPage() {
               {legendOpen && (
                 <div
                   id='map-legend-panel'
-                  className='mt-2 bg-[var(--background)]/80 backdrop-blur-md border rounded px-2 py-2 shadow-md w-[min(70vw,150px)] sm:w-auto'>
+                  className='mt-2 bg-[var(--background)]/80 backdrop-blur-md border rounded px-2 py-2 shadow-md w-[min(90vw,320px)] sm:w-auto'>
                   <div className='flex flex-col gap-2 max-h-[40vh] overflow-auto sm:max-h-none sm:flex-row sm:flex-wrap'>
                     {uniqueTypes.map((type) => (
                       <button
