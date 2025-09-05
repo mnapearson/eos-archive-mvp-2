@@ -1,36 +1,30 @@
 export default function AboutPage() {
   return (
-    <div>
+    <div className='mx-auto w-3/4'>
       <p className='mb-4'>
-        eos archive elevates event art—flyers, posters, and other visuals—from
-        ephemeral cultural artefacts to essential citations in the (post)digital
-        age. As a platform documenting subcultural creativity, eos archive
-        reimagines knowledge sharing by treating each piece of event art as a
-        reference point for understanding connections between artists,
-        collectives, and spaces.
+        eos is a living archive of event culture: graphics and spaces from the
+        independent scene. What was once temporary promotion becomes lasting
+        cultural memory.
       </p>
 
       <p className='mb-4'>
-        Subcultural events not only reflect the creative pulse of their time but
-        actively shape their scenes, capturing trends in expression, color
-        waves, and aesthetic forms. These events document the movements of the
-        moment, offering invaluable insight into underground and alternative
-        culture. By preserving and curating these artefacts, eos archive creates
-        a resource that future generations can use to trace the histories of
-        subcultural creativity in cities across the globe, fostering inspiration
-        and understanding of the diverse trajectories of the creative
-        underground.
+        Each piece is more than an image: it connects artists, collectives, and
+        the spaces where culture happens. On the platform, you can explore the
+        map of spaces, browse by city, and discover events through the visuals
+        that document them.
       </p>
 
       <p className='mb-4'>
-        Built with open-source principles, eos archive offers direct public
-        access for uploading and browsing. This approach ensures transparency,
-        inclusivity, and adaptability for a diverse range of users.
+        Together these artefacts tell the story of subcultures in motion...
+        shifting colors, styles, and ideas that shape how we gather and create.
+        By preserving and curating this material, eos builds a resource for both
+        today and the future. A way to see how independent culture grows, and to
+        keep these histories alive.
       </p>
 
       <p className='mb-4'>
-        You can also email us at any time, we would love to hear your feedback
-        or ideas for features—{' '}
+        You can email us at any time, we would love to hear your feedback or
+        ideas for features—{' '}
         <a
           href='mailto:hello@eosarchive.app'
           className='hover:underline'>
