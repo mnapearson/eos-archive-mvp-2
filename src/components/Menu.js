@@ -187,7 +187,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
             <Link
               onClick={toggleMenu}
               target='blank'
-              href='https://www.are.na/eos-archive-4vdklofkovq/conversations-1wumw6beixo'
+              href='https://www./.na/eos-archive-4vdklofkovq/conversations-1wumw6beixo'
               className='block py-1 hover:underline'>
               conversations
             </Link>

@@ -93,7 +93,7 @@ export default function NavBar() {
         </a>
 
         {/* Single-row flex: left (menu + brand), right (actions) */}
-        <div className='py-2 mx-2 flex items-center justify-between'>
+        <div className='py-2 mx-2 flex items-center justify-between text-sm'>
           {/* Left: Menu + Brand */}
           <div className='flex items-center gap-3'>
             <button
