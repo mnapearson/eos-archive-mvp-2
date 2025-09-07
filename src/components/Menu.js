@@ -138,7 +138,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
       }`}>
       {/* Sidebar Panel */}
       <div
-        className={`border-r border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/10 backdrop-blur-xl text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`border-r border-[var(--foreground)] fixed left-0 top-0 h-full w-80 bg-[var(--background)]/70 backdrop-blur-xl backdrop-brightness-75 text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Scrollable Content */}
@@ -187,7 +187,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
             <Link
               onClick={toggleMenu}
               target='blank'
-              href='https://www./.na/eos-archive-4vdklofkovq/conversations-1wumw6beixo'
+              href='https://www.are.na/eos-archive-4vdklofkovq/conversations-1wumw6beixo'
               className='block py-1 hover:underline'>
               conversations
             </Link>

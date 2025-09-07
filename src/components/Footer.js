@@ -6,8 +6,10 @@ export default function Footer() {
   return (
     <footer className='bg-[var(--background)] text-[var(--foreground)] border-t border-[var(--foreground)] mt-20'>
       <div className='max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between'>
-        <p className='text-sm'>&copy; {currentYear} eos archive.</p>
-        <div className='text-sm flex space-x-4 mt-4 md:mt-0'>
+        <div className='text-sm flex space-x-4 mb-4 md:mt-0'>
+          <a href='https://instagram.com/eosarchive.app'>
+            <p className='hover:underline'>instagram</p>
+          </a>
           <Link href='/privacy'>
             <p className='hover:underline'>privacy</p>
           </Link>
@@ -20,6 +22,7 @@ export default function Footer() {
             hello@eosarchive.app
           </a>{' '}
         </div>
+        <p className='text-sm'>&copy; {currentYear} eos archive.</p>
       </div>
     </footer>
   );
