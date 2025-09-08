@@ -27,7 +27,7 @@ function ConversationsPanel() {
     const { data, error } = await supabase
       .from('conversations')
       .select(
-        'id, slug, title, dek, status, cover_image_url, updated_at, published_at'
+        'id, slug, title, dek, quote, convo_date, location, status, cover_image_url, updated_at, published_at'
       )
       .order('updated_at', { ascending: false });
     if (!error) setRows(data || []);
@@ -52,6 +52,12 @@ function ConversationsPanel() {
       return;
     }
     setEditing(conv);
+    setEditing((prev) => ({
+      ...prev,
+      quote: '',
+      convo_date: null,
+      location: '',
+    }));
     setMd('');
     await load();
   }
@@ -60,7 +66,7 @@ function ConversationsPanel() {
     const { data: c } = await supabase
       .from('conversations')
       .select(
-        'id, slug, title, dek, status, cover_image_url, updated_at, published_at'
+        'id, slug, title, dek, quote, convo_date, location, status, cover_image_url, updated_at, published_at'
       )
       .eq('id', row.id)
       .single();
@@ -105,6 +111,9 @@ function ConversationsPanel() {
       id: editing.id,
       title: editing.title,
       dek: editing.dek || null,
+      quote: editing.quote || null,
+      convo_date: editing.convo_date || null,
+      location: editing.location || null,
       slug: editing.slug || slugify(editing.title || 'conversation'),
       status: editing.status || 'draft',
       cover_image_url: editing.cover_image_url || null,
@@ -198,6 +207,17 @@ function ConversationsPanel() {
                     <div className='font-medium'>{r.title}</div>
                     <div className='text-xs opacity-70'>
                       {r.status} • /conversations/{r.slug}
+                      {(r.convo_date || r.location) && (
+                        <>
+                          {' '}
+                          •{' '}
+                          {r.convo_date
+                            ? String(r.convo_date).split('T')[0]
+                            : ''}
+                          {r.convo_date && r.location ? ' · ' : ''}
+                          {r.location || ''}
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className='flex gap-2'>
@@ -253,6 +273,48 @@ function ConversationsPanel() {
                     }
                   />
                 </label>
+
+                <label className='flex flex-col gap-1 md:col-span-2'>
+                  <span className='text-sm opacity-80'>Quote</span>
+                  <textarea
+                    className='input min-h-[60px] italic'
+                    placeholder='A short line that captures the conversation'
+                    value={editing.quote || ''}
+                    onChange={(e) =>
+                      setEditing({ ...editing, quote: e.target.value })
+                    }
+                  />
+                </label>
+
+                <label className='flex flex-col gap-1'>
+                  <span className='text-sm opacity-80'>Conversation date</span>
+                  <input
+                    type='date'
+                    className='input'
+                    value={
+                      editing.convo_date
+                        ? String(editing.convo_date).split('T')[0]
+                        : ''
+                    }
+                    onChange={(e) =>
+                      setEditing({ ...editing, convo_date: e.target.value })
+                    }
+                  />
+                </label>
+
+                <label className='flex flex-col gap-1'>
+                  <span className='text-sm opacity-80'>Location</span>
+                  <input
+                    type='text'
+                    className='input'
+                    placeholder='City, venue, etc.'
+                    value={editing.location || ''}
+                    onChange={(e) =>
+                      setEditing({ ...editing, location: e.target.value })
+                    }
+                  />
+                </label>
+
                 <label className='flex flex-col gap-1'>
                   <span className='text-sm opacity-80'>Status</span>
                   <select
