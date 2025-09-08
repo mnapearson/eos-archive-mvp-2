@@ -4,8 +4,6 @@ export const revalidate = 0;
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { marked } from 'marked';
-import sanitizeHtml from 'sanitize-html';
 
 export default async function ConversationsIndex() {
   const cookieStore = await cookies();
@@ -13,58 +11,36 @@ export default async function ConversationsIndex() {
 
   const { data } = await supabase
     .from('conversations')
-    .select('id, slug, title, dek, cover_image_url, published_at, status')
+    .select(
+      'id, slug, title, dek, quote, convo_date, location, cover_image_url, published_at, status'
+    )
     .eq('status', 'published')
     .order('published_at', { ascending: false });
 
   const rows = data || [];
   const total = rows.length;
 
-  // --- helpers for preview rendering (markdown -> safe HTML) ---
-  function looksLikeHtml(s = '') {
-    return /<\s*([a-zA-Z]+)(\s|>)/.test(s);
+  function formatDateDMY(ymd) {
+    if (!ymd) return '';
+    const [y, m, d] = String(ymd).split('T')[0].split('-');
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const day = d.padStart(2, '0');
+    const mon = months[parseInt(m, 10) - 1] || '';
+    return `${day} ${mon} ${y}`;
   }
-  function mdToSafeHtml(md) {
-    const raw = marked.parse(md || '', { gfm: true, breaks: false });
-    return sanitizeHtml(raw, {
-      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-        'h1',
-        'h2',
-        'h3',
-        'pre',
-        'code',
-        'strong',
-        'em',
-        'p',
-        'ul',
-        'ol',
-        'li',
-        'blockquote',
-        'br',
-      ]),
-      allowedAttributes: { '*': ['class'] },
-    });
-  }
-  const safeHtml = (html) => sanitizeHtml(html || '');
-
-  async function fetchPreviewHTML(conversationId) {
-    const { data: item } = await supabase
-      .from('conversation_items')
-      .select('text_md, html, idx')
-      .eq('conversation_id', conversationId)
-      .order('idx', { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (!item) return '';
-    const src = item.text_md ?? item.html ?? '';
-    if (item.text_md) return mdToSafeHtml(src);
-    return looksLikeHtml(src) ? safeHtml(src) : mdToSafeHtml(src);
-  }
-
-  const rowsWithPreview = await Promise.all(
-    rows.map(async (r) => ({ ...r, previewHtml: await fetchPreviewHTML(r.id) }))
-  );
 
   return (
     <main className='px-4 py-6 sm:px-6 lg:px-8'>
@@ -82,14 +58,11 @@ export default async function ConversationsIndex() {
       {rows.length === 0 ? (
         <p className='opacity-70'>No conversations published yet.</p>
       ) : (
-        <div className='my-4 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
-          {rowsWithPreview.map((c, idx) => {
+        <div className='my-4 grid items-stretch gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+          {rows.map((c, idx) => {
             const number = String(total - idx).padStart(2, '0');
-            const [m1, m2] = (c.dek || '')
-              .split('\n')
-              .map((t) => t.trim())
-              .filter(Boolean);
-            const previewHtml = c.previewHtml || '';
+            const desc = (c.dek && c.dek.replace(/\n/g, ' ')) || c.title || '';
+            const dateStr = c.convo_date ? formatDateDMY(c.convo_date) : null;
             return (
               <Link
                 key={c.slug}
@@ -98,16 +71,11 @@ export default async function ConversationsIndex() {
                   c.title ? `: ${c.title}` : ''
                 }`}
                 className='block'>
-                <div className='text-center'>
-                  {/* Optional cover image (Apartamento style) */}
+                <div className='text-center flex h-[32rem] flex-col'>
                   {c.cover_image_url ? (
                     <img
                       src={c.cover_image_url}
-                      alt={
-                        (c.dek && c.dek.replace(/\n/g, ' ')) ||
-                        c.title ||
-                        'Conversation cover'
-                      }
+                      alt={desc || 'Conversation cover'}
                       loading='lazy'
                       className='mx-auto mb-3 w-full max-w-[640px] aspect-[4/3] object-cover'
                     />
@@ -118,13 +86,31 @@ export default async function ConversationsIndex() {
                     Conversation {number}
                   </div>
 
-                  {/* Big title from description (dek); fall back to title; calmer weight/size */}
-                  <h3 className='mt-3 text-sm tracking-tight '>
-                    {(c.dek && c.dek.replace(/\n/g, ' ')) || c.title}
+                  {/* Big line from description (dek); fall back to title */}
+                  <h3 className='mt-3 font-medium tracking-tight text-lg overflow-hidden'>
+                    {desc}
                   </h3>
+                  {/* Meta: date · location */}
+                  {(dateStr || c.location) && (
+                    <div className='mt-2 ea-meta'>
+                      {dateStr}
+                      {dateStr && c.location ? ' · ' : ''}
+                      {c.location || ''}
+                    </div>
+                  )}
+
+                  {/* Optional quote */}
+                  {c.quote && (
+                    <p className='text-justify mt-3 italic opacity-85 text-sm overflow-hidden'>
+                      “{c.quote}”
+                    </p>
+                  )}
+
+                  {/* Spacer to push button down if content is short */}
+                  <div className='mt-auto' />
 
                   {/* Read more button using global .button style */}
-                  <div className='mt-5 mx-auto'>
+                  <div className='mx-auto pb-2'>
                     <button className='button mx-auto'>Read more</button>
                   </div>
                 </div>
