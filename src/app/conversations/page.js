@@ -67,24 +67,22 @@ export default async function ConversationsIndex() {
   );
 
   return (
-    <main className='px-4 py-6 sm:px-6'>
-      <header className='mb-6 sm:mb-8'>
-        <div className='max-w-3xl mx-auto'>
-          <div className='text-[11px] tracking-wide uppercase opacity-60'>
-            Conversations
-          </div>
-          <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
-            Through these dialogues, we celebrate creativity, share stories, and
-            highlight the unique voices that shape independent event culture in
-            Leipzig and beyond.
-          </p>
+    <main className='px-4 py-6 sm:px-6 lg:px-8'>
+      <div className='mx-auto'>
+        <div className='text-[11px] tracking-wide uppercase opacity-60'>
+          Conversations
         </div>
-      </header>
+        <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
+          Through these dialogues, we celebrate creativity, share stories, and
+          highlight the unique voices that shape independent event culture in
+          Leipzig and beyond.
+        </p>
+      </div>
 
       {rows.length === 0 ? (
         <p className='opacity-70'>No conversations published yet.</p>
       ) : (
-        <div className='grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='my-4 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
           {rowsWithPreview.map((c, idx) => {
             const number = String(total - idx).padStart(2, '0');
             const [m1, m2] = (c.dek || '')

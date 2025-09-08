@@ -22,7 +22,9 @@ export default function Footer() {
             hello@eosarchive.app
           </a>{' '}
         </div>
-        <p className='text-sm'>&copy; {currentYear} eos archive.</p>
+        <div className='text-sm flex space-x-4 mb-4 md:mt-0'>
+          <p>&copy; {currentYear} eos archive.</p>
+        </div>
       </div>
     </footer>
   );
