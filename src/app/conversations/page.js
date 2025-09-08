@@ -14,10 +14,21 @@ export default async function ConversationsIndex() {
     .select(
       'id, slug, title, dek, quote, convo_date, location, cover_image_url, published_at, status'
     )
-    .eq('status', 'published')
-    .order('published_at', { ascending: false });
+    .eq('status', 'published');
 
-  const rows = data || [];
+  function extractNumberFromTitle(title) {
+    const m = String(title || '').match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  const rows = (data || []).slice().sort((a, b) => {
+    const an = extractNumberFromTitle(a.title);
+    const bn = extractNumberFromTitle(b.title);
+    if (an == null && bn == null) return 0;
+    if (an == null) return 1;
+    if (bn == null) return -1;
+    return bn - an; // descending
+  });
   const total = rows.length;
 
   function formatDateDMY(ymd) {
@@ -50,7 +61,7 @@ export default async function ConversationsIndex() {
         </div>
         <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
           Through these dialogues, we celebrate creativity, share stories, and
-          highlight the unique voices that shape independent event culture in
+          highlight the unique voices that shape the independent scene in
           Leipzig and beyond.
         </p>
       </div>
@@ -58,36 +69,34 @@ export default async function ConversationsIndex() {
       {rows.length === 0 ? (
         <p className='opacity-70'>No conversations published yet.</p>
       ) : (
-        <div className='my-4 grid items-stretch gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
-          {rows.map((c, idx) => {
-            const number = String(total - idx).padStart(2, '0');
+        <div className='my-4 flex flex-wrap gap-4 sm:gap-6 justify-center'>
+          {rows.map((c) => {
             const desc = (c.dek && c.dek.replace(/\n/g, ' ')) || c.title || '';
             const dateStr = c.convo_date ? formatDateDMY(c.convo_date) : null;
             return (
               <Link
                 key={c.slug}
                 href={`/conversations/${c.slug}`}
-                aria-label={`Open Conversation ${number}${
-                  c.title ? `: ${c.title}` : ''
-                }`}
-                className='block'>
-                <div className='text-center flex h-[32rem] flex-col'>
+                aria-label={`Open ${c.title || 'conversation'}`}
+                className='block h-[32rem] w-[375px] shrink-0'>
+                <div className='text-center flex h-full flex-col min-h-[250px]'>
+                  {/* Optional cover image (Apartamento style) */}
                   {c.cover_image_url ? (
                     <img
                       src={c.cover_image_url}
                       alt={desc || 'Conversation cover'}
                       loading='lazy'
-                      className='mx-auto mb-3 w-full max-w-[640px] aspect-[4/3] object-cover'
+                      className='mx-auto mb-3 w-full aspect-[4/3] object-cover'
                     />
                   ) : null}
 
-                  {/* Kicker: conversation number as link-style text */}
+                  {/* Kicker: conversation title as link-style text */}
                   <div className='ea-kicker underline decoration-[var(--foreground)]/70 underline-offset-4'>
-                    Conversation {number}
+                    {c.title}
                   </div>
 
                   {/* Big line from description (dek); fall back to title */}
-                  <h3 className='mt-3 font-medium tracking-tight text-lg overflow-hidden'>
+                  <h3 className='mt-3 font-medium tracking-tight text-lg line-clamp-2'>
                     {desc}
                   </h3>
                   {/* Meta: date · location */}
@@ -101,7 +110,7 @@ export default async function ConversationsIndex() {
 
                   {/* Optional quote */}
                   {c.quote && (
-                    <p className='text-justify mt-3 italic opacity-85 text-sm overflow-hidden'>
+                    <p className='text-justify mt-3 italic opacity-85 text-sm line-clamp-4'>
                       “{c.quote}”
                     </p>
                   )}

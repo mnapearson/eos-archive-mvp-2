@@ -182,12 +182,12 @@ body {
 /* Interview page body */
 .ea-prose {
   max-width: 68ch;
-  font-size: var(--ea-text-md);
+  font-size: 1rem;
   line-height: 1.7;
 }
 .ea-prose h2 {
   margin-top: 1.6em;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 .ea-prose p {

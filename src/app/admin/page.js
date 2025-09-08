@@ -27,7 +27,7 @@ function ConversationsPanel() {
     const { data, error } = await supabase
       .from('conversations')
       .select(
-        'id, slug, title, dek, quote, convo_date, location, status, cover_image_url, updated_at, published_at'
+        'id, slug, title, dek, quote, convo_date, location, instagram_url, website_url, status, cover_image_url, updated_at, published_at'
       )
       .order('updated_at', { ascending: false });
     if (!error) setRows(data || []);
@@ -57,6 +57,8 @@ function ConversationsPanel() {
       quote: '',
       convo_date: null,
       location: '',
+      instagram_url: '',
+      website_url: '',
     }));
     setMd('');
     await load();
@@ -66,7 +68,7 @@ function ConversationsPanel() {
     const { data: c } = await supabase
       .from('conversations')
       .select(
-        'id, slug, title, dek, quote, convo_date, location, status, cover_image_url, updated_at, published_at'
+        'id, slug, title, dek, quote, convo_date, location, instagram_url, website_url, status, cover_image_url, updated_at, published_at'
       )
       .eq('id', row.id)
       .single();
@@ -114,6 +116,8 @@ function ConversationsPanel() {
       quote: editing.quote || null,
       convo_date: editing.convo_date || null,
       location: editing.location || null,
+      instagram_url: editing.instagram_url || null,
+      website_url: editing.website_url || null,
       slug: editing.slug || slugify(editing.title || 'conversation'),
       status: editing.status || 'draft',
       cover_image_url: editing.cover_image_url || null,
@@ -218,6 +222,7 @@ function ConversationsPanel() {
                           {r.location || ''}
                         </>
                       )}
+                      {(r.instagram_url || r.website_url) && <> • links</>}
                     </div>
                   </div>
                   <div className='flex gap-2'>
@@ -311,6 +316,34 @@ function ConversationsPanel() {
                     value={editing.location || ''}
                     onChange={(e) =>
                       setEditing({ ...editing, location: e.target.value })
+                    }
+                  />
+                </label>
+
+                <label className='flex flex-col gap-1'>
+                  <span className='text-sm opacity-80'>Instagram URL</span>
+                  <input
+                    type='url'
+                    inputMode='url'
+                    className='input'
+                    placeholder='https://instagram.com/username'
+                    value={editing.instagram_url || ''}
+                    onChange={(e) =>
+                      setEditing({ ...editing, instagram_url: e.target.value })
+                    }
+                  />
+                </label>
+
+                <label className='flex flex-col gap-1'>
+                  <span className='text-sm opacity-80'>Website URL</span>
+                  <input
+                    type='url'
+                    inputMode='url'
+                    className='input'
+                    placeholder='https://example.org'
+                    value={editing.website_url || ''}
+                    onChange={(e) =>
+                      setEditing({ ...editing, website_url: e.target.value })
                     }
                   />
                 </label>

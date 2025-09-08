@@ -56,6 +56,28 @@ function looksLikeHtml(s = '') {
   return /<\s*([a-zA-Z]+)(\s|>)/.test(s);
 }
 
+function formatDateDMY(ymd) {
+  if (!ymd) return '';
+  const [y, m, d] = String(ymd).split('T')[0].split('-');
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const day = d.padStart(2, '0');
+  const mon = months[parseInt(m, 10) - 1] || '';
+  return `${day} ${mon} ${y}`;
+}
+
 export default async function ConversationPublicPage(props) {
   const { slug } = await props.params; // Next 14/15 quirk
   const cookieStore = await cookies(); // await cookies()
@@ -63,7 +85,9 @@ export default async function ConversationPublicPage(props) {
 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, title, dek, cover_image_url, published_at, status')
+    .select(
+      'id, title, dek, cover_image_url, published_at, status, convo_date, location, instagram_url, website_url'
+    )
     .eq('slug', slug)
     .single();
 
@@ -109,17 +133,45 @@ export default async function ConversationPublicPage(props) {
 
           {/* Kicker */}
           <div className='ea-kicker underline decoration-[var(--foreground)]/70 underline-offset-4'>
-            <Link href='/conversations'>conversations</Link>{' '}
+            <Link href='/conversations'>conversations</Link>
           </div>
 
-          {/* Big title from dek (fallback to title) */}
-          <h1 className='mt-3 font-medium tracking-tight text-[24px] sm:text-[28px]'>
+          {/* Title from dek (fallback to title) — app-wide text-sm */}
+          <h1 className='mt-2 text-lg font-medium tracking-tight'>
             {(conv.dek && conv.dek.replace(/\n/g, ' ')) || conv.title}
           </h1>
+          {/* Guest links: Instagram / Website */}
+          {(conv.instagram_url || conv.website_url) && (
+            <div className='mt-1 text-sm opacity-80'>
+              {conv.instagram_url && (
+                <a
+                  href={conv.instagram_url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className=' focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
+                  Instagram
+                </a>
+              )}
+              {conv.instagram_url && conv.website_url ? ' · ' : null}
+              {conv.website_url && (
+                <a
+                  href={conv.website_url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className=' focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
+                  Website
+                </a>
+              )}
+            </div>
+          )}
 
-          {/* Participants (title) as small meta */}
-          {conv.title && (
-            <div className='mt-1 text-sm opacity-80'>{conv.title}</div>
+          {/* Meta: date · location */}
+          {(conv.convo_date || conv.location) && (
+            <div className='mt-2 text-sm opacity-80'>
+              {conv.convo_date ? formatDateDMY(conv.convo_date) : ''}
+              {conv.convo_date && conv.location ? ' · ' : ''}
+              {conv.location || ''}
+            </div>
           )}
 
           <div className='ea-rule'></div>
