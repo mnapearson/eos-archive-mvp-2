@@ -27,7 +27,7 @@ function ConversationsPanel() {
     const { data, error } = await supabase
       .from('conversations')
       .select(
-        'id, slug, title, dek, quote, convo_date, location, instagram_url, website_url, status, cover_image_url, updated_at, published_at'
+        'id, slug, title, dek, quote, convo_date, location, instagram_url, website_url, status, cover_image_url, show_cover, updated_at, published_at'
       )
       .order('updated_at', { ascending: false });
     if (!error) setRows(data || []);
@@ -59,6 +59,7 @@ function ConversationsPanel() {
       location: '',
       instagram_url: '',
       website_url: '',
+      show_cover: false,
     }));
     setMd('');
     await load();
@@ -68,7 +69,7 @@ function ConversationsPanel() {
     const { data: c } = await supabase
       .from('conversations')
       .select(
-        'id, slug, title, dek, quote, convo_date, location, instagram_url, website_url, status, cover_image_url, updated_at, published_at'
+        'id, slug, title, dek, quote, convo_date, location, instagram_url, website_url, status, cover_image_url, show_cover, updated_at, published_at'
       )
       .eq('id', row.id)
       .single();
@@ -121,6 +122,7 @@ function ConversationsPanel() {
       slug: editing.slug || slugify(editing.title || 'conversation'),
       status: editing.status || 'draft',
       cover_image_url: editing.cover_image_url || null,
+      show_cover: !!editing.show_cover,
       source: 'native',
     };
     const { data: conv, error } = await supabase
@@ -223,6 +225,7 @@ function ConversationsPanel() {
                         </>
                       )}
                       {(r.instagram_url || r.website_url) && <> • links</>}
+                      {r.show_cover && <> • cover</>}
                     </div>
                   </div>
                   <div className='flex gap-2'>
@@ -374,6 +377,18 @@ function ConversationsPanel() {
                       className='mt-2 max-h-40 rounded object-cover'
                     />
                   )}
+                </label>
+                <label className='flex items-center gap-2'>
+                  <input
+                    type='checkbox'
+                    checked={!!editing.show_cover}
+                    onChange={(e) =>
+                      setEditing({ ...editing, show_cover: e.target.checked })
+                    }
+                  />
+                  <span className='text-sm opacity-80'>
+                    Show cover on public page
+                  </span>
                 </label>
               </div>
 

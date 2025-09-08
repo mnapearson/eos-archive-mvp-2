@@ -78,8 +78,8 @@ export default async function ConversationsIndex() {
                 key={c.slug}
                 href={`/conversations/${c.slug}`}
                 aria-label={`Open ${c.title || 'conversation'}`}
-                className='block h-[32rem] w-[375px] shrink-0'>
-                <div className='text-center flex h-full flex-col min-h-[250px]'>
+                className='border p-2 block h-[16rem] w-[350px] shrink-0'>
+                <div className='text-center flex h-full flex-col min-h-[100px]'>
                   {/* Optional cover image (Apartamento style) */}
                   {c.cover_image_url ? (
                     <img
