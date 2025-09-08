@@ -63,11 +63,24 @@ export default async function ConversationPublicPage(props) {
 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, title, dek, published_at, status')
+    .select('id, title, dek, cover_image_url, published_at, status')
     .eq('slug', slug)
     .single();
 
   if (!conv) return <main className='p-4'>Not found.</main>;
+
+  // Derive conversation number by rank (newest first = 01)
+  let convoNumber = null;
+  if (conv?.published_at) {
+    const { count } = await supabase
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .gte('published_at', conv.published_at);
+    if (typeof count === 'number') {
+      convoNumber = String(count).padStart(2, '0');
+    }
+  }
 
   const { data: items } = await supabase
     .from('conversation_items')
@@ -75,47 +88,47 @@ export default async function ConversationPublicPage(props) {
     .eq('conversation_id', conv.id)
     .order('idx', { ascending: true });
 
-  const dateStr = conv.published_at
-    ? new Date(conv.published_at).toISOString().slice(0, 10)
-    : null;
-
   return (
     <main className='pb-12'>
       {/* Header */}
       <section className='px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8'>
-        <div className='max-w-3xl mx-auto'>
-          <div className='text-[11px] tracking-wide uppercase opacity-60'>
-            <Link
-              href='/conversations'
-              className='underline'>
-              Conversations
-            </Link>
-            {dateStr ? <span className='mx-2 opacity-50'>/</span> : null}
-            {dateStr ? <span>{dateStr}</span> : null}
+        <div className='max-w-3xl mx-auto text-center'>
+          {/* Optional cover image */}
+          {conv.cover_image_url ? (
+            <img
+              src={conv.cover_image_url}
+              alt={
+                (conv.dek && conv.dek.replace(/\n/g, ' ')) ||
+                conv.title ||
+                'Conversation cover'
+              }
+              loading='lazy'
+              className='mx-auto mb-4 w-full max-w-[720px] aspect-[4/3] object-cover'
+            />
+          ) : null}
+
+          {/* Kicker */}
+          <div className='ea-kicker underline decoration-[var(--foreground)]/70 underline-offset-4'>
+            <Link href='/conversations'>conversations</Link>{' '}
           </div>
 
-          <h1 className='mt-2 text-2xl sm:text-3xl font-semibold leading-tight'>
-            {conv.title}
+          {/* Big title from dek (fallback to title) */}
+          <h1 className='mt-3 font-medium tracking-tight text-[24px] sm:text-[28px]'>
+            {(conv.dek && conv.dek.replace(/\n/g, ' ')) || conv.title}
           </h1>
 
-          {conv.dek && <p className='mt-2 text-base opacity-80'>{conv.dek}</p>}
+          {/* Participants (title) as small meta */}
+          {conv.title && (
+            <div className='mt-1 text-sm opacity-80'>{conv.title}</div>
+          )}
+
+          <div className='ea-rule'></div>
         </div>
       </section>
 
       {/* Body */}
       <section className='px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8'>
-        <article
-          className='
-            max-w-3xl mx-auto
-            prose prose-invert
-            prose-headings:font-semibold
-            prose-h2:mt-6 prose-h3:mt-5 prose-h2:text-xl prose-h3:text-lg
-            prose-p:leading-relaxed prose-p:my-4
-            prose-li:my-1
-            prose-a:underline
-            prose-hr:border-white/10
-            prose-pre:border prose-pre:rounded-xl
-          '>
+        <article className='ea-prose mx-auto'>
           {(items || []).map((it) => {
             const source = it.text_md ?? it.html ?? '';
             const rendered = it.text_md
