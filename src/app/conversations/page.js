@@ -79,7 +79,7 @@ export default async function ConversationsIndex() {
                 href={`/conversations/${c.slug}`}
                 aria-label={`Open ${c.title || 'conversation'}`}
                 className='border p-2 block h-[16rem] w-[350px] shrink-0'>
-                <div className='text-center flex h-full flex-col min-h-[100px]'>
+                <div className='text-center flex h-full flex-col min-h-[120px]'>
                   {/* Optional cover image (Apartamento style) */}
                   {c.cover_image_url ? (
                     <img
@@ -110,8 +110,8 @@ export default async function ConversationsIndex() {
 
                   {/* Optional quote */}
                   {c.quote && (
-                    <p className='text-justify mt-3 italic opacity-85 text-sm line-clamp-4'>
-                      “{c.quote}”
+                    <p className='text-justify mt-3 italic opacity-85 text-sm line-clamp-5'>
+                      {c.quote}
                     </p>
                   )}
 
