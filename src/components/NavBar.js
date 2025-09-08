@@ -37,6 +37,9 @@ export default function NavBar() {
   const user = useUserSimple();
 
   const pathname = usePathname();
+  const isConversationsActive =
+    pathname.startsWith('/conversations') ||
+    pathname.startsWith('/conversations');
   const isSpacesActive =
     pathname.startsWith('/map') || pathname.startsWith('/spaces');
   const isLoginActive =
@@ -116,6 +119,15 @@ export default function NavBar() {
           <nav
             aria-label='Primary'
             className='flex gap-3'>
+            <Link
+              href='/conversations'
+              title='Read conversations'
+              aria-label='Read conversations'
+              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
+                isConversationsActive ? 'underline' : ''
+              }`}>
+              conversations
+            </Link>
             <Link
               href='/map'
               title='Browse spaces on map'
