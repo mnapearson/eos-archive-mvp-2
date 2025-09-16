@@ -13,6 +13,13 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang='en'>
+      <head>
+        {/* Plausible: render server-side so the checker sees it */}
+        <script
+          defer
+          data-domain='eosarchive.app'
+          src='https://plausible.io/js/script.js'></script>
+      </head>
       <body className='min-h-screen flex flex-col'>
         <FilterProvider>
           <Analytics />
