@@ -6,6 +6,7 @@ import CookieConsentBar from '@/components/CookieConsentBar';
 import { FilterProvider } from '@/contexts/FilterContext';
 import Footer from '@/components/Footer';
 import ToastProvider from '@/components/ToastProvider';
+import Analytics from '@/components/Analytics';
 
 export default function RootLayout({ children }) {
   // State for theme (default to system preference)
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body className='min-h-screen flex flex-col'>
         <FilterProvider>
+          <Analytics />
           <NavBar />
           {/* Page Content */}
           <main className='w-full px-4 py-2 flex-1'>

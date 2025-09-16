@@ -52,9 +52,10 @@ export default function PrivacyPage() {
 
           <h3 className='font-semibold mt-6 mb-1'>Third-Party Services</h3>
           <p className='mb-4'>
-            We may integrate third-party services (for example, Google
-            Analytics) to monitor and analyze traffic. These services may set
-            cookies and collect technical information about your visit.
+            We use Plausible Analytics, which doesn’t use cookies or collect
+            personal data. We may integrate third-party services (for example,
+            Google Analytics) to monitor and analyze traffic. These services may
+            set cookies and collect technical information about your visit.
           </p>
 
           <h3 className='font-semibold mt-6 mb-1'>Security of Your Data</h3>
