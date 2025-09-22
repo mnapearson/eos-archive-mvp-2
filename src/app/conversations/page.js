@@ -60,8 +60,8 @@ export default async function ConversationsIndex() {
           Conversations
         </div>
         <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
-          Through these dialogues highlight the unique voices that shape the
-          independent scene in Leipzig and beyond.
+          These dialogues highlight unique voices that shape event culture in
+          Leipzig, Berlin and beyond.
         </p>
       </div>
 
