@@ -277,7 +277,7 @@ export default function HomePage() {
   return (
     <div className='w-full'>
       {/* Scope tabs + City dropdown */}
-      <div className='mb-3 flex flex-wrap items-center gap-2 sm:gap-6 max-w-full'>
+      <div className='mb-3 flex flex-wrap justify-between gap-2 sm:gap-6 max-w-full'>
         <div className='flex flex-wrap gap-2'>
           <button
             onClick={() => setScope('all')}
@@ -316,17 +316,17 @@ export default function HomePage() {
             PAST
           </button>
         </div>
-        <div className='ml-0 sm:ml-auto flex flex-wrap gap-2 w-full sm:w-auto justify-center sm:justify-end max-w-full overflow-x-auto'>
+        <div>
+          {' '}
           <button
             onClick={() => setView('grid')}
-            className={`px-2 py-1 flex-shrink-0 ${
-              view === 'grid'
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : ''
+            className={`px-1 py-1 flex-shrink-0 text-[var(--foreground)] ${
+              view === 'grid' ? 'opacity-100' : 'opacity-60'
             }`}
             aria-pressed={view === 'grid'}
             aria-label='Grid view'>
             <svg
+              fill='currentColor'
               width='18'
               height='18'
               viewBox='0 0 18 18'
@@ -364,14 +364,13 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setView('list')}
-            className={`px-2 py-1 flex-shrink-0 ${
-              view === 'list'
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : ''
+            className={`px-1 py-1 flex-shrink-0 text-[var(--foreground)] ${
+              view === 'list' ? 'opacity-100' : 'opacity-60'
             }`}
             aria-pressed={view === 'list'}
             aria-label='List view'>
             <svg
+              fill='currentColor'
               width='18'
               height='18'
               viewBox='0 0 18 18'
