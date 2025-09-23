@@ -33,5 +33,19 @@ export default async function sitemap() {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...convRoutes];
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, updated_at, approved, status')
+    .order('updated_at', { ascending: false });
+
+  const eventRoutes = (events || [])
+    .filter((e) => e.approved === true || e.status === 'approved')
+    .map((e) => ({
+      url: `${base}/events/${e.id}`,
+      lastModified: e.updated_at || now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }));
+
+  return [...staticRoutes, ...convRoutes, ...eventRoutes];
 }

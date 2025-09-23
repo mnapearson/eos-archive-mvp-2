@@ -1,93 +1,42 @@
-'use client';
-
 import './globals.css';
 import NavBar from '@/components/NavBar';
 import CookieConsentBar from '@/components/CookieConsentBar';
 import { FilterProvider } from '@/contexts/FilterContext';
 import Footer from '@/components/Footer';
 import ToastProvider from '@/components/ToastProvider';
+import Script from 'next/script';
+import { SITE } from '@/lib/seo';
+
+export const metadata = {
+  metadataBase: new URL(SITE.url),
+  title: { default: SITE.name, template: `%s — ${SITE.name}` },
+  description: SITE.description,
+  openGraph: {
+    siteName: SITE.name,
+    images: [{ url: SITE.ogImage, width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
+};
 
 export default function RootLayout({ children }) {
-  // State for theme (default to system preference)
+  const plausibleDomain =
+    process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || 'eosarchive.app';
 
   return (
     <html lang='en'>
-      <head>
-        {/* Plausible: render server-side so the checker sees it */}
-        <script
-          defer
-          data-domain='eosarchive.app'
-          src='https://plausible.io/js/script.js'></script>
-        <title>eos archive</title>
-        <meta
-          name='description'
-          content='eos is a living archive of event culture — curated graphics from the independent scene.'
-        />
-        <link
-          rel='canonical'
-          href='https://eosarchive.app/'
-        />
-        <meta
-          name='robots'
-          content='index,follow'
-        />
-
-        {/* Open Graph */}
-        <meta
-          property='og:title'
-          content='eos archive'
-        />
-        <meta
-          property='og:description'
-          content='eos is a living archive of event culture — curated graphics from the independent scene.'
-        />
-        <meta
-          property='og:type'
-          content='website'
-        />
-        <meta
-          property='og:url'
-          content='https://eosarchive.app/'
-        />
-        <meta
-          property='og:site_name'
-          content='eos archive'
-        />
-        <meta
-          property='og:image'
-          content='/og.png'
-        />
-        <meta
-          property='og:image:width'
-          content='1200'
-        />
-        <meta
-          property='og:image:height'
-          content='630'
-        />
-
-        {/* Twitter */}
-        <meta
-          name='twitter:card'
-          content='summary_large_image'
-        />
-        <meta
-          name='twitter:title'
-          content='eos archive'
-        />
-        <meta
-          name='twitter:description'
-          content='eos is a living archive of event culture — curated graphics from the independent scene.'
-        />
-        <meta
-          name='twitter:image'
-          content='/og.png'
-        />
-      </head>
       <body
         className='min-h-screen flex flex-col'
         style={{ overscrollBehaviorX: 'auto' }}
         suppressHydrationWarning>
+        {/* Plausible */}
+        <Script
+          id='plausible'
+          strategy='afterInteractive'
+          defer
+          data-domain={plausibleDomain}
+          src='https://plausible.io/js/script.js'
+        />
+
         <FilterProvider>
           <NavBar />
           {/* Page Content */}
