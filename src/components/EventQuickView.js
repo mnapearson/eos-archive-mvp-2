@@ -65,9 +65,26 @@ export default function EventQuickView({ event }) {
       {/* Title */}
       <h2 className='text-base font-medium tracking-tight'>{title}</h2>
 
+      {/* Flyer image (contained) */}
+      {flyer ? (
+        <div className='mt-3 relative w-full aspect-[3/4] max-h-[70vh]'>
+          <EAImage
+            src={flyer}
+            alt={title}
+            fill
+            className='object-contain rounded-md'
+            sizes='(max-width: 768px) 92vw, 720px'
+          />
+        </div>
+      ) : (
+        <div className='mt-3 w-full h-64 rounded-md bg-neutral-800/40 flex items-center justify-center text-xs opacity-70'>
+          No flyer available
+        </div>
+      )}
+
       {/* Location then Date/Time */}
       {(venue || address || city) && (
-        <div className='mt-1 opacity-80'>
+        <div className='mt-3 opacity-80'>
           {spaceId && spaceName ? (
             <>
               <a
@@ -95,23 +112,6 @@ export default function EventQuickView({ event }) {
         </div>
       )}
       {when && <div className='opacity-80'>{when}</div>}
-
-      {/* Flyer image (contained) */}
-      {flyer ? (
-        <div className='mt-3 relative w-full aspect-[3/4] max-h-[70vh]'>
-          <EAImage
-            src={flyer}
-            alt={title}
-            fill
-            className='object-contain rounded-md'
-            sizes='(max-width: 768px) 92vw, 720px'
-          />
-        </div>
-      ) : (
-        <div className='mt-3 w-full h-64 rounded-md bg-neutral-800/40 flex items-center justify-center text-xs opacity-70'>
-          No flyer available
-        </div>
-      )}
 
       {/* Description (full) */}
       {details?.description && (
