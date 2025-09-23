@@ -1,50 +1,102 @@
 'use client';
+import { useEffect, useState } from 'react';
 import EAImage from '@/components/EAImage';
 import { formatDateRange } from '@/lib/date';
+import ShareButton from '@/components/ShareButton';
+import AddToCalendar from '@/components/AddToCalendar';
+import MapComponent from '@/components/MapComponent';
 
 export default function EventQuickView({ event }) {
-  // ---- Defensive reads -----------------------------------------------------
-  const title = event?.title ?? 'Event';
+  const [details, setDetails] = useState(event);
+  const title = details?.title ?? 'Event';
   const flyer =
-    event?.image_url || event?.flyer_url || event?.thumbnail_url || '';
+    details?.image_url || details?.flyer_url || details?.thumbnail_url || '';
 
-  // Prefer nested space fields when available
-  const venue = event?.space?.name || event?.space_name || event?.venue || null;
+  // Prefer nested space fields when available; broaden fallbacks
+  const venue =
+    details?.space?.name ||
+    details?.space_name ||
+    details?.venue ||
+    details?.location ||
+    null;
   const address =
-    event?.space?.address || event?.address || event?.space_address || null;
-  const city = event?.space?.city || event?.city || event?.space_city || null;
+    details?.space?.address ||
+    details?.address ||
+    details?.space_address ||
+    details?.street ||
+    null;
+  const city =
+    details?.space?.city || details?.city || details?.space_city || null;
+  const locationStr = [venue, address, city].filter(Boolean).join(', ');
+  const spaceId = details?.space?.id || null;
+  const spaceName = details?.space?.name || null;
 
-  // Dates (hide line entirely if we don't have a start date)
-  const start = event?.start_date || null;
-  const end = event?.end_date || null;
-  const startTime = event?.start_time || event?.time || null;
-  const endTime = event?.end_time || null;
+  // Dates
+  const start = details?.start_date || null;
+  const end = details?.end_date || null;
+  const startTime = details?.start_time || details?.time || null;
+  const endTime = details?.end_time || null;
   const when = start ? formatDateRange(start, end, startTime, endTime) : null;
 
-  const gmaps =
-    address || city
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          `${address ? address + ', ' : ''}${city ?? ''}`
-        )}`
-      : null;
+  const eventHref = `/events/${details?.slug ?? details?.id ?? ''}`;
 
-  const eventHref = `/events/${event?.slug ?? event?.id ?? ''}`;
+  // If location is missing but we have an id, fetch the joined event from the API
+  useEffect(() => {
+    const needsLocation = !venue && !address && !city;
+    if (!needsLocation || !details?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/events/${details.id}`, {
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data) setDetails((prev) => ({ ...prev, ...data }));
+      } catch (_) {}
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [details?.id, venue, address, city]);
 
   return (
     <div className='text-sm'>
       {/* Title */}
       <h2 className='text-base font-medium tracking-tight'>{title}</h2>
 
-      {/* Meta line: date/time · venue */}
-      {(when || venue || city) && (
+      {/* Location then Date/Time */}
+      {(venue || address || city) && (
         <div className='mt-1 opacity-80'>
-          {when ?? ''}
-          {when && (venue || city) ? ' · ' : ''}
-          {[venue, city].filter(Boolean).join(', ')}
+          {spaceId && spaceName ? (
+            <>
+              <a
+                href={`/spaces/${spaceId}`}
+                className='underline underline-offset-2 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
+                {spaceName}
+              </a>
+              {address || city
+                ? `, ${[address, city].filter(Boolean).join(', ')}`
+                : ''}
+            </>
+          ) : locationStr ? (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                locationStr
+              )}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='underline underline-offset-2 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
+              {locationStr}
+            </a>
+          ) : (
+            <span>{locationStr}</span>
+          )}
         </div>
       )}
+      {when && <div className='opacity-80'>{when}</div>}
 
-      {/* Flyer image (contained, not overflowing modal) */}
+      {/* Flyer image (contained) */}
       {flyer ? (
         <div className='mt-3 relative w-full aspect-[3/4] max-h-[70vh]'>
           <EAImage
@@ -61,21 +113,10 @@ export default function EventQuickView({ event }) {
         </div>
       )}
 
-      {/* Address */}
-      {(address || city) && (
+      {/* Description (full) */}
+      {details?.description && (
         <div className='mt-3'>
-          <span className='opacity-70'>Address: </span>
-          {gmaps ? (
-            <a
-              href={gmaps}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='underline focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
-              {address || city}
-            </a>
-          ) : (
-            <span>{address || city}</span>
-          )}
+          <p className='whitespace-pre-line'>{details.description}</p>
         </div>
       )}
 
@@ -84,10 +125,53 @@ export default function EventQuickView({ event }) {
         {eventHref && (
           <a
             href={eventHref}
-            className='ea-btn ea-btn--ghost'>
-            Open event page
+            className='button'>
+            More details
           </a>
         )}
+        <ShareButton
+          title={title}
+          text={locationStr}
+          buttonText='Share'
+          className='button'
+        />
+        <AddToCalendar
+          event={details}
+          overrides={{ location: locationStr }}
+        />
+      </div>
+
+      {/* Small embedded Map */}
+      <div
+        className='mt-4 rounded-lg overflow-hidden border'
+        style={{
+          borderColor:
+            'color-mix(in oklab, var(--foreground) 15%, transparent)',
+        }}>
+        <div className='relative w-full h-56'>
+          {details?.space?.latitude || details?.space?.longitude ? (
+            <MapComponent
+              spaces={[
+                {
+                  id: details.space.id,
+                  name: details.space.name,
+                  type: details.space.type,
+                  latitude: details.space.latitude,
+                  longitude: details.space.longitude,
+                  city: details.space.city,
+                  address: details.space.address,
+                },
+              ]}
+              showDetails={false}
+            />
+          ) : (
+            <MapComponent
+              eventId={details?.id}
+              address={address || city || undefined}
+              showDetails={false}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
