@@ -5,6 +5,10 @@ import { FilterContext } from '@/contexts/FilterContext';
 import { supabase } from '@/lib/supabaseClient';
 import MasonryGrid from '@/components/MasonryGrid';
 import Spinner from '@/components/Spinner';
+import Link from 'next/link';
+import Modal from '@/components/Modal';
+import EventQuickView from '@/components/EventQuickView';
+import EAImage from '@/components/EAImage';
 
 export default function HomePage() {
   const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
@@ -12,6 +16,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [scope, setScope] = useState('all'); // 'all' | 'upcoming' | 'current' | 'past'
   const [cities, setCities] = useState([]);
+  const [view, setView] = useState('grid'); // 'grid' | 'list'
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     async function fetchCities() {
@@ -157,6 +164,76 @@ export default function HomePage() {
     );
   }
 
+  function handleGridClick(e) {
+    const a = e.target?.closest && e.target.closest('a[href^="/events/"]');
+    if (!a) return;
+    if (e.metaKey || e.ctrlKey || e.button === 1) return; // allow new tab
+    e.preventDefault();
+    try {
+      const href = a.getAttribute('href');
+      const url = new URL(href, window.location.origin);
+      const slug = url.pathname.split('/').pop();
+      const match = (events || []).find(
+        (ev) => (ev.slug && ev.slug === slug) || String(ev.id) === slug
+      );
+      if (match) {
+        setSelected(match);
+        setModalOpen(true);
+      } else {
+        window.location.href = href; // fall back if we can’t find it
+      }
+    } catch {
+      // non-standard href, just navigate
+      window.location.href = a.href;
+    }
+  }
+
+  function renderList() {
+    return (
+      <div className='divide-y divide-white/10'>
+        {events.map((ev) => (
+          <div
+            key={ev.id}
+            className='flex gap-3 py-3'>
+            <EAImage
+              src={ev.flyer_url || ev.image_url}
+              alt={ev.title || 'Event flyer'}
+              width={64}
+              height={64}
+              sizes='64px'
+              className='w-16 h-16 rounded object-cover'
+            />
+            <div className='flex-1 min-w-0'>
+              <div className='text-sm font-medium truncate'>
+                {ev.title || 'Untitled event'}
+              </div>
+              <div className='text-sm opacity-80 truncate'>
+                {ev.city || ev.space_city || ''}
+                {ev.city && (ev.space_name || ev.venue) ? ' · ' : ''}
+                {ev.space_name || ev.venue || ''}
+              </div>
+              <div className='mt-2 flex gap-2'>
+                <button
+                  className='button'
+                  onClick={() => {
+                    setSelected(ev);
+                    setModalOpen(true);
+                  }}>
+                  Quick view
+                </button>
+                <Link
+                  className='underline text-sm'
+                  href={`/events/${ev.slug || ev.id}`}>
+                  Open
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className='w-full'>
       {/* Scope tabs + City dropdown */}
@@ -199,6 +276,28 @@ export default function HomePage() {
             PAST
           </button>
         </div>
+        <div className='ml-auto flex gap-2'>
+          <button
+            onClick={() => setView('grid')}
+            className={`button ${
+              view === 'grid'
+                ? 'bg-[var(--foreground)] text-[var(--background)]'
+                : ''
+            }`}
+            aria-pressed={view === 'grid'}>
+            grid
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`button ${
+              view === 'list'
+                ? 'bg-[var(--foreground)] text-[var(--background)]'
+                : ''
+            }`}
+            aria-pressed={view === 'list'}>
+            list
+          </button>
+        </div>
 
         {/* <select
           className='input ml-auto'
@@ -224,7 +323,23 @@ export default function HomePage() {
       {/* Filter Bar at the top */}
       {renderFilterBar()}
 
-      {loading ? <Spinner /> : <MasonryGrid items={events} />}
+      {loading ? (
+        <Spinner />
+      ) : view === 'grid' ? (
+        <div onClickCapture={handleGridClick}>
+          <MasonryGrid items={events} />
+        </div>
+      ) : (
+        renderList()
+      )}
+
+      {/* Modal for quick view */}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        label='Event quick view'>
+        {selected && <EventQuickView event={selected} />}
+      </Modal>
     </div>
   );
 }
