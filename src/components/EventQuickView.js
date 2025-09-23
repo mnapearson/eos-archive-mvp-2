@@ -134,6 +134,7 @@ export default function EventQuickView({ event }) {
           text={locationStr}
           buttonText='Share'
           className='button'
+          variant='' // uses default .button look; adjust later if you add variants
         />
         <AddToCalendar
           event={details}
