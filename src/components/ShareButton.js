@@ -7,7 +7,8 @@ export default function ShareButton({
   title,
   text,
   buttonText = 'Share',
-  className = '',
+  className = 'button',
+  variant = '',
   onError,
 }) {
   const handleShare = async () => {
@@ -36,7 +37,7 @@ export default function ShareButton({
   return (
     <button
       onClick={handleShare}
-      className={`glow-button ${className}`}>
+      className={`${className} ${variant}`.trim()}>
       {buttonText}
     </button>
   );
