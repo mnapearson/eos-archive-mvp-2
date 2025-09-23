@@ -61,9 +61,9 @@ export default function EventQuickView({ event }) {
   }, [details?.id, venue, address, city]);
 
   return (
-    <div className='text-sm'>
+    <div>
       {/* Title */}
-      <h2 className='text-base font-medium tracking-tight'>{title}</h2>
+      <h2 className='text-base text-lg font-medium tracking-tight'>{title}</h2>
 
       {/* Flyer image (contained) */}
       {flyer ? (
