@@ -9,6 +9,7 @@ import Link from 'next/link';
 import Modal from '@/components/Modal';
 import EventQuickView from '@/components/EventQuickView';
 import EAImage from '@/components/EAImage';
+import { formatDateRange } from '@/lib/date';
 
 export default function HomePage() {
   const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
@@ -191,45 +192,84 @@ export default function HomePage() {
   function renderList() {
     return (
       <div className='divide-y divide-white/10'>
-        {events.map((ev) => (
-          <div
-            key={ev.id}
-            className='flex gap-3 py-3'>
-            <EAImage
-              src={ev.flyer_url || ev.image_url}
-              alt={ev.title || 'Event flyer'}
-              width={64}
-              height={64}
-              sizes='64px'
-              className='w-16 h-16 rounded object-cover'
-            />
-            <div className='flex-1 min-w-0'>
-              <div className='text-sm font-medium truncate'>
-                {ev.title || 'Untitled event'}
-              </div>
-              <div className='text-sm opacity-80 truncate'>
-                {ev.city || ev.space_city || ''}
-                {ev.city && (ev.space_name || ev.venue) ? ' · ' : ''}
-                {ev.space_name || ev.venue || ''}
-              </div>
-              <div className='mt-2 flex gap-2'>
-                <button
-                  className='button'
-                  onClick={() => {
-                    setSelected(ev);
-                    setModalOpen(true);
-                  }}>
-                  Quick view
-                </button>
-                <Link
-                  className='underline text-sm'
-                  href={`/events/${ev.slug || ev.id}`}>
-                  Open
-                </Link>
+        {events.map((ev) => {
+          const title = ev.title || 'Untitled event';
+          const flyer = ev.flyer_url || ev.image_url || '';
+          const spaceId = ev.space_id || null;
+          const spaceName = ev.space_name || ev.venue || null;
+          const city = ev.city || ev.space_city || '';
+          const address = ev.address || ev.space_address || '';
+          const locationStr = [spaceName, address, city]
+            .filter(Boolean)
+            .join(', ');
+          const when = ev.start_date
+            ? formatDateRange(
+                ev.start_date,
+                ev.end_date,
+                ev.start_time,
+                ev.end_time
+              )
+            : '';
+
+          return (
+            <div
+              key={ev.id}
+              className='flex gap-3 py-3'>
+              <EAImage
+                src={flyer}
+                alt={title}
+                width={64}
+                height={64}
+                sizes='64px'
+                className='w-16 h-16 rounded object-cover'
+              />
+              <div className='flex-1 min-w-0'>
+                {/* Title */}
+                <div className='text-sm font-medium truncate'>{title}</div>
+
+                {/* Location */}
+                {spaceId && spaceName ? (
+                  <div className='text-sm opacity-80 truncate'>
+                    <Link
+                      href={`/spaces/${spaceId}`}
+                      className='underline'>
+                      {spaceName}
+                    </Link>
+                    {address || city
+                      ? `, ${[address, city].filter(Boolean).join(', ')}`
+                      : ''}
+                  </div>
+                ) : (
+                  <div className='text-sm opacity-80 truncate'>
+                    {locationStr}
+                  </div>
+                )}
+
+                {/* Dates */}
+                {when && (
+                  <div className='text-xs opacity-70 mt-0.5'>{when}</div>
+                )}
+
+                {/* Actions */}
+                <div className='mt-2 flex gap-2'>
+                  <button
+                    className='button'
+                    onClick={() => {
+                      setSelected(ev);
+                      setModalOpen(true);
+                    }}>
+                    Quick view
+                  </button>
+                  <Link
+                    className='button'
+                    href={`/events/${ev.slug || ev.id}`}>
+                    More details
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -237,11 +277,11 @@ export default function HomePage() {
   return (
     <div className='w-full'>
       {/* Scope tabs + City dropdown */}
-      <div className='mb-3 flex items-center gap-20 '>
-        <div className='flex gap-2'>
+      <div className='mb-3 flex flex-wrap items-center gap-2 sm:gap-6 max-w-full'>
+        <div className='flex flex-wrap gap-2'>
           <button
             onClick={() => setScope('all')}
-            className={`button ${
+            className={`button text-sm flex-shrink-0 ${
               scope === 'all'
                 ? 'bg-[var(--foreground)] text-[var(--background)]'
                 : ''
@@ -250,7 +290,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setScope('upcoming')}
-            className={`button ${
+            className={`button text-sm flex-shrink-0 ${
               scope === 'upcoming'
                 ? 'bg-[var(--foreground)] text-[var(--background)]'
                 : ''
@@ -259,7 +299,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setScope('current')}
-            className={`button ${
+            className={`button text-sm flex-shrink-0 ${
               scope === 'current'
                 ? 'bg-[var(--foreground)] text-[var(--background)]'
                 : ''
@@ -268,7 +308,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setScope('past')}
-            className={`button ${
+            className={`button text-sm flex-shrink-0 ${
               scope === 'past'
                 ? 'bg-[var(--foreground)] text-[var(--background)]'
                 : ''
@@ -276,26 +316,89 @@ export default function HomePage() {
             PAST
           </button>
         </div>
-        <div className='ml-auto flex gap-2'>
+        <div className='ml-0 sm:ml-auto flex flex-wrap gap-2 w-full sm:w-auto justify-center sm:justify-end max-w-full overflow-x-auto'>
           <button
             onClick={() => setView('grid')}
-            className={`button ${
+            className={`px-2 py-1 flex-shrink-0 ${
               view === 'grid'
                 ? 'bg-[var(--foreground)] text-[var(--background)]'
                 : ''
             }`}
-            aria-pressed={view === 'grid'}>
-            grid
+            aria-pressed={view === 'grid'}
+            aria-label='Grid view'>
+            <svg
+              width='18'
+              height='18'
+              viewBox='0 0 18 18'
+              aria-hidden='true'>
+              <rect
+                x='2'
+                y='2'
+                width='5'
+                height='5'
+                rx='1'
+              />
+              <rect
+                x='11'
+                y='2'
+                width='5'
+                height='5'
+                rx='1'
+              />
+              <rect
+                x='2'
+                y='11'
+                width='5'
+                height='5'
+                rx='1'
+              />
+              <rect
+                x='11'
+                y='11'
+                width='5'
+                height='5'
+                rx='1'
+              />
+            </svg>
+            <span className='sr-only'>Grid</span>
           </button>
           <button
             onClick={() => setView('list')}
-            className={`button ${
+            className={`px-2 py-1 flex-shrink-0 ${
               view === 'list'
                 ? 'bg-[var(--foreground)] text-[var(--background)]'
                 : ''
             }`}
-            aria-pressed={view === 'list'}>
-            list
+            aria-pressed={view === 'list'}
+            aria-label='List view'>
+            <svg
+              width='18'
+              height='18'
+              viewBox='0 0 18 18'
+              aria-hidden='true'>
+              <rect
+                x='2'
+                y='3'
+                width='14'
+                height='2'
+                rx='1'
+              />
+              <rect
+                x='2'
+                y='8'
+                width='14'
+                height='2'
+                rx='1'
+              />
+              <rect
+                x='2'
+                y='13'
+                width='14'
+                height='2'
+                rx='1'
+              />
+            </svg>
+            <span className='sr-only'>List</span>
           </button>
         </div>
 
