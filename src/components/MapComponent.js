@@ -6,6 +6,44 @@ import markerColors from '@/lib/markerColors';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+function buildPopupHTML({
+  spaceId,
+  name,
+  fullAddress,
+  typeLabel,
+  directionsAddress,
+}) {
+  const safeName = (name || 'UNKNOWN').toString().toUpperCase();
+  const link = spaceId
+    ? `<a href="/spaces/${spaceId}" style="text-decoration:underline; color:inherit;">${safeName}</a>`
+    : safeName;
+  const typeLine = typeLabel
+    ? `<br/><em style="font-size:10px; color:#555;">${typeLabel}</em>`
+    : '';
+  const addr = fullAddress
+    ? `<br/>
+        <a href="#" class="copy-address" data-address="${fullAddress}" style="color:inherit;">
+          ${fullAddress}
+        </a>`
+    : '';
+  const directions =
+    directionsAddress || fullAddress
+      ? `<br/>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+          directionsAddress || fullAddress
+        )}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline; color:inherit;">
+          Directions
+        </a>`
+      : '';
+  return `
+    <div style="color:#000; font-size:12px; line-height:1.4;">
+      <strong>${link}</strong>
+      ${typeLine}
+      ${addr}
+      ${directions}
+    </div>`;
+}
+
 export default function MapComponent({
   eventId,
   spaces,
@@ -118,53 +156,20 @@ export default function MapComponent({
         markerColors[typeKey] || markerColors.default;
 
       const spaceId = (item.space && item.space.id) || item.id;
-      const popupTitle = (
-        item.name ||
-        (item.space && item.space.name) ||
-        'UNKNOWN'
-      ).toUpperCase();
-
-      const popupTitleHtml = spaceId
-        ? `<a href="/spaces/${spaceId}" target="_blank" style="text-decoration:underline; color:inherit;">${popupTitle}</a>`
-        : popupTitle;
-
-      // compute full address for marker popups
+      const spaceName = item.name || item.space?.name || 'UNKNOWN';
       const addrParts = [];
       if (item.address) addrParts.push(item.address);
       else if (item.space?.address) addrParts.push(item.space.address);
       if (item.city) addrParts.push(item.city);
       else if (item.space?.city) addrParts.push(item.space.city);
-
       const fullAddress = addrParts.join(', ');
-
-      const popupContent = `
-        <div style="color:#000; font-size:12px; line-height:1.4;">
-          <strong>
-            <a href="/spaces/${spaceId}" target="_blank" style=" color:inherit;">
-              ${popupTitle}
-            </a>
-          </strong>
-          
-          ${
-            fullAddress
-              ? `<br/>
-            <a href="#" class="copy-address" data-address="${fullAddress}"
-               style="color:inherit;">
-              ${fullAddress}
-            </a>
-            <br/>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-              fullAddress
-            )}"
-               target="_blank"
-               style="text-decoration:underline; color:inherit;">
-              Directions
-            </a>
-          `
-              : ''
-          }
-        </div>
-      `;
+      const popupContent = buildPopupHTML({
+        spaceId,
+        name: spaceName,
+        fullAddress,
+        typeLabel: typeKey,
+        directionsAddress: fullAddress || fallbackAddress,
+      });
 
       const lng = Number(item.longitude);
       const lat = Number(item.latitude);
@@ -186,16 +191,14 @@ export default function MapComponent({
             if (geoData.features && geoData.features.length > 0) {
               address = geoData.features[0].place_name;
             }
-            // update fullAddress with new address from reverse geocoding
             const newFullAddress = address;
-            const newPopupContent = `
-              <div style="color:#000; font-size:12px; line-height:1.4;">
-                <strong>${popupTitleHtml}</strong>
-                <br/><em style="font-size:10px; color:#555;">${typeKey}</em>
-                <br/>
-                <a href="#" class="copy-address" data-address="${newFullAddress}" style=" color:inherit;">${newFullAddress}</a>
-              </div>
-            `;
+            const newPopupContent = buildPopupHTML({
+              spaceId,
+              name: spaceName,
+              fullAddress: newFullAddress,
+              typeLabel: typeKey,
+              directionsAddress: newFullAddress || fallbackAddress,
+            });
             marker.getPopup().setHTML(newPopupContent);
           })
           .catch((err) => {
@@ -213,7 +216,7 @@ export default function MapComponent({
 
   useEffect(() => {
     function handleCopy(e) {
-      if (e.target.classList.contains('copy-address')) {
+      if (e?.target?.classList?.contains?.('copy-address')) {
         e.preventDefault();
         const text = e.target.getAttribute('data-address');
         navigator.clipboard
