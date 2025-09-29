@@ -15,7 +15,6 @@ export default function MapComponent({
   initialZoom,
 }) {
   const [mapData, setMapData] = useState([]);
-  const [selectedSpace, setSelectedSpace] = useState(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -176,10 +175,6 @@ export default function MapComponent({
         .setLngLat([markerLng, markerLat])
         .setPopup(new mapboxgl.Popup().setHTML(popupContent))
         .addTo(mapRef.current);
-      marker
-        .getElement()
-        .addEventListener('click', () => setSelectedSpace(item));
-      markersRef.current.push(marker);
 
       if (!item.address && !fallbackAddress) {
         fetch(
@@ -236,80 +231,12 @@ export default function MapComponent({
     return () => document.removeEventListener('click', handleCopy);
   }, []);
 
-  // compute full address for selectedSpace bottom panel
-  const selectedAddrParts = [];
-  if (selectedSpace?.address) selectedAddrParts.push(selectedSpace.address);
-  else if (selectedSpace?.space?.address)
-    selectedAddrParts.push(selectedSpace.space.address);
-  if (selectedSpace?.city) selectedAddrParts.push(selectedSpace.city);
-  else if (selectedSpace?.space?.city)
-    selectedAddrParts.push(selectedSpace.space.city);
-
-  const selectedFullAddress = selectedAddrParts.join(', ');
-
   return (
     <div className='w-full h-full'>
       <div
         ref={mapContainerRef}
         className='w-full h-full'
       />
-      {selectedSpace && (
-        <div className='fixed bottom-0 left-0 right-0 bg-[var(--background)] border-t border-[var(--accent)] p-6 z-50 max-h-[40vh] overflow-auto'>
-          <div className='container mx-auto flex flex-col items-start'>
-            <div className='flex-shrink-0 w-full'>
-              <h3 className='font-bold text-xl mb-1'>
-                <a
-                  href={`/spaces/${
-                    selectedSpace.space?.id || selectedSpace.id
-                  }`}
-                  className='hover:text-[var(--accent)]'>
-                  {selectedSpace.name || selectedSpace.space?.name}
-                </a>{' '}
-              </h3>
-              <p className='text-sm mb-2'>{selectedFullAddress}</p>
-              {selectedSpace.eventCount > 0 && (
-                <p className='text-sm mb-2'>
-                  {selectedSpace.eventCount} event
-                  {selectedSpace.eventCount > 1 ? 's' : ''}
-                </p>
-              )}
-              {/* <p className='text-sm italic mb-1'>No events listed yet</p> */}
-            </div>
-            <div className='flex-grow w-full '>
-              {selectedSpace.description && (
-                <p className='mb-4 text-sm text-[var(--text-secondary)] whitespace-pre-wrap'>
-                  {selectedSpace.description}
-                </p>
-              )}
-              <div className='flex flex-wrap gap-3'>
-                {selectedSpace.website && (
-                  <a
-                    href={selectedSpace.website}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='button'>
-                    Website
-                  </a>
-                )}
-                <a
-                  href={`/spaces/${
-                    (selectedSpace.space && selectedSpace.space.id) ||
-                    selectedSpace.id
-                  }`}
-                  className='button'>
-                  Archive
-                </a>
-                <button
-                  onClick={() => setSelectedSpace(null)}
-                  className='ml-auto text-[var(--accent)] text-2xl font-bold leading-none p-0 border-none bg-transparent cursor-pointer'
-                  aria-label='Close details panel'>
-                  ×
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
