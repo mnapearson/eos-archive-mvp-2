@@ -92,9 +92,7 @@ export default function SpacesPage() {
     <main className='px-4 py-6 sm:px-6 lg:px-8'>
       <div className='mx-auto h-screen min-h-0 flex flex-col'>
         <header className='mb-3 sm:mb-4'>
-          <h1 className='text-[11px] tracking-wide uppercase opacity-60'>
-            Spaces ARCHIVE
-          </h1>
+          <h1 className='ea-label ea-label--muted'>Spaces archive</h1>
           <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
             Browse the growing number of selected spaces included in the
             archive. Use search to filter by name or city, toggle the legend to

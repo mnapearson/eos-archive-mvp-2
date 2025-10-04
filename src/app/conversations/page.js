@@ -56,9 +56,7 @@ export default async function ConversationsIndex() {
   return (
     <main className='px-4 py-6 sm:px-6 lg:px-8'>
       <div className='mx-auto'>
-        <div className='text-[11px] tracking-wide uppercase opacity-60'>
-          Conversations
-        </div>
+        <div className='ea-label ea-label--muted'>Conversations</div>
         <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
           These dialogues highlight unique voices that shape event culture in
           Leipzig, Berlin and beyond.

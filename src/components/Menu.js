@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
@@ -53,6 +53,86 @@ export default function Menu({ menuOpen, toggleMenu }) {
   } = useContext(FilterContext);
 
   const router = useRouter();
+  const pathname = usePathname();
+
+  const filterLabels = {
+    city: 'City',
+    space: 'Space',
+    date: 'Date',
+    category: 'Category',
+    designer: 'Designer',
+  };
+
+  const quickLinks = useMemo(
+    () => [
+      {
+        href: '/',
+        label: 'Explore',
+        meta: 'Home feed',
+        type: 'link',
+        isActive: pathname === '/',
+      },
+      {
+        href: '/map',
+        label: 'Spaces',
+        meta: 'Discover venues',
+        type: 'link',
+        isActive:
+          pathname.startsWith('/map') || pathname.startsWith('/spaces'),
+      },
+      {
+        href: '/conversations',
+        label: 'Conversations',
+        meta: 'Interviews & essays',
+        type: 'link',
+        isActive: pathname.startsWith('/conversations'),
+      },
+      {
+        href: '/leico',
+        label: 'Leico',
+        meta: 'LEICO collaboration',
+        type: 'link',
+        isActive: pathname.startsWith('/leico'),
+      },
+      {
+        href: '/about',
+        label: 'About',
+        meta: 'What is eos archive',
+        type: 'link',
+        isActive: pathname.startsWith('/about'),
+      },
+      {
+        href: 'https://eosarchive.app/spaces/signup',
+        label: 'Register a space',
+        meta: 'Submit your venue',
+        type: 'external',
+        isActive: false,
+      },
+      {
+        href: '#newsletter',
+        label: 'Newsletter',
+        meta: 'Stay updated',
+        type: 'anchor',
+        isActive: false,
+      },
+    ],
+    [pathname]
+  );
+
+  const activeFilterPairs = useMemo(() => {
+    const pairs = [];
+    Object.entries(selectedFilters).forEach(([filterKey, values]) => {
+      if (Array.isArray(values) && values.length > 0) {
+        values.forEach((value) => {
+          pairs.push({ filterKey, value });
+        });
+      }
+    });
+    return pairs;
+  }, [selectedFilters]);
+
+  const activeFilterCount = activeFilterPairs.length;
+  const hasActiveFilters = activeFilterCount > 0;
 
   const panelRef = useRef(null);
 
@@ -111,6 +191,16 @@ export default function Menu({ menuOpen, toggleMenu }) {
     designer: false,
   });
 
+  useEffect(() => {
+    setOpenFilters((prev) => ({
+      city: selectedFilters.city.length > 0 || prev.city,
+      space: selectedFilters.space.length > 0 || prev.space,
+      date: selectedFilters.date.length > 0 || prev.date,
+      category: selectedFilters.category.length > 0 || prev.category,
+      designer: selectedFilters.designer.length > 0 || prev.designer,
+    }));
+  }, [selectedFilters]);
+
   // Toggle a value in an array-based filter (add/remove)
   function toggleValue(category, value) {
     setSelectedFilters((prev) => {
@@ -129,6 +219,16 @@ export default function Menu({ menuOpen, toggleMenu }) {
     }));
   }
 
+  function removeFilterValue(filterKey, value) {
+    setSelectedFilters((prev) => {
+      const current = prev[filterKey] || [];
+      return {
+        ...prev,
+        [filterKey]: current.filter((v) => v !== value),
+      };
+    });
+  }
+
   // Clear all filter selections
   function handleClear() {
     setSelectedFilters({
@@ -138,7 +238,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
       category: [],
       designer: [],
     });
-    toggleMenu();
   }
 
   // "Save" navigates to the homepage with the selected filters.
@@ -161,7 +260,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
 
     return (
       <section
-        className='mb-4'
+        className='overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/60'
         aria-labelledby={headingId}>
         <button
           type='button'
@@ -169,39 +268,44 @@ export default function Menu({ menuOpen, toggleMenu }) {
           aria-expanded={openFilters[category]}
           aria-controls={panelId}
           onClick={() => toggleAccordion(category)}
-          className='w-full flex items-center justify-between focus:outline-none'>
-          <h3 className='font-bold mb-2'>{title.toUpperCase()}</h3>
-          <span className='text-xl'>{openFilters[category] ? '−' : '+'}</span>
+          className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left focus:outline-none'>
+          <span className='ea-label'>{title}</span>
+          <span className='text-lg font-semibold leading-none'>
+            {openFilters[category] ? '–' : '+'}
+          </span>
         </button>
         <div
           id={panelId}
           role='region'
           aria-labelledby={headingId}
-          className={`transition-all duration-300 overflow-hidden ${
-            openFilters[category] ? 'max-h-96' : 'max-h-0'
-          }`}>
-          {options.map((item) => {
-            const optId = `${category}-${toId(item)}`;
-            const checked = selectedFilters[category].includes(item);
-            return (
-              <div
-                key={item}
-                className='mb-1 pl-4'>
-                <input
-                  id={optId}
-                  type='checkbox'
-                  checked={checked}
-                  onChange={() => toggleValue(category, item)}
-                  className='mr-2 align-middle'
-                />
+          aria-hidden={!openFilters[category]}
+          className={`px-4 transition-[max-height,opacity,padding] duration-300 ease-out ${
+            openFilters[category]
+              ? 'max-h-72 py-3 opacity-100'
+              : 'max-h-0 py-0 opacity-0'
+          }`}
+          style={{ overflow: 'hidden' }}>
+          <div className='flex flex-col gap-2'>
+            {options.map((item) => {
+              const optId = `${category}-${toId(item)}`;
+              const checked = selectedFilters[category].includes(item);
+              return (
                 <label
+                  key={item}
                   htmlFor={optId}
-                  className='cursor-pointer'>
-                  {item.toLowerCase()}
+                  className='flex items-center gap-3 text-sm uppercase tracking-[0.18em] opacity-80'>
+                  <input
+                    id={optId}
+                    type='checkbox'
+                    checked={checked}
+                    onChange={() => toggleValue(category, item)}
+                    className='h-4 w-4 accent-[var(--foreground)]'
+                  />
+                  <span>{item}</span>
                 </label>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </section>
     );
@@ -215,83 +319,144 @@ export default function Menu({ menuOpen, toggleMenu }) {
       className={`fixed inset-0 z-50 transition-all duration-300 ${
         menuOpen
           ? 'bg-[var(--background)]/100 opacity-100'
-          : 'opacity-0 pointer-events-none'
+          : 'pointer-events-none opacity-0'
       }`}>
       {/* Sidebar Panel */}
       <div
         ref={panelRef}
         tabIndex={-1}
         onKeyDown={onPanelKeyDown}
-        className={`border-r border-[var(--foreground)] fixed left-0 top-0 h-full w-[85vw] max-w-sm sm:w-96 bg-[var(--background)]/75 backdrop-blur-xl backdrop-brightness-75 text-[var(--foreground)] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed left-0 top-0 flex h-full w-[85vw] max-w-sm transform flex-col border-r border-[var(--foreground)] bg-[var(--background)]/82 backdrop-blur-xl backdrop-brightness-90 text-[var(--foreground)] transition-transform duration-300 ease-in-out sm:w-96 ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
-        {/* Scrollable Content */}
-        <div className='flex-grow overflow-y-auto p-6'>
-          {/* Header Row: FILTER (left) | CLEAR & SAVE (right) */}
-          <div className='flex items-center justify-between mb-4'>
+        <div className='flex-grow overflow-y-auto px-6 py-6 space-y-8'>
+          <div className='space-y-3'>
             <h2
               id='menu-title'
-              className='text-md font-semibold italic'>
-              FILTER
+              className='ea-label'>
+              Navigator
             </h2>
-            <div className='flex gap-4'>
-              <button
-                onClick={handleClear}
-                className='button'>
-                CLEAR
-              </button>
-              <button
-                onClick={handleSave}
-                className='button'>
-                SAVE
-              </button>
+            <div className='grid gap-2'>
+              {quickLinks.map((item) => {
+                const content = (
+                  <>
+                    <span className='menu-link__label'>{item.label}</span>
+                    {item.meta && (
+                      <span className='menu-link__meta'>{item.meta}</span>
+                    )}
+                  </>
+                );
+
+                if (item.type === 'external') {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className='menu-link'
+                      data-active={item.isActive ? 'true' : 'false'}
+                      onClick={toggleMenu}
+                      target='_blank'
+                      rel='noreferrer'>
+                      {content}
+                    </a>
+                  );
+                }
+
+                if (item.type === 'anchor') {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className='menu-link'
+                      data-active='false'
+                      onClick={toggleMenu}>
+                      {content}
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className='menu-link'
+                    data-active={item.isActive ? 'true' : 'false'}
+                    prefetch={false}
+                    onClick={toggleMenu}>
+                    {content}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
-          {/* Render each filter section as an accordion */}
-          {renderFilterSection('City', 'city', cityOptions)}
-          {renderFilterSection('Space', 'space', spaceOptions)}
-          {renderFilterSection('Date', 'date', dateOptions)}
-          {renderFilterSection('Category', 'category', categoryOptions)}
-          {renderFilterSection('Designer', 'designer', designerOptions)}
+          <div className='space-y-4'>
+            <div className='flex flex-wrap items-center justify-between gap-3'>
+              <span className='ea-label'>Filters</span>
+              <span className='text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/60'>
+                Active {activeFilterCount}
+              </span>
+            </div>
+            {hasActiveFilters && (
+              <div className='flex flex-wrap gap-2'>
+                {activeFilterPairs.map(({ filterKey, value }, idx) => {
+                  const label = filterLabels[filterKey] || filterKey;
+                  return (
+                    <button
+                      key={`${filterKey}-${value}-${idx}`}
+                      type='button'
+                      className='filter-chip'
+                      onClick={() => removeFilterValue(filterKey, value)}>
+                      <span>
+                        {label}: {value}
+                      </span>
+                      <span className='filter-chip__remove' aria-hidden='true'>
+                        ×
+                      </span>
+                      <span className='sr-only'>
+                        Remove {label.toLowerCase()} filter {value}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-          {/* Navigation Links */}
+            {renderFilterSection('City', 'city', cityOptions)}
+            {renderFilterSection('Space', 'space', spaceOptions)}
+            {renderFilterSection('Date', 'date', dateOptions)}
+            {renderFilterSection('Category', 'category', categoryOptions)}
+            {renderFilterSection('Designer', 'designer', designerOptions)}
+          </div>
         </div>
-        {/* Conditionally render "DASHBOARD" or "LOGIN" link */}
-        <div className='m-6'>
-          <div>
-            <Link
+
+        <div className='menu-footer px-6 py-4 space-y-3'>
+          <button
+            type='button'
+            onClick={handleSave}
+            className='nav-cta w-full justify-center'>
+            Apply filters
+          </button>
+          <div className='menu-footer__row'>
+            <button
+              type='button'
+              onClick={handleClear}
+              className='nav-action w-full flex-1 justify-center'>
+              Clear all
+            </button>
+            <button
+              type='button'
               onClick={toggleMenu}
-              href='/map'
-              className='block py-1 hover:underline'>
-              spaces
-            </Link>
-            <Link
-              onClick={toggleMenu}
-              href='/leico'
-              className='block py-1 hover:underline'>
-              LEICO
-            </Link>
-            <Link
-              onClick={toggleMenu}
-              href='/conversations'
-              className='block py-1 hover:underline'>
-              conversations
-            </Link>
-            <Link
-              onClick={toggleMenu}
-              href='/about'
-              className='block py-1 hover:underline'>
-              about eos archive
-            </Link>
+              className='nav-action w-full flex-1 justify-center'>
+              Close
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Clicking outside the menu closes it */}
       {menuOpen && (
         <div
-          className='w-full h-full'
+          className='h-full w-full'
           onClick={toggleMenu}
           aria-hidden='true'
         />

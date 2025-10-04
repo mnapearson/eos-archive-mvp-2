@@ -2,16 +2,18 @@
 
 import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
-import { supabase } from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 // Custom hook to subscribe to auth state changes
 function useUserSimple() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     // Get current session on mount
+    const supabase = createClientComponentClient();
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
     });
@@ -34,16 +36,17 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useUserSimple();
 
   const pathname = usePathname();
-  const isConversationsActive =
-    pathname.startsWith('/conversations') ||
-    pathname.startsWith('/conversations');
-  const isSpacesActive =
-    pathname.startsWith('/map') || pathname.startsWith('/spaces');
-  const isLoginActive =
-    pathname.startsWith('/login') || pathname.startsWith('/spaces/admin');
+
+  // Sync search input with current query string
+  const currentSearchValue = searchParams.get('search') || '';
+
+  useEffect(() => {
+    setSearchTerm(currentSearchValue);
+  }, [currentSearchValue]);
 
   // Load saved theme or system preference
   useEffect(() => {
@@ -82,12 +85,55 @@ export default function NavBar() {
   // Handle search submission: redirect to homepage with the search query.
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    router.push(`/?search=${encodeURIComponent(searchTerm)}`);
+    const trimmed = searchTerm.trim();
+    if (trimmed.length > 0) {
+      router.push(`/?search=${encodeURIComponent(trimmed)}`);
+      setSearchTerm(trimmed);
+    } else {
+      router.push('/');
+      setSearchTerm('');
+    }
+    const mobileSearch = document.getElementById('nav-mobile-search');
+    mobileSearch?.classList.add('hidden');
   };
+
+  const primaryLinks = [
+    {
+      href: '/',
+      label: 'Explore',
+      isActive: pathname === '/',
+    },
+    {
+      href: '/map',
+      label: 'Spaces',
+      isActive:
+        pathname.startsWith('/map') || pathname.startsWith('/spaces'),
+    },
+    {
+      href: '/conversations',
+      label: 'Conversations',
+      isActive: pathname.startsWith('/conversations'),
+    },
+    {
+      href: '/leico',
+      label: 'Leico',
+      isActive: pathname.startsWith('/leico'),
+    },
+    {
+      href: '/about',
+      label: 'About',
+      isActive: pathname.startsWith('/about'),
+    },
+  ];
+
+  const themeToggleLabel =
+    theme === 'dawn' ? 'Switch to dusk mode' : 'Switch to dawn mode';
+  const loginHref = user ? '/spaces/admin' : '/login';
+  const loginLabel = user ? 'Dashboard' : 'Login';
 
   return (
     <>
-      <header className='fixed top-0 inset-x-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b'>
+      <header className='fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]'>
         {/* Skip link for keyboard users */}
         <a
           href='#main'
@@ -95,58 +141,117 @@ export default function NavBar() {
           Skip to content
         </a>
 
-        {/* Single-row flex: left (menu + brand), right (actions) */}
-        <div className='py-2 mx-2 flex items-center justify-between text-sm'>
-          {/* Left: Menu + Brand */}
-          <div className='flex items-center gap-3'>
+        <div className='mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <div className='flex items-center gap-3'>
+              <button
+                type='button'
+                onClick={toggleMenu}
+                aria-label='Open menu'
+                aria-controls='primary-menu'
+                className='nav-action'>
+                Menu
+              </button>
+              <Link
+                href='/'
+                title='Navigate to homepage'
+                onClick={handleLogoClick}
+                className='ea-label tracking-[0.4em]'>
+                eos archive
+              </Link>
+            </div>
+
+          <form
+            onSubmit={handleSearchSubmit}
+            className='nav-search hidden flex-1 items-center justify-between md:flex'
+            role='search'>
+            <input
+              type='search'
+              name='search'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder='Search the archive'
+              className='nav-search__input'
+              aria-label='Search archived events'
+            />
             <button
-              onClick={toggleMenu}
-              aria-label='Open menu'
-              aria-controls='primary-menu'
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]'>
-              menu
+              type='submit'
+              className='nav-search__submit'>
+              Search
             </button>
-            <Link
-              href='/'
-              title='Navigate to homepage'
-              onClick={handleLogoClick}
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] tracking-wide font-semibold'>
-              eos archive
-            </Link>
+          </form>
+          <button
+            type='button'
+            onClick={() => {
+              const mobileSearch = document.getElementById('nav-mobile-search');
+              mobileSearch?.classList.toggle('hidden');
+              mobileSearch?.querySelector('input')?.focus();
+            }}
+            className='nav-action md:hidden'>
+            Search
+          </button>
+
+          <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={toggleTheme}
+                className='nav-action'
+                aria-label={themeToggleLabel}>
+                {theme === 'dawn' ? 'Dawn' : 'Dusk'}
+              </button>
+              <a
+                href='#newsletter'
+                className='nav-action hidden sm:inline-flex'>
+                Newsletter
+              </a>
+              <Link
+                href={loginHref}
+                className='nav-action'>
+                {loginLabel}
+              </Link>
+            </div>
           </div>
 
-          {/* Right: Actions */}
-          <nav
-            aria-label='Primary'
-            className='flex gap-3'>
-            <Link
-              href='/conversations'
-              title='Read conversations'
-              aria-label='Read conversations'
-              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
-                isConversationsActive ? 'underline' : ''
-              }`}>
-              conversations
-            </Link>
-            <Link
-              href='/map'
-              title='Browse spaces on map'
-              aria-label='Browse spaces on map'
-              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
-                isSpacesActive ? 'underline' : ''
-              }`}>
-              spaces
-            </Link>
-            <Link
-              href={user ? '/spaces/admin' : '/login'}
-              title='Login or Register'
-              aria-label='Login or Register'
-              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
-                isLoginActive ? 'underline' : ''
-              }`}>
-              login
-            </Link>
-          </nav>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <nav
+              aria-label='Primary'
+              className='flex flex-wrap items-center gap-2'>
+              {primaryLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-pill ${item.isActive ? 'nav-pill--active' : ''}`}
+                  prefetch={false}>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <a
+              href='https://eosarchive.app/spaces/signup'
+              className='nav-cta hidden sm:inline-flex'>
+              Register a space
+            </a>
+          </div>
+          <form
+            id='nav-mobile-search'
+            onSubmit={handleSearchSubmit}
+            className='nav-search hidden flex-1 items-center justify-between md:hidden'
+            role='search'>
+            <input
+              type='search'
+              name='search'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder='Search the archive'
+              className='nav-search__input'
+              aria-label='Search archived events'
+            />
+            <button
+              type='submit'
+              className='nav-search__submit'>
+              Search
+            </button>
+          </form>
         </div>
       </header>
 

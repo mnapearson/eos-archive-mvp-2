@@ -48,9 +48,7 @@ export default function LeicoPage() {
   return (
     <main className='px-4 py-6 sm:px-6 lg:px-8'>
       <div className='mx-auto '>
-        <h1 className='text-[11px] tracking-wide uppercase opacity-60'>
-          LEICO × eos archive
-        </h1>
+        <h1 className='ea-label ea-label--muted'>Leico × eos archive</h1>
         <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
           This page documents the collaboration between LEICO and eos archive —
           an online extension of the printed LEICO map, a selection of Leipzig’s

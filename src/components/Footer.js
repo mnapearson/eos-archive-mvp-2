@@ -7,8 +7,10 @@ export default function Footer() {
   return (
     <footer className='bg-[var(--background)] text-[var(--foreground)] border-t border-[var(--foreground)] mt-20'>
       <div className='max-w-6xl mx-auto px-4 py-12'>
-        <div className='mx-auto max-w-2xl space-y-6'>
-          <h3 className='text-sm uppercase font-semi-bold'>join eos news</h3>
+        <div
+          id='newsletter'
+          className='mx-auto max-w-2xl space-y-6'>
+          <h3 className='ea-label'>Join eos news</h3>
           <NewsletterForm />
         </div>
       </div>

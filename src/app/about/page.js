@@ -3,9 +3,7 @@ export default function AboutPage() {
     <main className='px-4 py-6 sm:px-6 lg:px-8'>
       <header className='mb-6 sm:mb-8'>
         <div className='max-w-3xl mx-auto'>
-          <div className='text-[11px] tracking-wide uppercase opacity-60'>
-            About eos archive
-          </div>
+          <div className='ea-label ea-label--muted'>About eos archive</div>
         </div>
       </header>
       <div className='max-w-3xl mx-auto text-sm'>

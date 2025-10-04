@@ -1,6 +1,7 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import { supabase } from '@/lib/supabaseClient';
 import MasonryGrid from '@/components/MasonryGrid';
@@ -12,32 +13,52 @@ import EAImage from '@/components/EAImage';
 import { formatDateRange } from '@/lib/date';
 
 export default function HomePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [scope, setScope] = useState('all'); // 'all' | 'upcoming' | 'current' | 'past'
-  const [cities, setCities] = useState([]);
   const [view, setView] = useState('grid'); // 'grid' | 'list'
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  useEffect(() => {
-    async function fetchCities() {
-      const { data, error } = await supabase.from('spaces').select('city');
-      if (error) {
-        console.error('Error fetching cities:', error);
-        return;
+  const searchTermRaw = (searchParams.get('search') || '').trim();
+  const searchTermLower = searchTermRaw.toLowerCase();
+
+  const filterLabels = {
+    city: 'City',
+    space: 'Space',
+    date: 'Date',
+    category: 'Category',
+    designer: 'Designer',
+    search: 'Search',
+  };
+
+  const activeFilterPairs = useMemo(() => {
+    const pairs = [];
+    Object.entries(selectedFilters).forEach(([filterKey, filterValues]) => {
+      if (Array.isArray(filterValues) && filterValues.length > 0) {
+        filterValues.forEach((val) => {
+          pairs.push({ filterKey, val });
+        });
       }
-      const unique = Array.from(
-        new Set((data || []).map((d) => d.city).filter(Boolean))
-      ).sort((a, b) => a.localeCompare(b));
-      setCities(unique);
+    });
+    if (searchTermRaw) {
+      pairs.push({ filterKey: 'search', val: searchTermRaw });
     }
-    fetchCities();
-  }, []);
+    return pairs;
+  }, [selectedFilters, searchTermRaw]);
+
+  const activeFilterCount = activeFilterPairs.length;
+  const hasActiveFilters = activeFilterCount > 0;
 
   // Helper function to remove a single value from a multi-select filter
   function removeFilterValue(filterKey, value) {
+    if (filterKey === 'search') {
+      clearSearch();
+      return;
+    }
     setSelectedFilters((prev) => {
       const updated = { ...prev };
       // Filter out the clicked value
@@ -45,6 +66,26 @@ export default function HomePage() {
       updated[filterKey] = newValues;
       return updated;
     });
+  }
+
+  function clearAllFilters() {
+    setSelectedFilters({
+      city: [],
+      space: [],
+      date: [],
+      category: [],
+      designer: [],
+    });
+    if (searchTermRaw) {
+      clearSearch();
+    }
+  }
+
+  function clearSearch() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('search');
+    const query = params.toString();
+    router.replace(query ? `/?${query}` : '/', { scroll: false });
   }
 
   // Fetch events whenever filters change
@@ -122,8 +163,27 @@ export default function HomePage() {
             return true;
           });
 
+          const filteredBySearch = searchTermLower
+            ? filteredByScope.filter((ev) => {
+                const haystack = [
+                  ev.title,
+                  ev.category,
+                  ev.designer,
+                  ev.city,
+                  ev.space_city,
+                  ev.space_name,
+                  ev.venue,
+                  ev.description,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                  .toLowerCase();
+                return haystack.includes(searchTermLower);
+              })
+            : filteredByScope;
+
           // Ensure newest-first by submission
-          const sorted = filteredByScope.sort(
+          const sorted = filteredBySearch.sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
           setEvents(sorted);
@@ -136,34 +196,7 @@ export default function HomePage() {
     }
 
     fetchEvents();
-  }, [selectedFilters, scope]);
-
-  // Render a top bar showing active filters
-  function renderFilterBar() {
-    // Flatten all filter values into a single array of {key, value} pairs
-    const activeFilterPairs = [];
-    Object.entries(selectedFilters).forEach(([filterKey, filterValues]) => {
-      if (Array.isArray(filterValues) && filterValues.length > 0) {
-        filterValues.forEach((val) => {
-          activeFilterPairs.push({ filterKey, val });
-        });
-      }
-    });
-
-    return (
-      <div className='filter-bar'>
-        {activeFilterPairs.map(({ filterKey, val }, idx) => (
-          <button
-            key={`${filterKey}-${val}-${idx}`}
-            onClick={() => removeFilterValue(filterKey, val)}
-            className='button'>
-            <span>×</span>
-            <span className='uppercase'>{val}</span>
-          </button>
-        ))}
-      </div>
-    );
-  }
+  }, [selectedFilters, scope, searchTermLower]);
 
   function handleGridClick(e) {
     const a = e.target?.closest && e.target.closest('a[href^="/events/"]');
@@ -274,156 +307,157 @@ export default function HomePage() {
     );
   }
 
+  const scopeOptions = [
+    { value: 'all', label: 'All', description: 'Every archived flyer' },
+    { value: 'upcoming', label: 'Upcoming', description: 'Future events' },
+    { value: 'current', label: 'Current', description: 'Happening now' },
+    { value: 'past', label: 'Past', description: 'Archive history' },
+  ];
+
+  const viewOptions = [
+    {
+      value: 'grid',
+      label: 'Grid view',
+      icon: (
+        <svg
+          fill='currentColor'
+          width='16'
+          height='16'
+          viewBox='0 0 18 18'
+          aria-hidden='true'>
+          <rect x='2' y='2' width='5' height='5' rx='1' />
+          <rect x='11' y='2' width='5' height='5' rx='1' />
+          <rect x='2' y='11' width='5' height='5' rx='1' />
+          <rect x='11' y='11' width='5' height='5' rx='1' />
+        </svg>
+      ),
+    },
+    {
+      value: 'list',
+      label: 'List view',
+      icon: (
+        <svg
+          fill='currentColor'
+          width='16'
+          height='16'
+          viewBox='0 0 18 18'
+          aria-hidden='true'>
+          <rect x='2' y='3' width='14' height='2' rx='1' />
+          <rect x='2' y='8' width='14' height='2' rx='1' />
+          <rect x='2' y='13' width='14' height='2' rx='1' />
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <div className='w-full'>
-      {/* Scope tabs + City dropdown */}
-      <div className='mb-3 flex flex-wrap justify-between gap-2 sm:gap-6 max-w-full'>
-        <div className='flex flex-wrap gap-2'>
-          <button
-            onClick={() => setScope('all')}
-            className={`button text-sm flex-shrink-0 ${
-              scope === 'all'
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : ''
-            }`}>
-            ALL
-          </button>
-          <button
-            onClick={() => setScope('upcoming')}
-            className={`button text-sm flex-shrink-0 ${
-              scope === 'upcoming'
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : ''
-            }`}>
-            UPCOMING
-          </button>
-          <button
-            onClick={() => setScope('current')}
-            className={`button text-sm flex-shrink-0 ${
-              scope === 'current'
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : ''
-            }`}>
-            CURRENT
-          </button>
-          <button
-            onClick={() => setScope('past')}
-            className={`button text-sm flex-shrink-0 ${
-              scope === 'past'
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : ''
-            }`}>
-            PAST
-          </button>
+      <section
+        className='home-hero'
+        aria-labelledby='home-hero__title'>
+        <p className='home-hero__lead'>Til dawn culture log</p>
+        <div className='space-y-4'>
+          <h1
+            id='home-hero__title'
+            className='home-hero__heading'>
+            The living archive of event graphics
+          </h1>
+          <p className='home-hero__body'>
+            Discover independent parties, exhibitions, and gatherings through the flyers that announced them. Filter by city, designer, or mood—then dive into the spaces that keep the scene alive.
+          </p>
+          <div className='home-hero__actions'>
+            <a
+              className='home-hero__cta'
+              href='#newsletter'>
+              Join the newsletter
+            </a>
+            <a
+              className='home-hero__link'
+              href='https://eosarchive.app/spaces/signup'>
+              Register a space →
+            </a>
+          </div>
         </div>
-        <div>
-          {' '}
-          <button
-            onClick={() => setView('grid')}
-            className={`px-1 py-1 flex-shrink-0 text-[var(--foreground)] ${
-              view === 'grid' ? 'opacity-100' : 'opacity-60'
-            }`}
-            aria-pressed={view === 'grid'}
-            aria-label='Grid view'>
-            <svg
-              fill='currentColor'
-              width='18'
-              height='18'
-              viewBox='0 0 18 18'
-              aria-hidden='true'>
-              <rect
-                x='2'
-                y='2'
-                width='5'
-                height='5'
-                rx='1'
-              />
-              <rect
-                x='11'
-                y='2'
-                width='5'
-                height='5'
-                rx='1'
-              />
-              <rect
-                x='2'
-                y='11'
-                width='5'
-                height='5'
-                rx='1'
-              />
-              <rect
-                x='11'
-                y='11'
-                width='5'
-                height='5'
-                rx='1'
-              />
-            </svg>
-            <span className='sr-only'>Grid</span>
-          </button>
-          <button
-            onClick={() => setView('list')}
-            className={`px-1 py-1 flex-shrink-0 text-[var(--foreground)] ${
-              view === 'list' ? 'opacity-100' : 'opacity-60'
-            }`}
-            aria-pressed={view === 'list'}
-            aria-label='List view'>
-            <svg
-              fill='currentColor'
-              width='18'
-              height='18'
-              viewBox='0 0 18 18'
-              aria-hidden='true'>
-              <rect
-                x='2'
-                y='3'
-                width='14'
-                height='2'
-                rx='1'
-              />
-              <rect
-                x='2'
-                y='8'
-                width='14'
-                height='2'
-                rx='1'
-              />
-              <rect
-                x='2'
-                y='13'
-                width='14'
-                height='2'
-                rx='1'
-              />
-            </svg>
-            <span className='sr-only'>List</span>
-          </button>
+      </section>
+
+      <div
+        className='filter-rail'
+        role='region'
+        aria-label='Archive filters'>
+        <div
+          className='filter-rail__row'
+          role='toolbar'
+          aria-label='Event scope and layout'>
+          <div
+            className='filter-rail__scopes'
+            role='group'
+            aria-label='Event timeframe'>
+            {scopeOptions.map((option) => (
+              <button
+                key={option.value}
+                type='button'
+                aria-pressed={scope === option.value}
+                onClick={() => setScope(option.value)}
+                aria-label={`${option.label} · ${option.description}`}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <div
+            className='filter-rail__views'
+            role='group'
+            aria-label='Result layout'>
+            {viewOptions.map((option) => (
+              <button
+                key={option.value}
+                type='button'
+                aria-pressed={view === option.value}
+                onClick={() => setView(option.value)}>
+                {option.icon}
+                <span>{option.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* <select
-          className='input ml-auto'
-          value={(selectedFilters.city && selectedFilters.city[0]) || ''}
-          onChange={(e) => {
-            const val = e.target.value;
-            setSelectedFilters((prev) => ({
-              ...prev,
-              city: val ? [val] : [],
-            }));
-          }}>
-          <option value=''>Cities</option>
-          {cities.map((c) => (
-            <option
-              key={c}
-              value={c}>
-              {c}
-            </option>
-          ))}
-        </select> */}
+        {hasActiveFilters ? (
+          <div className='filter-rail__chips'>
+            <div className='filter-rail__summary' aria-live='polite'>
+              <span>Active filters</span>
+              <span className='filter-rail__count'>{activeFilterCount}</span>
+            </div>
+            {activeFilterPairs.map(({ filterKey, val }, idx) => {
+              const label = filterLabels[filterKey] || filterKey;
+              return (
+                <button
+                  key={`${filterKey}-${val}-${idx}`}
+                  type='button'
+                  className='filter-chip'
+                  onClick={() => removeFilterValue(filterKey, val)}>
+                  <span>
+                    {label}: {val}
+                  </span>
+                  <span className='filter-chip__remove' aria-hidden='true'>×</span>
+                  <span className='sr-only'>
+                    Remove {label.toLowerCase()} filter {val}
+                  </span>
+                </button>
+              );
+            })}
+            <button
+              type='button'
+              className='filter-rail__clear'
+              onClick={clearAllFilters}>
+              Clear all
+            </button>
+          </div>
+        ) : (
+          <div className='filter-rail__summary' aria-live='polite'>
+            <span>No filters applied</span>
+            <span className='filter-rail__count'>0</span>
+          </div>
+        )}
       </div>
-
-      {/* Filter Bar at the top */}
-      {renderFilterBar()}
 
       {loading ? (
         <Spinner />
