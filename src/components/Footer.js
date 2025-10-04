@@ -1,10 +1,17 @@
 // File: src/components/Footer.js
 import Link from 'next/link';
+import NewsletterForm from '@/components/NewsletterForm';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   return (
     <footer className='bg-[var(--background)] text-[var(--foreground)] border-t border-[var(--foreground)] mt-20'>
+      <div className='mt-4'>
+        <h3 className='text-sm opacity-70 uppercase tracking-wide'>
+          Newsletter
+        </h3>
+        <NewsletterForm />
+      </div>
       <div className='max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between'>
         <div className='text-sm flex space-x-4 mb-4 md:mt-0'>
           <a href='https://instagram.com/eosarchive.app'>
