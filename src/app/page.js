@@ -1,9 +1,8 @@
 'use client';
 
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
-import { supabase } from '@/lib/supabaseClient';
 import MasonryGrid from '@/components/MasonryGrid';
 import Spinner from '@/components/Spinner';
 import Link from 'next/link';
@@ -15,9 +14,12 @@ import { formatDateRange } from '@/lib/date';
 export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { selectedFilters, setSelectedFilters } = useContext(FilterContext);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    selectedFilters,
+    setSelectedFilters,
+    filteredEvents,
+    filtersLoading,
+  } = useContext(FilterContext);
   const [scope, setScope] = useState('all'); // 'all' | 'upcoming' | 'current' | 'past'
   const [view, setView] = useState('grid'); // 'grid' | 'list'
   const [modalOpen, setModalOpen] = useState(false);
@@ -88,115 +90,50 @@ export default function HomePage() {
     router.replace(query ? `/?${query}` : '/', { scroll: false });
   }
 
-  // Fetch events whenever filters change
-  useEffect(() => {
-    async function fetchEvents() {
-      setLoading(true);
-      try {
-        // 1. Start with events that are approved.
-        let query = supabase.from('events').select('*').eq('approved', true);
+  const scopedEvents = useMemo(() => {
+    if (!filteredEvents.length) return [];
+    const today = new Date().toISOString().slice(0, 10);
 
-        // 2. Apply filters for fields directly on events (date, category, designer).
-        ['date', 'category', 'designer'].forEach((key) => {
-          if (selectedFilters[key] && selectedFilters[key].length > 0) {
-            const column = key === 'date' ? 'start_date' : key;
-            query = query.in(column, selectedFilters[key]);
-          }
-        });
+    return filteredEvents.filter((ev) => {
+      const sd = ev.start_date ? ev.start_date.slice(0, 10) : null;
+      const ed = ev.end_date ? ev.end_date.slice(0, 10) : null;
+      if (!sd) return false;
+      if (scope === 'all') return true;
+      if (scope === 'upcoming') return sd > today;
+      if (scope === 'current') return ed ? sd <= today && ed >= today : sd === today;
+      if (scope === 'past') return ed ? ed < today : sd < today;
+      return true;
+    });
+  }, [filteredEvents, scope]);
 
-        // 3. For city and space filters (which live on the spaces table), query the spaces table first.
-        let spaceIds = null;
-        if (
-          (selectedFilters.city && selectedFilters.city.length > 0) ||
-          (selectedFilters.space && selectedFilters.space.length > 0)
-        ) {
-          let spacesQuery = supabase.from('spaces').select('id, city, name');
-          if (selectedFilters.city && selectedFilters.city.length > 0) {
-            spacesQuery = spacesQuery.in('city', selectedFilters.city);
-          }
-          if (selectedFilters.space && selectedFilters.space.length > 0) {
-            spacesQuery = spacesQuery.in('name', selectedFilters.space);
-          }
-          const { data: spacesData, error: spacesError } = await spacesQuery;
-          if (spacesError) {
-            console.error('Error fetching spaces for filters:', spacesError);
-            return;
-          }
-          spaceIds = spacesData.map((s) => s.id);
-        }
-
-        // 4. If we have space IDs, filter events by those IDs.
-        if (spaceIds && spaceIds.length > 0) {
-          query = query.in('space_id', spaceIds);
-        } else if (
-          (selectedFilters.city && selectedFilters.city.length > 0) ||
-          (selectedFilters.space && selectedFilters.space.length > 0)
-        ) {
-          // If filters for city/space are set but no matching spaces found, then no events match.
-          setEvents([]);
-          return;
-        }
-
-        // 5. Execute the events query (newest submission first).
-        query = query.order('created_at', { ascending: false });
-        const { data, error } = await query;
-        if (error) {
-          console.error('Error fetching events:', error);
-        } else {
-          const today = new Date().toISOString().slice(0, 10);
-          const filteredByScope = (data || []).filter((ev) => {
-            const sd = ev.start_date ? ev.start_date.slice(0, 10) : null;
-            const ed = ev.end_date ? ev.end_date.slice(0, 10) : null;
-            if (!sd) return false;
-            if (scope === 'all') {
-              return true;
-            }
-            if (scope === 'upcoming') {
-              return sd > today;
-            }
-            if (scope === 'current') {
-              return ed ? sd <= today && ed >= today : sd === today;
-            }
-            if (scope === 'past') {
-              return ed ? ed < today : sd < today;
-            }
-            return true;
-          });
-
-          const filteredBySearch = searchTermLower
-            ? filteredByScope.filter((ev) => {
-                const haystack = [
-                  ev.title,
-                  ev.category,
-                  ev.designer,
-                  ev.city,
-                  ev.space_city,
-                  ev.space_name,
-                  ev.venue,
-                  ev.description,
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-                  .toLowerCase();
-                return haystack.includes(searchTermLower);
-              })
-            : filteredByScope;
-
-          // Ensure newest-first by submission
-          const sorted = filteredBySearch.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
-          setEvents(sorted);
-        }
-      } catch (err) {
-        console.error('Unexpected error fetching events:', err);
-      } finally {
-        setLoading(false);
-      }
+  const searchedEvents = useMemo(() => {
+    if (!searchTermLower) {
+      return scopedEvents;
     }
 
-    fetchEvents();
-  }, [selectedFilters, scope, searchTermLower]);
+    return scopedEvents.filter((ev) => {
+      const haystack = [
+        ev.title,
+        ev.category,
+        ev.designer,
+        ev.city,
+        ev.space_city,
+        ev.space_name,
+        ev.venue,
+        ev.description,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(searchTermLower);
+    });
+  }, [scopedEvents, searchTermLower]);
+
+  const events = useMemo(() => {
+    return searchedEvents
+      .slice()
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [searchedEvents]);
 
   function handleGridClick(e) {
     const a = e.target?.closest && e.target.closest('a[href^="/events/"]');
@@ -459,7 +396,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {loading ? (
+      {filtersLoading ? (
         <Spinner />
       ) : view === 'grid' ? (
         <div onClickCapture={handleGridClick}>

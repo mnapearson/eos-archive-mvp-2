@@ -2,9 +2,19 @@
 
 import { useContext, useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import {
+  addMonths,
+  addDays,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns';
 // Updated custom hook to subscribe to auth state changes
 function useUserSimple() {
   const [user, setUser] = useState(null);
@@ -50,10 +60,13 @@ export default function Menu({ menuOpen, toggleMenu }) {
     dateOptions,
     categoryOptions,
     designerOptions,
+    optionCounts,
   } = useContext(FilterContext);
 
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchTerm = (searchParams.get('search') || '').trim();
 
   const filterLabels = {
     city: 'City',
@@ -61,6 +74,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
     date: 'Date',
     category: 'Category',
     designer: 'Designer',
+    search: 'Search',
   };
 
   const quickLinks = useMemo(
@@ -128,8 +142,11 @@ export default function Menu({ menuOpen, toggleMenu }) {
         });
       }
     });
+    if (searchTerm) {
+      pairs.push({ filterKey: 'search', value: searchTerm });
+    }
     return pairs;
-  }, [selectedFilters]);
+  }, [selectedFilters, searchTerm]);
 
   const activeFilterCount = activeFilterPairs.length;
   const hasActiveFilters = activeFilterCount > 0;
@@ -219,7 +236,19 @@ export default function Menu({ menuOpen, toggleMenu }) {
     }));
   }
 
+  function clearSearchParam() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('search');
+    const query = params.toString();
+    router.replace(query ? `/?${query}` : '/', { scroll: false });
+  }
+
   function removeFilterValue(filterKey, value) {
+    if (filterKey === 'search') {
+      clearSearchParam();
+      return;
+    }
+
     setSelectedFilters((prev) => {
       const current = prev[filterKey] || [];
       return {
@@ -238,6 +267,10 @@ export default function Menu({ menuOpen, toggleMenu }) {
       category: [],
       designer: [],
     });
+
+    if (searchTerm) {
+      clearSearchParam();
+    }
   }
 
   // "Save" navigates to the homepage with the selected filters.
@@ -248,6 +281,9 @@ export default function Menu({ menuOpen, toggleMenu }) {
         values.forEach((val) => params.append(key, val));
       }
     });
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
     router.push(`/?${params.toString()}`, { scroll: false });
     toggleMenu();
   }
@@ -281,31 +317,53 @@ export default function Menu({ menuOpen, toggleMenu }) {
           aria-hidden={!openFilters[category]}
           className={`px-4 transition-[max-height,opacity,padding] duration-300 ease-out ${
             openFilters[category]
-              ? 'max-h-72 py-3 opacity-100'
+              ? 'max-h-[28rem] py-3 opacity-100'
               : 'max-h-0 py-0 opacity-0'
           }`}
           style={{ overflow: 'hidden' }}>
-          <div className='flex flex-col gap-2'>
-            {options.map((item) => {
-              const optId = `${category}-${toId(item)}`;
-              const checked = selectedFilters[category].includes(item);
-              return (
-                <label
-                  key={item}
-                  htmlFor={optId}
-                  className='flex items-center gap-3 text-sm uppercase tracking-[0.18em] opacity-80'>
-                  <input
-                    id={optId}
-                    type='checkbox'
-                    checked={checked}
-                    onChange={() => toggleValue(category, item)}
-                    className='h-4 w-4 accent-[var(--foreground)]'
-                  />
-                  <span>{item}</span>
-                </label>
-              );
-            })}
-          </div>
+          {category === 'date' ? (
+            <DateCalendar
+              counts={optionCounts?.date || {}}
+              selectedDates={selectedFilters.date}
+              onToggle={(value) => toggleValue('date', value)}
+            />
+          ) : (
+            <div className='flex max-h-52 flex-col gap-2 overflow-y-auto pr-1'>
+              {options.map((item) => {
+                const optId = `${category}-${toId(item)}`;
+                const checked = selectedFilters[category].includes(item);
+                const countsForCategory = optionCounts?.[category] || {};
+                const count = countsForCategory[item] ?? 0;
+                const isDisabled = !checked && count === 0;
+
+                if (!item) return null;
+
+                return (
+                  <label
+                    key={item}
+                    htmlFor={optId}
+                    className={`flex items-center justify-between gap-3 text-sm uppercase tracking-[0.18em] ${
+                      isDisabled ? 'opacity-40' : 'opacity-80'
+                    }`}>
+                    <span className='flex items-center gap-3'>
+                      <input
+                        id={optId}
+                        type='checkbox'
+                        checked={checked}
+                        disabled={isDisabled}
+                        onChange={() => toggleValue(category, item)}
+                        className='h-4 w-4 accent-[var(--foreground)] disabled:cursor-not-allowed'
+                      />
+                      <span>{item}</span>
+                    </span>
+                    <span className='text-[10px] tracking-[0.28em]'>
+                      {count}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     );
@@ -461,6 +519,98 @@ export default function Menu({ menuOpen, toggleMenu }) {
           aria-hidden='true'
         />
       )}
+    </div>
+  );
+}
+
+function DateCalendar({ counts, selectedDates, onToggle }) {
+  const [month, setMonth] = useState(() => startOfMonth(new Date()));
+
+  useEffect(() => {
+    if (selectedDates.length > 0) {
+      const firstSelected = startOfMonth(new Date(selectedDates[0]));
+      setMonth(firstSelected);
+    }
+  }, [selectedDates]);
+
+  const daysMatrix = useMemo(() => {
+    const monthStart = startOfMonth(month);
+    const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const monthEnd = endOfMonth(month);
+    const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+    const days = [];
+    let cursor = gridStart;
+    while (cursor <= gridEnd) {
+      days.push(cursor);
+      cursor = addDays(cursor, 1);
+    }
+
+    const rows = [];
+    for (let i = 0; i < days.length; i += 7) {
+      rows.push(days.slice(i, i + 7));
+    }
+    return rows;
+  }, [month]);
+
+  return (
+    <div className='space-y-3'>
+      <div className='flex items-center justify-between'>
+        <button
+          type='button'
+          onClick={() => setMonth((prev) => startOfMonth(addMonths(prev, -1)))}
+          className='nav-action px-3 py-1 tracking-[0.24em]'>
+          Prev
+        </button>
+        <span className='ea-label'>{format(month, 'MMMM yyyy')}</span>
+        <button
+          type='button'
+          onClick={() => setMonth((prev) => startOfMonth(addMonths(prev, 1)))}
+          className='nav-action px-3 py-1 tracking-[0.24em]'>
+          Next
+        </button>
+      </div>
+
+      <div className='grid grid-cols-7 gap-2 text-center text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/60'>
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
+          <span key={label}>{label}</span>
+        ))}
+      </div>
+
+      <div className='grid grid-cols-7 gap-2 text-sm'>
+        {daysMatrix.flat().map((day) => {
+          const iso = format(day, 'yyyy-MM-dd');
+          const count = counts[iso] ?? 0;
+          const isCurrentMonth = isSameMonth(day, month);
+          const isSelected = selectedDates.includes(iso);
+
+          const baseClasses = 'relative flex h-12 items-center justify-center rounded-2xl border text-xs tracking-[0.18em] transition';
+          const stateClasses = isSelected
+            ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)] shadow-[0_12px_25px_rgba(0,0,0,0.18)]'
+            : count > 0
+            ? 'border-[var(--foreground)]/25 text-[var(--foreground)] hover:border-[var(--foreground)]'
+            : 'border-transparent text-[var(--foreground)]/35';
+          const outOfMonth = isCurrentMonth ? '' : 'opacity-40';
+
+          return (
+            <button
+              key={iso}
+              type='button'
+              onClick={() => onToggle(iso)}
+              disabled={count === 0}
+              className={`${baseClasses} ${stateClasses} ${outOfMonth} disabled:cursor-not-allowed disabled:opacity-30`}
+              aria-pressed={isSelected}
+              aria-label={`${format(day, 'MMMM d, yyyy')} · ${count} event${
+                count === 1 ? '' : 's'
+              }`}>
+              <span>{format(day, 'd')}</span>
+              {count > 0 && !isSelected && (
+                <span className='absolute -bottom-1 h-1.5 w-1.5 rounded-full bg-[var(--foreground)]/80'></span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
