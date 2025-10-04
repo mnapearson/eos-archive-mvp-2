@@ -59,7 +59,7 @@ export default function NewsletterForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className='flex flex-col gap-2'
+      className='mx-auto flex w-full max-w-xl flex-col gap-4'
       noValidate>
       <label
         htmlFor='nl-email'
@@ -74,25 +74,26 @@ export default function NewsletterForm() {
         placeholder='your@email.com'
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className='input'
+        className='input w-full'
       />
-      {/* Consent checkbox */}
-      <label className='items-start gap-2 text-sm opacity-80'>
+      <label className='flex items-start gap-3 text-sm opacity-80'>
         <input
           required
           type='checkbox'
-          className='mr-2'
+          className='mt-1'
         />
-        I agree to receive emails from eos archive and accept the{' '}
-        <a
-          className='underline'
-          href='/privacy'>
-          privacy policy
-        </a>
-        .
+        <span>
+          I agree to receive emails from eos archive and accept the{' '}
+          <a
+            className='underline'
+            href='/privacy'>
+            privacy policy
+          </a>
+          .
+        </span>
       </label>
       <button
-        className='button'
+        className='button w-full self-start justify-center px-6 sm:w-auto'
         disabled={state === 'loading'}>
         {state === 'loading' ? 'Subscribing…' : 'Subscribe'}
       </button>

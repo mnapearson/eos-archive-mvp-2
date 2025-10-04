@@ -6,31 +6,37 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
   return (
     <footer className='bg-[var(--background)] text-[var(--foreground)] border-t border-[var(--foreground)] mt-20'>
-      <div className='mt-4'>
-        <h3 className='text-sm opacity-70 uppercase tracking-wide'>
-          Newsletter
-        </h3>
-        <NewsletterForm />
-      </div>
-      <div className='max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between'>
-        <div className='text-sm flex space-x-4 mb-4 md:mt-0'>
-          <a href='https://instagram.com/eosarchive.app'>
-            <p className='hover:underline'>instagram</p>
-          </a>
-          <Link href='/privacy'>
-            <p className='hover:underline'>privacy</p>
-          </Link>
-          <Link href='/terms'>
-            <p className='hover:underline'>terms</p>
-          </Link>
-          <a
-            href='mailto:hello@eosarchive.app'
-            className='hover:underline'>
-            hello@eosarchive.app
-          </a>{' '}
+      <div className='max-w-6xl mx-auto px-4 py-12'>
+        <div className='mx-auto max-w-2xl space-y-6'>
+          <h3 className='text-sm uppercase font-semi-bold'>join eos news</h3>
+          <NewsletterForm />
         </div>
-        <div className='text-sm flex space-x-4 mb-4 md:mt-0'>
-          <p>&copy; {currentYear} eos archive.</p>
+      </div>
+      <div className='border-t border-[var(--foreground)]/15'>
+        <div className='max-w-6xl mx-auto px-4 py-6 flex flex-col-reverse items-center justify-between gap-4 text-sm md:flex-row'>
+          <p className='opacity-80'>&copy; {currentYear} eos archive.</p>
+          <div className='flex flex-wrap items-center justify-center gap-4 opacity-80 md:justify-start'>
+            <a
+              href='mailto:hello@eosarchive.app'
+              className='hover:underline'>
+              hello@eosarchive.app
+            </a>
+            <a
+              href='https://instagram.com/eosarchive.app'
+              className='hover:underline'>
+              instagram
+            </a>
+            <Link
+              href='/privacy'
+              className='hover:underline'>
+              privacy
+            </Link>
+            <Link
+              href='/terms'
+              className='hover:underline'>
+              terms
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
