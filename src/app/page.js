@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import MasonryGrid from '@/components/MasonryGrid';
@@ -9,7 +9,6 @@ import Link from 'next/link';
 import Modal from '@/components/Modal';
 import EventQuickView from '@/components/EventQuickView';
 import EAImage from '@/components/EAImage';
-import { formatDateRange } from '@/lib/date';
 
 export default function HomePage() {
   const router = useRouter();
@@ -19,9 +18,10 @@ export default function HomePage() {
     setSelectedFilters,
     filteredEvents,
     filtersLoading,
+    recentSpaces,
   } = useContext(FilterContext);
-  const [scope, setScope] = useState('all'); // 'all' | 'upcoming' | 'current' | 'past'
-  const [view, setView] = useState('grid'); // 'grid' | 'list'
+  const [viewMode, setViewMode] = useState('grid');
+  const [flowPaused, setFlowPaused] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
@@ -90,50 +90,32 @@ export default function HomePage() {
     router.replace(query ? `/?${query}` : '/', { scroll: false });
   }
 
-  const scopedEvents = useMemo(() => {
-    if (!filteredEvents.length) return [];
-    const today = new Date().toISOString().slice(0, 10);
-
-    return filteredEvents.filter((ev) => {
-      const sd = ev.start_date ? ev.start_date.slice(0, 10) : null;
-      const ed = ev.end_date ? ev.end_date.slice(0, 10) : null;
-      if (!sd) return false;
-      if (scope === 'all') return true;
-      if (scope === 'upcoming') return sd > today;
-      if (scope === 'current') return ed ? sd <= today && ed >= today : sd === today;
-      if (scope === 'past') return ed ? ed < today : sd < today;
-      return true;
-    });
-  }, [filteredEvents, scope]);
-
-  const searchedEvents = useMemo(() => {
-    if (!searchTermLower) {
-      return scopedEvents;
-    }
-
-    return scopedEvents.filter((ev) => {
-      const haystack = [
-        ev.title,
-        ev.category,
-        ev.designer,
-        ev.city,
-        ev.space_city,
-        ev.space_name,
-        ev.venue,
-        ev.description,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(searchTermLower);
-    });
-  }, [scopedEvents, searchTermLower]);
-
   const events = useMemo(() => {
-    return searchedEvents
+    const base = filteredEvents;
+
+    const searched = !searchTermLower
+      ? base
+      : base.filter((ev) => {
+          const haystack = [
+            ev.title,
+            ev.category,
+            ev.designer,
+            ev.city,
+            ev.space_city,
+            ev.space_name,
+            ev.venue,
+            ev.description,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          return haystack.includes(searchTermLower);
+        });
+
+    return searched
       .slice()
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  }, [searchedEvents]);
+  }, [filteredEvents, searchTermLower]);
 
   function handleGridClick(e) {
     const a = e.target?.closest && e.target.closest('a[href^="/events/"]');
@@ -159,134 +141,6 @@ export default function HomePage() {
     }
   }
 
-  function renderList() {
-    return (
-      <div className='divide-y divide-white/10'>
-        {events.map((ev) => {
-          const title = ev.title || 'Untitled event';
-          const flyer = ev.flyer_url || ev.image_url || '';
-          const spaceId = ev.space_id || null;
-          const spaceName = ev.space_name || ev.venue || null;
-          const city = ev.city || ev.space_city || '';
-          const address = ev.address || ev.space_address || '';
-          const locationStr = [spaceName, address, city]
-            .filter(Boolean)
-            .join(', ');
-          const when = ev.start_date
-            ? formatDateRange(
-                ev.start_date,
-                ev.end_date,
-                ev.start_time,
-                ev.end_time
-              )
-            : '';
-
-          return (
-            <div
-              key={ev.id}
-              className='flex gap-3 py-3'>
-              <EAImage
-                src={flyer}
-                alt={title}
-                width={64}
-                height={64}
-                sizes='64px'
-                className='w-16 h-16 rounded object-cover'
-              />
-              <div className='flex-1 min-w-0'>
-                {/* Title */}
-                <div className='text-sm font-medium truncate'>{title}</div>
-
-                {/* Location */}
-                {spaceId && spaceName ? (
-                  <div className='text-sm opacity-80 truncate'>
-                    <Link
-                      href={`/spaces/${spaceId}`}
-                      className='underline'>
-                      {spaceName}
-                    </Link>
-                    {address || city
-                      ? `, ${[address, city].filter(Boolean).join(', ')}`
-                      : ''}
-                  </div>
-                ) : (
-                  <div className='text-sm opacity-80 truncate'>
-                    {locationStr}
-                  </div>
-                )}
-
-                {/* Dates */}
-                {when && (
-                  <div className='text-xs opacity-70 mt-0.5'>{when}</div>
-                )}
-
-                {/* Actions */}
-                <div className='mt-2 flex gap-2'>
-                  <button
-                    className='button'
-                    onClick={() => {
-                      setSelected(ev);
-                      setModalOpen(true);
-                    }}>
-                    Quick view
-                  </button>
-                  <Link
-                    className='button'
-                    href={`/events/${ev.slug || ev.id}`}>
-                    More details
-                  </Link>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  const scopeOptions = [
-    { value: 'all', label: 'All', description: 'Every archived flyer' },
-    { value: 'upcoming', label: 'Upcoming', description: 'Future events' },
-    { value: 'current', label: 'Current', description: 'Happening now' },
-    { value: 'past', label: 'Past', description: 'Archive history' },
-  ];
-
-  const viewOptions = [
-    {
-      value: 'grid',
-      label: 'Grid view',
-      icon: (
-        <svg
-          fill='currentColor'
-          width='16'
-          height='16'
-          viewBox='0 0 18 18'
-          aria-hidden='true'>
-          <rect x='2' y='2' width='5' height='5' rx='1' />
-          <rect x='11' y='2' width='5' height='5' rx='1' />
-          <rect x='2' y='11' width='5' height='5' rx='1' />
-          <rect x='11' y='11' width='5' height='5' rx='1' />
-        </svg>
-      ),
-    },
-    {
-      value: 'list',
-      label: 'List view',
-      icon: (
-        <svg
-          fill='currentColor'
-          width='16'
-          height='16'
-          viewBox='0 0 18 18'
-          aria-hidden='true'>
-          <rect x='2' y='3' width='14' height='2' rx='1' />
-          <rect x='2' y='8' width='14' height='2' rx='1' />
-          <rect x='2' y='13' width='14' height='2' rx='1' />
-        </svg>
-      ),
-    },
-  ];
-
   return (
     <div className='w-full'>
       <section
@@ -297,10 +151,12 @@ export default function HomePage() {
           <h1
             id='home-hero__title'
             className='home-hero__heading'>
-            The living archive of event graphics
+            eos—the living archive of event graphics
           </h1>
           <p className='home-hero__body'>
-            Discover independent parties, exhibitions, and gatherings through the flyers that announced them. Filter by city, designer, or mood—then dive into the spaces that keep the scene alive.
+            Discover independent parties, exhibitions, and gatherings through
+            the flyers that announced them. Filter by city, designer, or
+            mood—then dive into the spaces that keep the scene alive.
           </p>
           <div className='home-hero__actions'>
             <a
@@ -324,42 +180,51 @@ export default function HomePage() {
         <div
           className='filter-rail__row'
           role='toolbar'
-          aria-label='Event scope and layout'>
-          <div
-            className='filter-rail__scopes'
-            role='group'
-            aria-label='Event timeframe'>
-            {scopeOptions.map((option) => (
-              <button
-                key={option.value}
-                type='button'
-                aria-pressed={scope === option.value}
-                onClick={() => setScope(option.value)}
-                aria-label={`${option.label} · ${option.description}`}>
-                {option.label}
-              </button>
-            ))}
+          aria-label='Explorer modes'>
+          <div className='flex flex-col gap-1 text-xs uppercase tracking-[0.3em] text-[var(--foreground)]/60'>
+            <span>Results</span>
+            <span className='text-[var(--foreground)]'>
+              {events.length} events
+            </span>
           </div>
-          <div
-            className='filter-rail__views'
-            role='group'
-            aria-label='Result layout'>
-            {viewOptions.map((option) => (
+          <div className='flex flex-wrap items-center gap-2'>
+            <button
+              type='button'
+              aria-pressed={viewMode === 'flow'}
+              onClick={() => setViewMode('flow')}
+              className={`nav-action ${viewMode === 'flow' ? 'nav-cta' : ''}`}>
+              Flow
+            </button>
+            <button
+              type='button'
+              aria-pressed={viewMode === 'grid'}
+              onClick={() => setViewMode('grid')}
+              className={`nav-action ${viewMode === 'grid' ? 'nav-cta' : ''}`}>
+              Grid
+            </button>
+            <button
+              type='button'
+              aria-pressed={viewMode === 'list'}
+              onClick={() => setViewMode('list')}
+              className={`nav-action ${viewMode === 'list' ? 'nav-cta' : ''}`}>
+              List
+            </button>
+            {viewMode === 'flow' && (
               <button
-                key={option.value}
                 type='button'
-                aria-pressed={view === option.value}
-                onClick={() => setView(option.value)}>
-                {option.icon}
-                <span>{option.label}</span>
+                onClick={() => setFlowPaused((prev) => !prev)}
+                className='nav-action'>
+                {flowPaused ? 'Resume' : 'Pause'}
               </button>
-            ))}
+            )}
           </div>
         </div>
 
         {hasActiveFilters ? (
           <div className='filter-rail__chips'>
-            <div className='filter-rail__summary' aria-live='polite'>
+            <div
+              className='filter-rail__summary'
+              aria-live='polite'>
               <span>Active filters</span>
               <span className='filter-rail__count'>{activeFilterCount}</span>
             </div>
@@ -374,7 +239,11 @@ export default function HomePage() {
                   <span>
                     {label}: {val}
                   </span>
-                  <span className='filter-chip__remove' aria-hidden='true'>×</span>
+                  <span
+                    className='filter-chip__remove'
+                    aria-hidden='true'>
+                    ×
+                  </span>
                   <span className='sr-only'>
                     Remove {label.toLowerCase()} filter {val}
                   </span>
@@ -389,7 +258,9 @@ export default function HomePage() {
             </button>
           </div>
         ) : (
-          <div className='filter-rail__summary' aria-live='polite'>
+          <div
+            className='filter-rail__summary'
+            aria-live='polite'>
             <span>No filters applied</span>
             <span className='filter-rail__count'>0</span>
           </div>
@@ -398,12 +269,46 @@ export default function HomePage() {
 
       {filtersLoading ? (
         <Spinner />
-      ) : view === 'grid' ? (
-        <div onClickCapture={handleGridClick}>
-          <MasonryGrid items={events} />
-        </div>
       ) : (
-        renderList()
+        <div onClickCapture={handleGridClick}>
+          <MasonryGrid
+            items={events}
+            mode={viewMode}
+            flowPaused={flowPaused}
+          />
+        </div>
+      )}
+
+      {recentSpaces?.length > 0 && (
+        <section className='mx-auto mt-16 max-w-6xl space-y-6 px-4'>
+          <div className='flex flex-wrap items-center justify-between gap-3'>
+            <span className='ea-label ea-label--muted'>
+              Recently added spaces
+            </span>
+            <Link
+              href='/map'
+              className='nav-action'>
+              Browse map
+            </Link>
+          </div>
+          <div className='grid gap-4 md:grid-cols-3'>
+            {recentSpaces.map((space) => (
+              <Link
+                key={space.id}
+                href={`/spaces/${space.id}`}
+                className='recent-space-card group rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/85 p-4 transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_18px_40px_rgba(0,0,0,0.12)]'>
+                <div className='ea-label ea-label--muted'>{space.name}</div>
+                <p className='mt-1 text-sm opacity-70'>
+                  {space.city || 'Unknown city'}
+                </p>
+                <p className='mt-4 text-xs uppercase tracking-[0.32em] text-[var(--foreground)]/60'>
+                  {space.eventCount} event{space.eventCount === 1 ? '' : 's'}{' '}
+                  archived
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Modal for quick view */}

@@ -106,23 +106,12 @@ export default function NavBar() {
     {
       href: '/map',
       label: 'Spaces',
-      isActive:
-        pathname.startsWith('/map') || pathname.startsWith('/spaces'),
+      isActive: pathname.startsWith('/map') || pathname.startsWith('/spaces'),
     },
     {
       href: '/conversations',
       label: 'Conversations',
       isActive: pathname.startsWith('/conversations'),
-    },
-    {
-      href: '/leico',
-      label: 'Leico',
-      isActive: pathname.startsWith('/leico'),
-    },
-    {
-      href: '/about',
-      label: 'About',
-      isActive: pathname.startsWith('/about'),
     },
   ];
 
@@ -152,46 +141,29 @@ export default function NavBar() {
                 className='nav-action'>
                 Menu
               </button>
-              <Link
-                href='/'
-                title='Navigate to homepage'
-                onClick={handleLogoClick}
-                className='ea-label tracking-[0.4em]'>
-                eos archive
-              </Link>
             </div>
 
-          <form
-            onSubmit={handleSearchSubmit}
-            className='nav-search hidden flex-1 items-center justify-between md:flex'
-            role='search'>
-            <input
-              type='search'
-              name='search'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder='Search the archive'
-              className='nav-search__input'
-              aria-label='Search archived events'
-            />
-            <button
-              type='submit'
-              className='nav-search__submit'>
-              Search
-            </button>
-          </form>
-          <button
-            type='button'
-            onClick={() => {
-              const mobileSearch = document.getElementById('nav-mobile-search');
-              mobileSearch?.classList.toggle('hidden');
-              mobileSearch?.querySelector('input')?.focus();
-            }}
-            className='nav-action md:hidden'>
-            Search
-          </button>
+            <form
+              onSubmit={handleSearchSubmit}
+              className='nav-search hidden flex-1 items-center justify-between md:flex'
+              role='search'>
+              <input
+                type='search'
+                name='search'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder='Search the archive'
+                className='nav-search__input'
+                aria-label='Search archived events'
+              />
+              <button
+                type='submit'
+                className='nav-search__submit'>
+                Search
+              </button>
+            </form>
 
-          <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-2'>
               <button
                 type='button'
                 onClick={toggleTheme}
@@ -199,11 +171,7 @@ export default function NavBar() {
                 aria-label={themeToggleLabel}>
                 {theme === 'dawn' ? 'Dawn' : 'Dusk'}
               </button>
-              <a
-                href='#newsletter'
-                className='nav-action hidden sm:inline-flex'>
-                Newsletter
-              </a>
+
               <Link
                 href={loginHref}
                 className='nav-action'>
@@ -220,7 +188,9 @@ export default function NavBar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`nav-pill ${item.isActive ? 'nav-pill--active' : ''}`}
+                  className={`nav-pill ${
+                    item.isActive ? 'nav-pill--active' : ''
+                  }`}
                   prefetch={false}>
                   {item.label}
                 </Link>
@@ -232,26 +202,6 @@ export default function NavBar() {
               Register a space
             </a>
           </div>
-          <form
-            id='nav-mobile-search'
-            onSubmit={handleSearchSubmit}
-            className='nav-search hidden flex-1 items-center justify-between md:hidden'
-            role='search'>
-            <input
-              type='search'
-              name='search'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder='Search the archive'
-              className='nav-search__input'
-              aria-label='Search archived events'
-            />
-            <button
-              type='submit'
-              className='nav-search__submit'>
-              Search
-            </button>
-          </form>
         </div>
       </header>
 

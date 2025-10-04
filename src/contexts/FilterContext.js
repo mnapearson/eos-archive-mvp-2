@@ -274,6 +274,37 @@ export function FilterProvider({ children }) {
     };
   }, [applyFilters, filterOptions, selectedFilters, spaceMap]);
 
+  const recentSpaces = useMemo(() => {
+    if (!allSpaces.length || !allEvents.length) return [];
+
+    const summaries = new Map();
+
+    allEvents.forEach((event) => {
+      const spaceId = event.space_id;
+      if (!spaceId) return;
+      const summary = summaries.get(spaceId) || {
+        id: spaceId,
+        name: spaceMap.get(spaceId)?.name || '',
+        city: spaceMap.get(spaceId)?.city || '',
+        eventCount: 0,
+        latestEventDate: null,
+      };
+
+      summary.eventCount += 1;
+      const createdAt = new Date(event.created_at || event.start_date || Date.now());
+      if (!summary.latestEventDate || createdAt > summary.latestEventDate) {
+        summary.latestEventDate = createdAt;
+      }
+
+      summaries.set(spaceId, summary);
+    });
+
+    return Array.from(summaries.values())
+      .filter((space) => space.name)
+      .sort((a, b) => (b.latestEventDate || 0) - (a.latestEventDate || 0))
+      .slice(0, 3);
+  }, [allEvents, allSpaces, spaceMap]);
+
   const value = useMemo(
     () => ({
       selectedFilters,
@@ -287,6 +318,7 @@ export function FilterProvider({ children }) {
       filteredEvents,
       filtersLoading: loading,
       filtersError: error,
+      recentSpaces,
     }),
     [
       selectedFilters,
@@ -296,6 +328,7 @@ export function FilterProvider({ children }) {
       filteredEvents,
       loading,
       error,
+      recentSpaces,
     ]
   );
 
