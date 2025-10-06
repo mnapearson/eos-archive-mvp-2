@@ -353,11 +353,13 @@ body {
 
 .grid-shell__masonry {
   display: flex;
+  gap: clamp(1rem, 2.4vw, 1.8rem);
 }
 
 .grid-shell__column {
   display: flex;
   flex-direction: column;
+  gap: clamp(1rem, 2.4vw, 1.8rem);
 }
 
 .grid-card {
@@ -394,6 +396,28 @@ body {
 
 .grid-card:hover .grid-card__image {
   transform: translateY(-4px) scale(1.015);
+}
+
+.grid-card__status {
+  position: absolute;
+  top: clamp(0.6rem, 2vw, 1rem);
+  left: clamp(0.6rem, 2vw, 1rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    rgba(0, 0, 0, 0.78) 70%,
+    rgba(255, 255, 255, 0.2) 30%
+  );
+  color: #f5f7fb;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  box-shadow: 0 18px 32px rgba(6, 8, 14, 0.28);
 }
 
 
@@ -489,11 +513,7 @@ body {
   flex-direction: column;
   gap: 0.75rem;
   padding-top: 1.75rem;
-}
-
-.quick-view__status {
-  display: flex;
-  justify-content: flex-end;
+  position: relative;
 }
 
 .quick-view__title-row {
@@ -573,6 +593,13 @@ body {
 
 .quick-view__badge {
   background: color-mix(in oklab, var(--foreground) 24%, transparent);
+}
+
+.quick-view__badge--floating {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(-0.4rem);
 }
 
 .quick-view__media {

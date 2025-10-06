@@ -10,6 +10,87 @@ import Modal from '@/components/Modal';
 import EventQuickView from '@/components/EventQuickView';
 import EAImage from '@/components/EAImage';
 
+const EVENT_STATUS_PRIORITY = {
+  upcoming: 0,
+  current: 1,
+  past: 2,
+};
+
+function normalizeTime(time, fallback) {
+  if (!time) return fallback;
+  return time.length === 5 ? `${time}:00` : time;
+}
+
+function parseEventDate(date, time, type) {
+  if (!date) return null;
+  try {
+    const isoTime = normalizeTime(
+      time,
+      type === 'end' ? '23:59:59' : '00:00:00'
+    );
+    const value = new Date(`${date}T${isoTime}`);
+    return Number.isNaN(value.getTime()) ? null : value;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getTemporalInfo(event, reference) {
+  const now = reference ?? new Date();
+  const start = parseEventDate(event?.start_date, event?.start_time, 'start');
+  const end = parseEventDate(
+    event?.end_date || event?.start_date,
+    event?.end_time,
+    'end'
+  );
+
+  let status = 'past';
+  if (start) {
+    if (start > now) {
+      status = 'upcoming';
+    } else if (now >= start) {
+      const isCurrent = end
+        ? now <= end
+        : now.toDateString() === start.toDateString();
+      status = isCurrent ? 'current' : 'past';
+    }
+  }
+
+  const startMs = start ? start.getTime() : Number.NEGATIVE_INFINITY;
+  const endMs = end ? end.getTime() : startMs;
+  const createdMs = event?.created_at
+    ? new Date(event.created_at).getTime()
+    : Number.NEGATIVE_INFINITY;
+
+  return { status, startMs, endMs, createdMs };
+}
+
+function compareEventsByTemporalOrder(a, b, reference) {
+  const infoA = getTemporalInfo(a, reference);
+  const infoB = getTemporalInfo(b, reference);
+
+  const priorityA = EVENT_STATUS_PRIORITY[infoA.status] ?? EVENT_STATUS_PRIORITY.past;
+  const priorityB = EVENT_STATUS_PRIORITY[infoB.status] ?? EVENT_STATUS_PRIORITY.past;
+  if (priorityA !== priorityB) {
+    return priorityA - priorityB;
+  }
+
+  if (infoA.status === 'upcoming') {
+    return infoA.startMs - infoB.startMs;
+  }
+
+  if (infoA.status === 'current') {
+    return infoA.endMs - infoB.endMs;
+  }
+
+  // Past events: most recent first
+  if (infoA.startMs !== infoB.startMs) {
+    return infoB.startMs - infoA.startMs;
+  }
+
+  return infoB.createdMs - infoA.createdMs;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -109,9 +190,10 @@ export default function HomePage() {
           return haystack.includes(searchTermLower);
         });
 
+    const referenceNow = new Date();
     return searched
       .slice()
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      .sort((a, b) => compareEventsByTemporalOrder(a, b, referenceNow));
   }, [filteredEvents, searchTermLower]);
 
   function handleGridClick(e) {

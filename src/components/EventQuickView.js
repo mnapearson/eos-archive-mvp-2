@@ -115,9 +115,9 @@ export default function EventQuickView({ event }) {
     <section className='quick-view space-y-6'>
       <header className='quick-view__header space-y-3'>
         {statusLabel && (
-          <div className='quick-view__status'>
-            <span className='list-card__badge quick-view__badge'>{statusLabel}</span>
-          </div>
+          <span className='list-card__badge quick-view__badge quick-view__badge--floating'>
+            {statusLabel}
+          </span>
         )}
         <div className='quick-view__title-row'>
           <h2 className='quick-view__title'>{title}</h2>

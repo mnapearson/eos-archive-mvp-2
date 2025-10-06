@@ -92,6 +92,7 @@ function GridView({ items }) {
         columnClassName='grid-shell__column'>
         {items.map((item, index) => {
           const href = item?.id ? `/events/${item.id}` : '#';
+          const statusLabel = getEventStatus(item);
 
           return (
             <Link
@@ -106,6 +107,9 @@ function GridView({ items }) {
                   className='grid-card__image'
                   loading='lazy'
                 />
+                {statusLabel && (
+                  <span className='grid-card__status'>{statusLabel}</span>
+                )}
               </figure>
               <span className='sr-only'>View event {item?.title}</span>
             </Link>
