@@ -19,10 +19,10 @@ const tileVariants = [
   'aspect-[16/11]',
 ];
 const gridColumns = {
-  default: 4,
-  1600: 3,
-  1100: 2,
-  768: 2,
+  default: 3,
+  1200: 3,
+  960: 2,
+  640: 2,
 };
 
 export default function MasonryGrid({

@@ -842,6 +842,12 @@ body {
   border-color: transparent;
 }
 
+@media (max-width: 640px) {
+  .nav-cta {
+    display: none;
+  }
+}
+
 .nav-cta:hover,
 .nav-cta:focus-visible {
   background: color-mix(in oklab, var(--foreground) 85%, black 15%);

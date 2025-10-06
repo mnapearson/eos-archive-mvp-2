@@ -129,22 +129,36 @@ export default function NavBar() {
           Skip to content
         </a>
 
-        <div className='mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3'>
-          <div className='flex w-full items-center gap-2'>
-            <div className='flex items-center gap-3 flex-shrink-0'>
-              <button
-                type='button'
-                onClick={toggleMenu}
-                aria-label='Open menu'
-                aria-controls='primary-menu'
-                className='nav-action'>
-                Menu
-              </button>
-            </div>
+        <div className='mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3 md:flex-row md:items-center md:gap-4 lg:max-w-5xl'>
+          <div className='flex w-full items-center gap-2 flex-wrap md:flex-nowrap md:gap-3 md:flex-1'>
+            <button
+              type='button'
+              onClick={toggleMenu}
+              aria-label='Open menu'
+              aria-controls='primary-menu'
+              className='nav-action'>
+              Menu
+            </button>
+
+            <nav
+              aria-label='Primary'
+              className='hidden lg:flex items-center gap-2'>
+              {primaryLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-pill ${
+                    item.isActive ? 'nav-pill--active' : ''
+                  }`}
+                  prefetch={false}>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
 
             <form
               onSubmit={handleSearchSubmit}
-              className='nav-search flex items-center justify-between'
+              className='nav-search flex items-center justify-between flex-1 md:max-w-sm'
               role='search'>
               <input
                 type='search'
@@ -179,30 +193,12 @@ export default function NavBar() {
                 className='nav-action'>
                 {loginLabel}
               </Link>
+              <a
+                href='https://eosarchive.app/spaces/signup'
+                className='nav-cta hidden sm:inline-flex'>
+                Register a space
+              </a>
             </div>
-          </div>
-
-          <div className='hidden w-full items-center justify-between gap-3 md:flex'>
-            <nav
-              aria-label='Primary'
-              className='flex flex-wrap items-center gap-2'>
-              {primaryLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`nav-pill ${
-                    item.isActive ? 'nav-pill--active' : ''
-                  }`}
-                  prefetch={false}>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <a
-              href='https://eosarchive.app/spaces/signup'
-              className='nav-cta hidden sm:inline-flex'>
-              Register a space
-            </a>
           </div>
         </div>
       </header>

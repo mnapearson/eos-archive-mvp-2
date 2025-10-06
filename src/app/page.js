@@ -139,16 +139,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className='w-full'>
+    <div className='w-full flex flex-col items-center'>
       <section
-        className='home-hero'
+        className='home-hero w-full max-w-6xl lg:max-w-5xl px-4'
         aria-labelledby='home-hero__title'>
         <p className='home-hero__lead'>Culture Til dawn </p>
         <div className='space-y-4'>
           <h1
             id='home-hero__title'
             className='home-hero__heading'>
-            eos—the living archive of event graphics
+            eos—the living archive of event graphics worldwide
           </h1>
           <p className='home-hero__body'>
             Discover independent parties, exhibitions, and gatherings through
@@ -173,7 +173,7 @@ export default function HomePage() {
       </section>
 
       <div
-        className='filter-rail'
+        className='filter-rail w-full max-w-6xl lg:max-w-5xl px-4'
         role='region'
         aria-label='Archive filters'>
         <div
@@ -252,9 +252,13 @@ export default function HomePage() {
       </div>
 
       {filtersLoading ? (
-        <Spinner />
+        <div className='w-full max-w-6xl lg:max-w-5xl px-4'>
+          <Spinner />
+        </div>
       ) : (
-        <div onClickCapture={handleGridClick}>
+        <div
+          onClickCapture={handleGridClick}
+          className='w-full max-w-6xl lg:max-w-5xl px-4'>
           <MasonryGrid
             items={events}
             mode={viewMode}
@@ -263,7 +267,7 @@ export default function HomePage() {
       )}
 
       {recentSpaces?.length > 0 && (
-        <section className='mx-auto mt-16 max-w-6xl space-y-6 px-4'>
+        <section className='mx-auto mt-16 w-full max-w-6xl lg:max-w-5xl space-y-6 px-4'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
             <span className='ea-label ea-label--muted'>
               Recently added spaces
