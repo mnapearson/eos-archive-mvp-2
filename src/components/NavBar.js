@@ -130,8 +130,8 @@ export default function NavBar() {
         </a>
 
         <div className='mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3'>
-          <div className='flex flex-wrap items-center justify-between gap-2'>
-            <div className='flex items-center gap-3'>
+          <div className='flex w-full items-center gap-2'>
+            <div className='flex items-center gap-3 flex-shrink-0'>
               <button
                 type='button'
                 onClick={toggleMenu}
@@ -173,15 +173,7 @@ export default function NavBar() {
               </button>
             </form>
 
-            <div className='flex items-center gap-2 text-xs sm:text-sm'>
-              <button
-                type='button'
-                onClick={toggleTheme}
-                className='nav-action'
-                aria-label={themeToggleLabel}>
-                {theme === 'dawn' ? 'Dawn' : 'Dusk'}
-              </button>
-
+            <div className='flex items-center gap-2 text-xs sm:text-sm flex-shrink-0'>
               <Link
                 href={loginHref}
                 className='nav-action'>
@@ -217,9 +209,11 @@ export default function NavBar() {
 
       {/* Menu Component */}
       <Menu
-        title='Open navigation menu'
         menuOpen={menuOpen}
         toggleMenu={toggleMenu}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        themeLabel={themeToggleLabel}
       />
     </>
   );

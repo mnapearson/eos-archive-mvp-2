@@ -143,7 +143,7 @@ export default function HomePage() {
       <section
         className='home-hero'
         aria-labelledby='home-hero__title'>
-        <p className='home-hero__lead'>Til dawn culture log</p>
+        <p className='home-hero__lead'>Culture Til dawn </p>
         <div className='space-y-4'>
           <h1
             id='home-hero__title'

@@ -51,7 +51,7 @@ function toId(s = '') {
     .replace(/[^a-z0-9_-]/g, '');
 }
 
-export default function Menu({ menuOpen, toggleMenu }) {
+export default function Menu({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
   const {
     selectedFilters,
     setSelectedFilters,
@@ -447,6 +447,17 @@ export default function Menu({ menuOpen, toggleMenu }) {
                 );
               })}
             </div>
+          </div>
+
+          <div className='space-y-3'>
+            <span className='ea-label'>Appearance</span>
+            <button
+              type='button'
+              onClick={toggleTheme}
+              className='nav-action w-full justify-center'
+              aria-label={themeLabel}>
+              {theme === 'dawn' ? 'Switch to dusk' : 'Switch to dawn'}
+            </button>
           </div>
 
           <div className='space-y-4'>
