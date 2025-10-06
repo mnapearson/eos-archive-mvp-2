@@ -10,8 +10,6 @@ const VIEW_MODES = {
   LIST: 'list',
 };
 
-const NEW_EVENT_WINDOW_DAYS = 14;
-
 const tileVariants = [
   'aspect-[4/5]',
   'aspect-square',
@@ -104,8 +102,9 @@ function GridView({ items }) {
           const dateLabel = formatDate(item);
           const city = item?.space_city || item?.city;
           const spaceName = item?.space_name || item?.venue;
+          const category = item?.category || (item?.type || 'Event');
           const detailItems = [dateLabel, city, spaceName].filter(Boolean);
-          const isNew = isEventNew(item?.created_at);
+          const statusLabel = getEventStatus(item);
 
           return (
             <Link
@@ -122,10 +121,12 @@ function GridView({ items }) {
                 <div className='grid-card__overlay' />
                 <div className='grid-card__meta'>
                   <div className='grid-card__meta-top'>
-                    <p className='grid-card__kicker'>
-                      {(item?.type || 'Event')?.toString()}
-                    </p>
-                    {isNew && <span className='grid-card__badge'>New</span>}
+                    {category && (
+                      <p className='grid-card__kicker'>{category}</p>
+                    )}
+                    {statusLabel && (
+                      <span className='grid-card__badge'>{statusLabel}</span>
+                    )}
                   </div>
                   <p className='grid-card__title'>{item?.title}</p>
                   {detailItems.length > 0 && (
@@ -158,11 +159,17 @@ function ListView({ items }) {
         const dateLabel = formatDate(item);
         const city = item?.space_city || item?.city;
         const spaceName = item?.space_name || item?.venue;
-        const designer = item?.designer;
         const category = item?.category;
-        const isNew = isEventNew(item?.created_at);
+        const statusLabel = getEventStatus(item);
         const locationDetails = [dateLabel, city, spaceName].filter(Boolean);
         const descriptionExcerpt = buildDescriptionExcerpt(item?.description);
+        const sharePayload = {
+          item,
+          href,
+          dateLabel,
+          city,
+          spaceName,
+        };
 
         return (
           <article
@@ -187,11 +194,10 @@ function ListView({ items }) {
                     {category && (
                       <span className='ea-label ea-label--muted'>{category}</span>
                     )}
-                    {designer && (
-                      <span className='list-card__designer'>{designer}</span>
-                    )}
                   </div>
-                  {isNew && <span className='list-card__badge'>New</span>}
+                  {statusLabel && (
+                    <span className='list-card__badge'>{statusLabel}</span>
+                  )}
                 </div>
                 <h3 className='text-lg font-semibold leading-tight'>
                   {item?.title}
@@ -217,6 +223,15 @@ function ListView({ items }) {
                     className='nav-action inline-flex'>
                     View event
                   </Link>
+                  <button
+                    type='button'
+                    className='nav-action list-card__share'
+                    onClick={(event) => {
+                      event.preventDefault();
+                      void shareEventDetails(sharePayload);
+                    }}>
+                    Share
+                  </button>
                 </div>
               </div>
             </div>
@@ -236,18 +251,112 @@ function formatDate(event) {
   );
 }
 
-function isEventNew(createdAt) {
-  if (!createdAt) return false;
-  const created = new Date(createdAt);
-  if (Number.isNaN(created.getTime())) return false;
-  const diffMs = Date.now() - created.getTime();
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  return diffDays <= NEW_EVENT_WINDOW_DAYS;
-}
-
 function buildDescriptionExcerpt(description, maxLength = 140) {
   if (!description) return '';
   const trimmed = description.trim();
   if (trimmed.length <= maxLength) return trimmed;
   return `${trimmed.slice(0, maxLength).replace(/\s+$/, '')}…`;
+}
+
+function getEventStatus(event) {
+  const start = parseDateTime(event?.start_date, event?.start_time, 'start');
+  const end = parseDateTime(
+    event?.end_date || event?.start_date,
+    event?.end_time,
+    'end'
+  );
+  if (!start) return '';
+
+  const now = new Date();
+  if (start > now) {
+    return 'Upcoming';
+  }
+
+  if (end && now <= end) {
+    return 'Current';
+  }
+
+  if (!end && now.toDateString() === start.toDateString()) {
+    return 'Current';
+  }
+
+  return '';
+}
+
+function parseDateTime(date, time, type) {
+  if (!date) return null;
+  try {
+    const isoTime = time
+      ? time.length === 5
+        ? `${time}:00`
+        : time
+      : type === 'end'
+      ? '23:59:59'
+      : '00:00:00';
+    const value = new Date(`${date}T${isoTime}`);
+    if (Number.isNaN(value.getTime())) {
+      return null;
+    }
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+async function shareEventDetails({ item, href, dateLabel, city, spaceName }) {
+  const title = item?.title || 'Event';
+  const detailLine = [dateLabel, city, spaceName].filter(Boolean).join(' · ');
+  const imageUrl = item?.image_url;
+  const origin =
+    typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : '';
+  const shareUrl = origin && href?.startsWith('/') ? `${origin}${href}` : href;
+
+  const textSegments = [];
+  if (detailLine) {
+    textSegments.push(detailLine);
+  }
+  if (imageUrl) {
+    textSegments.push(imageUrl);
+  }
+  const shareData = {
+    title,
+  };
+  if (textSegments.length) {
+    shareData.text = textSegments.join('\n');
+  }
+  if (shareUrl) {
+    shareData.url = shareUrl;
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    try {
+      await navigator.share(shareData);
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
+    }
+  }
+
+  const fallbackLines = [title];
+  if (detailLine) fallbackLines.push(detailLine);
+  if (shareUrl) fallbackLines.push(shareUrl);
+  if (imageUrl) fallbackLines.push(imageUrl);
+  const fallbackText = fallbackLines.join('\n');
+
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(fallbackText);
+      return;
+    } catch {
+      // noop
+    }
+  }
+
+  if (shareUrl && typeof window !== 'undefined') {
+    window.open(shareUrl, '_blank', 'noopener');
+  }
 }

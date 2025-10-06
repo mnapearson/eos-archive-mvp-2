@@ -489,13 +489,6 @@ body {
   gap: 0.5rem;
 }
 
-.list-card__designer {
-  font-size: 0.75rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  opacity: 0.6;
-}
-
 .list-card__badge {
   display: inline-flex;
   align-items: center;
@@ -535,8 +528,22 @@ body {
 
 .list-card__actions {
   display: flex;
+  align-items: center;
   justify-content: flex-start;
+  gap: 0.65rem;
+  flex-wrap: wrap;
   margin-top: 0.75rem;
+}
+
+.list-card__share {
+  background: transparent;
+  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+}
+
+.list-card__share:hover,
+.list-card__share:focus-visible {
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+  color: var(--foreground);
 }
 
 @media (max-width: 640px) {
