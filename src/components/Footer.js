@@ -91,6 +91,13 @@ export default function Footer() {
               className='hover:underline'>
               About
             </Link>
+            <a
+              href='https://donate.stripe.com/3csg0l1N5auLaTmaEF'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='hover:underline'>
+              Support
+            </a>
           </nav>
         </div>
 
