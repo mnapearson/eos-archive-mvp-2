@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Masonry from 'react-masonry-css';
 import { formatDateRange } from '@/lib/date';
+import ShareButton from '@/components/ShareButton';
 
 const VIEW_MODES = {
   GRID: 'grid',
@@ -163,13 +164,9 @@ function ListView({ items }) {
         const statusLabel = getEventStatus(item);
         const locationDetails = [dateLabel, city, spaceName].filter(Boolean);
         const descriptionExcerpt = buildDescriptionExcerpt(item?.description);
-        const sharePayload = {
-          item,
-          href,
-          dateLabel,
-          city,
-          spaceName,
-        };
+        const shareSummary = [dateLabel, city, spaceName]
+          .filter(Boolean)
+          .join(' · ');
 
         return (
           <article
@@ -223,15 +220,13 @@ function ListView({ items }) {
                     className='nav-action inline-flex'>
                     View event
                   </Link>
-                  <button
-                    type='button'
+                  <ShareButton
+                    title={item?.title}
+                    text={shareSummary}
+                    url={href}
                     className='nav-action list-card__share'
-                    onClick={(event) => {
-                      event.preventDefault();
-                      void shareEventDetails(sharePayload);
-                    }}>
-                    Share
-                  </button>
+                    buttonText='Share'
+                  />
                 </div>
               </div>
             </div>
@@ -300,63 +295,5 @@ function parseDateTime(date, time, type) {
     return value;
   } catch {
     return null;
-  }
-}
-
-async function shareEventDetails({ item, href, dateLabel, city, spaceName }) {
-  const title = item?.title || 'Event';
-  const detailLine = [dateLabel, city, spaceName].filter(Boolean).join(' · ');
-  const imageUrl = item?.image_url;
-  const origin =
-    typeof window !== 'undefined' && window.location?.origin
-      ? window.location.origin
-      : '';
-  const shareUrl = origin && href?.startsWith('/') ? `${origin}${href}` : href;
-
-  const textSegments = [];
-  if (detailLine) {
-    textSegments.push(detailLine);
-  }
-  if (imageUrl) {
-    textSegments.push(imageUrl);
-  }
-  const shareData = {
-    title,
-  };
-  if (textSegments.length) {
-    shareData.text = textSegments.join('\n');
-  }
-  if (shareUrl) {
-    shareData.url = shareUrl;
-  }
-
-  if (typeof navigator !== 'undefined' && navigator.share) {
-    try {
-      await navigator.share(shareData);
-      return;
-    } catch (error) {
-      if (error?.name === 'AbortError') {
-        return;
-      }
-    }
-  }
-
-  const fallbackLines = [title];
-  if (detailLine) fallbackLines.push(detailLine);
-  if (shareUrl) fallbackLines.push(shareUrl);
-  if (imageUrl) fallbackLines.push(imageUrl);
-  const fallbackText = fallbackLines.join('\n');
-
-  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(fallbackText);
-      return;
-    } catch {
-      // noop
-    }
-  }
-
-  if (shareUrl && typeof window !== 'undefined') {
-    window.open(shareUrl, '_blank', 'noopener');
   }
 }

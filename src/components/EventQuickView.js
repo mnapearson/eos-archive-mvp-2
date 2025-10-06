@@ -39,6 +39,7 @@ export default function EventQuickView({ event }) {
   const when = start ? formatDateRange(start, end, startTime, endTime) : null;
 
   const eventHref = `/events/${details?.slug ?? details?.id ?? ''}`;
+  const shareSummary = [when, locationStr].filter(Boolean).join(' · ');
 
   // If location is missing but we have an id, fetch the joined event from the API
   useEffect(() => {
@@ -131,7 +132,8 @@ export default function EventQuickView({ event }) {
         )}
         <ShareButton
           title={title}
-          text={locationStr}
+          text={shareSummary}
+          url={eventHref}
           buttonText='Share'
           className='button'
           variant='' // uses default .button look; adjust later if you add variants
