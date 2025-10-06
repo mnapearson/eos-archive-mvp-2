@@ -659,6 +659,18 @@ body {
   position: relative;
 }
 
+@media (max-width: 640px) {
+  .modal-shell {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    padding: 1.25rem 1rem 2.5rem;
+  }
+}
+
 .modal__close {
   position: absolute;
   top: 0.75rem;
