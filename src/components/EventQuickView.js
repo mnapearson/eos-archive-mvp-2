@@ -40,6 +40,7 @@ export default function EventQuickView({ event }) {
   const startTime = details?.start_time || details?.time || null;
   const endTime = details?.end_time || null;
   const when = start ? formatDateRange(start, end, startTime, endTime) : null;
+  const startDate = start ? String(start).slice(0, 10) : null;
 
   const eventHref = `/events/${details?.slug ?? details?.id ?? ''}`;
   const shareSummary = [when, locationStr].filter(Boolean).join(' · ');
@@ -54,7 +55,11 @@ export default function EventQuickView({ event }) {
       chips.push({ id, label, href, ...options });
     };
 
-    if (when) pushChip('when', when);
+    if (startDate && when) {
+      pushChip('date', when, buildFilterHref({ date: [startDate] }));
+    } else if (when) {
+      pushChip('date', when);
+    }
 
     const spaceHref = spaceSlug
       ? `/spaces/${spaceSlug}`
@@ -66,15 +71,22 @@ export default function EventQuickView({ event }) {
       pushChip('space', spaceName, spaceHref);
     } else if (spaceName) {
       pushChip('space', spaceName);
-    } else if (locationStr) {
+    }
+
+    if (city) {
+      pushChip('city', city, buildFilterHref({ city: [city] }));
+    }
+
+    if (address && address !== city) {
+      pushChip('address', address);
+    }
+
+    if (!spaceHref && !spaceName && locationStr && !seen.has(locationStr)) {
       pushChip('location', locationStr);
     }
 
-    if (address && address !== city) pushChip('address', address);
-    if (city) pushChip('city', city);
-
     return chips;
-  }, [when, spaceId, spaceName, locationStr, address, city]);
+  }, [when, startDate, spaceId, spaceName, spaceSlug, city, address, locationStr]);
 
   useEffect(() => {
     const needsLocation = !venue && !address && !city;
@@ -252,4 +264,23 @@ function parseDateTime(date, time, type) {
   } catch {
     return null;
   }
+}
+
+function buildFilterHref(filters = {}) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, values]) => {
+    if (!values) return;
+    if (Array.isArray(values)) {
+      values
+        .map((value) => (value != null ? String(value).trim() : ''))
+        .filter(Boolean)
+        .forEach((value) => params.append(key, value));
+    } else if (values != null) {
+      const value = String(values).trim();
+      if (value) params.append(key, value);
+    }
+  });
+
+  const query = params.toString();
+  return query ? `/?${query}` : '/';
 }

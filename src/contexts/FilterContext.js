@@ -30,6 +30,7 @@ export function FilterProvider({ children }) {
   const [allSpaces, setAllSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [initializedFromQuery, setInitializedFromQuery] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -304,6 +305,48 @@ export function FilterProvider({ children }) {
       .sort((a, b) => (b.latestEventDate || 0) - (a.latestEventDate || 0))
       .slice(0, 3);
   }, [allEvents, allSpaces, spaceMap]);
+
+  useEffect(() => {
+    if (initializedFromQuery || loading) return;
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const nextFilters = {};
+
+    FILTER_KEYS.forEach((key) => {
+      const values = params
+        .getAll(key)
+        .flatMap((entry) => entry.split(','))
+        .map(normalizeValue)
+        .filter(Boolean);
+      if (values.length > 0) {
+        nextFilters[key] = Array.from(new Set(values));
+      }
+    });
+
+    if (Object.keys(nextFilters).length > 0) {
+      setSelectedFilters((prev) => {
+        let changed = false;
+        const updated = { ...prev };
+        FILTER_KEYS.forEach((key) => {
+          if (nextFilters[key]) {
+            const incoming = nextFilters[key];
+            const current = prev[key] || [];
+            if (
+              incoming.length !== current.length ||
+              incoming.some((value, idx) => value !== current[idx])
+            ) {
+              updated[key] = incoming;
+              changed = true;
+            }
+          }
+        });
+        return changed ? updated : prev;
+      });
+    }
+
+    setInitializedFromQuery(true);
+  }, [initializedFromQuery, loading]);
 
   const value = useMemo(
     () => ({
