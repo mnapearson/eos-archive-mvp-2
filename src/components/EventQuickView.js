@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useEffect, useMemo, useState } from 'react';
 import EAImage from '@/components/EAImage';
 import { formatDateRange } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
@@ -12,7 +13,6 @@ export default function EventQuickView({ event }) {
   const flyer =
     details?.image_url || details?.flyer_url || details?.thumbnail_url || '';
 
-  // Prefer nested space fields when available; broaden fallbacks
   const venue =
     details?.space?.name ||
     details?.space_name ||
@@ -30,8 +30,10 @@ export default function EventQuickView({ event }) {
   const locationStr = [venue, address, city].filter(Boolean).join(', ');
   const spaceId = details?.space?.id || null;
   const spaceName = details?.space?.name || null;
+  const category =
+    details?.category || details?.type || details?.tags?.[0] || null;
+  const designer = details?.designer || details?.creator || null;
 
-  // Dates
   const start = details?.start_date || null;
   const end = details?.end_date || null;
   const startTime = details?.start_time || details?.time || null;
@@ -40,8 +42,38 @@ export default function EventQuickView({ event }) {
 
   const eventHref = `/events/${details?.slug ?? details?.id ?? ''}`;
   const shareSummary = [when, locationStr].filter(Boolean).join(' · ');
+  const statusLabel = useMemo(() => getEventStatus(details), [details]);
+  const metaChips = useMemo(() => {
+    const chips = [];
+    const seen = new Set();
 
-  // If location is missing but we have an id, fetch the joined event from the API
+    const pushChip = (id, label, href, options = {}) => {
+      if (!label || seen.has(label)) return;
+      seen.add(label);
+      chips.push({ id, label, href, ...options });
+    };
+
+    if (when) pushChip('when', when);
+
+    if (spaceId && spaceName) {
+      pushChip('space', spaceName, `/spaces/${spaceId}`);
+    } else if (locationStr) {
+      pushChip(
+        'location',
+        locationStr,
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          locationStr
+        )}`,
+        { external: true }
+      );
+    }
+
+    if (address && address !== city) pushChip('address', address);
+    if (city) pushChip('city', city);
+
+    return chips;
+  }, [when, spaceId, spaceName, locationStr, address, city]);
+
   useEffect(() => {
     const needsLocation = !venue && !address && !city;
     if (!needsLocation || !details?.id) return;
@@ -62,96 +94,91 @@ export default function EventQuickView({ event }) {
   }, [details?.id, venue, address, city]);
 
   return (
-    <div>
-      {/* Title */}
-      <h2 className='text-base text-lg font-medium tracking-tight'>{title}</h2>
-
-      {/* Flyer image (contained) */}
-      {flyer ? (
-        <div className='mt-3 relative w-full aspect-[3/4] max-h-[70vh]'>
-          <EAImage
-            src={flyer}
-            alt={title}
-            fill
-            className='object-contain rounded-md'
-            sizes='(max-width: 768px) 92vw, 720px'
-          />
-        </div>
-      ) : (
-        <div className='mt-3 w-full h-64 rounded-md bg-neutral-800/40 flex items-center justify-center text-xs opacity-70'>
-          No flyer available
-        </div>
-      )}
-
-      {/* Location then Date/Time */}
-      {(venue || address || city) && (
-        <div className='mt-3 opacity-80'>
-          {spaceId && spaceName ? (
-            <>
-              <a
-                href={`/spaces/${spaceId}`}
-                className='underline underline-offset-2 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
-                {spaceName}
-              </a>
-              {address || city
-                ? `, ${[address, city].filter(Boolean).join(', ')}`
-                : ''}
-            </>
-          ) : locationStr ? (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                locationStr
-              )}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='underline underline-offset-2 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white/30 rounded'>
-              {locationStr}
-            </a>
-          ) : (
-            <span>{locationStr}</span>
+    <section className='quick-view space-y-6'>
+      <header className='quick-view__header space-y-3'>
+        <div className='quick-view__eyebrow flex items-center gap-3'>
+          {category && <span className='ea-label ea-label--muted'>{category}</span>}
+          {statusLabel && (
+            <span className='list-card__badge quick-view__badge'>{statusLabel}</span>
           )}
         </div>
-      )}
-      {when && <div className='opacity-80'>{when}</div>}
+        <div className='quick-view__title-row'>
+          <h2 className='quick-view__title'>{title}</h2>
+          {designer && <span className='quick-view__designer'>{designer}</span>}
+        </div>
+        {metaChips.length > 0 && (
+          <div className='quick-view__chips'>
+            {metaChips.map(({ id, label, href, external }) =>
+              href ? (
+                <a
+                  key={id}
+                  href={href}
+                  className='quick-view__chip quick-view__chip--link'
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noopener noreferrer' : undefined}>
+                  {label}
+                </a>
+              ) : (
+                <span
+                  key={id}
+                  className='quick-view__chip'>
+                  {label}
+                </span>
+              )
+            )}
+          </div>
+        )}
+      </header>
 
-      {/* Description (full) */}
+      <div className='quick-view__media'>
+        {flyer ? (
+          <div className='quick-view__poster'>
+            <EAImage
+              src={flyer}
+              alt={title}
+              fill
+              className='quick-view__poster-image'
+              sizes='(max-width: 768px) 92vw, 720px'
+            />
+          </div>
+        ) : (
+          <div className='quick-view__poster quick-view__poster--empty'>
+            <span>No flyer available</span>
+          </div>
+        )}
+      </div>
+
       {details?.description && (
-        <div className='mt-3'>
-          <p className='whitespace-pre-line'>{details.description}</p>
+        <div className='quick-view__description'>
+          <p className='quick-view__description-text'>{details.description}</p>
         </div>
       )}
 
-      {/* Actions */}
-      <div className='mt-4 flex flex-wrap items-center gap-2'>
+      <div className='quick-view__actions'>
         {eventHref && (
           <a
             href={eventHref}
-            className='button'>
-            More details
+            className='nav-action nav-cta quick-view__action'>
+            View full details
           </a>
         )}
         <ShareButton
           title={title}
           text={shareSummary}
           url={eventHref}
+          className='nav-action quick-view__action'
+          copiedText='Copied'
           buttonText='Share'
-          className='button'
-          variant='' // uses default .button look; adjust later if you add variants
         />
         <AddToCalendar
           event={details}
           overrides={{ location: locationStr }}
+          className='quick-view__calendar'
         />
       </div>
 
-      {/* Small embedded Map */}
-      <div
-        className='mt-4 rounded-lg overflow-hidden border'
-        style={{
-          borderColor:
-            'color-mix(in oklab, var(--foreground) 15%, transparent)',
-        }}>
-        <div className='relative w-full h-56'>
+      <div className='quick-view__map'>
+        <div className='quick-view__map-inner'>
           {details?.space?.latitude || details?.space?.longitude ? (
             <MapComponent
               spaces={[
@@ -176,6 +203,51 @@ export default function EventQuickView({ event }) {
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
+}
+
+function getEventStatus(event) {
+  const start = parseDateTime(event?.start_date, event?.start_time, 'start');
+  const end = parseDateTime(
+    event?.end_date || event?.start_date,
+    event?.end_time,
+    'end'
+  );
+  if (!start) return '';
+
+  const now = new Date();
+  if (start > now) {
+    return 'Upcoming';
+  }
+
+  if (end && now <= end) {
+    return 'Current';
+  }
+
+  if (!end && now.toDateString() === start.toDateString()) {
+    return 'Current';
+  }
+
+  return '';
+}
+
+function parseDateTime(date, time, type) {
+  if (!date) return null;
+  try {
+    const isoTime = time
+      ? time.length === 5
+        ? `${time}:00`
+        : time
+      : type === 'end'
+      ? '23:59:59'
+      : '00:00:00';
+    const value = new Date(`${date}T${isoTime}`);
+    if (Number.isNaN(value.getTime())) {
+      return null;
+    }
+    return value;
+  } catch {
+    return null;
+  }
 }
