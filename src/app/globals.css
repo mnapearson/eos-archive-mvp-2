@@ -1039,6 +1039,182 @@ body {
   outline-offset: 2px;
 }
 
+/* Cookie banner */
+.cookie-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.7rem;
+  border-radius: 26px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
+  background: color-mix(in oklab, var(--background) 96%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 22px 60px rgba(12, 12, 14, 0.22);
+}
+
+.cookie-banner__header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cookie-banner__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cookie-banner__eyebrow {
+  letter-spacing: 0.38em;
+}
+
+.cookie-banner__text {
+  font-size: var(--ea-text-sm);
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--foreground) 78%, transparent);
+}
+
+.cookie-banner__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cookie-banner__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  background: color-mix(in oklab, var(--background) 98%, transparent);
+  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.cookie-banner__button:hover,
+.cookie-banner__button:focus-visible {
+  outline: none;
+  border-color: color-mix(in oklab, var(--foreground) 42%, transparent);
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+  color: var(--foreground);
+  transform: translateY(-1px);
+}
+
+.cookie-banner__button--primary {
+  background: color-mix(in oklab, var(--foreground) 85%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  color: var(--background);
+}
+
+.cookie-banner__button--primary:hover,
+.cookie-banner__button--primary:focus-visible {
+  background: var(--foreground);
+  border-color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  color: var(--background);
+}
+
+.cookie-banner__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-start;
+}
+
+.cookie-banner__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 68%, transparent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.cookie-banner__link:hover,
+.cookie-banner__link:focus-visible {
+  color: var(--foreground);
+  text-decoration: underline;
+  outline: none;
+}
+
+.cookie-banner__details {
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  border-radius: 18px;
+  padding: 1.25rem 1.4rem;
+  display: grid;
+  gap: 0.9rem;
+  background: color-mix(in oklab, var(--background) 98%, transparent);
+}
+
+.cookie-banner__details-heading {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--foreground) 75%, transparent);
+}
+
+.cookie-banner__list {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--foreground) 78%, transparent);
+}
+
+.cookie-banner__list li::marker {
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+}
+
+.cookie-banner__details-copy {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: color-mix(in oklab, var(--foreground) 75%, transparent);
+}
+
+.cookie-banner__note {
+  font-size: 0.68rem;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+}
+
+@media (min-width: 640px) {
+  .cookie-banner {
+    gap: 1.75rem;
+    padding: 1.9rem 2rem;
+  }
+
+  .cookie-banner__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cookie-banner__buttons {
+    flex-direction: row;
+    flex-shrink: 0;
+  }
+
+  .cookie-banner__buttons > * {
+    min-width: 12rem;
+  }
+}
+
 .nav-cta {
   background: var(--foreground);
   color: var(--background);

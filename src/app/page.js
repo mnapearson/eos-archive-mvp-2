@@ -148,7 +148,7 @@ export default function HomePage() {
           <h1
             id='home-hero__title'
             className='home-hero__heading'>
-            eos—the living archive of event graphics worldwide
+            eos— a living archive of event graphics worldwide
           </h1>
           <p className='home-hero__body'>
             Discover independent parties, exhibitions, and gatherings through
