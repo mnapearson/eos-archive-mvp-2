@@ -141,7 +141,7 @@ export default function HomePage() {
   return (
     <div className='w-full flex flex-col items-center'>
       <section
-        className='home-hero w-full max-w-6xl lg:max-w-5xl px-4'
+        className='home-hero w-full max-w-6xl lg:max-w-5xl'
         aria-labelledby='home-hero__title'>
         <p className='home-hero__lead'>Culture Til dawn </p>
         <div className='space-y-4'>
