@@ -286,7 +286,11 @@ body {
 .flow-card__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0.7) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.05) 10%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
   opacity: 0;
   transition: opacity 0.6s ease;
 }
@@ -395,18 +399,27 @@ body {
 .grid-card__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(6, 6, 6, 0.16) 20%, rgba(6, 6, 6, 0.82) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(6, 6, 6, 0.16) 20%,
+    rgba(6, 6, 6, 0.82) 100%
+  );
   opacity: 1;
   transition: background 0.6s ease;
 }
 
 .grid-card:hover .grid-card__overlay {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 12%, rgba(0, 0, 0, 0.88) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.25) 12%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
 }
 
 .grid-card__meta {
   position: absolute;
-  inset: auto clamp(1.2rem, 2.4vw, 1.8rem) clamp(1.4rem, 2.6vw, 2rem) clamp(1.2rem, 2.4vw, 1.8rem);
+  inset: auto clamp(1.2rem, 2.4vw, 1.8rem) clamp(1.4rem, 2.6vw, 2rem)
+    clamp(1.2rem, 2.4vw, 1.8rem);
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
@@ -1044,7 +1057,6 @@ body {
   color: var(--background);
 }
 
-
 .nav-search {
   display: inline-flex;
   align-items: center;
@@ -1053,7 +1065,8 @@ body {
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--foreground) 20%, transparent);
   background: color-mix(in oklab, var(--background) 96%, rgba(0, 0, 0, 0.02));
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--foreground) 5%, transparent);
   max-width: min(260px, 62vw);
   width: auto;
   flex: 1 1 160px;

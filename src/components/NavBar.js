@@ -117,7 +117,7 @@ export default function NavBar() {
   const themeToggleLabel =
     theme === 'dawn' ? 'Switch to dusk mode' : 'Switch to dawn mode';
   const loginHref = user ? '/spaces/admin' : '/login';
-  const loginLabel = user ? 'Dashboard' : 'Login';
+  const loginLabel = user ? 'Submit' : 'Login';
 
   return (
     <>
