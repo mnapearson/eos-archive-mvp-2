@@ -128,6 +128,14 @@ export default function EventPageClient({ eventId }) {
       pushChip({ id: 'city', label: city, filters: { city: [city] } });
     }
 
+    if (eventCategory) {
+      pushChip({
+        id: 'category',
+        label: eventCategory,
+        filters: { category: [eventCategory] },
+      });
+    }
+
     if (spaceHref && venueName) {
       pushChip({ id: 'space', label: venueName, href: spaceHref });
     } else if (venueName) {
@@ -135,7 +143,7 @@ export default function EventPageClient({ eventId }) {
     }
 
     return chips;
-  }, [startDate, eventDateTime, city, venueName, spaceHref]);
+  }, [startDate, eventDateTime, city, venueName, spaceHref, eventCategory]);
 
   const infoRows = useMemo(() => {
     if (!event) return [];
@@ -183,14 +191,6 @@ export default function EventPageClient({ eventId }) {
         externalHref: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
           addressValue
         )}`,
-      });
-    }
-
-    if (eventDesigner) {
-      rows.push({
-        id: 'info-designer',
-        label: 'Graphic Design',
-        value: eventDesigner,
       });
     }
 
@@ -244,14 +244,6 @@ export default function EventPageClient({ eventId }) {
 
       <header className='event-page__header space-y-4'>
         <div className='flex flex-wrap items-center gap-3'>
-          {eventCategory && (
-            <button
-              type='button'
-              className='quick-view__category'
-              onClick={() => applyFiltersAndNavigate({ category: [eventCategory] })}>
-              {eventCategory}
-            </button>
-          )}
           {statusLabel && (
             <span className='list-card__badge quick-view__badge'>{statusLabel}</span>
           )}

@@ -839,6 +839,8 @@ body {
   border-radius: 1rem;
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.05));
+  align-items: flex-start;
+  text-align: left;
 }
 
 .event-page__info-label {
