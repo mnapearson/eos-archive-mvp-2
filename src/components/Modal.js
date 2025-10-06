@@ -49,6 +49,7 @@ export default function Modal({ open, onClose, children, label = 'Dialog' }) {
         tabIndex={-1}
         className='modal-shell mx-auto my-8 w-[min(720px,92vw)] max-h-[90vh] overflow-auto rounded-xl p-4 shadow-2xl outline-none border border-[color-mix(in_oklab,var(--foreground)_20%,transparent)] bg-[color-mix(in_oklab,var(--background)_60%,transparent)] backdrop-blur-xl'>
         <button
+          type='button'
           onClick={onClose}
           className='modal__close nav-action'
           aria-label='Close dialog'>

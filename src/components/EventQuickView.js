@@ -7,7 +7,7 @@ import ShareButton from '@/components/ShareButton';
 import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
 
-export default function EventQuickView({ event }) {
+export default function EventQuickView({ event, onClose }) {
   const [details, setDetails] = useState(event);
   const title = details?.title ?? 'Event';
   const flyer =
@@ -180,7 +180,7 @@ export default function EventQuickView({ event }) {
         {eventHref && (
           <a
             href={eventHref}
-            className='nav-action nav-cta quick-view__action'>
+            className='nav-action nav-cta quick-view__action quick-view__action--primary'>
             View full details
           </a>
         )}

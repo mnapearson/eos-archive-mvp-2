@@ -385,7 +385,12 @@ export default function HomePage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         label='Event quick view'>
-        {selected && <EventQuickView event={selected} />}
+        {selected && (
+          <EventQuickView
+            event={selected}
+            onClose={() => setModalOpen(false)}
+          />
+        )}
       </Modal>
     </div>
   );

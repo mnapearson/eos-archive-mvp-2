@@ -50,7 +50,7 @@ body {
 
 /* Main page content styling */
 .page-content {
-  @apply mt-20 flex-grow overflow-visible mx-auto flex-1;
+  @apply flex-grow overflow-visible mx-auto flex-1 mt-12;
 }
 
 /* Footer container styling */
@@ -353,13 +353,13 @@ body {
 
 .grid-shell__masonry {
   display: flex;
-  gap: clamp(1rem, 2.4vw, 1.8rem);
+  gap: clamp(0.75rem, 2vw, 1.4rem);
 }
 
 .grid-shell__column {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2.4vw, 1.8rem);
+  gap: clamp(0.75rem, 2vw, 1.4rem);
 }
 
 .grid-card {
@@ -419,7 +419,6 @@ body {
   text-transform: uppercase;
   box-shadow: 0 18px 32px rgba(6, 8, 14, 0.28);
 }
-
 
 .list-view {
   display: flex;
@@ -652,7 +651,6 @@ body {
 
 .quick-view__actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
 }
@@ -671,6 +669,22 @@ body {
 
 .quick-view__action {
   min-width: fit-content;
+}
+
+.quick-view__action--primary {
+  display: inline-flex;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .quick-view__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .quick-view__action--primary {
+    width: 100%;
+  }
 }
 
 .quick-view__calendar {
@@ -1167,6 +1181,14 @@ body {
   .nav-cta {
     display: none;
   }
+
+  .quick-view__actions .nav-cta {
+    display: inline-flex;
+  }
+
+  .newsletter__submit {
+    display: inline-flex;
+  }
 }
 
 .nav-cta:hover,
@@ -1300,7 +1322,7 @@ body {
 
 /* Homepage hero */
 .home-hero {
-  margin: clamp(1.5rem, 4vw, 3.5rem) auto clamp(1.5rem, 4vw, 3rem);
+  margin: clamp(1rem, 3vw, 2.4rem) auto clamp(1.4rem, 3.6vw, 2.6rem);
   max-width: min(78rem, 92vw);
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.6rem);
