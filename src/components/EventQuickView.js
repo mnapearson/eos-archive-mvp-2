@@ -28,8 +28,9 @@ export default function EventQuickView({ event }) {
   const city =
     details?.space?.city || details?.city || details?.space_city || null;
   const locationStr = [venue, address, city].filter(Boolean).join(', ');
-  const spaceId = details?.space?.id || null;
-  const spaceName = details?.space?.name || null;
+  const spaceId = details?.space?.id || details?.space_id || null;
+  const spaceSlug = details?.space?.slug || details?.space_slug || null;
+  const spaceName = details?.space?.name || details?.space_name || null;
   const category =
     details?.category || details?.type || details?.tags?.[0] || null;
   const designer = details?.designer || details?.creator || null;
@@ -55,17 +56,18 @@ export default function EventQuickView({ event }) {
 
     if (when) pushChip('when', when);
 
-    if (spaceId && spaceName) {
-      pushChip('space', spaceName, `/spaces/${spaceId}`);
+    const spaceHref = spaceSlug
+      ? `/spaces/${spaceSlug}`
+      : spaceId
+      ? `/spaces/${spaceId}`
+      : null;
+
+    if (spaceHref && spaceName) {
+      pushChip('space', spaceName, spaceHref);
+    } else if (spaceName) {
+      pushChip('space', spaceName);
     } else if (locationStr) {
-      pushChip(
-        'location',
-        locationStr,
-        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          locationStr
-        )}`,
-        { external: true }
-      );
+      pushChip('location', locationStr);
     }
 
     if (address && address !== city) pushChip('address', address);
