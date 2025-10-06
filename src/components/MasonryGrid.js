@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Masonry from 'react-masonry-css';
 import { formatDateRange } from '@/lib/date';
 
 const VIEW_MODES = {
-  FLOW: 'flow',
   GRID: 'grid',
   LIST: 'list',
 };
@@ -25,9 +24,12 @@ const gridColumns = {
   768: 2,
 };
 
-export default function MasonryGrid({ items = [], fetchMoreData, hasMore }) {
-  const [mode, setMode] = useState(VIEW_MODES.GRID);
-  const [flowPaused, setFlowPaused] = useState(false);
+export default function MasonryGrid({
+  items = [],
+  mode = VIEW_MODES.GRID,
+  fetchMoreData,
+  hasMore,
+}) {
   const [isFetching, setIsFetching] = useState(false);
   const loadMoreRef = useRef(null);
 
@@ -56,12 +58,6 @@ export default function MasonryGrid({ items = [], fetchMoreData, hasMore }) {
     return () => observer.disconnect();
   }, [fetchMoreData, hasMore, isFetching]);
 
-  useEffect(() => {
-    if (mode !== VIEW_MODES.FLOW) {
-      setFlowPaused(false);
-    }
-  }, [mode]);
-
   if (!items.length) {
     return (
       <section className='space-y-8 py-20'>
@@ -76,12 +72,7 @@ export default function MasonryGrid({ items = [], fetchMoreData, hasMore }) {
 
   return (
     <section>
-      {mode === VIEW_MODES.FLOW ? (
-        <FlowView
-          items={items}
-          paused={flowPaused}
-        />
-      ) : mode === VIEW_MODES.GRID ? (
+      {mode === VIEW_MODES.GRID ? (
         <GridView items={items} />
       ) : (
         <ListView items={items} />
@@ -95,76 +86,6 @@ export default function MasonryGrid({ items = [], fetchMoreData, hasMore }) {
         <p className='ea-label ea-label--faint text-center'>Loading more…</p>
       )}
     </section>
-  );
-}
-
-function FlowView({ items, paused }) {
-  const { duplicated, loops } = useMemo(() => {
-    if (!items.length) return { duplicated: [], loops: 0 };
-    const loops = Math.max(2, Math.ceil(12 / items.length));
-    const duplicated = Array.from({ length: loops }, () => items).flat();
-    return { duplicated, loops };
-  }, [items]);
-
-  const animationDuration = useMemo(
-    () => `${Math.max(28, duplicated.length * 3.2)}s`,
-    [duplicated.length]
-  );
-  const flowDistance = useMemo(
-    () => (loops ? `-${((loops - 1) / loops) * 100}%` : '-50%'),
-    [loops]
-  );
-
-  return (
-    <div className='flow-shell'>
-      <div
-        className='flow-track'
-        style={{
-          '--flow-duration': animationDuration,
-          '--flow-distance': flowDistance,
-          animationPlayState: paused ? 'paused' : 'running',
-        }}>
-        {duplicated.map((item, index) => {
-          const href = item?.id ? `/events/${item.id}` : '#';
-          const variant =
-            index % 7 === 0
-              ? 'aspect-[16/9]'
-              : tileVariants[index % tileVariants.length];
-          const category = item?.category || item?.type || 'Event';
-          const city = item?.space_city || item?.city;
-          const dateLabel = formatDate(item);
-
-          return (
-            <Link
-              key={`${item?.id ?? index}-${index}`}
-              href={href}
-              scroll={false}
-              className='flow-card group'>
-              <article className={`flow-card__media ${variant}`}>
-                <img
-                  src={item?.image_url || '/placeholder.jpg'}
-                  alt={item?.title || 'Event image'}
-                  className='flow-card__image'
-                />
-                <div className='flow-card__overlay' />
-                <div className='flow-card__meta'>
-                  <p className='flow-card__kicker'>{category}</p>
-                  <p className='flow-card__title'>{item?.title}</p>
-                  <p className='flow-card__metafooter'>
-                    {[city, dateLabel].filter(Boolean).join(' · ')}
-                  </p>
-                </div>
-              </article>
-              <span className='sr-only'>
-                {category} · {item?.title}
-                {city ? ` · ${city}` : ''}
-                {dateLabel ? ` · ${dateLabel}` : ''}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 

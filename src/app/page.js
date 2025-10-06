@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import MasonryGrid from '@/components/MasonryGrid';
@@ -21,7 +21,6 @@ export default function HomePage() {
     recentSpaces,
   } = useContext(FilterContext);
   const [viewMode, setViewMode] = useState('grid');
-  const [flowPaused, setFlowPaused] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
@@ -190,13 +189,6 @@ export default function HomePage() {
           <div className='flex flex-wrap items-center gap-2'>
             <button
               type='button'
-              aria-pressed={viewMode === 'flow'}
-              onClick={() => setViewMode('flow')}
-              className={`nav-action ${viewMode === 'flow' ? 'nav-cta' : ''}`}>
-              Flow
-            </button>
-            <button
-              type='button'
               aria-pressed={viewMode === 'grid'}
               onClick={() => setViewMode('grid')}
               className={`nav-action ${viewMode === 'grid' ? 'nav-cta' : ''}`}>
@@ -209,14 +201,6 @@ export default function HomePage() {
               className={`nav-action ${viewMode === 'list' ? 'nav-cta' : ''}`}>
               List
             </button>
-            {viewMode === 'flow' && (
-              <button
-                type='button'
-                onClick={() => setFlowPaused((prev) => !prev)}
-                className='nav-action'>
-                {flowPaused ? 'Resume' : 'Pause'}
-              </button>
-            )}
           </div>
         </div>
 
@@ -274,7 +258,6 @@ export default function HomePage() {
           <MasonryGrid
             items={events}
             mode={viewMode}
-            flowPaused={flowPaused}
           />
         </div>
       )}
