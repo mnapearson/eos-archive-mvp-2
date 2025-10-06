@@ -165,8 +165,10 @@ export default function HomePage() {
             </a>
             <a
               className='home-hero__link'
-              href='https://eosarchive.app/spaces/signup'>
-              Register a space →
+              href='https://donate.stripe.com/3csg0l1N5auLaTmaEF'
+              target='_blank'
+              rel='noopener noreferrer'>
+              Support the archive →
             </a>
           </div>
         </div>
