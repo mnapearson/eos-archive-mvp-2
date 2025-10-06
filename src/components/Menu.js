@@ -59,7 +59,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
     spaceOptions,
     dateOptions,
     categoryOptions,
-    designerOptions,
     optionCounts,
   } = useContext(FilterContext);
 
@@ -73,7 +72,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
     space: 'Space',
     date: 'Date',
     category: 'Category',
-    designer: 'Designer',
     search: 'Search',
   };
 
@@ -91,8 +89,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
         label: 'Spaces',
         meta: 'Discover venues',
         type: 'link',
-        isActive:
-          pathname.startsWith('/map') || pathname.startsWith('/spaces'),
+        isActive: pathname.startsWith('/map') || pathname.startsWith('/spaces'),
       },
       {
         href: '/conversations',
@@ -119,6 +116,13 @@ export default function Menu({ menuOpen, toggleMenu }) {
         href: 'https://eosarchive.app/spaces/signup',
         label: 'Register a space',
         meta: 'Submit your venue',
+        type: 'external',
+        isActive: false,
+      },
+      {
+        href: 'https://donate.stripe.com/3csg0l1N5auLaTmaEF',
+        label: 'Support',
+        meta: 'Fuel the living archive',
         type: 'external',
         isActive: false,
       },
@@ -205,7 +209,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
     space: false,
     date: false,
     category: false,
-    designer: false,
   });
 
   useEffect(() => {
@@ -214,7 +217,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
       space: selectedFilters.space.length > 0 || prev.space,
       date: selectedFilters.date.length > 0 || prev.date,
       category: selectedFilters.category.length > 0 || prev.category,
-      designer: selectedFilters.designer.length > 0 || prev.designer,
     }));
   }, [selectedFilters]);
 
@@ -265,7 +267,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
       space: [],
       date: [],
       category: [],
-      designer: [],
     });
 
     if (searchTerm) {
@@ -468,7 +469,9 @@ export default function Menu({ menuOpen, toggleMenu }) {
                       <span>
                         {label}: {value}
                       </span>
-                      <span className='filter-chip__remove' aria-hidden='true'>
+                      <span
+                        className='filter-chip__remove'
+                        aria-hidden='true'>
                         ×
                       </span>
                       <span className='sr-only'>
@@ -484,7 +487,6 @@ export default function Menu({ menuOpen, toggleMenu }) {
             {renderFilterSection('Space', 'space', spaceOptions)}
             {renderFilterSection('Date', 'date', dateOptions)}
             {renderFilterSection('Category', 'category', categoryOptions)}
-            {renderFilterSection('Designer', 'designer', designerOptions)}
           </div>
         </div>
 
@@ -584,7 +586,8 @@ function DateCalendar({ counts, selectedDates, onToggle }) {
           const isCurrentMonth = isSameMonth(day, month);
           const isSelected = selectedDates.includes(iso);
 
-          const baseClasses = 'relative flex h-12 items-center justify-center rounded-2xl border text-xs tracking-[0.18em] transition';
+          const baseClasses =
+            'relative flex h-12 items-center justify-center rounded-2xl border text-xs tracking-[0.18em] transition';
           const stateClasses = isSelected
             ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)] shadow-[0_12px_25px_rgba(0,0,0,0.18)]'
             : count > 0

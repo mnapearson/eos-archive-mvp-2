@@ -32,7 +32,6 @@ export default function HomePage() {
     space: 'Space',
     date: 'Date',
     category: 'Category',
-    designer: 'Designer',
     search: 'Search',
   };
 
@@ -75,7 +74,6 @@ export default function HomePage() {
       space: [],
       date: [],
       category: [],
-      designer: [],
     });
     if (searchTermRaw) {
       clearSearch();
@@ -154,7 +152,7 @@ export default function HomePage() {
           </h1>
           <p className='home-hero__body'>
             Discover independent parties, exhibitions, and gatherings through
-            the flyers that announced them. Filter by city, designer, or
+            the flyers that announced them. Filter by city, category, or
             mood—then dive into the spaces that keep the scene alive.
           </p>
           <div className='home-hero__actions'>

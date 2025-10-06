@@ -78,7 +78,6 @@ export default function NavBar() {
       space: [],
       date: [],
       category: [],
-      designer: [],
     });
   };
 

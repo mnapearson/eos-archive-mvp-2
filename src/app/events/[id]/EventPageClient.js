@@ -194,11 +194,7 @@ export default function EventPageClient({ eventId }) {
 
           <div>
             <h3 className='uppercase text-xs font-bold mb-1'>Flyer Design</h3>
-            <button
-              onClick={() => handleFilterClick('designer', eventDesigner)}
-              className='hover:underline'>
-              {eventDesigner}
-            </button>
+            <p className='leading-relaxed'>{eventDesigner}</p>
           </div>
 
           {event.document_url && (

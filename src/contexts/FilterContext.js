@@ -11,7 +11,7 @@ import {
 
 export const FilterContext = createContext();
 
-const FILTER_KEYS = ['city', 'space', 'date', 'category', 'designer'];
+const FILTER_KEYS = ['city', 'space', 'date', 'category'];
 
 function normalizeValue(value) {
   return value ? String(value).trim() : '';
@@ -23,7 +23,6 @@ export function FilterProvider({ children }) {
     space: [],
     date: [],
     category: [],
-    designer: [],
   });
 
   const [allEvents, setAllEvents] = useState([]);
@@ -90,7 +89,6 @@ export function FilterProvider({ children }) {
     const spaces = new Set();
     const dates = new Set();
     const categories = new Set();
-    const designers = new Set();
 
     allSpaces.forEach((space) => {
       const city = normalizeValue(space.city);
@@ -101,14 +99,12 @@ export function FilterProvider({ children }) {
 
     allEvents.forEach((event) => {
       const category = normalizeValue(event.category);
-      const designer = normalizeValue(event.designer);
       const date = normalizeValue(event.start_date)
         ? normalizeValue(event.start_date).slice(0, 10)
         : '';
       const fallbackCity = normalizeValue(event.city);
 
       if (category) categories.add(category);
-      if (designer) designers.add(designer);
       if (date) dates.add(date);
 
       if (fallbackCity && !cities.has(fallbackCity)) {
@@ -127,7 +123,6 @@ export function FilterProvider({ children }) {
       space: sortAlpha(spaces),
       date: sortDates(dates),
       category: sortAlpha(categories),
-      designer: sortAlpha(designers),
     };
   }, [allEvents, allSpaces]);
 
@@ -137,7 +132,6 @@ export function FilterProvider({ children }) {
 
       return allEvents.reduce((acc, event) => {
         const categoryValue = normalizeValue(event.category);
-        const designerValue = normalizeValue(event.designer);
         const dateValue = normalizeValue(event.start_date)
           ? normalizeValue(event.start_date).slice(0, 10)
           : '';
@@ -148,13 +142,6 @@ export function FilterProvider({ children }) {
         if (
           filters.category.length > 0 &&
           !filters.category.includes(categoryValue)
-        ) {
-          return acc;
-        }
-
-        if (
-          filters.designer.length > 0 &&
-          !filters.designer.includes(designerValue)
         ) {
           return acc;
         }
@@ -193,7 +180,6 @@ export function FilterProvider({ children }) {
       space: new Map(),
       date: new Map(),
       category: new Map(),
-      designer: new Map(),
     };
 
     FILTER_KEYS.forEach((key) => {
@@ -203,7 +189,6 @@ export function FilterProvider({ children }) {
       eventsForCounts.forEach((event) => {
         const space = spaceMap.get(event.space_id);
         const categoryValue = normalizeValue(event.category);
-        const designerValue = normalizeValue(event.designer);
         const dateValue = normalizeValue(event.start_date)
           ? normalizeValue(event.start_date).slice(0, 10)
           : '';
@@ -242,16 +227,6 @@ export function FilterProvider({ children }) {
             }
             break;
           }
-          case 'designer': {
-            const value = designerValue;
-            if (value) {
-              counts.designer.set(
-                value,
-                (counts.designer.get(value) || 0) + 1
-              );
-            }
-            break;
-          }
           default:
             break;
         }
@@ -271,7 +246,6 @@ export function FilterProvider({ children }) {
       space: mapToObject(filterOptions.space, counts.space),
       date: mapToObject(filterOptions.date, counts.date),
       category: mapToObject(filterOptions.category, counts.category),
-      designer: mapToObject(filterOptions.designer, counts.designer),
     };
   }, [applyFilters, filterOptions, selectedFilters, spaceMap]);
 
@@ -356,7 +330,6 @@ export function FilterProvider({ children }) {
       spaceOptions: filterOptions.space,
       dateOptions: filterOptions.date,
       categoryOptions: filterOptions.category,
-      designerOptions: filterOptions.designer,
       optionCounts,
       filteredEvents,
       filtersLoading: loading,
