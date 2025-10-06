@@ -130,8 +130,8 @@ export default function NavBar() {
           Skip to content
         </a>
 
-        <div className='mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3'>
-          <div className='flex flex-wrap items-center justify-between gap-3'>
+        <div className='mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3'>
+          <div className='flex flex-wrap items-center justify-between gap-2'>
             <div className='flex items-center gap-3'>
               <button
                 type='button'
@@ -163,7 +163,7 @@ export default function NavBar() {
               </button>
             </form>
 
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-2 text-xs sm:text-sm'>
               <button
                 type='button'
                 onClick={toggleTheme}
@@ -180,7 +180,7 @@ export default function NavBar() {
             </div>
           </div>
 
-          <div className='flex flex-wrap items-center justify-between gap-3'>
+          <div className='hidden w-full items-center justify-between gap-3 md:flex'>
             <nav
               aria-label='Primary'
               className='flex flex-wrap items-center gap-2'>

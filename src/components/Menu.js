@@ -384,7 +384,7 @@ export default function Menu({ menuOpen, toggleMenu }) {
         ref={panelRef}
         tabIndex={-1}
         onKeyDown={onPanelKeyDown}
-        className={`fixed left-0 top-0 flex h-full w-[85vw] max-w-sm transform flex-col border-r border-[var(--foreground)] bg-[var(--background)]/82 backdrop-blur-xl backdrop-brightness-90 text-[var(--foreground)] transition-transform duration-300 ease-in-out sm:w-96 ${
+        className={`fixed left-0 top-0 flex h-full w-full max-w-none transform flex-col border-r border-[var(--foreground)] bg-[var(--background)]/92 backdrop-blur-xl backdrop-brightness-95 text-[var(--foreground)] transition-transform duration-300 ease-in-out sm:w-96 sm:max-w-sm ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
         <div className='flex-grow overflow-y-auto px-6 py-6 space-y-8'>

@@ -22,7 +22,7 @@ const gridColumns = {
   default: 4,
   1600: 3,
   1100: 2,
-  640: 1,
+  768: 2,
 };
 
 export default function MasonryGrid({
