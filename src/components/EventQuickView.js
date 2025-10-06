@@ -118,7 +118,6 @@ export default function EventQuickView({ event }) {
         </div>
         <div className='quick-view__title-row'>
           <h2 className='quick-view__title'>{title}</h2>
-          {designer && <span className='quick-view__designer'>{designer}</span>}
         </div>
         {metaChips.length > 0 && (
           <div className='quick-view__chips'>
@@ -161,6 +160,12 @@ export default function EventQuickView({ event }) {
           </div>
         )}
       </div>
+
+      {designer && (
+        <div className='quick-view__designer-row'>
+          <span className='quick-view__designer'>Graphic design by {designer}</span>
+        </div>
+      )}
 
       {details?.description && (
         <div className='quick-view__description'>
