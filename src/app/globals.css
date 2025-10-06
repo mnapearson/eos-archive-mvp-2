@@ -616,6 +616,24 @@ body {
   color: var(--foreground);
 }
 
+.quick-view__chip--button {
+  border: none;
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+  color: color-mix(in oklab, var(--foreground) 86%, transparent);
+  cursor: pointer;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.quick-view__chip--button:hover,
+.quick-view__chip--button:focus-visible {
+  background: color-mix(in oklab, var(--foreground) 18%, transparent);
+  color: var(--foreground);
+}
+
 .quick-view__badge {
   background: color-mix(in oklab, var(--foreground) 24%, transparent);
 }
@@ -731,6 +749,157 @@ body {
   position: relative;
   width: 100%;
   height: clamp(240px, 36vh, 320px);
+}
+
+.event-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.event-page__nav {
+  display: flex;
+}
+
+.event-page__back {
+  font-size: 0.65rem;
+  padding-inline: 0.7rem;
+}
+
+.event-page__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.event-page__title {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+}
+
+.event-page__media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.event-page__details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.event-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.event-page__calendar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.event-page__calendar .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  background: color-mix(in oklab, var(--background) 96%, rgba(0, 0, 0, 0.04));
+  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.event-page__calendar .button:hover,
+.event-page__calendar .button:focus-visible {
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 40%, transparent);
+  color: var(--foreground);
+}
+
+.event-page__info-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.event-page__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.05));
+}
+
+.event-page__info-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+}
+
+.event-page__info-value {
+  font-size: 0.96rem;
+  color: color-mix(in oklab, var(--foreground) 88%, transparent);
+}
+
+.event-page__info-link {
+  font-size: 0.96rem;
+  color: color-mix(in oklab, var(--foreground) 86%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s ease;
+  align-self: flex-start;
+}
+
+.event-page__info-link:hover,
+.event-page__info-link:focus-visible {
+  opacity: 0.75;
+}
+
+.event-page__description {
+  padding: 1.1rem 1.2rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: color-mix(in oklab, var(--background) 90%, rgba(0, 0, 0, 0.05));
+  color: color-mix(in oklab, var(--foreground) 88%, transparent);
+  line-height: 1.55;
+  font-size: 0.98rem;
+}
+
+.event-page__map-card {
+  border-radius: 1.1rem;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  overflow: hidden;
+  height: clamp(240px, 34vh, 320px);
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.event-page__map-card > div {
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .event-page__layout {
+    flex-direction: row;
+    gap: 3rem;
+    align-items: flex-start;
+  }
+
+  .event-page__media,
+  .event-page__details {
+    flex: 1 1 0;
+  }
 }
 
 @media (max-width: 640px) {
