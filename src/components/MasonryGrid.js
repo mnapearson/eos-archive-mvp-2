@@ -10,6 +10,8 @@ const VIEW_MODES = {
   LIST: 'list',
 };
 
+const NEW_EVENT_WINDOW_DAYS = 14;
+
 const tileVariants = [
   'aspect-[4/5]',
   'aspect-square',
@@ -18,10 +20,10 @@ const tileVariants = [
   'aspect-[16/11]',
 ];
 const gridColumns = {
-  default: 5,
-  1600: 4,
-  1100: 3,
-  768: 2,
+  default: 4,
+  1600: 3,
+  1100: 2,
+  640: 1,
 };
 
 export default function MasonryGrid({
@@ -99,6 +101,11 @@ function GridView({ items }) {
         {items.map((item, index) => {
           const href = item?.id ? `/events/${item.id}` : '#';
           const variant = tileVariants[index % tileVariants.length];
+          const dateLabel = formatDate(item);
+          const city = item?.space_city || item?.city;
+          const spaceName = item?.space_name || item?.venue;
+          const detailItems = [dateLabel, city, spaceName].filter(Boolean);
+          const isNew = isEventNew(item?.created_at);
 
           return (
             <Link
@@ -114,12 +121,27 @@ function GridView({ items }) {
                 />
                 <div className='grid-card__overlay' />
                 <div className='grid-card__meta'>
-                  <p className='grid-card__kicker'>
-                    {(item?.type || 'Event')?.toString()}
-                  </p>
+                  <div className='grid-card__meta-top'>
+                    <p className='grid-card__kicker'>
+                      {(item?.type || 'Event')?.toString()}
+                    </p>
+                    {isNew && <span className='grid-card__badge'>New</span>}
+                  </div>
                   <p className='grid-card__title'>{item?.title}</p>
+                  {detailItems.length > 0 && (
+                    <div className='grid-card__details'>
+                      {detailItems.map((detail, detailIdx) => (
+                        <span
+                          key={`${item?.id ?? index}-detail-${detailIdx}`}
+                          className='grid-card__detail'>
+                          {detail}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </article>
+              <span className='sr-only'>View event {item?.title}</span>
             </Link>
           );
         })}
@@ -135,8 +157,12 @@ function ListView({ items }) {
         const href = item?.id ? `/events/${item.id}` : '#';
         const dateLabel = formatDate(item);
         const city = item?.space_city || item?.city;
+        const spaceName = item?.space_name || item?.venue;
         const designer = item?.designer;
         const category = item?.category;
+        const isNew = isEventNew(item?.created_at);
+        const locationDetails = [dateLabel, city, spaceName].filter(Boolean);
+        const descriptionExcerpt = buildDescriptionExcerpt(item?.description);
 
         return (
           <article
@@ -156,29 +182,42 @@ function ListView({ items }) {
               </Link>
 
               <div className='flex-1 space-y-2'>
-                <div className='flex flex-wrap items-center gap-2'>
-                  {category && (
-                    <span className='ea-label ea-label--muted'>{category}</span>
-                  )}
-                  {designer && (
-                    <span className='text-[11px] uppercase tracking-[0.28em] opacity-60'>
-                      {designer}
-                    </span>
-                  )}
+                <div className='list-card__meta-head'>
+                  <div className='list-card__tags'>
+                    {category && (
+                      <span className='ea-label ea-label--muted'>{category}</span>
+                    )}
+                    {designer && (
+                      <span className='list-card__designer'>{designer}</span>
+                    )}
+                  </div>
+                  {isNew && <span className='list-card__badge'>New</span>}
                 </div>
                 <h3 className='text-lg font-semibold leading-tight'>
                   {item?.title}
                 </h3>
-                <div className='flex flex-wrap gap-4 text-sm opacity-75'>
-                  {dateLabel && <span>{dateLabel}</span>}
-                  {city && <span>{city}</span>}
+                {locationDetails.length > 0 && (
+                  <div className='list-card__details'>
+                    {locationDetails.map((detail, detailIdx) => (
+                      <span
+                        key={`${item?.id ?? href}-detail-${detailIdx}`}
+                        className='list-card__detail'>
+                        {detail}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {descriptionExcerpt && (
+                  <p className='list-card__description'>{descriptionExcerpt}</p>
+                )}
+                <div className='list-card__actions'>
+                  <Link
+                    href={href}
+                    scroll={false}
+                    className='nav-action inline-flex'>
+                    View event
+                  </Link>
                 </div>
-                <Link
-                  href={href}
-                  scroll={false}
-                  className='nav-action inline-flex'>
-                  View event
-                </Link>
               </div>
             </div>
           </article>
@@ -195,4 +234,20 @@ function formatDate(event) {
     event?.start_time,
     event?.end_time
   );
+}
+
+function isEventNew(createdAt) {
+  if (!createdAt) return false;
+  const created = new Date(createdAt);
+  if (Number.isNaN(created.getTime())) return false;
+  const diffMs = Date.now() - created.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays <= NEW_EVENT_WINDOW_DAYS;
+}
+
+function buildDescriptionExcerpt(description, maxLength = 140) {
+  if (!description) return '';
+  const trimmed = description.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, maxLength).replace(/\s+$/, '')}…`;
 }
