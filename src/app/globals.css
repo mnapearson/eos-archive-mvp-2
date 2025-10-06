@@ -353,131 +353,49 @@ body {
 
 .grid-shell__masonry {
   display: flex;
-  gap: clamp(1.6rem, 3vw, 2.6rem);
 }
 
 .grid-shell__column {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.6rem, 3vw, 2.6rem);
 }
 
 .grid-card {
-  display: block;
   position: relative;
+  display: block;
   overflow: hidden;
-  border-radius: clamp(1.6rem, 2.8vw, 2.2rem);
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-  background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.06));
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.18);
-  transition: transform 0.6s ease, box-shadow 0.6s ease;
+  border-radius: clamp(1.45rem, 2.6vw, 2.1rem);
+  background: color-mix(in oklab, var(--background) 96%, rgba(0, 0, 0, 0.03));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
 
 .grid-card:hover {
-  transform: translateY(-16px);
-  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.24);
+  transform: translateY(-12px);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.2);
 }
 
 .grid-card__media {
   position: relative;
   width: 100%;
+  padding: clamp(0.6rem, 1.8vw, 1rem);
+  background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.03));
 }
 
 .grid-card__image {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.85s ease;
+  height: auto;
+  object-fit: contain;
+  border-radius: clamp(1rem, 2vw, 1.45rem);
+  box-shadow: 0 16px 38px rgba(10, 12, 16, 0.22);
+  transition: transform 0.45s ease;
 }
 
 .grid-card:hover .grid-card__image {
-  transform: scale(1.12) rotate(-0.45deg);
+  transform: translateY(-4px) scale(1.015);
 }
 
-.grid-card__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(6, 6, 6, 0.16) 20%,
-    rgba(6, 6, 6, 0.82) 100%
-  );
-  opacity: 1;
-  transition: background 0.6s ease;
-}
-
-.grid-card:hover .grid-card__overlay {
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.25) 12%,
-    rgba(0, 0, 0, 0.88) 100%
-  );
-}
-
-.grid-card__meta {
-  position: absolute;
-  inset: auto clamp(1.2rem, 2.4vw, 1.8rem) clamp(1.4rem, 2.6vw, 2rem)
-    clamp(1.2rem, 2.4vw, 1.8rem);
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  color: #fff;
-  text-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
-}
-
-.grid-card__meta-top {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.grid-card__kicker {
-  font-size: 0.6rem;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
-.grid-card__title {
-  font-size: clamp(1.05rem, 1.6vw, 1.45rem);
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.grid-card__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.55rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.grid-card__details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.grid-card__detail {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(12, 12, 12, 0.45);
-  font-size: 0.72rem;
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
 
 .list-view {
   display: flex;
@@ -570,6 +488,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding-top: 1.75rem;
+}
+
+.quick-view__status {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .quick-view__title-row {
@@ -922,17 +846,8 @@ body {
     border-radius: 16px;
   }
 
-  .grid-card__meta {
-    inset: auto 1.1rem 1.1rem 1.1rem;
-  }
-
-  .grid-card__details {
-    gap: 0.35rem;
-  }
-
-  .grid-card__detail {
-    font-size: 0.68rem;
-    padding: 0.3rem 0.55rem;
+  .grid-card__media {
+    padding: 0.5rem;
   }
 
   .list-card {
@@ -1358,7 +1273,7 @@ body {
 
 /* Homepage hero */
 .home-hero {
-  margin: clamp(2.5rem, 6vw, 4.5rem) auto clamp(1.5rem, 4vw, 3rem);
+  margin: clamp(1.5rem, 4vw, 3.5rem) auto clamp(1.5rem, 4vw, 3rem);
   max-width: min(78rem, 92vw);
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.6rem);

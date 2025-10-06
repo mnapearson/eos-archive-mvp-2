@@ -11,18 +11,11 @@ const VIEW_MODES = {
   LIST: 'list',
 };
 
-const tileVariants = [
-  'aspect-[4/5]',
-  'aspect-square',
-  'aspect-[3/4]',
-  'aspect-[5/4]',
-  'aspect-[16/11]',
-];
 const gridColumns = {
   default: 3,
   1200: 3,
-  960: 2,
-  640: 2,
+  960: 3,
+  640: 3,
 };
 
 export default function MasonryGrid({
@@ -99,13 +92,6 @@ function GridView({ items }) {
         columnClassName='grid-shell__column'>
         {items.map((item, index) => {
           const href = item?.id ? `/events/${item.id}` : '#';
-          const variant = tileVariants[index % tileVariants.length];
-          const dateLabel = formatDate(item);
-          const city = item?.space_city || item?.city;
-          const spaceName = item?.space_name || item?.venue;
-          const category = item?.category || (item?.type || 'Event');
-          const detailItems = [dateLabel, city, spaceName].filter(Boolean);
-          const statusLabel = getEventStatus(item);
 
           return (
             <Link
@@ -113,36 +99,14 @@ function GridView({ items }) {
               href={href}
               scroll={false}
               className='grid-card group'>
-              <article className={`grid-card__media ${variant}`}>
+              <figure className='grid-card__media'>
                 <img
                   src={item?.image_url || '/placeholder.jpg'}
                   alt={item?.title || 'Event image'}
                   className='grid-card__image'
+                  loading='lazy'
                 />
-                <div className='grid-card__overlay' />
-                <div className='grid-card__meta'>
-                  <div className='grid-card__meta-top'>
-                    {category && (
-                      <p className='grid-card__kicker'>{category}</p>
-                    )}
-                    {statusLabel && (
-                      <span className='grid-card__badge'>{statusLabel}</span>
-                    )}
-                  </div>
-                  <p className='grid-card__title'>{item?.title}</p>
-                  {detailItems.length > 0 && (
-                    <div className='grid-card__details'>
-                      {detailItems.map((detail, detailIdx) => (
-                        <span
-                          key={`${item?.id ?? index}-detail-${detailIdx}`}
-                          className='grid-card__detail'>
-                          {detail}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </article>
+              </figure>
               <span className='sr-only'>View event {item?.title}</span>
             </Link>
           );
@@ -157,7 +121,7 @@ function ListView({ items }) {
     <div className='list-view space-y-4'>
       {items.map((item) => {
         const href = item?.id ? `/events/${item.id}` : '#';
-        const dateLabel = formatDate(item);
+        const dateLabel = formatEventDate(item);
         const city = item?.space_city || item?.city;
         const spaceName = item?.space_name || item?.venue;
         const category = item?.category;
@@ -237,7 +201,7 @@ function ListView({ items }) {
   );
 }
 
-function formatDate(event) {
+function formatEventDate(event) {
   return formatDateRange(
     event?.start_date,
     event?.end_date,

@@ -61,6 +61,10 @@ export default function EventQuickView({ event }) {
       pushChip('date', when);
     }
 
+    if (category) {
+      pushChip('category', category, buildFilterHref({ category: [category] }));
+    }
+
     const spaceHref = spaceSlug
       ? `/spaces/${spaceSlug}`
       : spaceId
@@ -110,12 +114,11 @@ export default function EventQuickView({ event }) {
   return (
     <section className='quick-view space-y-6'>
       <header className='quick-view__header space-y-3'>
-        <div className='quick-view__eyebrow flex items-center gap-3'>
-          {category && <span className='ea-label ea-label--muted'>{category}</span>}
-          {statusLabel && (
+        {statusLabel && (
+          <div className='quick-view__status'>
             <span className='list-card__badge quick-view__badge'>{statusLabel}</span>
-          )}
-        </div>
+          </div>
+        )}
         <div className='quick-view__title-row'>
           <h2 className='quick-view__title'>{title}</h2>
         </div>
