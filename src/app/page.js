@@ -348,7 +348,7 @@ function HomePageContent() {
 
       {filtersLoading ? (
         <div className='w-full max-w-6xl lg:max-w-5xl px-4'>
-          <Spinner />
+          <Spinner fullscreen={false} size={48} />
         </div>
       ) : (
         <div
