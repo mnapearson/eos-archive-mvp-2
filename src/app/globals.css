@@ -769,18 +769,16 @@ body {
 .event-page__media {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 0.75rem;
 }
 
-.event-page__poster:not(.quick-view__poster--empty) {
-  display: inline-block;
-  width: auto;
-  max-width: min(100%, 520px);
+.event-page__poster {
+  width: 100%;
   aspect-ratio: auto;
 }
 
-.event-page__poster:not(.quick-view__poster--empty) .quick-view__poster-image {
+.event-page__poster .quick-view__poster-image {
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -938,6 +936,15 @@ body {
 
   .quick-view__description {
     padding: 0.9rem 1rem;
+  }
+
+  .event-page__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .event-page__actions .nav-action {
+    width: 100%;
   }
 }
 

@@ -222,7 +222,6 @@ export default function EventPageClient({ eventId }) {
                 sizes='(max-width: 768px) 100vw, 50vw'
                 priority
                 className='quick-view__poster-image'
-                style={{ width: 'auto', height: 'auto', maxWidth: '100%' }}
               />
             </div>
           ) : (
