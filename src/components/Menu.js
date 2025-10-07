@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useState, useEffect, useRef, useMemo } from 'react';
+import { Suspense, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
@@ -51,7 +51,15 @@ function toId(s = '') {
     .replace(/[^a-z0-9_-]/g, '');
 }
 
-export default function Menu({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
+export default function Menu(props) {
+  return (
+    <Suspense fallback={null}>
+      <MenuContent {...props} />
+    </Suspense>
+  );
+}
+
+function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
   const {
     selectedFilters,
     setSelectedFilters,

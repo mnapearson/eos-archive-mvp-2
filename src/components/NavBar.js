@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { Suspense, useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
@@ -30,7 +30,15 @@ function useUserSimple() {
   return user;
 }
 
-export default function NavBar() {
+export default function NavBar(props) {
+  return (
+    <Suspense fallback={null}>
+      <NavBarContent {...props} />
+    </Suspense>
+  );
+}
+
+function NavBarContent() {
   const { setSelectedFilters } = useContext(FilterContext);
   const [theme, setTheme] = useState('dawn');
   const [menuOpen, setMenuOpen] = useState(false);

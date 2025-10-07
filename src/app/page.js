@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useMemo, useState } from 'react';
+import { Suspense, useContext, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import MasonryGrid from '@/components/MasonryGrid';
@@ -19,6 +19,19 @@ const EVENT_STATUS_PRIORITY = {
 function normalizeTime(time, fallback) {
   if (!time) return fallback;
   return time.length === 5 ? `${time}:00` : time;
+}
+
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-16 flex justify-center'>
+          <Spinner />
+        </div>
+      }>
+      <HomePageContent />
+    </Suspense>
+  );
 }
 
 function parseEventDate(date, time, type) {
@@ -91,7 +104,7 @@ function compareEventsByTemporalOrder(a, b, reference) {
   return infoB.createdMs - infoA.createdMs;
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
