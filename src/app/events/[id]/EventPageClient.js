@@ -104,47 +104,6 @@ export default function EventPageClient({ eventId }) {
       event?.space?.longitude
   );
 
-  const metaChips = useMemo(() => {
-    const chips = [];
-    const seen = new Set();
-
-    const pushChip = (chip) => {
-      if (!chip?.label) return;
-      const key = `${chip.label}-${chip.href ?? ''}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      chips.push(chip);
-    };
-
-    if (startDate && eventDateTime) {
-      pushChip({
-        id: 'date',
-        label: eventDateTime,
-        filters: { date: [startDate] },
-      });
-    }
-
-    if (city) {
-      pushChip({ id: 'city', label: city, filters: { city: [city] } });
-    }
-
-    if (eventCategory) {
-      pushChip({
-        id: 'category',
-        label: eventCategory,
-        filters: { category: [eventCategory] },
-      });
-    }
-
-    if (spaceHref && venueName) {
-      pushChip({ id: 'space', label: venueName, href: spaceHref });
-    } else if (venueName) {
-      pushChip({ id: 'space', label: venueName });
-    }
-
-    return chips;
-  }, [startDate, eventDateTime, city, venueName, spaceHref, eventCategory]);
-
   const infoRows = useMemo(() => {
     if (!event) return [];
 
@@ -249,40 +208,12 @@ export default function EventPageClient({ eventId }) {
           )}
         </div>
         <h1 className='quick-view__title event-page__title'>{eventTitle}</h1>
-        {metaChips.length > 0 && (
-          <div className='quick-view__chips'>
-            {metaChips.map(({ id, label, href, filters }) =>
-              href ? (
-                <a
-                  key={id}
-                  href={href}
-                  className='quick-view__chip quick-view__chip--link'>
-                  {label}
-                </a>
-              ) : filters ? (
-                <button
-                  key={id}
-                  type='button'
-                  className='quick-view__chip quick-view__chip--button'
-                  onClick={() => applyFiltersAndNavigate(filters)}>
-                  {label}
-                </button>
-              ) : (
-                <span
-                  key={id}
-                  className='quick-view__chip'>
-                  {label}
-                </span>
-              )
-            )}
-          </div>
-        )}
       </header>
 
       <div className='event-page__layout'>
         <div className='event-page__media'>
           {event.image_url ? (
-            <div className='quick-view__poster'>
+            <div className='quick-view__poster event-page__poster'>
               <Image
                 src={flyerSrc}
                 alt={`Flyer for ${eventTitle}`}
@@ -291,10 +222,11 @@ export default function EventPageClient({ eventId }) {
                 sizes='(max-width: 768px) 100vw, 50vw'
                 priority
                 className='quick-view__poster-image'
+                style={{ width: 'auto', height: 'auto', maxWidth: '100%' }}
               />
             </div>
           ) : (
-            <div className='quick-view__poster quick-view__poster--empty'>
+            <div className='quick-view__poster quick-view__poster--empty event-page__poster'>
               <span>No flyer available</span>
             </div>
           )}

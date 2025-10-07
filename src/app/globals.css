@@ -773,6 +773,19 @@ body {
   gap: 0.75rem;
 }
 
+.event-page__poster:not(.quick-view__poster--empty) {
+  display: inline-block;
+  width: auto;
+  max-width: min(100%, 520px);
+  aspect-ratio: auto;
+}
+
+.event-page__poster:not(.quick-view__poster--empty) .quick-view__poster-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .event-page__details {
   display: flex;
   flex-direction: column;
