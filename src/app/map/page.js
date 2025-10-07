@@ -130,6 +130,9 @@ export default function SpacesMapPage() {
           spaces={filteredSpaces}
           activeTypes={activeTypes}
           autoFit
+          fitKey={`${panelCollapsed ? 'collapsed' : 'expanded'}-${
+            listOpen ? 'list-open' : 'list-closed'
+          }`}
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
         />
@@ -137,30 +140,34 @@ export default function SpacesMapPage() {
 
       <div className='pointer-events-none absolute top-0 left-0 right-0 flex justify-center px-4 pt-6 sm:justify-start sm:px-6 sm:pt-8 lg:px-8'>
         <section
-          className={`pointer-events-auto w-full max-w-xl rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/90 px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 sm:max-w-md ${
-            panelCollapsed ? 'max-w-lg' : ''
+          className={`pointer-events-auto transition-all duration-300 ${
+            panelCollapsed
+              ? 'flex w-full max-w-3xl items-center justify-between gap-4 rounded-full border border-[var(--foreground)]/14 bg-[var(--background)]/85 px-4 py-2 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70 shadow-[0_14px_32px_rgba(0,0,0,0.18)] backdrop-blur-lg sm:max-w-4xl'
+              : 'w-full max-w-3xl rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/90 px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:max-w-4xl'
           }`}>
           {panelCollapsed ? (
-            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-              <span className='ea-label ea-label--muted'>Spaces archive</span>
-              <div className='flex flex-wrap items-center gap-2'>
+            <>
+              <span className='ea-label ea-label--muted shrink-0 text-[var(--foreground)]'>
+                Spaces archive
+              </span>
+              <div className='flex items-center gap-2'>
                 <button
                   type='button'
                   onClick={() => setListOpen(true)}
-                  className='nav-action text-xs uppercase tracking-[0.28em]'>
+                  className='nav-action h-8 whitespace-nowrap rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
                   Browse list ({totalCount})
                 </button>
                 <button
                   type='button'
                   onClick={() => setPanelCollapsed(false)}
-                  className='nav-action nav-cta text-xs uppercase tracking-[0.28em]'>
+                  className='nav-action nav-cta h-8 whitespace-nowrap rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
                   Open panel
                 </button>
               </div>
-            </div>
+            </>
           ) : (
             <>
-              <div className='flex items-start justify-between gap-3'>
+              <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
                 <div className='space-y-2'>
                   <span className='ea-label ea-label--muted'>
                     Spaces archive
@@ -174,12 +181,20 @@ export default function SpacesMapPage() {
                     dive into the map.
                   </p>
                 </div>
-                <button
-                  type='button'
-                  onClick={() => setPanelCollapsed(true)}
-                  className='nav-action text-xs uppercase tracking-[0.28em]'>
-                  Collapse
-                </button>
+                <div className='flex items-center gap-2'>
+                  <button
+                    type='button'
+                    onClick={() => setListOpen((open) => !open)}
+                    className='nav-action h-8 whitespace-nowrap rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
+                    {listOpen ? 'Close list' : `Browse list (${totalCount})`}
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => setPanelCollapsed(true)}
+                    className='nav-action nav-cta h-8 whitespace-nowrap rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
+                    Collapse
+                  </button>
+                </div>
               </div>
 
               <div className='mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
@@ -191,25 +206,17 @@ export default function SpacesMapPage() {
                   className='input w-full sm:max-w-xs'
                   aria-label='Search spaces'
                 />
-                <div className='flex flex-wrap items-center gap-2'>
+                {hasActiveFilters && (
                   <button
                     type='button'
-                    onClick={() => setListOpen((open) => !open)}
-                    className='nav-action nav-cta text-xs uppercase tracking-[0.28em]'>
-                    {listOpen ? 'Close list' : `Browse list (${totalCount})`}
+                    onClick={() => {
+                      setSearchQuery('');
+                      clearTypes();
+                    }}
+                    className='rounded-full border border-[var(--foreground)]/20 px-3 py-1.5 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 hover:border-[var(--foreground)]/40 hover:text-[var(--foreground)]'>
+                    Clear filters
                   </button>
-                  {hasActiveFilters && (
-                    <button
-                      type='button'
-                      onClick={() => {
-                        setSearchQuery('');
-                        clearTypes();
-                      }}
-                      className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 hover:text-[var(--foreground)]'>
-                      Clear filters
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
 
               {typeFilters.length > 0 && (
@@ -254,14 +261,6 @@ export default function SpacesMapPage() {
                         </button>
                       );
                     })}
-                    {activeTypes.length > 0 && (
-                      <button
-                        type='button'
-                        onClick={clearTypes}
-                        className='rounded-full border border-[var(--foreground)]/20 px-3 py-1.5 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 hover:border-[var(--foreground)]/40 hover:text-[var(--foreground)]'>
-                        Reset
-                      </button>
-                    )}
                   </div>
                 </div>
               )}

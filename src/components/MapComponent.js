@@ -52,6 +52,7 @@ export default function MapComponent({
   initialCenter,
   initialZoom,
   autoFit = false,
+  fitKey,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -234,7 +235,16 @@ export default function MapComponent({
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey]);
+
+  useEffect(() => {
+    if (!autoFit || !mapRef.current) return;
+    const resizeHandler = () => {
+      addMarkers();
+    };
+    window.addEventListener('resize', resizeHandler);
+    return () => window.removeEventListener('resize', resizeHandler);
+  }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey]);
 
   useEffect(() => {
     function handleCopy(e) {
