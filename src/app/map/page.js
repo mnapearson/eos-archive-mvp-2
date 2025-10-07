@@ -30,6 +30,7 @@ export default function SpacesMapPage() {
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [focusedSpaceId, setFocusedSpaceId] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -106,6 +107,10 @@ export default function SpacesMapPage() {
 
   const totalCount = filteredSpaces.length;
 
+  useEffect(() => {
+    setFocusedSpaceId(null);
+  }, [searchQuery, activeTypes]);
+
   const toggleType = (type) => {
     setActiveTypes((prev) => {
       if (prev.includes(type)) {
@@ -130,9 +135,8 @@ export default function SpacesMapPage() {
           spaces={filteredSpaces}
           activeTypes={activeTypes}
           autoFit
-          fitKey={`${panelCollapsed ? 'collapsed' : 'expanded'}-${
-            listOpen ? 'list-open' : 'list-closed'
-          }`}
+          fitKey={`${panelCollapsed ? 'collapsed' : 'expanded'}-${filteredSpaces.length}`}
+          focusSpaceId={focusedSpaceId}
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
         />
@@ -281,12 +285,14 @@ export default function SpacesMapPage() {
         open={listOpen}
         onClose={() => setListOpen(false)}
         spaces={filteredSpaces}
+        onFocus={(space) => setFocusedSpaceId(space?.id ?? null)}
+        focusedId={focusedSpaceId}
       />
     </main>
   );
 }
 
-function SpacesDrawer({ open, onClose, spaces }) {
+function SpacesDrawer({ open, onClose, spaces, onFocus, focusedId }) {
   return (
     <aside
       className={`pointer-events-auto fixed inset-x-4 bottom-5 z-40 w-auto max-w-3xl self-center rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-lg shadow-[0_30px_80px_rgba(0,0,0,0.26)] transition-all duration-300 sm:left-auto sm:right-8 sm:w-[min(420px,38vw)] sm:translate-x-0 ${
@@ -315,6 +321,9 @@ function SpacesDrawer({ open, onClose, spaces }) {
             <SpaceListItem
               key={space.id}
               space={space}
+              variant='compact'
+              onFocus={onFocus}
+              isActive={focusedId != null && focusedId === space.id}
             />
           ))
         )}

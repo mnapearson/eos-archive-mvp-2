@@ -1,193 +1,171 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import MapComponent from '@/components/MapComponent';
 import Image from 'next/image';
 
-export default function SpaceListItem({ space }) {
+function normalizeType(type) {
+  if (!type) return 'space';
+  return String(type).toLowerCase();
+}
+
+function truncate(text, limit = 160) {
+  if (!text) return '';
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit).trimEnd()}…`;
+}
+
+export default function SpaceListItem({
+  space,
+  variant = 'compact',
+  onFocus,
+  isActive = false,
+}) {
   const router = useRouter();
-  const [address, setAddress] = useState('');
-  const [mapOpen, setMapOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Build an optimized image URL when coming from Supabase Storage
-  const buildOptimizedSrc = (url, width = 600) => {
-    if (!url) return '';
+  const typeLabel = normalizeType(space.type);
+  const cityLabel =
+    space.city ||
+    space.space_city ||
+    space.address ||
+    space.space_address ||
+    'Unknown location';
+
+  const websiteLabel = useMemo(() => {
+    if (!space.website) return null;
     try {
-      const u = new URL(url);
-      if (u.hostname.includes('supabase.co')) {
-        u.searchParams.set('width', String(width));
-        u.searchParams.set('quality', '70');
-        u.searchParams.set('format', 'webp');
-        return u.toString();
-      }
-      return url;
+      return new URL(space.website).hostname.replace(/^www\./, '');
     } catch {
-      return url;
+      return space.website;
     }
+  }, [space.website]);
+
+  const handleFocus = (event) => {
+    event.stopPropagation();
+    onFocus?.(space);
   };
 
-  useEffect(() => {
-    if (space.latitude && space.longitude) {
-      const lng = Number(space.longitude);
-      const lat = Number(space.latitude);
-      if (!isNaN(lng) && !isNaN(lat)) {
-        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-        fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`
-        )
-          .then((res) => res.json())
-          .then((geoData) => {
-            if (geoData.features && geoData.features.length > 0) {
-              const feature = geoData.features[0];
-              const streetPart = feature.address
-                ? `${feature.address} ${feature.text}`
-                : feature.text;
-              const postcodeContext = feature.context?.find((c) =>
-                c.id.startsWith('postcode')
-              );
-              const postcode = postcodeContext ? postcodeContext.text : '';
-              const formatted = postcode
-                ? `${streetPart}, ${postcode}`
-                : streetPart;
-              setAddress(formatted);
-            } else {
-              setAddress('UNKNOWN ADDRESS');
-            }
-          })
-          .catch((err) => {
-            console.error('Reverse geocoding error:', err);
-            setAddress('UNKNOWN ADDRESS');
-          });
-      }
-    }
-  }, [space.latitude, space.longitude]);
-
-  const toggleMap = (e) => {
-    e.stopPropagation();
-    setMapOpen((prev) => !prev);
-  };
-
-  const handleNavigation = () => {
+  const handleNavigate = (event) => {
+    event.stopPropagation();
     router.push(`/spaces/${space.id}`);
   };
 
-  // Helper function to truncate text
-  const truncateText = (text, limit = 150) => {
-    if (!text) return '';
-    return text.length > limit ? text.substring(0, limit) : text;
-  };
+  if (variant === 'detail') {
+    return (
+      <article className='space-detail-card bg-[var(--background)]/85 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl'>
+        <div className='grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_360px]'>
+          <div className='space-y-5'>
+            <header className='space-y-3'>
+              <span className='ea-label ea-label--muted'>
+                {cityLabel.toUpperCase()}
+              </span>
+              <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)]'>
+                {space.name || 'Untitled space'}
+              </h1>
+              <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
+                <div className='inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-3 py-1 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
+                  <span className='text-[var(--foreground)]'>
+                    {typeLabel || 'other'}
+                  </span>
+                </div>
 
-  // Render description with read more / read less toggling
-  const renderDescription = () => {
-    if (!space.description) return null;
-    const limit = 400;
-    if (space.description.length <= limit) {
-      return <p className='mt-2 text-sm'>{space.description}</p>;
-    }
-    if (isExpanded) {
-      return (
-        <div className='mt-2 text-sm text-[var(--foreground)]'>
-          <p>{space.description}</p>
-          <button
-            className='mt-2 text-sm text-[var(--foreground)]'
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(false);
-            }}>
-            Read less
-          </button>
-        </div>
-      );
-    } else {
-      return (
-        <div className='mt-2 text-sm text-[var(--foreground)] '>
-          <p>{truncateText(space.description, limit)}(...)</p>
-          <button
-            className='mt-2 text-sm text-[var(--foreground)]'
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(true);
-            }}>
-            Read more
-          </button>
-        </div>
-      );
-    }
-  };
+                {websiteLabel && (
+                  <a
+                    href={space.website}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                    Visit website
+                  </a>
+                )}
+              </div>
+            </header>
 
-  const infoContent = (
-    <div className='cursor-pointer'>
-      <div className='flex items-center gap-2'>
-        <h2 className='text-lg font-semibold'>{space.name}</h2>
-        <p className='text-sm italic'>
-          ({space.type ? space.type.toLowerCase() : 'default'})
+            {space.description && (
+              <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
+                {space.description}
+              </p>
+            )}
+
+            <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
+              {onFocus && space.latitude && space.longitude && (
+                <button
+                  type='button'
+                  onClick={handleFocus}
+                  className='nav-action nav-cta h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                  View on map
+                </button>
+              )}
+            </div>
+          </div>
+
+          {space.image_url && (
+            <div className='relative h-[260px] overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:h-full'>
+              <Image
+                src={space.image_url}
+                alt={space.name || 'Space image'}
+                fill
+                sizes='(max-width: 768px) 80vw, 360px'
+                className='object-cover'
+                priority
+              />
+            </div>
+          )}
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article
+      className={`space-card group rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${
+        isActive ? 'border-[var(--foreground)]/50 bg-[var(--background)]' : ''
+      }`}>
+      <header className='flex flex-col gap-2'>
+        <div className='flex items-center justify-between gap-3'>
+          <h3 className='text-lg font-semibold text-[var(--foreground)]'>
+            {space.name || 'Untitled space'}
+          </h3>
+          <span className='rounded-full border border-[var(--foreground)]/20 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70'>
+            {typeLabel}
+          </span>
+        </div>
+        <div className='text-xs uppercase tracking-[0.32em] text-[var(--foreground)]/60'>
+          {cityLabel}
+        </div>
+      </header>
+
+      {space.description && (
+        <p className='mt-3 text-sm leading-relaxed text-[var(--foreground)]/80'>
+          {truncate(space.description, 180)}
         </p>
-      </div>
-      {address && (
-        <button
-          onClick={toggleMap}
-          className='block text-sm mt-1 underline'>
-          {address}
-        </button>
       )}
-      <p className='text-sm mb-1'>{space.city}</p>
-      {space.website && (
-        <p className='mt-1'>
+
+      <footer className='mt-4 flex flex-wrap items-center gap-2'>
+        {onFocus && space.latitude && space.longitude && (
+          <button
+            type='button'
+            onClick={handleFocus}
+            className='nav-action h-8 rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
+            View on map
+          </button>
+        )}
+        <button
+          type='button'
+          onClick={handleNavigate}
+          className='nav-action nav-cta h-8 rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
+          Details
+        </button>
+        {websiteLabel && (
           <a
             href={space.website}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-xs uppercase'
-            onClick={(e) => e.stopPropagation()}>
-            VISIT WEBSITE
+            className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 hover:text-[var(--foreground)]'>
+            {websiteLabel}
           </a>
-        </p>
-      )}
-      {renderDescription()}
-    </div>
-  );
-
-  // Wrap the infoContent so clicking anywhere navigates to the space page.
-  const mainContent = <div onClick={handleNavigation}>{infoContent}</div>;
-
-  return (
-    <div className='border-b border-[var(--foreground)] pb-2 text-left relative flex flex-col-reverse md:flex-row md:justify-between md:items-stretch'>
-      <div className='flex-1'>{mainContent}</div>
-      {space.image_url && (
-        <div className='my-2 md:mt-0 md:ml-4'>
-          <Image
-            src={buildOptimizedSrc(space.image_url, 600)}
-            alt={space.name || 'space image'}
-            width={300}
-            height={400}
-            sizes='(max-width: 768px) 100vw, 300px'
-            className='object-cover rounded-sm'
-          />
-        </div>
-      )}
-      {mapOpen && (
-        <div className='fixed inset-0 z-50 flex justify-end'>
-          <div
-            className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
-            onClick={toggleMap}
-            aria-hidden='true'
-          />
-          <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
-            <button
-              className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
-              onClick={toggleMap}
-              aria-label='Close map'>
-              ✕
-            </button>
-            <MapComponent
-              spaces={[space]}
-              address={address}
-            />
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </footer>
+    </article>
   );
 }

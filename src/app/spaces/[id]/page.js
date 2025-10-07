@@ -93,7 +93,7 @@ export default function SpacePage() {
         {/* Use the reusable SpaceListItem in detailed mode */}
         <SpaceListItem
           space={space}
-          detailed={true}
+          variant='detail'
         />
         <div className='mt-4'>
           <MapComponent spaces={[space]} />

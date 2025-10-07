@@ -53,6 +53,7 @@ export default function MapComponent({
   initialZoom,
   autoFit = false,
   fitKey,
+  focusSpaceId,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -125,7 +126,7 @@ export default function MapComponent({
   }, [mapData, eventId, initialCenter, initialZoom, spaces]);
 
   const clearMarkers = () => {
-    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current.forEach(({ marker }) => marker.remove());
     markersRef.current = [];
   };
 
@@ -186,6 +187,8 @@ export default function MapComponent({
         .setPopup(new mapboxgl.Popup().setHTML(popupContent))
         .addTo(mapRef.current);
 
+      markersRef.current.push({ marker, id: spaceId });
+
       if (!Number.isNaN(markerLng) && !Number.isNaN(markerLat)) {
         bounds.extend([markerLng, markerLat]);
         hasValidBounds = true;
@@ -245,6 +248,24 @@ export default function MapComponent({
     window.addEventListener('resize', resizeHandler);
     return () => window.removeEventListener('resize', resizeHandler);
   }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey]);
+
+  useEffect(() => {
+    if (!focusSpaceId || !mapRef.current) return;
+    const entry = markersRef.current.find(
+      (item) => String(item.id) === String(focusSpaceId)
+    );
+    if (!entry) return;
+    const coords = entry.marker.getLngLat();
+    mapRef.current.flyTo({
+      center: coords,
+      zoom: Math.max(mapRef.current.getZoom(), 13),
+      essential: true,
+    });
+    const popup = entry.marker.getPopup();
+    if (popup && !popup.isOpen()) {
+      popup.addTo(mapRef.current);
+    }
+  }, [focusSpaceId]);
 
   useEffect(() => {
     function handleCopy(e) {
