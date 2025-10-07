@@ -51,6 +51,7 @@ export default function MapComponent({
   activeTypes,
   initialCenter,
   initialZoom,
+  autoFit = false,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -142,6 +143,9 @@ export default function MapComponent({
           })
         : mapData;
 
+    const bounds = new mapboxgl.LngLatBounds();
+    let hasValidBounds = false;
+
     filteredData.forEach((item) => {
       const markerEl = document.createElement('div');
       markerEl.style.width = '12px';
@@ -181,6 +185,11 @@ export default function MapComponent({
         .setPopup(new mapboxgl.Popup().setHTML(popupContent))
         .addTo(mapRef.current);
 
+      if (!Number.isNaN(markerLng) && !Number.isNaN(markerLat)) {
+        bounds.extend([markerLng, markerLat]);
+        hasValidBounds = true;
+      }
+
       if (!item.address && !fallbackAddress) {
         fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${markerLng},${markerLat}.json?access_token=${mapboxgl.accessToken}`
@@ -206,13 +215,26 @@ export default function MapComponent({
           });
       }
     });
+
+    if (autoFit && hasValidBounds) {
+      try {
+        const padding = typeof window !== 'undefined' && window.innerWidth < 640 ? 60 : 120;
+        mapRef.current.fitBounds(bounds, {
+          padding,
+          maxZoom: 14,
+          duration: 800,
+        });
+      } catch (err) {
+        console.warn('Map fitBounds failed:', err);
+      }
+    }
   };
 
   useEffect(() => {
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit]);
 
   useEffect(() => {
     function handleCopy(e) {
