@@ -61,6 +61,7 @@ export default function MapComponent({
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
+  const focusMarkerRef = useRef(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -165,6 +166,10 @@ export default function MapComponent({
       marker.remove();
     });
     markersRef.current = [];
+    if (focusMarkerRef.current) {
+      focusMarkerRef.current.remove();
+      focusMarkerRef.current = null;
+    }
   };
 
   const addMarkers = () => {
@@ -306,6 +311,7 @@ export default function MapComponent({
     });
 
     updateMarkerFocusStyles(focusSpaceId);
+    updateFocusMarker(focusSpaceId);
 
     if (autoFit && hasValidBounds) {
       try {
@@ -327,6 +333,35 @@ export default function MapComponent({
     }
   };
 
+  const updateFocusMarker = (currentFocusId) => {
+    if (focusMarkerRef.current) {
+      focusMarkerRef.current.remove();
+      focusMarkerRef.current = null;
+    }
+    if (!currentFocusId || !mapRef.current) return;
+    const entry = markersRef.current.find(
+      (item) => String(item.id) === String(currentFocusId)
+    );
+    if (!entry) return;
+    const coords = entry.marker.getLngLat();
+    const highlightEl = document.createElement('div');
+    highlightEl.style.width = '28px';
+    highlightEl.style.height = '28px';
+    highlightEl.style.borderRadius = '50%';
+    highlightEl.style.background =
+      'radial-gradient(circle at center, rgba(27,27,27,0.95) 0%, rgba(27,27,27,0.7) 55%, rgba(27,27,27,0.45) 100%)';
+    highlightEl.style.boxShadow =
+      '0 20px 45px rgba(0,0,0,0.45), 0 0 0 6px rgba(255,255,255,0.65)';
+    highlightEl.style.border = '2px solid rgba(255,255,255,0.85)';
+    highlightEl.style.pointerEvents = 'none';
+    focusMarkerRef.current = new mapboxgl.Marker({
+      element: highlightEl,
+      anchor: 'center',
+    })
+      .setLngLat(coords)
+      .addTo(mapRef.current);
+  };
+
   useEffect(() => {
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
@@ -346,6 +381,7 @@ export default function MapComponent({
     if (!mapRef.current) return;
     if (!focusSpaceId) {
       updateMarkerFocusStyles(null);
+      updateFocusMarker(null);
       return;
     }
     const entry = markersRef.current.find(
@@ -382,6 +418,7 @@ export default function MapComponent({
       }
     }
     updateMarkerFocusStyles(focusSpaceId);
+    updateFocusMarker(focusSpaceId);
   }, [focusSpaceId, showPopups]);
 
   useEffect(() => {
