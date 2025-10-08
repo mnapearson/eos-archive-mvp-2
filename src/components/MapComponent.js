@@ -6,6 +6,18 @@ import markerColors from '@/lib/markerColors';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+const DEFAULT_FIT_PADDING = {
+  mobile: { top: 80, right: 60, bottom: 320, left: 60 },
+  desktop: { top: 140, right: 240, bottom: 320, left: 240 },
+};
+
+const DEFAULT_FOCUS_PADDING = {
+  mobile: { top: 64, right: 56, bottom: 320, left: 56 },
+  desktop: { top: 120, right: 240, bottom: 320, left: 240 },
+};
+
+const DEFAULT_MAX_AUTO_FIT_ZOOM = 14;
+
 function buildPopupHTML({
   spaceId,
   name,
@@ -44,6 +56,29 @@ function buildPopupHTML({
     </div>`;
 }
 
+function getViewportPadding(customPadding, defaults) {
+  if (typeof window === 'undefined') {
+    if (customPadding == null) return defaults.desktop;
+    if (typeof customPadding === 'number') return customPadding;
+    return customPadding.desktop ?? customPadding.mobile ?? defaults.desktop;
+  }
+
+  const isMobile = window.innerWidth < 768;
+
+  if (typeof customPadding === 'number') {
+    return customPadding;
+  }
+
+  if (customPadding && typeof customPadding === 'object') {
+    if (isMobile) {
+      return customPadding.mobile ?? customPadding.desktop ?? defaults.mobile;
+    }
+    return customPadding.desktop ?? customPadding.mobile ?? defaults.desktop;
+  }
+
+  return isMobile ? defaults.mobile : defaults.desktop;
+}
+
 export default function MapComponent({
   eventId,
   spaces,
@@ -57,6 +92,9 @@ export default function MapComponent({
   onMarkerSelect,
   showPopups = true,
   fallbackToAllSpaces = true,
+  fitPadding,
+  maxAutoFitZoom = DEFAULT_MAX_AUTO_FIT_ZOOM,
+  focusPadding,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -318,16 +356,10 @@ export default function MapComponent({
 
     if (autoFit && hasValidBounds) {
       try {
-        let padding = 120;
-        if (typeof window !== 'undefined') {
-          const isMobile = window.innerWidth < 768;
-          padding = isMobile
-            ? { top: 80, right: 60, bottom: 320, left: 60 }
-            : { top: 140, right: 240, bottom: 320, left: 240 };
-        }
+        const padding = getViewportPadding(fitPadding, DEFAULT_FIT_PADDING);
         mapRef.current.fitBounds(bounds, {
           padding,
-          maxZoom: 14,
+          maxZoom: maxAutoFitZoom,
           duration: 800,
         });
       } catch (err) {
