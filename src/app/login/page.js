@@ -53,8 +53,8 @@ export default function LoginPage() {
 
   return (
     <main className='relative isolate flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden bg-[var(--background)]'>
-      <div className='absolute -z-10 h-[140%] w-[140%] animate-[pulse_14s_ease-in-out_infinite] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_62%)]' />
-      <section className='w-full max-w-xl rounded-[32px] border border-[var(--foreground)]/12 bg-[var(--background)]/85 px-8 py-10 shadow-[0_28px_80px_rgba(0,0,0,0.22)] backdrop-blur-2xl sm:px-12 sm:py-14'>
+      <div className='absolute -z-10 h-[120%] w-[140%] max-w-[960px] animate-[pulse_16s_ease-in-out_infinite] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.065),transparent_70%)]' />
+      <section className='w-full max-w-xl rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-14'>
         <header className='space-y-3 text-center'>
           <span className='ea-label ea-label--muted'>Member Access</span>
           <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)]'>
@@ -114,7 +114,7 @@ export default function LoginPage() {
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <button
               type='submit'
-              className='nav-action nav-cta h-11 flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60'
+              className='nav-action nav-cta !inline-flex h-11 flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60'
               disabled={loading}>
               {loading ? 'Connecting…' : 'Connect'}
             </button>
@@ -123,7 +123,7 @@ export default function LoginPage() {
               type='button'
               onClick={handleResetPassword}
               disabled={loading}
-              className='nav-action h-10 justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 disabled:cursor-not-allowed disabled:opacity-60'>
+              className='nav-action !inline-flex h-10 justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 disabled:cursor-not-allowed disabled:opacity-60'>
               {loading ? 'Sending…' : 'Reset password'}
             </button>
           </div>
