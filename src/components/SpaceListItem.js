@@ -1,193 +1,319 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import MapComponent from '@/components/MapComponent';
 import Image from 'next/image';
 
-export default function SpaceListItem({ space }) {
+function normalizeType(type) {
+  if (!type) return 'space';
+  return String(type).toLowerCase();
+}
+
+export default function SpaceListItem({
+  space,
+  variant = 'compact',
+  onFocus,
+  isActive = false,
+  surface = 'card',
+  className = '',
+  showActions = true,
+}) {
   const router = useRouter();
-  const [address, setAddress] = useState('');
-  const [mapOpen, setMapOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Build an optimized image URL when coming from Supabase Storage
-  const buildOptimizedSrc = (url, width = 600) => {
-    if (!url) return '';
+  const typeLabel = normalizeType(space.type);
+  const cityLabel =
+    space.city ||
+    space.space_city ||
+    space.address ||
+    space.space_address ||
+    'Unknown location';
+
+  const websiteLabel = useMemo(() => {
+    if (!space.website) return null;
     try {
-      const u = new URL(url);
-      if (u.hostname.includes('supabase.co')) {
-        u.searchParams.set('width', String(width));
-        u.searchParams.set('quality', '70');
-        u.searchParams.set('format', 'webp');
-        return u.toString();
-      }
-      return url;
+      return new URL(space.website).hostname.replace(/^www\./, '');
     } catch {
-      return url;
+      return space.website;
     }
+  }, [space.website]);
+
+  const directionsUrl = useMemo(() => {
+    const lat = parseFloat(space.latitude ?? space.space_latitude ?? '');
+    const lng = parseFloat(space.longitude ?? space.space_longitude ?? '');
+    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+        `${lat},${lng}`
+      )}`;
+    }
+    const destinationParts = [
+      space.address,
+      space.space_address,
+      space.city,
+      space.space_city,
+    ].filter(Boolean);
+    if (destinationParts.length === 0) return null;
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+      destinationParts.join(', ')
+    )}`;
+  }, [
+    space.latitude,
+    space.space_latitude,
+    space.longitude,
+    space.space_longitude,
+    space.address,
+    space.space_address,
+    space.city,
+    space.space_city,
+  ]);
+
+  const displayAddress = useMemo(() => {
+    const addressParts = [
+      space.address || space.space_address || '',
+      space.city || space.space_city || '',
+    ]
+      .map((part) => String(part || '').trim())
+      .filter(Boolean);
+
+    if (addressParts.length > 0) {
+      return addressParts.join(', ');
+    }
+    return cityLabel;
+  }, [
+    space.address,
+    space.space_address,
+    space.city,
+    space.space_city,
+    cityLabel,
+  ]);
+
+  const canFocus = Boolean(onFocus && space.latitude && space.longitude);
+
+  const handleFocus = (event) => {
+    if (!canFocus) return;
+    event?.stopPropagation?.();
+    onFocus?.(space);
   };
 
-  useEffect(() => {
-    if (space.latitude && space.longitude) {
-      const lng = Number(space.longitude);
-      const lat = Number(space.latitude);
-      if (!isNaN(lng) && !isNaN(lat)) {
-        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-        fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`
-        )
-          .then((res) => res.json())
-          .then((geoData) => {
-            if (geoData.features && geoData.features.length > 0) {
-              const feature = geoData.features[0];
-              const streetPart = feature.address
-                ? `${feature.address} ${feature.text}`
-                : feature.text;
-              const postcodeContext = feature.context?.find((c) =>
-                c.id.startsWith('postcode')
-              );
-              const postcode = postcodeContext ? postcodeContext.text : '';
-              const formatted = postcode
-                ? `${streetPart}, ${postcode}`
-                : streetPart;
-              setAddress(formatted);
-            } else {
-              setAddress('UNKNOWN ADDRESS');
-            }
-          })
-          .catch((err) => {
-            console.error('Reverse geocoding error:', err);
-            setAddress('UNKNOWN ADDRESS');
-          });
-      }
-    }
-  }, [space.latitude, space.longitude]);
-
-  const toggleMap = (e) => {
-    e.stopPropagation();
-    setMapOpen((prev) => !prev);
-  };
-
-  const handleNavigation = () => {
+  const handleNavigate = (event) => {
+    event.stopPropagation();
     router.push(`/spaces/${space.id}`);
   };
 
-  // Helper function to truncate text
-  const truncateText = (text, limit = 150) => {
-    if (!text) return '';
-    return text.length > limit ? text.substring(0, limit) : text;
+  const handleExternalLinkClick = (event) => {
+    event.stopPropagation();
   };
 
-  // Render description with read more / read less toggling
-  const renderDescription = () => {
-    if (!space.description) return null;
-    const limit = 400;
-    if (space.description.length <= limit) {
-      return <p className='mt-2 text-sm'>{space.description}</p>;
-    }
-    if (isExpanded) {
-      return (
-        <div className='mt-2 text-sm text-[var(--foreground)]'>
-          <p>{space.description}</p>
-          <button
-            className='mt-2 text-sm text-[var(--foreground)]'
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(false);
-            }}>
-            Read less
-          </button>
-        </div>
-      );
-    } else {
-      return (
-        <div className='mt-2 text-sm text-[var(--foreground)] '>
-          <p>{truncateText(space.description, limit)}(...)</p>
-          <button
-            className='mt-2 text-sm text-[var(--foreground)]'
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(true);
-            }}>
-            Read more
-          </button>
-        </div>
-      );
-    }
-  };
+  if (variant === 'detail') {
+    return (
+      <article
+        className={`space-detail-card bg-[var(--background)]/85 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl ${className}`.trim()}>
+        <div className='grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_360px]'>
+          <div className='space-y-5'>
+            <header className='space-y-3'>
+              <span className='ea-label ea-label--muted'>
+                {cityLabel.toUpperCase()}
+              </span>
+              <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)]'>
+                {space.name || 'Untitled space'}
+              </h1>
+              {displayAddress && directionsUrl ? (
+                <a
+                  href={directionsUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  onClick={handleExternalLinkClick}
+                  className='text-sm uppercase tracking-[0.22em] text-[var(--foreground)]/70 underline underline-offset-4 hover:text-[var(--foreground)]'>
+                  {displayAddress}
+                </a>
+              ) : (
+                displayAddress && (
+                  <p className='text-sm uppercase tracking-[0.22em] text-[var(--foreground)]/60'>
+                    {displayAddress}
+                  </p>
+                )
+              )}
+              <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
+                <div className='inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-3 py-1 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
+                  <span className='text-[var(--foreground)]'>
+                    {typeLabel || 'other'}
+                  </span>
+                </div>
 
-  const infoContent = (
-    <div className='cursor-pointer'>
-      <div className='flex items-center gap-2'>
-        <h2 className='text-lg font-semibold'>{space.name}</h2>
-        <p className='text-sm italic'>
-          ({space.type ? space.type.toLowerCase() : 'default'})
-        </p>
-      </div>
-      {address && (
-        <button
-          onClick={toggleMap}
-          className='block text-sm mt-1 underline'>
-          {address}
-        </button>
-      )}
-      <p className='text-sm mb-1'>{space.city}</p>
-      {space.website && (
-        <p className='mt-1'>
-          <a
-            href={space.website}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-xs uppercase'
-            onClick={(e) => e.stopPropagation()}>
-            VISIT WEBSITE
-          </a>
-        </p>
-      )}
-      {renderDescription()}
-    </div>
-  );
+                {websiteLabel && (
+                  <a
+                    href={space.website}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    onClick={handleExternalLinkClick}
+                    className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                    Visit website
+                  </a>
+                )}
+              </div>
+            </header>
 
-  // Wrap the infoContent so clicking anywhere navigates to the space page.
-  const mainContent = <div onClick={handleNavigation}>{infoContent}</div>;
+            {space.description && (
+              <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
+                {space.description}
+              </p>
+            )}
+
+            <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
+              {onFocus && space.latitude && space.longitude && (
+                <button
+                  type='button'
+                  onClick={handleFocus}
+                  className='nav-action nav-cta h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                  View on map
+                </button>
+              )}
+            </div>
+          </div>
+
+          {space.image_url && (
+            <div className='relative h-[260px] overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:h-full'>
+              <Image
+                src={space.image_url}
+                alt={space.name || 'Space image'}
+                fill
+                sizes='(max-width: 768px) 80vw, 360px'
+                className='object-cover'
+                priority
+              />
+            </div>
+          )}
+        </div>
+      </article>
+    );
+  }
+
+  const compactBaseClass = 'space-card group rounded-3xl px-3 py-3 transition';
+  const compactSurfaceClass =
+    surface === 'overlay'
+      ? 'border border-white/70 bg-[rgba(255,255,255,0.92)] text-[#1b1b1b] shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl'
+      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
+  const compactActiveClass =
+    surface === 'overlay'
+      ? isActive
+        ? 'bg-white'
+        : ''
+      : isActive
+      ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
+      : '';
+  const compactFocusClass = canFocus
+    ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
+    : '';
+
+  const overlayActionBase =
+    'inline-flex h-9 w-full items-center justify-center rounded-full px-3 text-[11px] uppercase tracking-[0.32em] transition';
+  const compactPrimaryActionVisual =
+    surface === 'overlay'
+      ? `${overlayActionBase} bg-[#1b1b1b] text-white shadow-[0_12px_34px_rgba(0,0,0,0.25)] hover:bg-[#1b1b1b]/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]`
+      : 'nav-action nav-cta !inline-flex';
+  const compactTertiaryActionVisual =
+    surface === 'overlay'
+      ? `${overlayActionBase} bg-white/12 text-[#1f1f1f] border border-[#1b1b1b]/20 hover:bg-white/22 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/25`
+      : 'nav-action !inline-flex';
+  const compactActionBase =
+    surface === 'overlay'
+      ? ''
+      : 'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
+  const compactFooterClass =
+    surface === 'overlay'
+      ? 'mt-3 flex flex-col gap-2'
+      : 'mt-3 flex flex-wrap items-center gap-2';
+
+  const titleClass =
+    surface === 'overlay'
+      ? 'truncate text-base font-semibold text-[#1b1b1b]'
+      : 'truncate text-base font-semibold text-[var(--foreground)]';
+  const cityClass =
+    surface === 'overlay'
+      ? 'text-[11px] uppercase tracking-[0.32em] text-[#454545]'
+      : 'text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55';
+  const typePillClass =
+    surface === 'overlay'
+      ? 'shrink-0 rounded-full border border-[#1b1b1b]/25 bg-white/65 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[#1b1b1b]'
+      : 'shrink-0 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70';
+  const addressClass =
+    surface === 'overlay'
+      ? 'mt-1 inline-flex text-[11px] uppercase tracking-[0.22em] text-[#1f1f1f]'
+      : 'mt-1 inline-flex text-[11px] uppercase tracking-[0.22em] text-[var(--foreground)]/65';
+  const addressLinkHover =
+    surface === 'overlay'
+      ? 'hover:text-[#000]'
+      : 'hover:text-[var(--foreground)]';
+
+  const compactClasses = [
+    compactBaseClass,
+    compactSurfaceClass,
+    compactActiveClass,
+    compactFocusClass,
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <div className='border-b border-[var(--foreground)] pb-2 text-left relative flex flex-col-reverse md:flex-row md:justify-between md:items-stretch'>
-      <div className='flex-1'>{mainContent}</div>
-      {space.image_url && (
-        <div className='my-2 md:mt-0 md:ml-4'>
-          <Image
-            src={buildOptimizedSrc(space.image_url, 600)}
-            alt={space.name || 'space image'}
-            width={300}
-            height={400}
-            sizes='(max-width: 768px) 100vw, 300px'
-            className='object-cover rounded-sm'
-          />
+    <article
+      className={compactClasses}
+      role={canFocus ? 'button' : undefined}
+      tabIndex={canFocus ? 0 : undefined}
+      onClick={handleFocus}
+      aria-pressed={canFocus ? (isActive ? 'true' : 'false') : undefined}
+      onKeyDown={(event) => {
+        if (!canFocus) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleFocus(event);
+        }
+      }}>
+      <header className='flex flex-wrap items-center justify-between gap-2'>
+        <div className='min-w-0 flex-1'>
+          <h3 className={titleClass}>
+            {space.name || 'Untitled space'}
+          </h3>
+          <p className={cityClass}>{cityLabel}</p>
+          {displayAddress && directionsUrl ? (
+            <a
+              href={directionsUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              onClick={handleExternalLinkClick}
+              className={`${addressClass} underline underline-offset-4 ${addressLinkHover}`}>
+              {displayAddress}
+            </a>
+          ) : (
+            <span className={addressClass}>{displayAddress}</span>
+          )}
         </div>
-      )}
-      {mapOpen && (
-        <div className='fixed inset-0 z-50 flex justify-end'>
-          <div
-            className='absolute inset-0 bg-[var(--background)]/80 backdrop-blur-md'
-            onClick={toggleMap}
-            aria-hidden='true'
-          />
-          <div className='relative z-20 w-80 md:w-96 h-full bg-[var(--background)]/80 backdrop-blur-md flex flex-col transition-transform duration-300'>
+        <span className={typePillClass}>
+          {typeLabel}
+        </span>
+      </header>
+
+      {showActions && (
+        <footer className={compactFooterClass}>
+          <button
+            type='button'
+            onClick={handleNavigate}
+            className={`${compactPrimaryActionVisual} ${
+              surface === 'overlay' ? '' : compactActionBase
+            }`}>
+            DETAILS
+          </button>
+          {onFocus && space.latitude && space.longitude && (
             <button
-              className='absolute top-2 left-2 text-white text-2xl z-30 cursor-pointer'
-              onClick={toggleMap}
-              aria-label='Close map'>
-              ✕
+              type='button'
+              onClick={handleFocus}
+              className={`${compactTertiaryActionVisual} ${
+                surface === 'overlay' ? '' : compactActionBase
+              }`}>
+              View on map
             </button>
-            <MapComponent
-              spaces={[space]}
-              address={address}
-            />
-          </div>
-        </div>
+          )}
+        </footer>
       )}
-    </div>
+    </article>
   );
 }

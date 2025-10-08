@@ -40,7 +40,7 @@ export default function RootLayout({ children }) {
         <FilterProvider>
           <NavBar />
           {/* Page Content */}
-          <main className='w-full px-4 py-2 flex-1'>
+          <main className='flex-1 w-full py-4'>
             <div className='page-content'>{children}</div>
           </main>
           <Footer />

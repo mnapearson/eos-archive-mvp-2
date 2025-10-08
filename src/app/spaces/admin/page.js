@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import Link from 'next/link';
 import Spinner from '@/components/Spinner';
 import EventSubmissionForm from '@/components/EventSubmissionForm';
 import SpaceImageUpload from '@/components/SpaceImageUpload';
+import SpaceListItem from '@/components/SpaceListItem';
 import AdminEventsManager from '@/components/AdminEventsManager';
 import { toast } from 'react-hot-toast';
 
@@ -20,7 +20,6 @@ export default function SpaceAdminDashboard() {
     website: '',
     description: '',
   });
-  const [updateError, setUpdateError] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
 
   const isValidUrl = (url) => {
@@ -34,8 +33,6 @@ export default function SpaceAdminDashboard() {
 
   async function fetchSpaceRecord(currentSpace) {
     setLoading(true);
-    setUpdateError(null);
-
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -74,7 +71,6 @@ export default function SpaceAdminDashboard() {
   }, []);
 
   const handleSave = async () => {
-    setUpdateError(null);
     if (formValues.website && !isValidUrl(formValues.website)) {
       toast.error(
         'Please enter a valid website URL starting with http:// or https://'
@@ -98,7 +94,6 @@ export default function SpaceAdminDashboard() {
 
     if (error) {
       console.error('Error updating space details', error);
-      setUpdateError('Failed to update details. Please try again.');
       return;
     }
 
@@ -117,185 +112,184 @@ export default function SpaceAdminDashboard() {
     setUpdateError(null);
   };
 
+  const tabOptions = useMemo(
+    () => [
+      { id: 'details', label: 'Space details' },
+      { id: 'events', label: 'Submit events' },
+      { id: 'archive', label: 'Archive' },
+    ],
+    []
+  );
+
   if (loading) {
     return <Spinner />;
   }
 
   if (!space) {
     return (
-      <div className='max-w-lg mx-auto'>
-        <p>No space record found for your account.</p>
+      <div className='mx-auto max-w-[92vw] py-16 text-center text-sm text-[var(--foreground)]/70 lg:max-w-5xl'>
+        No space record found for your account. If you believe this is an
+        error, please contact{' '}
+        <a
+          href='mailto:hello@eosarchive.app'
+          className='underline hover:text-[var(--foreground)]'>
+          hello@eosarchive.app
+        </a>
+        .
       </div>
     );
   }
 
   return (
-    <div className='mx-auto'>
-      <div className='tabs flex gap-2 mb-4'>
-        <button
-          className='button'
-          onClick={() => setActiveTab('details')}>
-          Space Details
-        </button>
-        <button
-          className='button'
-          onClick={() => setActiveTab('events')}>
-          Submit Events
-        </button>
-        <button
-          className='button'
-          onClick={() => setActiveTab('archive')}>
-          Archive
-        </button>
-      </div>
+    <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>
+      <div className='pointer-events-none absolute inset-x-0 top-[-6%] z-0 h-[120%] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.05),transparent_70%)]' />
 
-      {activeTab === 'details' && (
-        <div className='space-details'>
-          <div className='flex flex-col md:flex-row gap-4'>
-            <div className='flex-1'>
-              <div className='border p-4 rounded-md shadow mb-6 glow-box'>
-                <h2 className='font-semibold text-lg'>{space.name}</h2>
-                <p className='text-sm italic'>{space.type}</p>
-                <p className='text-sm mb-2'>
-                  {space.address}, {space.city}
-                </p>
-                {isEditing ? (
-                  <>
-                    <div className='mb-2'>
-                      <label className='block text-sm font-semibold mb-1'>
-                        Website
-                      </label>
-                      <input
-                        type='url'
-                        value={formValues.website}
-                        onChange={(e) =>
-                          setFormValues({
-                            ...formValues,
-                            website: e.target.value,
-                          })
-                        }
-                        className='input'
-                        placeholder='https://example.com'
-                      />
-                    </div>
-                    <div className='mb-2'>
-                      <label className='block text-sm font-semibold mb-1'>
-                        Description
-                      </label>
-                      <textarea
-                        value={formValues.description}
-                        onChange={(e) =>
-                          setFormValues({
-                            ...formValues,
-                            description: e.target.value,
-                          })
-                        }
-                        className='input'
-                        rows={4}
-                        placeholder='Describe your space...'
-                      />
-                    </div>
-                    <div className='flex justify-between mt-4'>
-                      <button
-                        onClick={handleSave}
-                        className='glow-button'>
-                        Save
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className='glow-button'>
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {space.website ? (
-                      <p className='mb-2'>
-                        <a
-                          href={space.website}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-sm text-[var(--accent)] underline hover:text-[var(--foreground)] transition'>
-                          VISIT WEBSITE
-                        </a>
-                      </p>
-                    ) : (
-                      <p className='mb-2 text-sm text-gray-500'>
-                        No website provided.
-                      </p>
-                    )}
-                    {space.description ? (
-                      <p className='mb-2 text-sm'>{space.description}</p>
-                    ) : (
-                      <p className='mb-2 text-sm text-gray-500'>
-                        No description provided.
-                      </p>
-                    )}
-                    <div className='flex gap-4 justify-center mt-4'>
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className='glow-button'>
-                        Edit details
-                      </button>
-                      <button
-                        onClick={async () => {
-                          await supabase.auth.signOut();
-                          router.push('/login');
-                        }}
-                        className='glow-button'>
-                        Disconnect
-                      </button>
-                    </div>
-                  </>
-                )}
+      <div className='relative z-10 mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
+        <header className='space-y-4'>
+          <span className='ea-label ea-label--muted'>Space dashboard</span>
+          <h1 className='quick-view__title text-balance'>Manage {space.name}</h1>
+          <p className='max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/70 sm:text-base'>
+            Update your venue profile, upload visuals, and publish upcoming
+            events from a single workspace. Remember to keep details current so
+            explorers know what&rsquo;s happening at your space.
+          </p>
+        </header>
+
+        <nav className='flex flex-wrap gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
+          {tabOptions.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type='button'
+                onClick={() => setActiveTab(tab.id)}
+                className={`nav-action !inline-flex h-10 px-4 transition ${
+                  isActive
+                    ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
+                    : ''
+                }`}>
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        {activeTab === 'details' && (
+          <section className='space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+            {isEditing ? (
+              <div className='space-y-6 rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8'>
+                <div className='space-y-2'>
+                  <label className='ea-label ea-label--muted' htmlFor='details-website'>
+                    Website
+                  </label>
+                  <input
+                    id='details-website'
+                    type='url'
+                    value={formValues.website}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        website: e.target.value,
+                      })
+                    }
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    placeholder='https://example.com'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <label className='ea-label ea-label--muted' htmlFor='details-description'>
+                    Description
+                  </label>
+                  <textarea
+                    id='details-description'
+                    value={formValues.description}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        description: e.target.value,
+                      })
+                    }
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    rows={4}
+                    placeholder='Describe your space...'
+                  />
+                </div>
+                <div className='flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4'>
+                  <button
+                    onClick={handleSave}
+                    className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] shadow-[0_18px_40px_rgba(0,0,0,0.24)] disabled:opacity-60 sm:w-auto'>
+                    Save changes
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className='nav-action !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
+                    Cancel
+                  </button>
+                </div>
               </div>
-              <div className='mb-2'>
-                {space && <SpaceImageUpload spaceId={space.id} />}
+            ) : (
+              <SpaceListItem
+                space={space}
+                variant='compact'
+                surface='overlay'
+                showActions={false}
+                className='border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8'
+              />
+            )}
+
+            {!isEditing && (
+              <div>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] shadow-[0_18px_40px_rgba(0,0,0,0.24)] sm:w-auto'>
+                  Edit details
+                </button>
               </div>
-            </div>
-            {space.image_url && (
-              <div className='md:w-1/3'>
+            )}
+
+            <div className='grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]'>
+              <SpaceImageUpload spaceId={space.id} />
+              {space.image_url && (
                 <img
                   src={space.image_url}
                   alt={space.name}
-                  className='w-full object-contain rounded-md'
+                  className='w-full rounded-3xl object-cover shadow-[0_18px_48px_rgba(0,0,0,0.18)]'
                 />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              )}
+            </div>
+          </section>
+        )}
 
-      {activeTab === 'events' && (
-        <div className='events-management space-y-8'>
-          {/* <div className='grid grid-cols-1 md:grid-cols-2 gap-4'> */}
-          <div>
+        {activeTab === 'events' && (
+          <section className='space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
             <EventSubmissionForm spaceId={space.id} />
-          </div>
-          {/* <div>
-              <h3 className='font-bold mb-2'>pending events</h3>
-              <AdminEventsManager
-                spaceId={space.id}
-                filter='pending'
-                editable={true}
-              />
-            </div> */}
-          {/* </div> */}
-        </div>
-      )}
+          </section>
+        )}
 
-      {activeTab === 'archive' && (
-        <div className='archive-events'>
-          <h3 className='text-lg font-bold mb-2'>archived events</h3>
-          <AdminEventsManager
-            spaceId={space.id}
-            filter='approved'
-            editable={true}
-            emptyMessage='No archived events yet for this space.'
-          />
+        {activeTab === 'archive' && (
+          <section className='space-y-4 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+            <h3 className='text-lg font-semibold tracking-tight text-[var(--foreground)]'>
+              Archived events
+            </h3>
+            <AdminEventsManager
+              spaceId={space.id}
+              filter='archive'
+              editable={true}
+              emptyMessage='No archived events yet for this space.'
+            />
+          </section>
+        )}
+        <div className='flex justify-end border-t border-[var(--foreground)]/12 pt-6'>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push('/login');
+            }}
+            className='nav-action !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
+            Disconnect
+          </button>
         </div>
-      )}
-    </div>
+      </div>
+    </main>
   );
 }

@@ -1,198 +1,428 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import MapComponent from '@/components/MapComponent';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import SpaceListItem from '@/components/SpaceListItem';
 import markerColors from '@/lib/markerColors';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const MapComponent = dynamic(() => import('@/components/MapComponent'), {
+  ssr: false,
+  loading: () => <div className='w-full h-full bg-[var(--background)]/60' />,
+});
 
-export default function SpacesPage() {
+function normaliseType(type) {
+  if (!type) return 'default';
+  return String(type).toLowerCase();
+}
+
+function prettifyType(type) {
+  if (!type || type === 'default') return 'other';
+  return type.replace(/[_-]+/g, ' ').trim();
+}
+
+export default function SpacesMapPage() {
   const [spaces, setSpaces] = useState([]);
   const [activeTypes, setActiveTypes] = useState([]);
-  // Toggle between list and map view
-  const [isListView, setIsListView] = useState(true);
-  // Search query for filtering (used in both views now)
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Legend open/closed (mobile defaults to closed)
-  const [legendOpen, setLegendOpen] = useState(true);
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const small = window.matchMedia('(max-width: 640px)').matches;
-      setLegendOpen(!small); // open on desktop, closed on mobile
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [focusedSpaceId, setFocusedSpaceId] = useState(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const mapSectionRef = useRef(null);
 
   useEffect(() => {
-    async function fetchAllSpaces() {
+    let isMounted = true;
+    async function loadSpaces() {
+      setLoading(true);
+      setError('');
       try {
-        const { data: spacesData, error } = await supabase
-          .from('spaces')
-          .select(
-            'id, name, type, latitude, longitude, city, website, description, image_url'
-          );
-        if (error) {
-          console.error('Error fetching spaces:', error);
-          return;
+        const res = await fetch('/api/spaces');
+        if (!res.ok) {
+          throw new Error(`Failed to load spaces (${res.status})`);
         }
-        setSpaces(spacesData);
+        const data = await res.json();
+        if (isMounted) {
+          setSpaces(Array.isArray(data) ? data : []);
+        }
       } catch (err) {
-        console.error('Unexpected error fetching spaces:', err);
+        console.error('Error fetching spaces:', err);
+        if (isMounted) {
+          setError('Unable to load spaces right now.');
+          setSpaces([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
-    fetchAllSpaces();
+
+    loadSpaces();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Compute unique marker types.
-  const uniqueTypes = Array.from(
-    new Set(
-      spaces.map((space) => (space.type ? space.type.toLowerCase() : 'default'))
-    )
-  );
+  const typeFilters = useMemo(() => {
+    const counts = new Map();
+    spaces.forEach((space) => {
+      const key = normaliseType(space.type);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
 
-  // Toggle activeTypes.
+    return Array.from(counts.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0], undefined, { sensitivity: 'base' })
+    );
+  }, [spaces]);
+
+  const filteredSpaces = useMemo(() => {
+    if (!spaces.length) return [];
+
+    const q = searchQuery.trim().toLowerCase();
+    const matchesType = (space) => {
+      if (activeTypes.length === 0) return true;
+      return activeTypes.includes(normaliseType(space.type));
+    };
+    const matchesQuery = (space) => {
+      if (!q) return true;
+      const haystack = [space.name, space.city, space.website]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    };
+
+    return spaces.filter((space) => matchesType(space) && matchesQuery(space));
+  }, [spaces, activeTypes, searchQuery]);
+
+  const totalCount = filteredSpaces.length;
+
+  useEffect(() => {
+    setFocusedSpaceId(null);
+    setOverlayOpen(false);
+  }, [searchQuery, activeTypes]);
+
+  const focusedSpace = useMemo(() => {
+    if (!focusedSpaceId) return null;
+    return (
+      spaces.find((space) => String(space.id) === String(focusedSpaceId)) ||
+      null
+    );
+  }, [focusedSpaceId, spaces]);
+
+  useEffect(() => {
+    if (focusedSpaceId && !focusedSpace) {
+      setOverlayOpen(false);
+    }
+  }, [focusedSpaceId, focusedSpace]);
+
+  const scrollToMap = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    if (!mapSectionRef.current) return;
+    const shouldScroll = window.innerWidth < 1024;
+    if (!shouldScroll) return;
+    mapSectionRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, []);
+
   const toggleType = (type) => {
     setActiveTypes((prev) => {
-      if (prev.length === 0) return [type];
-      else if (prev.includes(type)) return prev.filter((t) => t !== type);
-      else return [...prev, type];
+      if (prev.includes(type)) {
+        return prev.filter((item) => item !== type);
+      }
+      return [...prev, type];
     });
   };
 
-  // Filter spaces by activeTypes.
-  const filteredByType =
-    activeTypes.length > 0
-      ? spaces.filter((space) => {
-          const typeKey = space.type ? space.type.toLowerCase() : 'default';
-          return activeTypes.includes(typeKey);
-        })
-      : spaces;
+  const clearTypes = () => setActiveTypes([]);
 
-  // Apply search filter for BOTH views (list & map)
-  const finalFilteredSpaces = filteredByType.filter((space) => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      (space.name && space.name.toLowerCase().includes(query)) ||
-      (space.city && space.city.toLowerCase().includes(query)) ||
-      (space.website && space.website.toLowerCase().includes(query))
-    );
-  });
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
-  // Sort the final spaces list alphabetically by the space name.
-  const sortedSpaces = [...finalFilteredSpaces].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-  );
+  const hasActiveFilters = activeTypes.length > 0 || searchQuery.trim();
 
   return (
-    <main className='px-4 py-6 sm:px-6 lg:px-8'>
-      <div className='mx-auto h-screen min-h-0 flex flex-col'>
-        <header className='mb-3 sm:mb-4'>
-          <h1 className='text-[11px] tracking-wide uppercase opacity-60'>
-            Spaces ARCHIVE
-          </h1>
-          <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
-            Browse the growing number of selected spaces included in the
-            archive. Use search to filter by name or city, toggle the legend to
-            filter by type, and switch between map and list views.
-          </p>
-        </header>
-        <div className='mb-2 flex items-center gap-2'>
+    <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
+      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 space-y-4 lg:hidden'>
+        <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
+          Spaces archive
+        </span>
+        <h1 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)]'>
+          Map of independent scenes
+        </h1>
+        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
+          Explore the venues, studios, and cultural spaces that power the
+          archive. Filter by type, search for a city or name, and dive into the
+          map.
+        </p>
+        <form
+          role='search'
+          onSubmit={(event) => event.preventDefault()}
+          className='nav-search nav-search--panel w-full sm:max-w-xs'>
           <input
-            type='text'
-            placeholder='Search by space name or city'
+            type='search'
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className='input flex-grow'
+            onChange={handleSearchChange}
+            placeholder='Search by space or city'
+            className='nav-search__input text-sm'
+            aria-label='Search spaces'
           />
-
           <button
-            onClick={() => setIsListView(!isListView)}
-            className='button whitespace-nowrap ml-auto'>
-            {isListView ? 'SHOW MAP' : 'SHOW LIST'}
-          </button>
-        </div>
-        {/* Main content: List or Map view */}
-        <div
-          className={`flex-1 pb-20 relative min-h-0 ${
-            isListView ? 'overflow-auto' : 'overflow-hidden'
-          }`}>
-          {isListView ? (
-            <SpacesList spaces={sortedSpaces} />
-          ) : (
-            <>
-              <MapComponent
-                spaces={sortedSpaces}
-                initialCenter={{ lat: 51.3397, lng: 12.3731 }}
-                initialZoom={11}
-                activeTypes={activeTypes}
+            type='submit'
+            className='nav-search__submit'
+            aria-label='Search spaces'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='18'
+              height='18'
+              viewBox='0 0 24 24'
+              aria-hidden='true'>
+              <path
+                fill='currentColor'
+                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
               />
-              {/* Map legend (top-left) with mobile-friendly pill toggle */}
-              <div className='absolute top-2 left-2 z-10'>
-                <button
-                  onClick={() => setLegendOpen((o) => !o)}
-                  className='button'
-                  aria-expanded={legendOpen}
-                  aria-controls='map-legend-panel'>
-                  {legendOpen ? 'Legend ▾' : 'Legend ▸'}
-                </button>
+            </svg>
+          </button>
+        </form>
+      </section>
 
-                {legendOpen && (
-                  <div
-                    id='map-legend-panel'
-                    className='mt-2 bg-[var(--background)]/80 backdrop-blur-md border rounded px-2 py-2 shadow-md w-[min(90vw,320px)] sm:w-auto'>
-                    <div className='flex flex-col gap-2 max-h-[40vh] overflow-auto sm:max-h-none sm:flex-row sm:flex-wrap'>
-                      {uniqueTypes.map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => toggleType(type)}
-                          className={`flex items-center gap-2 px-2 py-1 text-xs rounded w-full sm:w-auto ${
-                            activeTypes.length === 0 ||
-                            activeTypes.includes(type)
-                              ? 'border border-[var(--foreground)]'
-                              : 'opacity-50'
-                          }`}>
-                          <span
-                            className='w-3 h-3 rounded-full border border-[var(--foreground)] flex-shrink-0'
-                            style={{
-                              backgroundColor:
-                                markerColors[type] || markerColors.default,
-                            }}
-                          />
-                          <span className='truncate'>{type.toUpperCase()}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      <section
+        ref={mapSectionRef}
+        className='relative order-2 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
+        <MapComponent
+          spaces={filteredSpaces}
+          activeTypes={activeTypes}
+          autoFit
+          fitKey={`split-${filteredSpaces.length}`}
+          focusSpaceId={focusedSpaceId}
+          initialCenter={{ lat: 51.3397, lng: 12.3731 }}
+          initialZoom={11}
+          onMarkerSelect={(id) => {
+            if (id == null) return;
+            setFocusedSpaceId((prev) =>
+              String(prev) === String(id) ? prev : id
+            );
+            setOverlayOpen(true);
+          }}
+          showPopups={false}
+        />
+        <FocusedSpaceOverlay
+          space={focusedSpace}
+          open={overlayOpen}
+          onClose={() => setOverlayOpen(false)}
+        />
+      </section>
+
+      <SpacesListPanel
+        spaces={filteredSpaces}
+        totalCount={totalCount}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onClearFilters={() => {
+          setSearchQuery('');
+          clearTypes();
+        }}
+        hasActiveFilters={hasActiveFilters}
+        typeFilters={typeFilters}
+        activeTypes={activeTypes}
+        toggleType={toggleType}
+        loading={loading}
+        error={error}
+        onFocus={(space) => {
+          if (!space?.id) return;
+          setFocusedSpaceId(space.id);
+          setOverlayOpen(true);
+        }}
+        focusedId={focusedSpaceId}
+        scrollToMap={scrollToMap}
+      />
     </main>
   );
 }
 
-function SpacesList({ spaces }) {
-  if (spaces.length === 0) {
-    return <p className='text-sm italic'>No spaces found.</p>;
-  }
+function SpacesListPanel({
+  spaces,
+  totalCount,
+  searchQuery,
+  onSearchChange,
+  onClearFilters,
+  hasActiveFilters,
+  typeFilters,
+  activeTypes,
+  toggleType,
+  loading,
+  error,
+  onFocus,
+  focusedId,
+  scrollToMap,
+}) {
+  const statusLabel = loading
+    ? 'Loading spaces…'
+    : error
+    ? error
+    : `${totalCount} space${totalCount === 1 ? '' : 's'} visible`;
+
   return (
-    <>
-      <div className='space-y-4'>
-        {spaces.map((space) => (
-          <SpaceListItem
-            key={space.id}
-            space={space}
+    <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
+      <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
+        <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
+          Spaces archive
+        </span>
+        <h1 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)] sm:text-3xl'>
+          Map of independent scenes
+        </h1>
+        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
+          Explore the venues, studios, and cultural spaces that power the
+          archive. Filter by type, search for a city or name, and dive into the
+          map.
+        </p>
+        <form
+          role='search'
+          onSubmit={(event) => event.preventDefault()}
+          className='nav-search nav-search--panel mt-4 hidden w-full lg:flex'>
+          <input
+            type='search'
+            value={searchQuery}
+            onChange={onSearchChange}
+            placeholder='Search by space or city'
+            className='nav-search__input text-sm'
+            aria-label='Search spaces'
           />
-        ))}
+          <button
+            type='submit'
+            className='nav-search__submit'
+            aria-label='Search spaces'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='18'
+              height='18'
+              viewBox='0 0 24 24'
+              aria-hidden='true'>
+              <path
+                fill='currentColor'
+                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+              />
+            </svg>
+          </button>
+        </form>
       </div>
-      <p className='text-sm italic mt-4'>No more spaces found.</p>
-    </>
+
+      <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
+        {typeFilters.length > 0 && (
+          <div className='mt-3 space-y-2'>
+            <div className='flex flex-wrap gap-2'>
+              {typeFilters.map(([type, count]) => {
+                const active = activeTypes.includes(type);
+                const label = prettifyType(type);
+                return (
+                  <button
+                    key={type}
+                    type='button'
+                    onClick={() => toggleType(type)}
+                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.28em] transition ${
+                      active
+                        ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
+                        : 'border-[var(--foreground)]/22 bg-[var(--background)]/80 text-[var(--foreground)]/85 hover:border-[var(--foreground)]/40'
+                    }`}>
+                    <span
+                      className='h-3 w-3 rounded-full border border-[var(--foreground)]/30'
+                      style={{
+                        backgroundColor:
+                          markerColors[type] || markerColors.default,
+                      }}
+                    />
+                    <span>{label}</span>
+                    <span className='text-[var(--foreground)]/50'>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50 sm:flex-row sm:items-center sm:justify-between'>
+          <span>{statusLabel}</span>
+          <div className='flex items-center justify-between gap-3 sm:justify-end'>
+            {hasActiveFilters && (
+              <button
+                type='button'
+                onClick={onClearFilters}
+                className='nav-action h-8 rounded-full px-4 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/75 hover:text-[var(--foreground)]'>
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className='flex-1 overflow-y-auto px-6 py-6'>
+        {loading ? (
+          <p className='text-sm italic text-[var(--foreground)]/70'>
+            Loading spaces…
+          </p>
+        ) : error ? (
+          <p className='text-sm text-[var(--foreground)]/70'>{error}</p>
+        ) : spaces.length === 0 ? (
+          <p className='text-sm italic text-[var(--foreground)]/70'>
+            No spaces match filters.
+          </p>
+        ) : (
+          <div className='space-y-4'>
+            {spaces.map((space) => (
+              <SpaceListItem
+                key={space.id}
+                space={space}
+                variant='compact'
+                onFocus={(value) => {
+                  onFocus?.(value);
+                  if (value) {
+                    scrollToMap?.();
+                  }
+                }}
+                isActive={
+                  focusedId != null && String(focusedId) === String(space.id)
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function FocusedSpaceOverlay({ space, open, onClose }) {
+  if (!open || !space) return null;
+
+  return (
+    <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
+      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-white/70 bg-[rgba(247,247,247,0.92)] text-[#1b1b1b] shadow-[0_34px_90px_rgba(0,0,0,0.35)] backdrop-blur-2xl'>
+        <div className='flex items-center justify-between px-5 pt-4 text-[#2a2a2a]'>
+          <span className='ea-label tracking-[0.3em] text-[#3a3a3a]'>
+            Selected space
+          </span>
+          <button
+            type='button'
+            onClick={onClose}
+            aria-label='Close selected space'
+            className='ea-label text-[#3a3a3a] hover:text-[#1b1b1b]'>
+            Close
+          </button>
+        </div>
+        <div className='px-5 pb-5'>
+          <SpaceListItem
+            space={space}
+            variant='compact'
+            isActive
+            surface='overlay'
+            className='text-[#1b1b1b]'
+          />
+        </div>
+      </div>
+    </div>
   );
 }

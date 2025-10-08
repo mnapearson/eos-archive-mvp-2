@@ -15,8 +15,7 @@ export const CascadingFilterContext = createContext();
  *   city: ['Leipzig', 'Berlin'],
  *   space: ['xyz space'],
  *   date: [],
- *   category: ['DJ Night'],
- *   designer: []
+ *   category: ['DJ Night']
  * }
  *
  * The context also stores the dynamically available options for each category
@@ -29,7 +28,6 @@ export function CascadingFilterProvider({ children }) {
     space: [],
     date: [],
     category: [],
-    designer: [],
   });
 
   // The dynamically updated options (based on selectedFilters)
@@ -37,13 +35,12 @@ export function CascadingFilterProvider({ children }) {
   const [spaceOptions, setSpaceOptions] = useState([]);
   const [dateOptions, setDateOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
-  const [designerOptions, setDesignerOptions] = useState([]);
 
   /**
    * Fetch all possible filter options that match the current selectedFilters.
    * This means we:
    * 1) Build a Supabase query that filters by the user’s current selections
-   * 2) From the matching events, extract the distinct city, space, date, category, designer values
+ * 2) From the matching events, extract the distinct city, space, date, and category values
    * 3) Update the corresponding state variables (cityOptions, spaceOptions, etc.)
    */
   async function fetchAvailableOptions() {
@@ -53,7 +50,7 @@ export function CascadingFilterProvider({ children }) {
 
     let query = supabase
       .from('events')
-      .select('city, space, date, category, designer');
+      .select('city, space, date, category');
 
     // City filter
     if (selectedFilters.city.length > 0) {
@@ -66,10 +63,6 @@ export function CascadingFilterProvider({ children }) {
     // Category filter
     if (selectedFilters.category.length > 0) {
       query = query.in('category', selectedFilters.category);
-    }
-    // Designer filter
-    if (selectedFilters.designer.length > 0) {
-      query = query.in('designer', selectedFilters.designer);
     }
     // Date filter
     // This could be more complex if you store date ranges, etc.
@@ -89,7 +82,6 @@ export function CascadingFilterProvider({ children }) {
     setSpaceOptions(unique(events, 'space'));
     setDateOptions(unique(events, 'date'));
     setCategoryOptions(unique(events, 'category'));
-    setDesignerOptions(unique(events, 'designer'));
   }
 
   // Whenever the user’s selectedFilters changes, refetch the available options
@@ -107,7 +99,6 @@ export function CascadingFilterProvider({ children }) {
         spaceOptions,
         dateOptions,
         categoryOptions,
-        designerOptions,
       }}>
       {children}
     </CascadingFilterContext.Provider>

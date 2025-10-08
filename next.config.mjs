@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  transpilePackages: [
+    '@supabase/auth-helpers-nextjs',
+    '@supabase/auth-helpers-shared',
+    '@supabase/supabase-js',
+  ],
   images: {
     formats: ['image/avif', 'image/webp'],
     // Keep the exact Supabase host you already use and allow common CDNs

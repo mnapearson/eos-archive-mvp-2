@@ -93,7 +93,7 @@ export default function NewsletterForm() {
         </span>
       </label>
       <button
-        className='button w-full self-start justify-center px-6 sm:w-auto'
+        className='nav-cta newsletter__submit w-full justify-center sm:w-auto'
         disabled={state === 'loading'}>
         {state === 'loading' ? 'Subscribing…' : 'Subscribe'}
       </button>

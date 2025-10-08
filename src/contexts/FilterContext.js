@@ -1,157 +1,354 @@
 // src/contexts/FilterContext.js
 'use client';
 
-import { createContext, useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 export const FilterContext = createContext();
 
+const FILTER_KEYS = ['city', 'space', 'date', 'category'];
+
+function normalizeValue(value) {
+  return value ? String(value).trim() : '';
+}
+
 export function FilterProvider({ children }) {
-  // Multi-select state for filters
   const [selectedFilters, setSelectedFilters] = useState({
     city: [],
     space: [],
     date: [],
     category: [],
-    designer: [],
   });
 
-  // Options for filter dropdowns
-  const [cityOptions, setCityOptions] = useState([]);
-  const [spaceOptions, setSpaceOptions] = useState([]);
-  const [dateOptions, setDateOptions] = useState([]);
-  const [categoryOptions, setCategoryOptions] = useState([]);
-  const [designerOptions, setDesignerOptions] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
+  const [allSpaces, setAllSpaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [initializedFromQuery, setInitializedFromQuery] = useState(false);
 
   useEffect(() => {
-    fetchApprovedOptions();
-  }, [selectedFilters]);
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const [eventsResponse, spacesResponse] = await Promise.all([
+          fetch('/api/events'),
+          fetch('/api/spaces'),
+        ]);
 
-  async function fetchApprovedOptions() {
-    try {
-      // 1. Query the events table for approved events only.
-      let eventsQuery = supabase
-        .from('events')
-        .select('id, space_id, start_date, category, designer')
-        .eq('approved', true);
+        if (!eventsResponse.ok) {
+          const payload = await eventsResponse.json().catch(() => ({}));
+          throw new Error(
+            payload?.error || `Failed to load events (${eventsResponse.status})`
+          );
+        }
+        if (!spacesResponse.ok) {
+          const payload = await spacesResponse.json().catch(() => ({}));
+          throw new Error(
+            payload?.error || `Failed to load spaces (${spacesResponse.status})`
+          );
+        }
 
-      // 2. Apply event-based filters (date, category, designer) if any.
-      // We do NOT filter by city or space here because those live in the spaces table.
-      ['date', 'category', 'designer'].forEach((key) => {
-        if (selectedFilters[key] && selectedFilters[key].length > 0) {
-          const column = key === 'date' ? 'start_date' : key;
-          eventsQuery = eventsQuery.in(column, selectedFilters[key]);
+        const eventsData = await eventsResponse.json();
+        const spacesData = await spacesResponse.json();
+
+        setAllEvents((eventsData || []).filter((event) => event.approved));
+        setAllSpaces(spacesData || []);
+      } catch (err) {
+        console.error('Error fetching filter data:', err);
+        setAllEvents([]);
+        setAllSpaces([]);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  const spaceMap = useMemo(() => {
+    const map = new Map();
+    allSpaces.forEach((space) => {
+      map.set(space.id, {
+        ...space,
+        name: normalizeValue(space.name),
+        city: normalizeValue(space.city),
+      });
+    });
+    return map;
+  }, [allSpaces]);
+
+  const filterOptions = useMemo(() => {
+    const cities = new Set();
+    const spaces = new Set();
+    const dates = new Set();
+    const categories = new Set();
+
+    allSpaces.forEach((space) => {
+      const city = normalizeValue(space.city);
+      const name = normalizeValue(space.name);
+      if (city) cities.add(city);
+      if (name) spaces.add(name);
+    });
+
+    allEvents.forEach((event) => {
+      const category = normalizeValue(event.category);
+      const date = normalizeValue(event.start_date)
+        ? normalizeValue(event.start_date).slice(0, 10)
+        : '';
+      const fallbackCity = normalizeValue(event.city);
+
+      if (category) categories.add(category);
+      if (date) dates.add(date);
+
+      if (fallbackCity && !cities.has(fallbackCity)) {
+        cities.add(fallbackCity);
+      }
+    });
+
+    const sortAlpha = (arr) => Array.from(arr).sort((a, b) => a.localeCompare(b));
+    const sortDates = (arr) =>
+      Array.from(arr)
+        .filter(Boolean)
+        .sort((a, b) => new Date(b) - new Date(a));
+
+    return {
+      city: sortAlpha(cities),
+      space: sortAlpha(spaces),
+      date: sortDates(dates),
+      category: sortAlpha(categories),
+    };
+  }, [allEvents, allSpaces]);
+
+  const applyFilters = useCallback(
+    (filters) => {
+      if (!allEvents.length) return [];
+
+      return allEvents.reduce((acc, event) => {
+        const categoryValue = normalizeValue(event.category);
+        const dateValue = normalizeValue(event.start_date)
+          ? normalizeValue(event.start_date).slice(0, 10)
+          : '';
+        const space = spaceMap.get(event.space_id);
+        const spaceName = space?.name || '';
+        const spaceCity = space?.city || normalizeValue(event.city);
+
+        if (
+          filters.category.length > 0 &&
+          !filters.category.includes(categoryValue)
+        ) {
+          return acc;
+        }
+
+        if (filters.date.length > 0 && !filters.date.includes(dateValue)) {
+          return acc;
+        }
+
+        if (filters.space.length > 0 && !filters.space.includes(spaceName)) {
+          return acc;
+        }
+
+        if (filters.city.length > 0 && !filters.city.includes(spaceCity)) {
+          return acc;
+        }
+
+        acc.push({
+          ...event,
+          space_name: spaceName,
+          space_city: spaceCity,
+        });
+        return acc;
+      }, []);
+    },
+    [allEvents, spaceMap]
+  );
+
+  const filteredEvents = useMemo(
+    () => applyFilters(selectedFilters),
+    [applyFilters, selectedFilters]
+  );
+
+  const optionCounts = useMemo(() => {
+    const counts = {
+      city: new Map(),
+      space: new Map(),
+      date: new Map(),
+      category: new Map(),
+    };
+
+    FILTER_KEYS.forEach((key) => {
+      const baseFilters = { ...selectedFilters, [key]: [] };
+      const eventsForCounts = applyFilters(baseFilters);
+
+      eventsForCounts.forEach((event) => {
+        const space = spaceMap.get(event.space_id);
+        const categoryValue = normalizeValue(event.category);
+        const dateValue = normalizeValue(event.start_date)
+          ? normalizeValue(event.start_date).slice(0, 10)
+          : '';
+        const spaceName = space?.name || '';
+        const spaceCity = space?.city || normalizeValue(event.city);
+
+        switch (key) {
+          case 'city': {
+            const value = spaceCity;
+            if (value) {
+              counts.city.set(value, (counts.city.get(value) || 0) + 1);
+            }
+            break;
+          }
+          case 'space': {
+            const value = spaceName;
+            if (value) {
+              counts.space.set(value, (counts.space.get(value) || 0) + 1);
+            }
+            break;
+          }
+          case 'date': {
+            const value = dateValue;
+            if (value) {
+              counts.date.set(value, (counts.date.get(value) || 0) + 1);
+            }
+            break;
+          }
+          case 'category': {
+            const value = categoryValue;
+            if (value) {
+              counts.category.set(
+                value,
+                (counts.category.get(value) || 0) + 1
+              );
+            }
+            break;
+          }
+          default:
+            break;
         }
       });
+    });
 
-      const { data: eventsData, error: eventsError } = await eventsQuery;
-      if (eventsError) {
-        console.error('Error fetching approved events:', eventsError);
-        return;
+    const mapToObject = (options, map) => {
+      const obj = {};
+      options.forEach((value) => {
+        obj[value] = map.get(value) || 0;
+      });
+      return obj;
+    };
+
+    return {
+      city: mapToObject(filterOptions.city, counts.city),
+      space: mapToObject(filterOptions.space, counts.space),
+      date: mapToObject(filterOptions.date, counts.date),
+      category: mapToObject(filterOptions.category, counts.category),
+    };
+  }, [applyFilters, filterOptions, selectedFilters, spaceMap]);
+
+  const recentSpaces = useMemo(() => {
+    if (!allSpaces.length || !allEvents.length) return [];
+
+    const summaries = new Map();
+
+    allEvents.forEach((event) => {
+      const spaceId = event.space_id;
+      if (!spaceId) return;
+      const summary = summaries.get(spaceId) || {
+        id: spaceId,
+        name: spaceMap.get(spaceId)?.name || '',
+        city: spaceMap.get(spaceId)?.city || '',
+        eventCount: 0,
+        latestEventDate: null,
+      };
+
+      summary.eventCount += 1;
+      const createdAt = new Date(event.created_at || event.start_date || Date.now());
+      if (!summary.latestEventDate || createdAt > summary.latestEventDate) {
+        summary.latestEventDate = createdAt;
       }
 
-      // 3. Gather unique space IDs from the filtered, approved events
-      const eventSpaceIds = Array.from(
-        new Set(eventsData.map((e) => e.space_id).filter(Boolean))
-      );
+      summaries.set(spaceId, summary);
+    });
 
-      // If no events are found after filters, reset all options and return
-      if (eventSpaceIds.length === 0 && eventsData.length === 0) {
-        setCityOptions([]);
-        setSpaceOptions([]);
-        setDateOptions([]);
-        setCategoryOptions([]);
-        setDesignerOptions([]);
-        return;
+    return Array.from(summaries.values())
+      .filter((space) => space.name)
+      .sort((a, b) => (b.latestEventDate || 0) - (a.latestEventDate || 0))
+      .slice(0, 3);
+  }, [allEvents, allSpaces, spaceMap]);
+
+  useEffect(() => {
+    if (initializedFromQuery || loading) return;
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const nextFilters = {};
+
+    FILTER_KEYS.forEach((key) => {
+      const values = params
+        .getAll(key)
+        .flatMap((entry) => entry.split(','))
+        .map(normalizeValue)
+        .filter(Boolean);
+      if (values.length > 0) {
+        nextFilters[key] = Array.from(new Set(values));
       }
+    });
 
-      // 4. Now we must filter the spaces by city/space if the user selected them.
-      // If user selected city filters, we query spaces for those cities & intersect with eventSpaceIds.
-      let spacesQuery = supabase.from('spaces').select('id, city, name');
-
-      const { data: allSpaces, error: spacesError } = await spacesQuery;
-      if (spacesError) {
-        console.error('Error fetching spaces:', spacesError);
-        return;
-      }
-
-      // Filter to only those spaces that appear in eventSpaceIds
-      let filteredSpaces = allSpaces.filter((s) =>
-        eventSpaceIds.includes(s.id)
-      );
-
-      // If user selected city filters, reduce further
-      if (selectedFilters.city && selectedFilters.city.length > 0) {
-        filteredSpaces = filteredSpaces.filter((s) =>
-          selectedFilters.city.includes(s.city)
-        );
-      }
-
-      // If user selected space filters, reduce further
-      if (selectedFilters.space && selectedFilters.space.length > 0) {
-        filteredSpaces = filteredSpaces.filter((s) =>
-          selectedFilters.space.includes(s.name)
-        );
-      }
-
-      // 5. Re-derive the final space IDs from these filtered spaces
-      const finalSpaceIds = filteredSpaces.map((s) => s.id);
-
-      // 6. Filter the eventsData to only keep events whose space_id is in finalSpaceIds
-      const finalEvents = eventsData.filter((e) =>
-        finalSpaceIds.includes(e.space_id)
-      );
-
-      // 7. Build unique sets for city, space, date, category, designer from final data
-      // For city and space, we use the finalSpaces
-      const uniqueCities = Array.from(
-        new Set(filteredSpaces.map((s) => s.city).filter(Boolean))
-      );
-      const uniqueSpaces = Array.from(
-        new Set(filteredSpaces.map((s) => s.name).filter(Boolean))
-      );
-
-      // For date, category, designer, we use the finalEvents
-      const uniqueDates = Array.from(
-        new Set(finalEvents.map((e) => e.start_date).filter(Boolean))
-      );
-      const uniqueCategories = Array.from(
-        new Set(finalEvents.map((e) => e.category).filter(Boolean))
-      );
-      const uniqueDesigners = Array.from(
-        new Set(finalEvents.map((e) => e.designer).filter(Boolean))
-      );
-
-      // Sort text options alphabetically, dates descending
-      const sortAlpha = (arr) => [...arr].sort((a, b) => a.localeCompare(b));
-      setCityOptions(sortAlpha(uniqueCities));
-      setSpaceOptions(sortAlpha(uniqueSpaces));
-      setCategoryOptions(sortAlpha(uniqueCategories));
-      setDesignerOptions(sortAlpha(uniqueDesigners));
-
-      uniqueDates.sort((a, b) => new Date(b) - new Date(a));
-      setDateOptions(uniqueDates);
-    } catch (err) {
-      console.error('Error in fetchApprovedOptions:', err);
+    if (Object.keys(nextFilters).length > 0) {
+      setSelectedFilters((prev) => {
+        let changed = false;
+        const updated = { ...prev };
+        FILTER_KEYS.forEach((key) => {
+          if (nextFilters[key]) {
+            const incoming = nextFilters[key];
+            const current = prev[key] || [];
+            if (
+              incoming.length !== current.length ||
+              incoming.some((value, idx) => value !== current[idx])
+            ) {
+              updated[key] = incoming;
+              changed = true;
+            }
+          }
+        });
+        return changed ? updated : prev;
+      });
     }
-  }
+
+    setInitializedFromQuery(true);
+  }, [initializedFromQuery, loading]);
+
+  const value = useMemo(
+    () => ({
+      selectedFilters,
+      setSelectedFilters,
+      cityOptions: filterOptions.city,
+      spaceOptions: filterOptions.space,
+      dateOptions: filterOptions.date,
+      categoryOptions: filterOptions.category,
+      optionCounts,
+      filteredEvents,
+      filtersLoading: loading,
+      filtersError: error,
+      recentSpaces,
+    }),
+    [
+      selectedFilters,
+      setSelectedFilters,
+      filterOptions,
+      optionCounts,
+      filteredEvents,
+      loading,
+      error,
+      recentSpaces,
+    ]
+  );
 
   return (
-    <FilterContext.Provider
-      value={{
-        selectedFilters,
-        setSelectedFilters,
-        cityOptions,
-        spaceOptions,
-        dateOptions,
-        categoryOptions,
-        designerOptions,
-      }}>
-      {children}
-    </FilterContext.Provider>
+    <FilterContext.Provider value={value}>{children}</FilterContext.Provider>
   );
 }

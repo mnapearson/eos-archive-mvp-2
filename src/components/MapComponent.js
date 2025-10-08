@@ -6,6 +6,18 @@ import markerColors from '@/lib/markerColors';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+const DEFAULT_FIT_PADDING = {
+  mobile: { top: 80, right: 60, bottom: 320, left: 60 },
+  desktop: { top: 140, right: 240, bottom: 320, left: 240 },
+};
+
+const DEFAULT_FOCUS_PADDING = {
+  mobile: { top: 64, right: 56, bottom: 320, left: 56 },
+  desktop: { top: 120, right: 240, bottom: 320, left: 240 },
+};
+
+const DEFAULT_MAX_AUTO_FIT_ZOOM = 14;
+
 function buildPopupHTML({
   spaceId,
   name,
@@ -44,6 +56,29 @@ function buildPopupHTML({
     </div>`;
 }
 
+function getViewportPadding(customPadding, defaults) {
+  if (typeof window === 'undefined') {
+    if (customPadding == null) return defaults.desktop;
+    if (typeof customPadding === 'number') return customPadding;
+    return customPadding.desktop ?? customPadding.mobile ?? defaults.desktop;
+  }
+
+  const isMobile = window.innerWidth < 768;
+
+  if (typeof customPadding === 'number') {
+    return customPadding;
+  }
+
+  if (customPadding && typeof customPadding === 'object') {
+    if (isMobile) {
+      return customPadding.mobile ?? customPadding.desktop ?? defaults.mobile;
+    }
+    return customPadding.desktop ?? customPadding.mobile ?? defaults.desktop;
+  }
+
+  return isMobile ? defaults.mobile : defaults.desktop;
+}
+
 export default function MapComponent({
   eventId,
   spaces,
@@ -51,11 +86,21 @@ export default function MapComponent({
   activeTypes,
   initialCenter,
   initialZoom,
+  autoFit = false,
+  fitKey,
+  focusSpaceId,
+  onMarkerSelect,
+  showPopups = true,
+  fallbackToAllSpaces = true,
+  fitPadding,
+  maxAutoFitZoom = DEFAULT_MAX_AUTO_FIT_ZOOM,
+  focusPadding,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
+  const focusMarkerRef = useRef(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -73,14 +118,16 @@ export default function MapComponent({
         setMapData([data]);
       } else if (spaces && spaces.length > 0) {
         setMapData(spaces);
-      } else {
+      } else if (fallbackToAllSpaces) {
         const response = await fetch('/api/spaces');
         const data = await response.json();
         setMapData(data);
+      } else {
+        setMapData([]);
       }
     }
     fetchData();
-  }, [eventId, spaces]);
+  }, [eventId, spaces, fallbackToAllSpaces]);
 
   useEffect(() => {
     if (mapData.length === 0 || !mapContainerRef.current) return;
@@ -122,9 +169,48 @@ export default function MapComponent({
     return () => map.remove();
   }, [mapData, eventId, initialCenter, initialZoom, spaces]);
 
+  const updateMarkerFocusStyles = (currentFocusId) => {
+    markersRef.current.forEach(({ element, inner, id, color }) => {
+      if (!element) return;
+      const isActive =
+        currentFocusId != null &&
+        String(id) === String(currentFocusId);
+      element.style.transform = isActive ? 'scale(1.45)' : 'scale(1)';
+      element.style.borderColor = isActive
+        ? 'rgba(255,255,255,0.9)'
+        : 'rgba(255,255,255,0.55)';
+      element.style.boxShadow = isActive
+        ? '0 0 18px rgba(0,0,0,0.32), 0 0 0 6px rgba(255,255,255,0.22)'
+        : '0 0 16px rgba(0,0,0,0.28)';
+      element.style.opacity = isActive ? '1' : '0.85';
+      element.style.zIndex = isActive ? '6' : '2';
+      element.style.backgroundColor = color;
+      element.style.display = 'flex';
+      element.style.visibility = 'visible';
+      if (inner) {
+        inner.style.backgroundColor = isActive
+          ? 'rgba(255,255,255,0.95)'
+          : 'rgba(255,255,255,0.85)';
+        inner.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
+        inner.style.opacity = isActive ? '1' : '0.92';
+      }
+    });
+  };
+
   const clearMarkers = () => {
-    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current.forEach(({ marker, element, listeners }) => {
+      if (element && Array.isArray(listeners)) {
+        listeners.forEach(([event, handler]) => {
+          element.removeEventListener(event, handler);
+        });
+      }
+      marker.remove();
+    });
     markersRef.current = [];
+    if (focusMarkerRef.current) {
+      focusMarkerRef.current.remove();
+      focusMarkerRef.current = null;
+    }
   };
 
   const addMarkers = () => {
@@ -142,18 +228,43 @@ export default function MapComponent({
           })
         : mapData;
 
+    const bounds = new mapboxgl.LngLatBounds();
+    let hasValidBounds = false;
+
     filteredData.forEach((item) => {
       const markerEl = document.createElement('div');
-      markerEl.style.width = '12px';
-      markerEl.style.height = '12px';
+      markerEl.style.width = '16px';
+      markerEl.style.height = '16px';
       markerEl.style.borderRadius = '50%';
+      markerEl.style.border = '2px solid rgba(255,255,255,0.55)';
+      markerEl.style.boxSizing = 'border-box';
+      markerEl.style.display = 'flex';
+      markerEl.style.alignItems = 'center';
+      markerEl.style.justifyContent = 'center';
+      markerEl.style.transition =
+        'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border 0.2s ease';
+      markerEl.style.cursor = 'pointer';
+      markerEl.style.pointerEvents = 'auto';
+      markerEl.style.boxShadow = '0 0 16px rgba(0,0,0,0.28)';
+      markerEl.style.opacity = '0.85';
+      markerEl.style.zIndex = '2';
+      markerEl.style.visibility = 'visible';
       const typeKey = item.type
         ? item.type.toLowerCase()
         : item.space && item.space.type
         ? item.space.type.toLowerCase()
         : 'default';
-      markerEl.style.backgroundColor =
-        markerColors[typeKey] || markerColors.default;
+      const markerColor = markerColors[typeKey] || markerColors.default;
+      markerEl.style.backgroundColor = markerColor;
+
+      const innerDot = document.createElement('span');
+      innerDot.style.width = '6px';
+      innerDot.style.height = '6px';
+      innerDot.style.borderRadius = '50%';
+      innerDot.style.backgroundColor = 'rgba(255,255,255,0.9)';
+      innerDot.style.boxShadow = '0 0 8px rgba(0,0,0,0.35)';
+      innerDot.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      markerEl.appendChild(innerDot);
 
       const spaceId = (item.space && item.space.id) || item.id;
       const spaceName = item.name || item.space?.name || 'UNKNOWN';
@@ -163,25 +274,58 @@ export default function MapComponent({
       if (item.city) addrParts.push(item.city);
       else if (item.space?.city) addrParts.push(item.space.city);
       const fullAddress = addrParts.join(', ');
-      const popupContent = buildPopupHTML({
-        spaceId,
-        name: spaceName,
-        fullAddress,
-        typeLabel: typeKey,
-        directionsAddress: fullAddress || fallbackAddress,
-      });
+      const popupContent = showPopups
+        ? buildPopupHTML({
+            spaceId,
+            name: spaceName,
+            fullAddress,
+            typeLabel: typeKey,
+            directionsAddress: fullAddress || fallbackAddress,
+          })
+        : null;
 
       const lng = Number(item.longitude);
       const lat = Number(item.latitude);
       const markerLng = isNaN(lng) ? 12.3731 : lng;
       const markerLat = isNaN(lat) ? 51.3397 : lat;
 
-      const marker = new mapboxgl.Marker({ element: markerEl })
-        .setLngLat([markerLng, markerLat])
-        .setPopup(new mapboxgl.Popup().setHTML(popupContent))
-        .addTo(mapRef.current);
+      const marker = new mapboxgl.Marker({
+        element: markerEl,
+        anchor: 'center',
+      }).setLngLat([
+        markerLng,
+        markerLat,
+      ]);
+      if (showPopups && popupContent) {
+        marker.setPopup(new mapboxgl.Popup().setHTML(popupContent));
+      }
+      marker.addTo(mapRef.current);
 
-      if (!item.address && !fallbackAddress) {
+      const listeners = [];
+      if (typeof onMarkerSelect === 'function') {
+        const handleMarkerClick = (event) => {
+          event.stopPropagation();
+          onMarkerSelect(spaceId);
+        };
+        markerEl.addEventListener('click', handleMarkerClick);
+        listeners.push(['click', handleMarkerClick]);
+      }
+
+      markersRef.current.push({
+        marker,
+        id: spaceId,
+        element: markerEl,
+        listeners,
+        inner: innerDot,
+        color: markerColor,
+      });
+
+      if (!Number.isNaN(markerLng) && !Number.isNaN(markerLat)) {
+        bounds.extend([markerLng, markerLat]);
+        hasValidBounds = true;
+      }
+
+      if (showPopups && !item.address && !fallbackAddress) {
         fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${markerLng},${markerLat}.json?access_token=${mapboxgl.accessToken}`
         )
@@ -206,13 +350,111 @@ export default function MapComponent({
           });
       }
     });
+
+    updateMarkerFocusStyles(focusSpaceId);
+    updateFocusMarker(focusSpaceId);
+
+    if (autoFit && hasValidBounds) {
+      try {
+        const padding = getViewportPadding(fitPadding, DEFAULT_FIT_PADDING);
+        mapRef.current.fitBounds(bounds, {
+          padding,
+          maxZoom: maxAutoFitZoom,
+          duration: 800,
+        });
+      } catch (err) {
+        console.warn('Map fitBounds failed:', err);
+      }
+    }
+  };
+
+  const updateFocusMarker = (currentFocusId) => {
+    if (focusMarkerRef.current) {
+      focusMarkerRef.current.remove();
+      focusMarkerRef.current = null;
+    }
+    if (!currentFocusId || !mapRef.current) return;
+    const entry = markersRef.current.find(
+      (item) => String(item.id) === String(currentFocusId)
+    );
+    if (!entry) return;
+    const coords = entry.marker.getLngLat();
+    const highlightEl = document.createElement('div');
+    highlightEl.style.width = '28px';
+    highlightEl.style.height = '28px';
+    highlightEl.style.borderRadius = '50%';
+    highlightEl.style.background =
+      'radial-gradient(circle at center, rgba(27,27,27,0.95) 0%, rgba(27,27,27,0.7) 55%, rgba(27,27,27,0.45) 100%)';
+    highlightEl.style.boxShadow =
+      '0 20px 45px rgba(0,0,0,0.45), 0 0 0 6px rgba(255,255,255,0.65)';
+    highlightEl.style.border = '2px solid rgba(255,255,255,0.85)';
+    highlightEl.style.pointerEvents = 'none';
+    focusMarkerRef.current = new mapboxgl.Marker({
+      element: highlightEl,
+      anchor: 'center',
+    })
+      .setLngLat(coords)
+      .addTo(mapRef.current);
   };
 
   useEffect(() => {
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect, showPopups]);
+
+  useEffect(() => {
+    if (!autoFit || !mapRef.current) return;
+    const resizeHandler = () => {
+      addMarkers();
+    };
+    window.addEventListener('resize', resizeHandler);
+    return () => window.removeEventListener('resize', resizeHandler);
+  }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey, showPopups]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (!focusSpaceId) {
+      updateMarkerFocusStyles(null);
+      updateFocusMarker(null);
+      return;
+    }
+    const entry = markersRef.current.find(
+      (item) => String(item.id) === String(focusSpaceId)
+    );
+    if (!entry) {
+      updateMarkerFocusStyles(null);
+      return;
+    }
+    const coords = entry.marker.getLngLat();
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 768;
+      const padding = isMobile
+        ? { top: 64, right: 56, bottom: 320, left: 56 }
+        : { top: 120, right: 240, bottom: 320, left: 240 };
+      mapRef.current.easeTo({
+        center: coords,
+        zoom: Math.max(mapRef.current.getZoom(), 13.5),
+        padding,
+        duration: 700,
+        essential: true,
+      });
+    } else {
+      mapRef.current.flyTo({
+        center: coords,
+        zoom: Math.max(mapRef.current.getZoom(), 13),
+        essential: true,
+      });
+    }
+    if (showPopups) {
+      const popup = entry.marker.getPopup();
+      if (popup && !popup.isOpen()) {
+        popup.addTo(mapRef.current);
+      }
+    }
+    updateMarkerFocusStyles(focusSpaceId);
+    updateFocusMarker(focusSpaceId);
+  }, [focusSpaceId, showPopups]);
 
   useEffect(() => {
     function handleCopy(e) {

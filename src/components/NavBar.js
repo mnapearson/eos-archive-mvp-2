@@ -1,49 +1,37 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { Suspense, useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
-import { supabase } from '@/lib/supabaseClient';
-// Custom hook to subscribe to auth state changes
-function useUserSimple() {
-  const [user, setUser] = useState(null);
+import useSupabaseUser from '@/hooks/useSupabaseUser';
 
-  useEffect(() => {
-    // Get current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-    });
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-  return user;
+export default function NavBar(props) {
+  return (
+    <Suspense fallback={null}>
+      <NavBarContent {...props} />
+    </Suspense>
+  );
 }
 
-export default function NavBar() {
+function NavBarContent() {
   const { setSelectedFilters } = useContext(FilterContext);
   const [theme, setTheme] = useState('dawn');
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
-  const user = useUserSimple();
+  const searchParams = useSearchParams();
+  const user = useSupabaseUser();
 
   const pathname = usePathname();
-  const isConversationsActive =
-    pathname.startsWith('/conversations') ||
-    pathname.startsWith('/conversations');
-  const isSpacesActive =
-    pathname.startsWith('/map') || pathname.startsWith('/spaces');
-  const isLoginActive =
-    pathname.startsWith('/login') || pathname.startsWith('/spaces/admin');
+
+  // Sync search input with current query string
+  const currentSearchValue = searchParams.get('search') || '';
+
+  useEffect(() => {
+    setSearchTerm(currentSearchValue);
+  }, [currentSearchValue]);
 
   // Load saved theme or system preference
   useEffect(() => {
@@ -75,19 +63,52 @@ export default function NavBar() {
       space: [],
       date: [],
       category: [],
-      designer: [],
     });
   };
 
   // Handle search submission: redirect to homepage with the search query.
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    router.push(`/?search=${encodeURIComponent(searchTerm)}`);
+    const trimmed = searchTerm.trim();
+    if (trimmed.length > 0) {
+      router.push(`/?search=${encodeURIComponent(trimmed)}`);
+      setSearchTerm(trimmed);
+    } else {
+      router.push('/');
+      setSearchTerm('');
+    }
+    const mobileSearch = document.getElementById('nav-mobile-search');
+    mobileSearch?.classList.add('hidden');
   };
+
+  const primaryLinks = [
+    {
+      href: '/',
+      label: 'Explore',
+      isActive: pathname === '/',
+    },
+    {
+      href: '/map',
+      label: 'Spaces',
+      isActive: pathname.startsWith('/map') || pathname.startsWith('/spaces'),
+    },
+    {
+      href: '/conversations',
+      label: 'Conversations',
+      isActive: pathname.startsWith('/conversations'),
+    },
+  ];
+
+  const themeToggleLabel =
+    theme === 'dawn' ? 'Switch to dusk mode' : 'Switch to dawn mode';
+  const loginHref = user ? '/spaces/admin' : '/login';
+  const loginLabel = user ? 'Submit' : 'Login';
+  const registerHref = user ? '/spaces/admin' : '/spaces/signup';
+  const registerLabel = user ? 'Dashboard' : 'Register a space';
 
   return (
     <>
-      <header className='fixed top-0 inset-x-0 z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b'>
+      <header className='fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]'>
         {/* Skip link for keyboard users */}
         <a
           href='#main'
@@ -95,66 +116,87 @@ export default function NavBar() {
           Skip to content
         </a>
 
-        {/* Single-row flex: left (menu + brand), right (actions) */}
-        <div className='py-2 mx-2 flex items-center justify-between text-sm'>
-          {/* Left: Menu + Brand */}
-          <div className='flex items-center gap-3'>
+        <div className='mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3 md:flex-row md:items-center md:gap-4 lg:max-w-5xl'>
+          <div className='flex w-full items-center gap-2 flex-wrap md:flex-nowrap md:gap-3 md:flex-1'>
             <button
+              type='button'
               onClick={toggleMenu}
               aria-label='Open menu'
               aria-controls='primary-menu'
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]'>
-              menu
+              className='nav-action'>
+              Menu
             </button>
-            <Link
-              href='/'
-              title='Navigate to homepage'
-              onClick={handleLogoClick}
-              className='px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] tracking-wide font-semibold'>
-              eos archive
-            </Link>
-          </div>
 
-          {/* Right: Actions */}
-          <nav
-            aria-label='Primary'
-            className='flex gap-3'>
-            <Link
-              href='/conversations'
-              title='Read conversations'
-              aria-label='Read conversations'
-              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
-                isConversationsActive ? 'underline' : ''
-              }`}>
-              conversations
-            </Link>
-            <Link
-              href='/map'
-              title='Browse spaces on map'
-              aria-label='Browse spaces on map'
-              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
-                isSpacesActive ? 'underline' : ''
-              }`}>
-              spaces
-            </Link>
-            <Link
-              href={user ? '/spaces/admin' : '/login'}
-              title='Login or Register'
-              aria-label='Login or Register'
-              className={`px-3 py-2 -mx-2 rounded hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] ${
-                isLoginActive ? 'underline' : ''
-              }`}>
-              login
-            </Link>
-          </nav>
+            <nav
+              aria-label='Primary'
+              className='hidden lg:flex items-center gap-2'>
+              {primaryLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-pill ${
+                    item.isActive ? 'nav-pill--active' : ''
+                  }`}
+                  prefetch={false}>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            <form
+              onSubmit={handleSearchSubmit}
+              className='nav-search flex items-center justify-between flex-1 md:max-w-sm'
+              role='search'>
+              <input
+                type='search'
+                name='search'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder='Search the archive'
+                className='nav-search__input'
+                aria-label='Search archived events'
+              />
+              <button
+                type='submit'
+                className='nav-search__submit'
+                aria-label='Search'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='18'
+                  height='18'
+                  viewBox='0 0 24 24'
+                  aria-hidden='true'>
+                  <path
+                    fill='currentColor'
+                    d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+                  />
+                </svg>
+              </button>
+            </form>
+
+            <div className='flex items-center gap-2 text-xs sm:text-sm flex-shrink-0'>
+              <Link
+                href={loginHref}
+                className='nav-action'>
+                {loginLabel}
+              </Link>
+              <Link
+                href={registerHref}
+                className='nav-cta hidden sm:inline-flex'>
+                {registerLabel}
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Menu Component */}
       <Menu
-        title='Open navigation menu'
         menuOpen={menuOpen}
         toggleMenu={toggleMenu}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        themeLabel={themeToggleLabel}
       />
     </>
   );

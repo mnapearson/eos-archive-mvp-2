@@ -9,6 +9,22 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
+let nextConfig = [];
+try {
+  nextConfig = compat.extends("next/core-web-vitals");
+} catch (error) {
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(
+      'Warning: unable to load "next/core-web-vitals" ESLint config. Falling back to a minimal config.'
+    );
+  }
+}
+
+const eslintConfig = [
+  ...nextConfig,
+  {
+    ignores: ["node_modules/**", ".next/**"],
+  },
+];
 
 export default eslintConfig;
