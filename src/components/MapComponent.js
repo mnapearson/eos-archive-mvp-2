@@ -128,7 +128,7 @@ export default function MapComponent({
   }, [mapData, eventId, initialCenter, initialZoom, spaces]);
 
   const updateMarkerFocusStyles = (currentFocusId) => {
-    markersRef.current.forEach(({ element, id, color }) => {
+    markersRef.current.forEach(({ element, inner, id, color }) => {
       if (!element) return;
       const isActive =
         currentFocusId != null &&
@@ -144,6 +144,14 @@ export default function MapComponent({
       element.style.zIndex = isActive ? '6' : '2';
       element.style.backgroundColor = color;
       element.style.display = 'flex';
+      element.style.visibility = 'visible';
+      if (inner) {
+        inner.style.backgroundColor = isActive
+          ? 'rgba(255,255,255,0.95)'
+          : 'rgba(255,255,255,0.85)';
+        inner.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
+        inner.style.opacity = isActive ? '1' : '0.92';
+      }
     });
   };
 
@@ -194,6 +202,7 @@ export default function MapComponent({
       markerEl.style.boxShadow = '0 0 16px rgba(0,0,0,0.28)';
       markerEl.style.opacity = '0.85';
       markerEl.style.zIndex = '2';
+      markerEl.style.visibility = 'visible';
       const typeKey = item.type
         ? item.type.toLowerCase()
         : item.space && item.space.type
@@ -201,6 +210,15 @@ export default function MapComponent({
         : 'default';
       const markerColor = markerColors[typeKey] || markerColors.default;
       markerEl.style.backgroundColor = markerColor;
+
+      const innerDot = document.createElement('span');
+      innerDot.style.width = '6px';
+      innerDot.style.height = '6px';
+      innerDot.style.borderRadius = '50%';
+      innerDot.style.backgroundColor = 'rgba(255,255,255,0.9)';
+      innerDot.style.boxShadow = '0 0 8px rgba(0,0,0,0.35)';
+      innerDot.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      markerEl.appendChild(innerDot);
 
       const spaceId = (item.space && item.space.id) || item.id;
       const spaceName = item.name || item.space?.name || 'UNKNOWN';
@@ -252,6 +270,7 @@ export default function MapComponent({
         id: spaceId,
         element: markerEl,
         listeners,
+        inner: innerDot,
         color: markerColor,
       });
 
@@ -294,8 +313,8 @@ export default function MapComponent({
         if (typeof window !== 'undefined') {
           const isMobile = window.innerWidth < 768;
           padding = isMobile
-            ? { top: 80, right: 60, bottom: 280, left: 60 }
-            : { top: 140, right: 220, bottom: 260, left: 220 };
+            ? { top: 80, right: 60, bottom: 320, left: 60 }
+            : { top: 140, right: 240, bottom: 320, left: 240 };
         }
         mapRef.current.fitBounds(bounds, {
           padding,
@@ -337,20 +356,25 @@ export default function MapComponent({
       return;
     }
     const coords = entry.marker.getLngLat();
-    let offset = [0, 0];
     if (typeof window !== 'undefined') {
-      const verticalOffset = Math.min(
-        Math.max(Math.round(window.innerHeight * 0.28), 140),
-        320
-      );
-      offset = [0, -verticalOffset];
+      const isMobile = window.innerWidth < 768;
+      const padding = isMobile
+        ? { top: 64, right: 56, bottom: 320, left: 56 }
+        : { top: 120, right: 240, bottom: 320, left: 240 };
+      mapRef.current.easeTo({
+        center: coords,
+        zoom: Math.max(mapRef.current.getZoom(), 13.5),
+        padding,
+        duration: 700,
+        essential: true,
+      });
+    } else {
+      mapRef.current.flyTo({
+        center: coords,
+        zoom: Math.max(mapRef.current.getZoom(), 13),
+        essential: true,
+      });
     }
-    mapRef.current.flyTo({
-      center: coords,
-      zoom: Math.max(mapRef.current.getZoom(), 13),
-      offset,
-      essential: true,
-    });
     if (showPopups) {
       const popup = entry.marker.getPopup();
       if (popup && !popup.isOpen()) {

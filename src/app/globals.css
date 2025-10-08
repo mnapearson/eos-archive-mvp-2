@@ -50,8 +50,23 @@ body {
 
 /* Main page content styling */
 .page-content {
-  @apply flex-grow overflow-visible mx-auto flex-1 mt-12;
+  width: 100%;
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 3rem;
+  flex: 1 1 auto;
+  display: block;
 }
+
+@media (min-width: 1024px) {
+  .page-content {
+    max-width: 64rem;
+  }
+}
+
 
 /* Footer container styling */
 .footer-container {

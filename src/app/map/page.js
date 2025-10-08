@@ -140,7 +140,7 @@ export default function SpacesMapPage() {
 
   return (
     <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
-      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 lg:hidden'>
+      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-0 py-6 lg:hidden'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
         </span>
@@ -221,7 +221,7 @@ function SpacesListPanel({
 
   return (
     <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
-      <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
+      <div className='hidden border-b border-[var(--foreground)]/12 px-0 py-6 lg:block'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
         </span>
@@ -235,7 +235,7 @@ function SpacesListPanel({
         </p>
       </div>
 
-      <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
+      <div className='border-b border-[var(--foreground)]/12 px-0 py-4'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
           <form
             role='search'
@@ -317,7 +317,7 @@ function SpacesListPanel({
         </div>
       </div>
 
-      <div className='flex-1 overflow-y-auto px-6 py-6'>
+      <div className='flex-1 overflow-y-auto px-0 py-6'>
         {loading ? (
           <p className='text-sm italic text-[var(--foreground)]/70'>
             Loading spaces…
