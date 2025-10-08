@@ -219,39 +219,40 @@ function SpacesListPanel({
 
       <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-          <input
-            type='search'
-            value={searchQuery}
-            onChange={onSearchChange}
-            placeholder='Search by space or city'
-            className='input w-full sm:max-w-xs'
-            aria-label='Search spaces'
-          />
-          {hasActiveFilters && (
+          <form
+            role='search'
+            onSubmit={(event) => event.preventDefault()}
+            className='nav-search nav-search--panel w-full sm:max-w-xs'>
+            <input
+              type='search'
+              value={searchQuery}
+              onChange={onSearchChange}
+              placeholder='Search by space or city'
+              className='nav-search__input text-sm'
+              aria-label='Search spaces'
+            />
             <button
-              type='button'
-              onClick={onClearFilters}
-              className='rounded-full border border-[var(--foreground)]/20 px-3 py-1.5 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 hover:border-[var(--foreground)]/40 hover:text-[var(--foreground)]'>
-              Clear filters
+              type='submit'
+              className='nav-search__submit'
+              aria-label='Search spaces'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='18'
+                height='18'
+                viewBox='0 0 24 24'
+                aria-hidden='true'>
+                <path
+                  fill='currentColor'
+                  d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+                />
+              </svg>
             </button>
-          )}
+          </form>
         </div>
 
         {typeFilters.length > 0 && (
-          <div className='mt-4 space-y-2'>
-            <button
-              type='button'
-              className='ea-label text-[var(--foreground)]/60 sm:hidden'
-              onClick={() => setLegendCollapsed((value) => !value)}
-              aria-expanded={!legendCollapsed}>
-              {legendCollapsed ? 'Show types ▸' : 'Hide types ▾'}
-            </button>
-            <div
-              className={`flex flex-wrap gap-2 transition-all ${
-                legendCollapsed
-                  ? 'max-h-0 overflow-hidden sm:max-h-none'
-                  : 'max-h-[420px]'
-              } sm:max-h-none`}>
+          <div className='mt-3 space-y-2'>
+            <div className='flex flex-wrap gap-2'>
               {typeFilters.map(([type, count]) => {
                 const active = activeTypes.includes(type);
                 const label = prettifyType(type);
@@ -283,8 +284,18 @@ function SpacesListPanel({
           </div>
         )}
 
-        <div className='mt-4 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50'>
-          {statusLabel}
+        <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50 sm:flex-row sm:items-center sm:justify-between'>
+          <span>{statusLabel}</span>
+          <div className='flex items-center justify-between gap-3 sm:justify-end'>
+            {hasActiveFilters && (
+              <button
+                type='button'
+                onClick={onClearFilters}
+                className='nav-action h-8 rounded-full px-4 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/75 hover:text-[var(--foreground)]'>
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

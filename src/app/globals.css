@@ -1244,6 +1244,15 @@ body {
   flex: 1 1 160px;
 }
 
+.nav-search--panel {
+  width: 100%;
+  max-width: min(360px, 100%);
+  padding: 0.4rem 0.75rem;
+  flex: none;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
 .nav-search__input {
   flex: 1 1 auto;
   min-width: 0;
@@ -1274,6 +1283,11 @@ body {
     gap: 0.3rem;
     padding: 0.26rem 0.5rem;
     max-width: min(210px, 75vw);
+  }
+
+  .nav-search--panel {
+    max-width: none;
+    padding: 0.32rem 0.6rem;
   }
 
   .nav-search__input {
