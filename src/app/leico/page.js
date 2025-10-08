@@ -216,25 +216,19 @@ function LeicoListPanel({
   onFocus,
   focusedId,
 }) {
-  const statusLabel = loading
-    ? 'Loading spaces…'
-    : error
-    ? error
-    : `${totalCount} of ${allCount} spaces in view`;
-
+  const statusLabel = loading ? 'Loading spaces…' : error;
   return (
     <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
       <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
-          LEICO collaboration
+          LEICO × EOS archive
         </span>
-        <h2 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)] sm:text-3xl'>
-          Partner spaces in Leipzig
-        </h2>
-        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
-          The LEICO × EOS archive network charts the independent venues shaping
-          Leipzig&rsquo;s art ecology. Use the filters below to narrow the map
-          to specific programme types.
+        <h1 className='text-balance text-2xl font-semibold text-[var(--foreground)] sm:text-3xl'>
+          Leipzig’s contemporary art map
+        </h1>
+        <p className='max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
+          Discover the spaces featured in the LEICO printed map. Browse and tap
+          any card to spotlight its position on the city map.
         </p>
       </div>
 
