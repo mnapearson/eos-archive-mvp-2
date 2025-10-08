@@ -94,12 +94,14 @@ export default function SpacePage() {
       />
 
       <div className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/70 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.14)]'>
-        <MapComponent
-          spaces={[space]}
-          autoFit
-          focusSpaceId={space.id}
-          showPopups={false}
-        />
+        <div className='h-[320px] overflow-hidden rounded-2xl border border-[var(--foreground)]/12'>
+          <MapComponent
+            spaces={[space]}
+            autoFit
+            focusSpaceId={space.id}
+            showPopups={false}
+          />
+        </div>
       </div>
 
       <section className='space-y-6'>
