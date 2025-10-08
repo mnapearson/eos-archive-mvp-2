@@ -164,12 +164,12 @@ export default function SpaceListItem({
     'space-card group rounded-3xl px-3 py-3 transition';
   const compactSurfaceClass =
     surface === 'overlay'
-      ? 'border border-transparent bg-[var(--background)]/45 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl'
+      ? 'border-none bg-[var(--background)]/42 shadow-[0_28px_90px_rgba(0,0,0,0.35)] backdrop-blur-xl'
       : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
   const compactActiveClass =
     surface === 'overlay'
       ? isActive
-        ? 'ring-1 ring-[var(--foreground)]/45 bg-[var(--background)]/55'
+        ? 'bg-[var(--background)]/50'
         : ''
       : isActive
       ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
