@@ -160,8 +160,7 @@ export default function SpaceListItem({
     );
   }
 
-  const compactBaseClass =
-    'space-card group rounded-3xl px-3 py-3 transition';
+  const compactBaseClass = 'space-card group rounded-3xl px-3 py-3 transition';
   const compactSurfaceClass =
     surface === 'overlay'
       ? 'border-none bg-[var(--background)]/42 shadow-[0_28px_90px_rgba(0,0,0,0.35)] backdrop-blur-xl'
@@ -177,6 +176,21 @@ export default function SpaceListItem({
   const compactFocusClass = canFocus
     ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
     : '';
+
+  const compactPrimaryActionVisual =
+    surface === 'overlay'
+      ? 'nav-action nav-cta bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 border border-transparent shadow-[0_12px_30px_rgba(0,0,0,0.24)]'
+      : 'nav-action nav-cta';
+  const compactSecondaryActionVisual =
+    surface === 'overlay'
+      ? 'nav-action bg-[var(--background)]/28 border border-[var(--foreground)]/28 text-[var(--foreground)] hover:bg-[var(--background)]/36'
+      : 'nav-action';
+  const compactTertiaryActionVisual =
+    surface === 'overlay'
+      ? 'nav-action bg-[var(--background)]/18 border border-[var(--foreground)]/24 text-[var(--foreground)] hover:bg-[var(--background)]/28'
+      : 'nav-action';
+  const compactActionBase =
+    'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
 
   const compactClasses = [
     compactBaseClass,
@@ -220,8 +234,8 @@ export default function SpaceListItem({
         <button
           type='button'
           onClick={handleNavigate}
-          className='nav-action nav-cta h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
-          Details
+          className={`${compactPrimaryActionVisual} ${compactActionBase}`}>
+          Events
         </button>
         {directionsUrl && (
           <a
@@ -229,7 +243,7 @@ export default function SpaceListItem({
             target='_blank'
             rel='noopener noreferrer'
             onClick={handleExternalLinkClick}
-            className='nav-action h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
+            className={`${compactSecondaryActionVisual} ${compactActionBase}`}>
             Directions
           </a>
         )}
@@ -237,7 +251,7 @@ export default function SpaceListItem({
           <button
             type='button'
             onClick={handleFocus}
-            className='nav-action h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
+            className={`${compactTertiaryActionVisual} ${compactActionBase}`}>
             View on map
           </button>
         )}

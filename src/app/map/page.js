@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import SpaceListItem from '@/components/SpaceListItem';
 import markerColors from '@/lib/markerColors';
@@ -28,6 +28,7 @@ export default function SpacesMapPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [focusedSpaceId, setFocusedSpaceId] = useState(null);
+  const mapSectionRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -109,6 +110,17 @@ export default function SpacesMapPage() {
     );
   }, [focusedSpaceId, spaces]);
 
+  const scrollToMap = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    if (!mapSectionRef.current) return;
+    const shouldScroll = window.innerWidth < 1024;
+    if (!shouldScroll) return;
+    mapSectionRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, []);
+
   const toggleType = (type) => {
     setActiveTypes((prev) => {
       if (prev.includes(type)) {
@@ -142,7 +154,9 @@ export default function SpacesMapPage() {
         </p>
       </section>
 
-      <section className='relative order-2 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
+      <section
+        ref={mapSectionRef}
+        className='relative order-2 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
         <MapComponent
           spaces={filteredSpaces}
           activeTypes={activeTypes}
@@ -177,6 +191,7 @@ export default function SpacesMapPage() {
         error={error}
         onFocus={(space) => setFocusedSpaceId(space?.id ?? null)}
         focusedId={focusedSpaceId}
+        scrollToMap={scrollToMap}
       />
     </main>
   );
@@ -196,6 +211,7 @@ function SpacesListPanel({
   error,
   onFocus,
   focusedId,
+  scrollToMap,
 }) {
   const statusLabel = loading
     ? 'Loading spaces…'
@@ -319,7 +335,12 @@ function SpacesListPanel({
                 key={space.id}
                 space={space}
                 variant='compact'
-                onFocus={onFocus}
+                onFocus={(value) => {
+                  onFocus?.(value);
+                  if (value) {
+                    scrollToMap?.();
+                  }
+                }}
                 isActive={
                   focusedId != null &&
                   String(focusedId) === String(space.id)

@@ -128,16 +128,22 @@ export default function MapComponent({
   }, [mapData, eventId, initialCenter, initialZoom, spaces]);
 
   const updateMarkerFocusStyles = (currentFocusId) => {
-    markersRef.current.forEach(({ element, id }) => {
+    markersRef.current.forEach(({ element, id, color }) => {
       if (!element) return;
       const isActive =
         currentFocusId != null &&
         String(id) === String(currentFocusId);
-      element.style.transform = isActive ? 'scale(1.6)' : 'scale(1)';
+      element.style.transform = isActive ? 'scale(1.45)' : 'scale(1)';
+      element.style.borderColor = isActive
+        ? 'rgba(255,255,255,0.9)'
+        : 'rgba(255,255,255,0.55)';
       element.style.boxShadow = isActive
-        ? '0 0 0 6px rgba(255,255,255,0.32)'
-        : '0 0 0 0 rgba(0,0,0,0)';
-      element.style.opacity = isActive ? '1' : '0.9';
+        ? '0 0 18px rgba(0,0,0,0.32), 0 0 0 6px rgba(255,255,255,0.22)'
+        : '0 0 16px rgba(0,0,0,0.28)';
+      element.style.opacity = isActive ? '1' : '0.85';
+      element.style.zIndex = isActive ? '6' : '2';
+      element.style.backgroundColor = color;
+      element.style.display = 'flex';
     });
   };
 
@@ -173,19 +179,28 @@ export default function MapComponent({
 
     filteredData.forEach((item) => {
       const markerEl = document.createElement('div');
-      markerEl.style.width = '12px';
-      markerEl.style.height = '12px';
+      markerEl.style.width = '16px';
+      markerEl.style.height = '16px';
       markerEl.style.borderRadius = '50%';
+      markerEl.style.border = '2px solid rgba(255,255,255,0.55)';
+      markerEl.style.boxSizing = 'border-box';
+      markerEl.style.display = 'flex';
+      markerEl.style.alignItems = 'center';
+      markerEl.style.justifyContent = 'center';
       markerEl.style.transition =
-        'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease';
+        'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border 0.2s ease';
       markerEl.style.cursor = 'pointer';
+      markerEl.style.pointerEvents = 'auto';
+      markerEl.style.boxShadow = '0 0 16px rgba(0,0,0,0.28)';
+      markerEl.style.opacity = '0.85';
+      markerEl.style.zIndex = '2';
       const typeKey = item.type
         ? item.type.toLowerCase()
         : item.space && item.space.type
         ? item.space.type.toLowerCase()
         : 'default';
-      markerEl.style.backgroundColor =
-        markerColors[typeKey] || markerColors.default;
+      const markerColor = markerColors[typeKey] || markerColors.default;
+      markerEl.style.backgroundColor = markerColor;
 
       const spaceId = (item.space && item.space.id) || item.id;
       const spaceName = item.name || item.space?.name || 'UNKNOWN';
@@ -210,7 +225,10 @@ export default function MapComponent({
       const markerLng = isNaN(lng) ? 12.3731 : lng;
       const markerLat = isNaN(lat) ? 51.3397 : lat;
 
-      const marker = new mapboxgl.Marker({ element: markerEl }).setLngLat([
+      const marker = new mapboxgl.Marker({
+        element: markerEl,
+        anchor: 'center',
+      }).setLngLat([
         markerLng,
         markerLat,
       ]);
@@ -229,7 +247,13 @@ export default function MapComponent({
         listeners.push(['click', handleMarkerClick]);
       }
 
-      markersRef.current.push({ marker, id: spaceId, element: markerEl, listeners });
+      markersRef.current.push({
+        marker,
+        id: spaceId,
+        element: markerEl,
+        listeners,
+        color: markerColor,
+      });
 
       if (!Number.isNaN(markerLng) && !Number.isNaN(markerLat)) {
         bounds.extend([markerLng, markerLat]);
@@ -266,7 +290,13 @@ export default function MapComponent({
 
     if (autoFit && hasValidBounds) {
       try {
-        const padding = typeof window !== 'undefined' && window.innerWidth < 640 ? 60 : 120;
+        let padding = 120;
+        if (typeof window !== 'undefined') {
+          const isMobile = window.innerWidth < 768;
+          padding = isMobile
+            ? { top: 80, right: 60, bottom: 280, left: 60 }
+            : { top: 140, right: 220, bottom: 260, left: 220 };
+        }
         mapRef.current.fitBounds(bounds, {
           padding,
           maxZoom: 14,
@@ -307,9 +337,18 @@ export default function MapComponent({
       return;
     }
     const coords = entry.marker.getLngLat();
+    let offset = [0, 0];
+    if (typeof window !== 'undefined') {
+      const verticalOffset = Math.min(
+        Math.max(Math.round(window.innerHeight * 0.28), 140),
+        320
+      );
+      offset = [0, -verticalOffset];
+    }
     mapRef.current.flyTo({
       center: coords,
       zoom: Math.max(mapRef.current.getZoom(), 13),
+      offset,
       essential: true,
     });
     if (showPopups) {
