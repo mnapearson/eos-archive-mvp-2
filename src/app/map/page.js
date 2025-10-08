@@ -104,9 +104,8 @@ export default function SpacesMapPage() {
   const focusedSpace = useMemo(() => {
     if (!focusedSpaceId) return null;
     return (
-      spaces.find(
-        (space) => String(space.id) === String(focusedSpaceId)
-      ) || null
+      spaces.find((space) => String(space.id) === String(focusedSpaceId)) ||
+      null
     );
   }, [focusedSpaceId, spaces]);
 
@@ -140,7 +139,7 @@ export default function SpacesMapPage() {
 
   return (
     <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
-      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 lg:hidden'>
+      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 space-y-4 lg:hidden'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
         </span>
@@ -152,6 +151,35 @@ export default function SpacesMapPage() {
           archive. Filter by type, search for a city or name, and dive into the
           map.
         </p>
+        <form
+          role='search'
+          onSubmit={(event) => event.preventDefault()}
+          className='nav-search nav-search--panel w-full sm:max-w-xs'>
+          <input
+            type='search'
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder='Search by space or city'
+            className='nav-search__input text-sm'
+            aria-label='Search spaces'
+          />
+          <button
+            type='submit'
+            className='nav-search__submit'
+            aria-label='Search spaces'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='18'
+              height='18'
+              viewBox='0 0 24 24'
+              aria-hidden='true'>
+              <path
+                fill='currentColor'
+                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+              />
+            </svg>
+          </button>
+        </form>
       </section>
 
       <section
@@ -236,38 +264,6 @@ function SpacesListPanel({
       </div>
 
       <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
-        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-          <form
-            role='search'
-            onSubmit={(event) => event.preventDefault()}
-            className='nav-search nav-search--panel w-full sm:max-w-xs'>
-            <input
-              type='search'
-              value={searchQuery}
-              onChange={onSearchChange}
-              placeholder='Search by space or city'
-              className='nav-search__input text-sm'
-              aria-label='Search spaces'
-            />
-            <button
-              type='submit'
-              className='nav-search__submit'
-              aria-label='Search spaces'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='18'
-                height='18'
-                viewBox='0 0 24 24'
-                aria-hidden='true'>
-                <path
-                  fill='currentColor'
-                  d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
-                />
-              </svg>
-            </button>
-          </form>
-        </div>
-
         {typeFilters.length > 0 && (
           <div className='mt-3 space-y-2'>
             <div className='flex flex-wrap gap-2'>
@@ -292,9 +288,7 @@ function SpacesListPanel({
                       }}
                     />
                     <span>{label}</span>
-                    <span className='text-[var(--foreground)]/50'>
-                      {count}
-                    </span>
+                    <span className='text-[var(--foreground)]/50'>{count}</span>
                   </button>
                 );
               })}
@@ -342,8 +336,7 @@ function SpacesListPanel({
                   }
                 }}
                 isActive={
-                  focusedId != null &&
-                  String(focusedId) === String(space.id)
+                  focusedId != null && String(focusedId) === String(space.id)
                 }
               />
             ))}
