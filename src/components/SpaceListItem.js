@@ -163,12 +163,12 @@ export default function SpaceListItem({
   const compactBaseClass = 'space-card group rounded-3xl px-3 py-3 transition';
   const compactSurfaceClass =
     surface === 'overlay'
-      ? 'border-none bg-[var(--background)]/42 shadow-[0_28px_90px_rgba(0,0,0,0.35)] backdrop-blur-xl'
+      ? 'border border-white/70 bg-[rgba(255,255,255,0.92)] text-[#1b1b1b] shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl'
       : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
   const compactActiveClass =
     surface === 'overlay'
       ? isActive
-        ? 'bg-[var(--background)]/50'
+        ? 'bg-white'
         : ''
       : isActive
       ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
@@ -179,15 +179,15 @@ export default function SpaceListItem({
 
   const compactPrimaryActionVisual =
     surface === 'overlay'
-      ? 'nav-action nav-cta bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 border border-transparent shadow-[0_12px_30px_rgba(0,0,0,0.24)]'
+      ? 'nav-action nav-cta bg-[#1b1b1b] text-white hover:bg-[#1b1b1b]/85 border border-[#1b1b1b] shadow-[0_12px_34px_rgba(0,0,0,0.25)]'
       : 'nav-action nav-cta';
   const compactSecondaryActionVisual =
     surface === 'overlay'
-      ? 'nav-action bg-[var(--background)]/28 border border-[var(--foreground)]/28 text-[var(--foreground)] hover:bg-[var(--background)]/36'
+      ? 'nav-action bg-white/20 border border-[#1b1b1b]/20 text-[#1f1f1f] hover:bg-white/35'
       : 'nav-action';
   const compactTertiaryActionVisual =
     surface === 'overlay'
-      ? 'nav-action bg-[var(--background)]/18 border border-[var(--foreground)]/24 text-[var(--foreground)] hover:bg-[var(--background)]/28'
+      ? 'nav-action bg-white/12 border border-[#1b1b1b]/15 text-[#1f1f1f] hover:bg-white/24'
       : 'nav-action';
   const compactActionBase =
     'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';

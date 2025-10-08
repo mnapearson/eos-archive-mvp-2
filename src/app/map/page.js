@@ -140,7 +140,7 @@ export default function SpacesMapPage() {
 
   return (
     <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
-      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-0 py-6 lg:hidden'>
+      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 lg:hidden'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
         </span>
@@ -221,7 +221,7 @@ function SpacesListPanel({
 
   return (
     <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
-      <div className='hidden border-b border-[var(--foreground)]/12 px-0 py-6 lg:block'>
+      <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
         </span>
@@ -235,7 +235,7 @@ function SpacesListPanel({
         </p>
       </div>
 
-      <div className='border-b border-[var(--foreground)]/12 px-0 py-4'>
+      <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
           <form
             role='search'
@@ -317,7 +317,7 @@ function SpacesListPanel({
         </div>
       </div>
 
-      <div className='flex-1 overflow-y-auto px-0 py-6'>
+      <div className='flex-1 overflow-y-auto px-6 py-6'>
         {loading ? (
           <p className='text-sm italic text-[var(--foreground)]/70'>
             Loading spaces…
@@ -359,16 +359,16 @@ function FocusedSpaceOverlay({ space, onClose }) {
 
   return (
     <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
-      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-[var(--foreground)]/25 bg-[var(--background)]/50 shadow-[0_28px_90px_rgba(0,0,0,0.45)] backdrop-blur-2xl'>
-        <div className='flex items-center justify-between px-5 pt-4'>
-          <span className='ea-label text-[var(--foreground)]/65'>
+      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-white/70 bg-[rgba(247,247,247,0.92)] text-[#1b1b1b] shadow-[0_34px_90px_rgba(0,0,0,0.35)] backdrop-blur-2xl'>
+        <div className='flex items-center justify-between px-5 pt-4 text-[#2a2a2a]'>
+          <span className='ea-label tracking-[0.3em] text-[#3a3a3a]'>
             Selected space
           </span>
           <button
             type='button'
             onClick={onClose}
             aria-label='Close selected space'
-            className='ea-label text-[var(--foreground)]/60 hover:text-[var(--foreground)]'>
+            className='ea-label text-[#3a3a3a] hover:text-[#1b1b1b]'>
             Close
           </button>
         </div>
@@ -378,6 +378,7 @@ function FocusedSpaceOverlay({ space, onClose }) {
             variant='compact'
             isActive
             surface='overlay'
+            className='text-[#1b1b1b]'
           />
         </div>
       </div>
