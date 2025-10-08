@@ -40,8 +40,13 @@ export default function SpaceListItem({
     }
   }, [space.website]);
 
+  const canFocus = Boolean(
+    onFocus && space.latitude && space.longitude
+  );
+
   const handleFocus = (event) => {
-    event.stopPropagation();
+    if (!canFocus) return;
+    event?.stopPropagation?.();
     onFocus?.(space);
   };
 
@@ -119,8 +124,23 @@ export default function SpaceListItem({
   return (
     <article
       className={`space-card group rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/85 px-3 py-3 shadow-[0_12px_32px_rgba(0,0,0,0.12)] transition hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)] ${
-        isActive ? 'border-[var(--foreground)]/50 bg-[var(--background)]' : ''
-      }`}>
+        isActive
+          ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
+          : ''
+      } ${canFocus ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35' : ''}`}
+      role={canFocus ? 'button' : undefined}
+      tabIndex={canFocus ? 0 : undefined}
+      onClick={handleFocus}
+      aria-pressed={
+        canFocus ? (isActive ? 'true' : 'false') : undefined
+      }
+      onKeyDown={(event) => {
+        if (!canFocus) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleFocus(event);
+        }
+      }}>
       <header className='flex flex-wrap items-center justify-between gap-2'>
         <div className='min-w-0 flex-1'>
           <h3 className='truncate text-base font-semibold text-[var(--foreground)]'>

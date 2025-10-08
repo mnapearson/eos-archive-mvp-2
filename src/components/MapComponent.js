@@ -54,6 +54,7 @@ export default function MapComponent({
   autoFit = false,
   fitKey,
   focusSpaceId,
+  onMarkerSelect,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -125,8 +126,29 @@ export default function MapComponent({
     return () => map.remove();
   }, [mapData, eventId, initialCenter, initialZoom, spaces]);
 
+  const updateMarkerFocusStyles = (currentFocusId) => {
+    markersRef.current.forEach(({ element, id }) => {
+      if (!element) return;
+      const isActive =
+        currentFocusId != null &&
+        String(id) === String(currentFocusId);
+      element.style.transform = isActive ? 'scale(1.6)' : 'scale(1)';
+      element.style.boxShadow = isActive
+        ? '0 0 0 6px rgba(255,255,255,0.32)'
+        : '0 0 0 0 rgba(0,0,0,0)';
+      element.style.opacity = isActive ? '1' : '0.9';
+    });
+  };
+
   const clearMarkers = () => {
-    markersRef.current.forEach(({ marker }) => marker.remove());
+    markersRef.current.forEach(({ marker, element, listeners }) => {
+      if (element && Array.isArray(listeners)) {
+        listeners.forEach(([event, handler]) => {
+          element.removeEventListener(event, handler);
+        });
+      }
+      marker.remove();
+    });
     markersRef.current = [];
   };
 
@@ -153,6 +175,9 @@ export default function MapComponent({
       markerEl.style.width = '12px';
       markerEl.style.height = '12px';
       markerEl.style.borderRadius = '50%';
+      markerEl.style.transition =
+        'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease';
+      markerEl.style.cursor = 'pointer';
       const typeKey = item.type
         ? item.type.toLowerCase()
         : item.space && item.space.type
@@ -187,7 +212,17 @@ export default function MapComponent({
         .setPopup(new mapboxgl.Popup().setHTML(popupContent))
         .addTo(mapRef.current);
 
-      markersRef.current.push({ marker, id: spaceId });
+      const listeners = [];
+      if (typeof onMarkerSelect === 'function') {
+        const handleMarkerClick = (event) => {
+          event.stopPropagation();
+          onMarkerSelect(spaceId);
+        };
+        markerEl.addEventListener('click', handleMarkerClick);
+        listeners.push(['click', handleMarkerClick]);
+      }
+
+      markersRef.current.push({ marker, id: spaceId, element: markerEl, listeners });
 
       if (!Number.isNaN(markerLng) && !Number.isNaN(markerLat)) {
         bounds.extend([markerLng, markerLat]);
@@ -220,6 +255,8 @@ export default function MapComponent({
       }
     });
 
+    updateMarkerFocusStyles(focusSpaceId);
+
     if (autoFit && hasValidBounds) {
       try {
         const padding = typeof window !== 'undefined' && window.innerWidth < 640 ? 60 : 120;
@@ -238,7 +275,7 @@ export default function MapComponent({
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect]);
 
   useEffect(() => {
     if (!autoFit || !mapRef.current) return;
@@ -250,11 +287,18 @@ export default function MapComponent({
   }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey]);
 
   useEffect(() => {
-    if (!focusSpaceId || !mapRef.current) return;
+    if (!mapRef.current) return;
+    if (!focusSpaceId) {
+      updateMarkerFocusStyles(null);
+      return;
+    }
     const entry = markersRef.current.find(
       (item) => String(item.id) === String(focusSpaceId)
     );
-    if (!entry) return;
+    if (!entry) {
+      updateMarkerFocusStyles(null);
+      return;
+    }
     const coords = entry.marker.getLngLat();
     mapRef.current.flyTo({
       center: coords,
@@ -265,6 +309,7 @@ export default function MapComponent({
     if (popup && !popup.isOpen()) {
       popup.addTo(mapRef.current);
     }
+    updateMarkerFocusStyles(focusSpaceId);
   }, [focusSpaceId]);
 
   useEffect(() => {
