@@ -1,9 +1,15 @@
+'use client';
+
 // File: src/components/Footer.js
 import Link from 'next/link';
 import NewsletterForm from '@/components/NewsletterForm';
+import useSupabaseUser from '@/hooks/useSupabaseUser';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const user = useSupabaseUser();
+  const registerHref = user ? '/spaces/admin' : '/spaces/signup';
+  const registerLabel = user ? 'Dashboard' : 'Register';
   return (
     <footer className='mt-20 border-t border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)]'>
       <div className='mx-auto flex max-w-6xl flex-col gap-12 px-4 py-12 lg:flex-row lg:gap-16'>
@@ -92,9 +98,9 @@ export default function Footer() {
               About
             </Link>
             <Link
-              href='/spaces/signup'
+              href={registerHref}
               className='hover:underline'>
-              Register
+              {registerLabel}
             </Link>
             <a
               href='https://donate.stripe.com/3csg0l1N5auLaTmaEF'

@@ -4,7 +4,7 @@ import { Suspense, useContext, useState, useEffect, useRef, useMemo } from 'reac
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import useSupabaseUser from '@/hooks/useSupabaseUser';
 import {
   addMonths,
   addDays,
@@ -15,34 +15,6 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
-// Updated custom hook to subscribe to auth state changes
-function useUserSimple() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const supabase = createClientComponentClient();
-
-    // Initial fetch of the session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-    });
-
-    // Subscribe to auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-
-    // Cleanup the subscription on unmount
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  return user;
-}
-
 function toId(s = '') {
   return String(s)
     .toLowerCase()
@@ -83,8 +55,10 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
     search: 'Search',
   };
 
-  const quickLinks = useMemo(
-    () => [
+  const user = useSupabaseUser();
+
+  const quickLinks = useMemo(() => {
+    const links = [
       {
         href: '/',
         label: 'Explore',
@@ -120,13 +94,27 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
         type: 'link',
         isActive: pathname.startsWith('/about'),
       },
-      {
-        href: '/spaces/signup',
-        label: 'Register a space',
-        meta: 'Submit your venue',
-        type: 'link',
-        isActive: pathname.startsWith('/spaces/signup'),
-      },
+    ];
+
+    const dashboardLink = user
+      ? {
+          href: '/spaces/admin',
+          label: 'Dashboard',
+          meta: 'Manage your space',
+          type: 'link',
+          isActive: pathname.startsWith('/spaces/admin'),
+        }
+      : {
+          href: '/spaces/signup',
+          label: 'Register a space',
+          meta: 'Submit your venue',
+          type: 'link',
+          isActive: pathname.startsWith('/spaces/signup'),
+        };
+
+    links.push(dashboardLink);
+
+    links.push(
       {
         href: 'https://donate.stripe.com/3csg0l1N5auLaTmaEF',
         label: 'Support',
@@ -140,10 +128,11 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
         meta: 'Stay updated',
         type: 'anchor',
         isActive: false,
-      },
-    ],
-    [pathname]
-  );
+      }
+    );
+
+    return links;
+  }, [pathname, user]);
 
   const activeFilterPairs = useMemo(() => {
     const pairs = [];

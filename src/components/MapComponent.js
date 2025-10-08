@@ -56,6 +56,7 @@ export default function MapComponent({
   focusSpaceId,
   onMarkerSelect,
   showPopups = true,
+  fallbackToAllSpaces = true,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -79,14 +80,16 @@ export default function MapComponent({
         setMapData([data]);
       } else if (spaces && spaces.length > 0) {
         setMapData(spaces);
-      } else {
+      } else if (fallbackToAllSpaces) {
         const response = await fetch('/api/spaces');
         const data = await response.json();
         setMapData(data);
+      } else {
+        setMapData([]);
       }
     }
     fetchData();
-  }, [eventId, spaces]);
+  }, [eventId, spaces, fallbackToAllSpaces]);
 
   useEffect(() => {
     if (mapData.length === 0 || !mapContainerRef.current) return;

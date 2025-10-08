@@ -5,30 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-// Custom hook to subscribe to auth state changes
-function useUserSimple() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // Get current session on mount
-    const supabase = createClientComponentClient();
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-    });
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-  return user;
-}
+import useSupabaseUser from '@/hooks/useSupabaseUser';
 
 export default function NavBar(props) {
   return (
@@ -45,7 +22,7 @@ function NavBarContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const user = useUserSimple();
+  const user = useSupabaseUser();
 
   const pathname = usePathname();
 
@@ -126,6 +103,8 @@ function NavBarContent() {
     theme === 'dawn' ? 'Switch to dusk mode' : 'Switch to dawn mode';
   const loginHref = user ? '/spaces/admin' : '/login';
   const loginLabel = user ? 'Submit' : 'Login';
+  const registerHref = user ? '/spaces/admin' : '/spaces/signup';
+  const registerLabel = user ? 'Dashboard' : 'Register a space';
 
   return (
     <>
@@ -202,9 +181,9 @@ function NavBarContent() {
                 {loginLabel}
               </Link>
               <Link
-                href='/spaces/signup'
+                href={registerHref}
                 className='nav-cta hidden sm:inline-flex'>
-                Register a space
+                {registerLabel}
               </Link>
             </div>
           </div>
