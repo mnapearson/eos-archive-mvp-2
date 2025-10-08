@@ -133,7 +133,7 @@ export default function SpaceSignUpPage() {
           </p>
         </header>
 
-        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/90 px-6 py-10 shadow-[0_26px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-14'>
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/90 px-6 py-8 shadow-[0_26px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
           <form
           onSubmit={handleSignUp}
           className='mt-10 space-y-10'>

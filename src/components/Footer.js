@@ -91,6 +91,11 @@ export default function Footer() {
               className='hover:underline'>
               About
             </Link>
+            <Link
+              href='/spaces/signup'
+              className='hover:underline'>
+              Register
+            </Link>
             <a
               href='https://donate.stripe.com/3csg0l1N5auLaTmaEF'
               target='_blank'

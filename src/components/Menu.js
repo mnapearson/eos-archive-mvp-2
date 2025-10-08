@@ -121,11 +121,11 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
         isActive: pathname.startsWith('/about'),
       },
       {
-        href: 'https://eosarchive.app/spaces/signup',
+        href: '/spaces/signup',
         label: 'Register a space',
         meta: 'Submit your venue',
-        type: 'external',
-        isActive: false,
+        type: 'link',
+        isActive: pathname.startsWith('/spaces/signup'),
       },
       {
         href: 'https://donate.stripe.com/3csg0l1N5auLaTmaEF',

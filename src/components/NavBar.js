@@ -201,11 +201,11 @@ function NavBarContent() {
                 className='nav-action'>
                 {loginLabel}
               </Link>
-              <a
-                href='https://eosarchive.app/spaces/signup'
+              <Link
+                href='/spaces/signup'
                 className='nav-cta hidden sm:inline-flex'>
                 Register a space
-              </a>
+              </Link>
             </div>
           </div>
         </div>
