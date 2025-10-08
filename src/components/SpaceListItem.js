@@ -16,6 +16,7 @@ export default function SpaceListItem({
   isActive = false,
   surface = 'card',
   className = '',
+  showActions = true,
 }) {
   const router = useRouter();
 
@@ -291,26 +292,28 @@ export default function SpaceListItem({
         </span>
       </header>
 
-      <footer className={compactFooterClass}>
-        <button
-          type='button'
-          onClick={handleNavigate}
-          className={`${compactPrimaryActionVisual} ${
-            surface === 'overlay' ? '' : compactActionBase
-          }`}>
-          DETAILS
-        </button>
-        {onFocus && space.latitude && space.longitude && (
+      {showActions && (
+        <footer className={compactFooterClass}>
           <button
             type='button'
-            onClick={handleFocus}
-            className={`${compactTertiaryActionVisual} ${
+            onClick={handleNavigate}
+            className={`${compactPrimaryActionVisual} ${
               surface === 'overlay' ? '' : compactActionBase
             }`}>
-            View on map
+            DETAILS
           </button>
-        )}
-      </footer>
+          {onFocus && space.latitude && space.longitude && (
+            <button
+              type='button'
+              onClick={handleFocus}
+              className={`${compactTertiaryActionVisual} ${
+                surface === 'overlay' ? '' : compactActionBase
+              }`}>
+              View on map
+            </button>
+          )}
+        </footer>
+      )}
     </article>
   );
 }

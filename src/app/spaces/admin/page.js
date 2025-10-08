@@ -232,6 +232,7 @@ export default function SpaceAdminDashboard() {
                 space={space}
                 variant='compact'
                 surface='overlay'
+                showActions={false}
                 className='border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8'
               />
             )}

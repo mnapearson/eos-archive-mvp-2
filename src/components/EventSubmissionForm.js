@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
@@ -24,37 +24,30 @@ const EVENT_CATEGORIES = [
   'other',
 ];
 
-export default function EventSubmissionForm({ spaceId }) {
-  const router = useRouter();
-  const supabase = createClientComponentClient();
+const EMPTY_FORM = (spaceId) => ({
+  space_id: spaceId || '',
+  title: '',
+  start_date: '',
+  end_date: '',
+  start_time: '',
+  end_time: '',
+  category: 'other',
+  designer: '',
+  description: '',
+});
 
-  const [formData, setFormData] = useState({
-    space_id: spaceId || '',
-    title: '',
-    start_date: '',
-    end_date: '',
-    start_time: '',
-    end_time: '',
-    category: 'other', // default to 'other'
-    designer: '',
-    description: '',
-  });
+export default function EventSubmissionForm({ spaceId, spaces = [] }) {
+  const router = useRouter();
+  const supabase = useMemo(() => createClientComponentClient(), []);
+
+  const [formData, setFormData] = useState(() => EMPTY_FORM(spaceId));
   const [imageFile, setImageFile] = useState(null);
   const [documentFile, setDocumentFile] = useState(null);
   const [agreed, setAgreed] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [spacesList, setSpacesList] = useState([]);
+  const flyerInputRef = useRef(null);
+  const documentInputRef = useRef(null);
 
-  useEffect(() => {
-    async function loadSpaces() {
-      const { data, error } = await supabase.from('spaces').select('id, name');
-      if (!error) setSpacesList(data);
-    }
-    loadSpaces();
-  }, [supabase]);
-
-  // Determine the logged-in space (for admin dashboard context)
+  const spacesList = spaces;
   const currentSpace = spacesList.find((s) => s.id === spaceId);
 
   const handleInputChange = (e) => {
@@ -62,34 +55,32 @@ export default function EventSubmissionForm({ spaceId }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        alert('File size exceeds 5MB. Please choose a smaller file.');
-        return;
-      }
-      setImageFile(file);
+  const handleFileChange = (event) => {
+    const selected = event.target.files?.[0];
+    if (!selected) return;
+    const maxSize = 5 * 1024 * 1024;
+    if (selected.size > maxSize) {
+      toast.error('Flyer must be smaller than 5MB.');
+      if (flyerInputRef.current) flyerInputRef.current.value = '';
+      return;
     }
+    setImageFile(selected);
   };
 
-  const handleDocumentChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        alert('Document exceeds 10MB. Please choose a smaller file.');
-        return;
-      }
-      setDocumentFile(file);
+  const handleDocumentChange = (event) => {
+    const selected = event.target.files?.[0];
+    if (!selected) return;
+    const maxSize = 10 * 1024 * 1024;
+    if (selected.size > maxSize) {
+      toast.error('Document must be smaller than 10MB.');
+      if (documentInputRef.current) documentInputRef.current.value = '';
+      return;
     }
+    setDocumentFile(selected);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
     // get current user for created_by
     const {
       data: { user },
@@ -183,27 +174,26 @@ export default function EventSubmissionForm({ spaceId }) {
     }
 
     toast.success('Event submitted successfully!');
-    // Optionally, reset the form and redirect after a delay
-    setFormData({
-      space_id: spaceId || '',
-      title: '',
-      start_date: '',
-      end_date: '',
-      start_time: '',
-      end_time: '',
-      category: 'other',
-      designer: '',
-      description: '',
-    });
+    setFormData(EMPTY_FORM(spaceId));
+    if (flyerInputRef.current) flyerInputRef.current.value = '';
+    if (documentInputRef.current) documentInputRef.current.value = '';
     setImageFile(null);
+    setDocumentFile(null);
     router.push('/submission-success');
   };
 
   return (
-    <div>
+    <div className='space-y-6'>
+      <header className='space-y-2'>
+        <span className='ea-label ea-label--muted'>Submit an event</span>
+        <p className='text-sm leading-relaxed text-[var(--foreground)]/70'>
+          Share an upcoming programme for your space. Flyers appear instantly on your space page once submitted.
+        </p>
+      </header>
+
       <form
         onSubmit={handleSubmit}
-        className='space-y-4 glow-box'>
+        className='space-y-6 rounded-3xl border border-[var(--foreground)]/14 bg-[var(--background)]/90 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
         {spaceId ? (
           // Read-only for space-owner context
           <div>
