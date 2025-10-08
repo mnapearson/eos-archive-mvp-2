@@ -52,17 +52,17 @@ export default function LoginPage() {
   };
 
   return (
-    <main className='relative isolate flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden bg-[var(--background)]'>
-      <div className='absolute -z-10 h-[120%] w-[140%] max-w-[960px] animate-[pulse_16s_ease-in-out_infinite] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.065),transparent_70%)]' />
-      <section className='w-full max-w-xl rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-14'>
-        <header className='space-y-3 text-center'>
+    <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>
+      <div className='pointer-events-none absolute inset-x-0 top-[-10%] z-0 h-[120%] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_70%)]' />
+
+      <div className='relative z-10 mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
+        <header className='space-y-4'>
           <span className='ea-label ea-label--muted'>Member Access</span>
-          <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)]'>
+          <h1 className='quick-view__title text-balance'>
             Sign in to eos archive
           </h1>
-          <p className='text-sm leading-relaxed text-[var(--foreground)]/70'>
-            Enter your credentials to manage spaces and upcoming events. If you
-            need support, drop us a line at{' '}
+          <p className='max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/70 sm:text-base'>
+            Enter your credentials to manage spaces and upcoming events. Need support? Drop us a line at{' '}
             <a
               href='mailto:hello@eosarchive.app'
               className='underline underline-offset-4 hover:text-[var(--foreground)]'>
@@ -72,6 +72,7 @@ export default function LoginPage() {
           </p>
         </header>
 
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-14'>
         <form
           onSubmit={handleLogin}
           className='mt-10 space-y-6'>
@@ -128,7 +129,8 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

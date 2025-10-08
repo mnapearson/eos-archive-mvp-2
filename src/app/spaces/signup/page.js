@@ -119,25 +119,22 @@ export default function SpaceSignUpPage() {
   };
 
   return (
-    <main className='relative isolate flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden bg-[var(--background)]'>
-      <div className='absolute -z-10 h-[120%] w-[160%] max-w-[1080px] animate-[pulse_18s_ease-in-out_infinite] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.065),transparent_70%)]' />
+    <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>
+      <div className='pointer-events-none absolute inset-x-0 top-[-10%] z-0 h-[120%] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_70%)]' />
 
-      <section className='w-full max-w-3xl rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/90 px-6 py-10 shadow-[0_26px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-14'>
-        <header className='space-y-3 text-center sm:text-left'>
-          <span className='ea-label ea-label--muted'>
-            Partner Space Onboarding
-          </span>
-          <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl'>
+      <div className='relative z-10 mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
+        <header className='space-y-4'>
+          <span className='ea-label ea-label--muted'>Partner Space Onboarding</span>
+          <h1 className='quick-view__title text-balance'>
             Register your space with the archive
           </h1>
-          <p className='text-sm leading-relaxed text-[var(--foreground)]/70'>
-            Share your venue details to access the eos partner dashboard. Once
-            approved, you'll be able to upload images, publish events, and
-            collaborate with the community.
+          <p className='max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/70 sm:text-base'>
+            Share your venue details to access the EOS partner dashboard. Once approved, you'll be able to upload imagery, publish events, and collaborate with the community across the archive.
           </p>
         </header>
 
-        <form
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/90 px-6 py-10 shadow-[0_26px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-14'>
+          <form
           onSubmit={handleSignUp}
           className='mt-10 space-y-10'>
           <fieldset className='space-y-6'>
@@ -340,8 +337,9 @@ export default function SpaceSignUpPage() {
               Submit space
             </button>
           </footer>
-        </form>
-      </section>
+          </form>
+        </section>
+      </div>
     </main>
   );
 }
