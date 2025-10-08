@@ -115,6 +115,22 @@ export default function SpaceListItem({
               <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)]'>
                 {space.name || 'Untitled space'}
               </h1>
+              {displayAddress && directionsUrl ? (
+                <a
+                  href={directionsUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  onClick={handleExternalLinkClick}
+                  className='text-sm uppercase tracking-[0.22em] text-[var(--foreground)]/70 underline underline-offset-4 hover:text-[var(--foreground)]'>
+                  {displayAddress}
+                </a>
+              ) : (
+                displayAddress && (
+                  <p className='text-sm uppercase tracking-[0.22em] text-[var(--foreground)]/60'>
+                    {displayAddress}
+                  </p>
+                )
+              )}
               <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
                 <div className='inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-3 py-1 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
                   <span className='text-[var(--foreground)]'>
@@ -130,16 +146,6 @@ export default function SpaceListItem({
                     onClick={handleExternalLinkClick}
                     className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
                     Visit website
-                  </a>
-                )}
-                {directionsUrl && (
-                  <a
-                    href={directionsUrl}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    onClick={handleExternalLinkClick}
-                    className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
-                    Directions
                   </a>
                 )}
               </div>
