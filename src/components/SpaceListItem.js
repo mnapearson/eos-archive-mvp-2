@@ -9,12 +9,6 @@ function normalizeType(type) {
   return String(type).toLowerCase();
 }
 
-function truncate(text, limit = 160) {
-  if (!text) return '';
-  if (text.length <= limit) return text;
-  return `${text.slice(0, limit).trimEnd()}…`;
-}
-
 export default function SpaceListItem({
   space,
   variant = 'compact',
@@ -40,9 +34,36 @@ export default function SpaceListItem({
     }
   }, [space.website]);
 
-  const canFocus = Boolean(
-    onFocus && space.latitude && space.longitude
-  );
+  const directionsUrl = useMemo(() => {
+    const lat = parseFloat(space.latitude ?? space.space_latitude ?? '');
+    const lng = parseFloat(space.longitude ?? space.space_longitude ?? '');
+    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+        `${lat},${lng}`
+      )}`;
+    }
+    const destinationParts = [
+      space.address,
+      space.space_address,
+      space.city,
+      space.space_city,
+    ].filter(Boolean);
+    if (destinationParts.length === 0) return null;
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+      destinationParts.join(', ')
+    )}`;
+  }, [
+    space.latitude,
+    space.space_latitude,
+    space.longitude,
+    space.space_longitude,
+    space.address,
+    space.space_address,
+    space.city,
+    space.space_city,
+  ]);
+
+  const canFocus = Boolean(onFocus && space.latitude && space.longitude);
 
   const handleFocus = (event) => {
     if (!canFocus) return;
@@ -53,6 +74,10 @@ export default function SpaceListItem({
   const handleNavigate = (event) => {
     event.stopPropagation();
     router.push(`/spaces/${space.id}`);
+  };
+
+  const handleExternalLinkClick = (event) => {
+    event.stopPropagation();
   };
 
   if (variant === 'detail') {
@@ -79,8 +104,19 @@ export default function SpaceListItem({
                     href={space.website}
                     target='_blank'
                     rel='noopener noreferrer'
+                    onClick={handleExternalLinkClick}
                     className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
                     Visit website
+                  </a>
+                )}
+                {directionsUrl && (
+                  <a
+                    href={directionsUrl}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    onClick={handleExternalLinkClick}
+                    className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                    Directions
                   </a>
                 )}
               </div>
@@ -127,13 +163,15 @@ export default function SpaceListItem({
         isActive
           ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
           : ''
-      } ${canFocus ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35' : ''}`}
+      } ${
+        canFocus
+          ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
+          : ''
+      }`}
       role={canFocus ? 'button' : undefined}
       tabIndex={canFocus ? 0 : undefined}
       onClick={handleFocus}
-      aria-pressed={
-        canFocus ? (isActive ? 'true' : 'false') : undefined
-      }
+      aria-pressed={canFocus ? (isActive ? 'true' : 'false') : undefined}
       onKeyDown={(event) => {
         if (!canFocus) return;
         if (event.key === 'Enter' || event.key === ' ') {
@@ -160,8 +198,18 @@ export default function SpaceListItem({
           type='button'
           onClick={handleNavigate}
           className='nav-action nav-cta h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
-          Details
+          EVENTS
         </button>
+        {directionsUrl && (
+          <a
+            href={directionsUrl}
+            target='_blank'
+            rel='noopener noreferrer'
+            onClick={handleExternalLinkClick}
+            className='nav-action h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
+            Directions
+          </a>
+        )}
         {onFocus && space.latitude && space.longitude && (
           <button
             type='button'

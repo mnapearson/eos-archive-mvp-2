@@ -55,6 +55,7 @@ export default function MapComponent({
   fitKey,
   focusSpaceId,
   onMarkerSelect,
+  showPopups = true,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -194,23 +195,29 @@ export default function MapComponent({
       if (item.city) addrParts.push(item.city);
       else if (item.space?.city) addrParts.push(item.space.city);
       const fullAddress = addrParts.join(', ');
-      const popupContent = buildPopupHTML({
-        spaceId,
-        name: spaceName,
-        fullAddress,
-        typeLabel: typeKey,
-        directionsAddress: fullAddress || fallbackAddress,
-      });
+      const popupContent = showPopups
+        ? buildPopupHTML({
+            spaceId,
+            name: spaceName,
+            fullAddress,
+            typeLabel: typeKey,
+            directionsAddress: fullAddress || fallbackAddress,
+          })
+        : null;
 
       const lng = Number(item.longitude);
       const lat = Number(item.latitude);
       const markerLng = isNaN(lng) ? 12.3731 : lng;
       const markerLat = isNaN(lat) ? 51.3397 : lat;
 
-      const marker = new mapboxgl.Marker({ element: markerEl })
-        .setLngLat([markerLng, markerLat])
-        .setPopup(new mapboxgl.Popup().setHTML(popupContent))
-        .addTo(mapRef.current);
+      const marker = new mapboxgl.Marker({ element: markerEl }).setLngLat([
+        markerLng,
+        markerLat,
+      ]);
+      if (showPopups && popupContent) {
+        marker.setPopup(new mapboxgl.Popup().setHTML(popupContent));
+      }
+      marker.addTo(mapRef.current);
 
       const listeners = [];
       if (typeof onMarkerSelect === 'function') {
@@ -229,7 +236,7 @@ export default function MapComponent({
         hasValidBounds = true;
       }
 
-      if (!item.address && !fallbackAddress) {
+      if (showPopups && !item.address && !fallbackAddress) {
         fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${markerLng},${markerLat}.json?access_token=${mapboxgl.accessToken}`
         )
@@ -275,7 +282,7 @@ export default function MapComponent({
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect, showPopups]);
 
   useEffect(() => {
     if (!autoFit || !mapRef.current) return;
@@ -284,7 +291,7 @@ export default function MapComponent({
     };
     window.addEventListener('resize', resizeHandler);
     return () => window.removeEventListener('resize', resizeHandler);
-  }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey]);
+  }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey, showPopups]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -305,12 +312,14 @@ export default function MapComponent({
       zoom: Math.max(mapRef.current.getZoom(), 13),
       essential: true,
     });
-    const popup = entry.marker.getPopup();
-    if (popup && !popup.isOpen()) {
-      popup.addTo(mapRef.current);
+    if (showPopups) {
+      const popup = entry.marker.getPopup();
+      if (popup && !popup.isOpen()) {
+        popup.addTo(mapRef.current);
+      }
     }
     updateMarkerFocusStyles(focusSpaceId);
-  }, [focusSpaceId]);
+  }, [focusSpaceId, showPopups]);
 
   useEffect(() => {
     function handleCopy(e) {

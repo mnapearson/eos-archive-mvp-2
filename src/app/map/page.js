@@ -25,7 +25,6 @@ export default function SpacesMapPage() {
   const [spaces, setSpaces] = useState([]);
   const [activeTypes, setActiveTypes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [focusedSpaceId, setFocusedSpaceId] = useState(null);
@@ -61,13 +60,6 @@ export default function SpacesMapPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const prefersCollapsed = window.matchMedia('(max-width: 768px)').matches;
-      setLegendCollapsed(prefersCollapsed);
-    }
   }, []);
 
   const typeFilters = useMemo(() => {
@@ -107,6 +99,15 @@ export default function SpacesMapPage() {
   useEffect(() => {
     setFocusedSpaceId(null);
   }, [searchQuery, activeTypes]);
+
+  const focusedSpace = useMemo(() => {
+    if (!focusedSpaceId) return null;
+    return (
+      spaces.find(
+        (space) => String(space.id) === String(focusedSpaceId)
+      ) || null
+    );
+  }, [focusedSpaceId, spaces]);
 
   const toggleType = (type) => {
     setActiveTypes((prev) => {
@@ -151,6 +152,11 @@ export default function SpacesMapPage() {
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
           onMarkerSelect={setFocusedSpaceId}
+          showPopups={false}
+        />
+        <FocusedSpaceOverlay
+          space={focusedSpace}
+          onClose={() => setFocusedSpaceId(null)}
         />
       </section>
 
@@ -167,8 +173,6 @@ export default function SpacesMapPage() {
         typeFilters={typeFilters}
         activeTypes={activeTypes}
         toggleType={toggleType}
-        legendCollapsed={legendCollapsed}
-        setLegendCollapsed={setLegendCollapsed}
         loading={loading}
         error={error}
         onFocus={(space) => setFocusedSpaceId(space?.id ?? null)}
@@ -188,8 +192,6 @@ function SpacesListPanel({
   typeFilters,
   activeTypes,
   toggleType,
-  legendCollapsed,
-  setLegendCollapsed,
   loading,
   error,
   onFocus,
@@ -328,5 +330,31 @@ function SpacesListPanel({
         )}
       </div>
     </aside>
+  );
+}
+
+function FocusedSpaceOverlay({ space, onClose }) {
+  if (!space) return null;
+
+  return (
+    <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
+      <div className='pointer-events-auto w-full max-w-md rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/95 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-xl'>
+        <div className='flex items-center justify-between px-4 pt-3'>
+          <span className='ea-label text-[var(--foreground)]/60'>
+            Selected space
+          </span>
+          <button
+            type='button'
+            onClick={onClose}
+            aria-label='Close selected space'
+            className='ea-label text-[var(--foreground)]/60 hover:text-[var(--foreground)]'>
+            Close
+          </button>
+        </div>
+        <div className='px-4 pb-4'>
+          <SpaceListItem space={space} variant='compact' isActive />
+        </div>
+      </div>
+    </div>
   );
 }
