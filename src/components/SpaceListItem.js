@@ -65,6 +65,26 @@ export default function SpaceListItem({
     space.space_city,
   ]);
 
+  const displayAddress = useMemo(() => {
+    const addressParts = [
+      space.address || space.space_address || '',
+      space.city || space.space_city || '',
+    ]
+      .map((part) => String(part || '').trim())
+      .filter(Boolean);
+
+    if (addressParts.length > 0) {
+      return addressParts.join(', ');
+    }
+    return cityLabel;
+  }, [
+    space.address,
+    space.space_address,
+    space.city,
+    space.space_city,
+    cityLabel,
+  ]);
+
   const canFocus = Boolean(onFocus && space.latitude && space.longitude);
 
   const handleFocus = (event) => {
@@ -183,10 +203,6 @@ export default function SpaceListItem({
     surface === 'overlay'
       ? `${overlayActionBase} bg-[#1b1b1b] text-white shadow-[0_12px_34px_rgba(0,0,0,0.25)] hover:bg-[#1b1b1b]/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]`
       : 'nav-action nav-cta !inline-flex';
-  const compactSecondaryActionVisual =
-    surface === 'overlay'
-      ? `${overlayActionBase} bg-white/18 text-[#1f1f1f] border border-[#1b1b1b]/25 hover:bg-white/28 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/30`
-      : 'nav-action !inline-flex';
   const compactTertiaryActionVisual =
     surface === 'overlay'
       ? `${overlayActionBase} bg-white/12 text-[#1f1f1f] border border-[#1b1b1b]/20 hover:bg-white/22 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/25`
@@ -212,6 +228,14 @@ export default function SpaceListItem({
     surface === 'overlay'
       ? 'shrink-0 rounded-full border border-[#1b1b1b]/25 bg-white/65 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[#1b1b1b]'
       : 'shrink-0 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70';
+  const addressClass =
+    surface === 'overlay'
+      ? 'mt-1 inline-flex text-[11px] uppercase tracking-[0.22em] text-[#1f1f1f]'
+      : 'mt-1 inline-flex text-[11px] uppercase tracking-[0.22em] text-[var(--foreground)]/65';
+  const addressLinkHover =
+    surface === 'overlay'
+      ? 'hover:text-[#000]'
+      : 'hover:text-[var(--foreground)]';
 
   const compactClasses = [
     compactBaseClass,
@@ -242,9 +266,19 @@ export default function SpaceListItem({
           <h3 className={titleClass}>
             {space.name || 'Untitled space'}
           </h3>
-          <p className={cityClass}>
-            {cityLabel}
-          </p>
+          <p className={cityClass}>{cityLabel}</p>
+          {displayAddress && directionsUrl ? (
+            <a
+              href={directionsUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              onClick={handleExternalLinkClick}
+              className={`${addressClass} underline underline-offset-4 ${addressLinkHover}`}>
+              {displayAddress}
+            </a>
+          ) : (
+            <span className={addressClass}>{displayAddress}</span>
+          )}
         </div>
         <span className={typePillClass}>
           {typeLabel}
@@ -260,18 +294,6 @@ export default function SpaceListItem({
           }`}>
           DETAILS
         </button>
-        {directionsUrl && (
-          <a
-            href={directionsUrl}
-            target='_blank'
-            rel='noopener noreferrer'
-            onClick={handleExternalLinkClick}
-            className={`${compactSecondaryActionVisual} ${
-              surface === 'overlay' ? '' : compactActionBase
-            }`}>
-            Directions
-          </a>
-        )}
         {onFocus && space.latitude && space.longitude && (
           <button
             type='button'
