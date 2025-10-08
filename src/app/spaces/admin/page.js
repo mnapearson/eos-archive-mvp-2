@@ -273,7 +273,7 @@ export default function SpaceAdminDashboard() {
             </h3>
             <AdminEventsManager
               spaceId={space.id}
-              filter='approved'
+              filter='archive'
               editable={true}
               emptyMessage='No archived events yet for this space.'
             />
