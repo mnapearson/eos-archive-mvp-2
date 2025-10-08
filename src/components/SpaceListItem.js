@@ -118,52 +118,37 @@ export default function SpaceListItem({
 
   return (
     <article
-      className={`space-card group rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_24px_60px_rgba(0,0,0,0.18)] ${
+      className={`space-card group rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/85 px-3 py-3 shadow-[0_12px_32px_rgba(0,0,0,0.12)] transition hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)] ${
         isActive ? 'border-[var(--foreground)]/50 bg-[var(--background)]' : ''
       }`}>
-      <header className='flex flex-col gap-2'>
-        <div className='flex items-center justify-between gap-3'>
-          <h3 className='text-lg font-semibold text-[var(--foreground)]'>
+      <header className='flex flex-wrap items-center justify-between gap-2'>
+        <div className='min-w-0 flex-1'>
+          <h3 className='truncate text-base font-semibold text-[var(--foreground)]'>
             {space.name || 'Untitled space'}
           </h3>
-          <span className='rounded-full border border-[var(--foreground)]/20 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70'>
-            {typeLabel}
-          </span>
+          <p className='text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
+            {cityLabel}
+          </p>
         </div>
-        <div className='text-xs uppercase tracking-[0.32em] text-[var(--foreground)]/60'>
-          {cityLabel}
-        </div>
+        <span className='shrink-0 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70'>
+          {typeLabel}
+        </span>
       </header>
 
-      {space.description && (
-        <p className='mt-3 text-sm leading-relaxed text-[var(--foreground)]/80'>
-          {truncate(space.description, 180)}
-        </p>
-      )}
-
-      <footer className='mt-4 flex flex-wrap items-center gap-2'>
+      <footer className='mt-3 flex flex-wrap items-center gap-2'>
+        <button
+          type='button'
+          onClick={handleNavigate}
+          className='nav-action nav-cta h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
+          Details
+        </button>
         {onFocus && space.latitude && space.longitude && (
           <button
             type='button'
             onClick={handleFocus}
-            className='nav-action h-8 rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
+            className='nav-action h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
             View on map
           </button>
-        )}
-        <button
-          type='button'
-          onClick={handleNavigate}
-          className='nav-action nav-cta h-8 rounded-full px-3 text-xs uppercase tracking-[0.28em]'>
-          Details
-        </button>
-        {websiteLabel && (
-          <a
-            href={space.website}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 hover:text-[var(--foreground)]'>
-            {websiteLabel}
-          </a>
         )}
       </footer>
     </article>
