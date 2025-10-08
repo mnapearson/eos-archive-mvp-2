@@ -127,7 +127,21 @@ export default function SpacesMapPage() {
 
   return (
     <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
-      <section className='relative order-1 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
+      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 lg:hidden'>
+        <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
+          Spaces archive
+        </span>
+        <h1 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)]'>
+          Map of independent scenes
+        </h1>
+        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
+          Explore the venues, studios, and cultural spaces that power the
+          archive. Filter by type, search for a city or name, and dive into the
+          map.
+        </p>
+      </section>
+
+      <section className='relative order-2 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
         <MapComponent
           spaces={filteredSpaces}
           activeTypes={activeTypes}
@@ -188,8 +202,8 @@ function SpacesListPanel({
     : `${totalCount} space${totalCount === 1 ? '' : 's'} visible`;
 
   return (
-    <aside className='order-2 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
-      <div className='border-b border-[var(--foreground)]/12 px-6 py-6'>
+    <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
+      <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
         </span>
