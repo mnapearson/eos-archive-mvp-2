@@ -28,6 +28,7 @@ export default function SpacesMapPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [focusedSpaceId, setFocusedSpaceId] = useState(null);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const mapSectionRef = useRef(null);
 
   useEffect(() => {
@@ -99,6 +100,7 @@ export default function SpacesMapPage() {
 
   useEffect(() => {
     setFocusedSpaceId(null);
+    setOverlayOpen(false);
   }, [searchQuery, activeTypes]);
 
   const focusedSpace = useMemo(() => {
@@ -108,6 +110,12 @@ export default function SpacesMapPage() {
       null
     );
   }, [focusedSpaceId, spaces]);
+
+  useEffect(() => {
+    if (focusedSpaceId && !focusedSpace) {
+      setOverlayOpen(false);
+    }
+  }, [focusedSpaceId, focusedSpace]);
 
   const scrollToMap = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -193,12 +201,19 @@ export default function SpacesMapPage() {
           focusSpaceId={focusedSpaceId}
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
-          onMarkerSelect={setFocusedSpaceId}
+          onMarkerSelect={(id) => {
+            if (id == null) return;
+            setFocusedSpaceId((prev) =>
+              String(prev) === String(id) ? prev : id
+            );
+            setOverlayOpen(true);
+          }}
           showPopups={false}
         />
         <FocusedSpaceOverlay
           space={focusedSpace}
-          onClose={() => setFocusedSpaceId(null)}
+          open={overlayOpen}
+          onClose={() => setOverlayOpen(false)}
         />
       </section>
 
@@ -217,7 +232,11 @@ export default function SpacesMapPage() {
         toggleType={toggleType}
         loading={loading}
         error={error}
-        onFocus={(space) => setFocusedSpaceId(space?.id ?? null)}
+        onFocus={(space) => {
+          if (!space?.id) return;
+          setFocusedSpaceId(space.id);
+          setOverlayOpen(true);
+        }}
         focusedId={focusedSpaceId}
         scrollToMap={scrollToMap}
       />
@@ -261,6 +280,35 @@ function SpacesListPanel({
           archive. Filter by type, search for a city or name, and dive into the
           map.
         </p>
+        <form
+          role='search'
+          onSubmit={(event) => event.preventDefault()}
+          className='nav-search nav-search--panel mt-4 hidden w-full lg:flex'>
+          <input
+            type='search'
+            value={searchQuery}
+            onChange={onSearchChange}
+            placeholder='Search by space or city'
+            className='nav-search__input text-sm'
+            aria-label='Search spaces'
+          />
+          <button
+            type='submit'
+            className='nav-search__submit'
+            aria-label='Search spaces'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='18'
+              height='18'
+              viewBox='0 0 24 24'
+              aria-hidden='true'>
+              <path
+                fill='currentColor'
+                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+              />
+            </svg>
+          </button>
+        </form>
       </div>
 
       <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
@@ -347,8 +395,8 @@ function SpacesListPanel({
   );
 }
 
-function FocusedSpaceOverlay({ space, onClose }) {
-  if (!space) return null;
+function FocusedSpaceOverlay({ space, open, onClose }) {
+  if (!open || !space) return null;
 
   return (
     <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
