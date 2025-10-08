@@ -338,9 +338,9 @@ function FocusedSpaceOverlay({ space, onClose }) {
 
   return (
     <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
-      <div className='pointer-events-auto w-full max-w-md rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/95 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-xl'>
-        <div className='flex items-center justify-between px-4 pt-3'>
-          <span className='ea-label text-[var(--foreground)]/60'>
+      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-[var(--foreground)]/25 bg-[var(--background)]/50 shadow-[0_28px_90px_rgba(0,0,0,0.45)] backdrop-blur-2xl'>
+        <div className='flex items-center justify-between px-5 pt-4'>
+          <span className='ea-label text-[var(--foreground)]/65'>
             Selected space
           </span>
           <button
@@ -351,8 +351,13 @@ function FocusedSpaceOverlay({ space, onClose }) {
             Close
           </button>
         </div>
-        <div className='px-4 pb-4'>
-          <SpaceListItem space={space} variant='compact' isActive />
+        <div className='px-5 pb-5'>
+          <SpaceListItem
+            space={space}
+            variant='compact'
+            isActive
+            surface='overlay'
+          />
         </div>
       </div>
     </div>

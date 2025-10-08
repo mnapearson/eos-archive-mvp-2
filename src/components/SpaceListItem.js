@@ -14,6 +14,8 @@ export default function SpaceListItem({
   variant = 'compact',
   onFocus,
   isActive = false,
+  surface = 'card',
+  className = '',
 }) {
   const router = useRouter();
 
@@ -82,7 +84,8 @@ export default function SpaceListItem({
 
   if (variant === 'detail') {
     return (
-      <article className='space-detail-card bg-[var(--background)]/85 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl'>
+      <article
+        className={`space-detail-card bg-[var(--background)]/85 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl ${className}`.trim()}>
         <div className='grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_360px]'>
           <div className='space-y-5'>
             <header className='space-y-3'>
@@ -157,17 +160,37 @@ export default function SpaceListItem({
     );
   }
 
+  const compactBaseClass =
+    'space-card group rounded-3xl px-3 py-3 transition';
+  const compactSurfaceClass =
+    surface === 'overlay'
+      ? 'border border-transparent bg-[var(--background)]/45 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl'
+      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
+  const compactActiveClass =
+    surface === 'overlay'
+      ? isActive
+        ? 'ring-1 ring-[var(--foreground)]/45 bg-[var(--background)]/55'
+        : ''
+      : isActive
+      ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
+      : '';
+  const compactFocusClass = canFocus
+    ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
+    : '';
+
+  const compactClasses = [
+    compactBaseClass,
+    compactSurfaceClass,
+    compactActiveClass,
+    compactFocusClass,
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <article
-      className={`space-card group rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/85 px-3 py-3 shadow-[0_12px_32px_rgba(0,0,0,0.12)] transition hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)] ${
-        isActive
-          ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
-          : ''
-      } ${
-        canFocus
-          ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
-          : ''
-      }`}
+      className={compactClasses}
       role={canFocus ? 'button' : undefined}
       tabIndex={canFocus ? 0 : undefined}
       onClick={handleFocus}
@@ -198,7 +221,7 @@ export default function SpaceListItem({
           type='button'
           onClick={handleNavigate}
           className='nav-action nav-cta h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
-          EVENTS
+          Details
         </button>
         {directionsUrl && (
           <a
