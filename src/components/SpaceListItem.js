@@ -177,20 +177,41 @@ export default function SpaceListItem({
     ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
     : '';
 
+  const overlayActionBase =
+    'inline-flex h-9 w-full items-center justify-center rounded-full px-3 text-[11px] uppercase tracking-[0.32em] transition';
   const compactPrimaryActionVisual =
     surface === 'overlay'
-      ? 'nav-action nav-cta bg-[#1b1b1b] text-white hover:bg-[#1b1b1b]/85 border border-[#1b1b1b] shadow-[0_12px_34px_rgba(0,0,0,0.25)]'
-      : 'nav-action nav-cta';
+      ? `${overlayActionBase} bg-[#1b1b1b] text-white shadow-[0_12px_34px_rgba(0,0,0,0.25)] hover:bg-[#1b1b1b]/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]`
+      : 'nav-action nav-cta !inline-flex';
   const compactSecondaryActionVisual =
     surface === 'overlay'
-      ? 'nav-action bg-white/20 border border-[#1b1b1b]/20 text-[#1f1f1f] hover:bg-white/35'
-      : 'nav-action';
+      ? `${overlayActionBase} bg-white/18 text-[#1f1f1f] border border-[#1b1b1b]/25 hover:bg-white/28 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/30`
+      : 'nav-action !inline-flex';
   const compactTertiaryActionVisual =
     surface === 'overlay'
-      ? 'nav-action bg-white/12 border border-[#1b1b1b]/15 text-[#1f1f1f] hover:bg-white/24'
-      : 'nav-action';
+      ? `${overlayActionBase} bg-white/12 text-[#1f1f1f] border border-[#1b1b1b]/20 hover:bg-white/22 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/25`
+      : 'nav-action !inline-flex';
   const compactActionBase =
-    'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
+    surface === 'overlay'
+      ? ''
+      : 'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
+  const compactFooterClass =
+    surface === 'overlay'
+      ? 'mt-3 flex flex-col gap-2'
+      : 'mt-3 flex flex-wrap items-center gap-2';
+
+  const titleClass =
+    surface === 'overlay'
+      ? 'truncate text-base font-semibold text-[#1b1b1b]'
+      : 'truncate text-base font-semibold text-[var(--foreground)]';
+  const cityClass =
+    surface === 'overlay'
+      ? 'text-[11px] uppercase tracking-[0.32em] text-[#454545]'
+      : 'text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55';
+  const typePillClass =
+    surface === 'overlay'
+      ? 'shrink-0 rounded-full border border-[#1b1b1b]/25 bg-white/65 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[#1b1b1b]'
+      : 'shrink-0 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70';
 
   const compactClasses = [
     compactBaseClass,
@@ -218,24 +239,26 @@ export default function SpaceListItem({
       }}>
       <header className='flex flex-wrap items-center justify-between gap-2'>
         <div className='min-w-0 flex-1'>
-          <h3 className='truncate text-base font-semibold text-[var(--foreground)]'>
+          <h3 className={titleClass}>
             {space.name || 'Untitled space'}
           </h3>
-          <p className='text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
+          <p className={cityClass}>
             {cityLabel}
           </p>
         </div>
-        <span className='shrink-0 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70'>
+        <span className={typePillClass}>
           {typeLabel}
         </span>
       </header>
 
-      <footer className='mt-3 flex flex-wrap items-center gap-2'>
+      <footer className={compactFooterClass}>
         <button
           type='button'
           onClick={handleNavigate}
-          className={`${compactPrimaryActionVisual} ${compactActionBase}`}>
-          Events
+          className={`${compactPrimaryActionVisual} ${
+            surface === 'overlay' ? '' : compactActionBase
+          }`}>
+          DETAILS
         </button>
         {directionsUrl && (
           <a
@@ -243,7 +266,9 @@ export default function SpaceListItem({
             target='_blank'
             rel='noopener noreferrer'
             onClick={handleExternalLinkClick}
-            className={`${compactSecondaryActionVisual} ${compactActionBase}`}>
+            className={`${compactSecondaryActionVisual} ${
+              surface === 'overlay' ? '' : compactActionBase
+            }`}>
             Directions
           </a>
         )}
@@ -251,7 +276,9 @@ export default function SpaceListItem({
           <button
             type='button'
             onClick={handleFocus}
-            className={`${compactTertiaryActionVisual} ${compactActionBase}`}>
+            className={`${compactTertiaryActionVisual} ${
+              surface === 'overlay' ? '' : compactActionBase
+            }`}>
             View on map
           </button>
         )}
