@@ -146,7 +146,7 @@ export default function LeicoPage() {
         </h1>
         <p className='max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
           Discover some of the spaces featured in the LEICO printed map. Browse
-          and tap any card to spotlight its position. Fina a limited edition
+          and tap any card to spotlight its position. Pick up a limited edition
           printed map at each location.
         </p>
       </section>
@@ -234,7 +234,7 @@ function LeicoListPanel({
         </h2>
         <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
           Discover some of the spaces featured in the LEICO printed map. Browse
-          and tap any card to spotlight its position. Fina a limited edition
+          and tap any card to spotlight its position. Pick up a limited edition
           printed map at each location.
         </p>
       </div>
