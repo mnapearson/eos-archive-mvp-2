@@ -124,15 +124,13 @@ export default function SpaceSignUpPage() {
 
       <div className='relative z-10 mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
         <header className='space-y-4'>
-          <span className='ea-label ea-label--muted'>
-            Partner Space Onboarding
-          </span>
+          <span className='ea-label ea-label--muted'>Space Onboarding</span>
           <h1 className='quick-view__title text-balance'>
             Register your space with the archive
           </h1>
           <p className='max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/70 sm:text-base'>
-            Share your venue details to access the eos partner dashboard. Once
-            approved, you'll be able to upload imagery, publish events, and
+            Share your venue details to access the eos archive dashboard. Once
+            submitted, you'll be able to upload imagery, publish events, and
             collaborate with the community across the archive.
           </p>
         </header>
