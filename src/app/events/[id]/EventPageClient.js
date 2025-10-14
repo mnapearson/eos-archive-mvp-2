@@ -1,13 +1,7 @@
 // src/app/events/[id]/EventPageClient.js
 'use client';
 
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -76,7 +70,11 @@ export default function EventPageClient({ eventId }) {
 
   const startDate = event?.start_date ? event.start_date.slice(0, 10) : null;
   const city =
-    event?.space?.city || event?.city || event?.space_city || event?.location || '';
+    event?.space?.city ||
+    event?.city ||
+    event?.space_city ||
+    event?.location ||
+    '';
   const venueName = event?.space?.name || event?.venue || '';
   const spaceHref = event?.space
     ? `/spaces/${event.space.slug || event.space.id}`
@@ -95,7 +93,9 @@ export default function EventPageClient({ eventId }) {
   const shareSummary = [eventDateTime, city, venueName]
     .filter(Boolean)
     .join(' · ');
-  const eventUrl = event?.slug ? `/events/${event.slug}` : `/events/${event?.id}`;
+  const eventUrl = event?.slug
+    ? `/events/${event.slug}`
+    : `/events/${event?.id}`;
   const statusLabel = getEventStatus(event);
   const hasMap = Boolean(
     event?.latitude ||
@@ -154,7 +154,16 @@ export default function EventPageClient({ eventId }) {
     }
 
     return rows;
-  }, [event, startDate, eventDateTime, eventCategory, venueName, spaceHref, spaceAddress, eventDesigner]);
+  }, [
+    event,
+    startDate,
+    eventDateTime,
+    eventCategory,
+    venueName,
+    spaceHref,
+    spaceAddress,
+    eventDesigner,
+  ]);
 
   if (loading) {
     return (
@@ -195,7 +204,9 @@ export default function EventPageClient({ eventId }) {
       <header className='event-page__header space-y-4'>
         <div className='flex flex-wrap items-center gap-3'>
           {statusLabel && (
-            <span className='list-card__badge quick-view__badge'>{statusLabel}</span>
+            <span className='list-card__badge quick-view__badge'>
+              {statusLabel}
+            </span>
           )}
         </div>
         <h1 className='quick-view__title event-page__title'>{eventTitle}</h1>
@@ -222,7 +233,9 @@ export default function EventPageClient({ eventId }) {
           )}
           {eventDesigner && (
             <div className='quick-view__designer-row'>
-              <span className='quick-view__designer'>Graphic design by {eventDesigner}</span>
+              <span className='quick-view__designer'>
+                Graphic design by {eventDesigner}
+              </span>
             </div>
           )}
 
@@ -259,37 +272,39 @@ export default function EventPageClient({ eventId }) {
 
           {infoRows.length > 0 && (
             <div className='event-page__info-grid'>
-              {infoRows.map(({ id, label, value, filters, href, externalHref }) => (
-                <div
-                  key={id}
-                  className='event-page__info-item'>
-                  <span className='event-page__info-label'>{label}</span>
-                  {filters ? (
-                    <button
-                      type='button'
-                      className='event-page__info-link'
-                      onClick={() => applyFiltersAndNavigate(filters)}>
-                      {value}
-                    </button>
-                  ) : href ? (
-                    <Link
-                      href={href}
-                      className='event-page__info-link'>
-                      {value}
-                    </Link>
-                  ) : externalHref ? (
-                    <a
-                      href={externalHref}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='event-page__info-link'>
-                      {value}
-                    </a>
-                  ) : (
-                    <span className='event-page__info-value'>{value}</span>
-                  )}
-                </div>
-              ))}
+              {infoRows.map(
+                ({ id, label, value, filters, href, externalHref }) => (
+                  <div
+                    key={id}
+                    className='event-page__info-item'>
+                    <span className='event-page__info-label'>{label}</span>
+                    {filters ? (
+                      <button
+                        type='button'
+                        className='event-page__info-link'
+                        onClick={() => applyFiltersAndNavigate(filters)}>
+                        {value}
+                      </button>
+                    ) : href ? (
+                      <Link
+                        href={href}
+                        className='event-page__info-link'>
+                        {value}
+                      </Link>
+                    ) : externalHref ? (
+                      <a
+                        href={externalHref}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='event-page__info-link'>
+                        {value}
+                      </a>
+                    ) : (
+                      <span className='event-page__info-value'>{value}</span>
+                    )}
+                  </div>
+                )
+              )}
             </div>
           )}
 
@@ -324,7 +339,7 @@ export default function EventPageClient({ eventId }) {
       </div>
       <div className='event-page__footer-links'>
         <Link
-          href='/events'
+          href='/'
           className='nav-action event-page__back event-page__footer-link'>
           Explore more events →
         </Link>
