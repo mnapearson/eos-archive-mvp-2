@@ -8,7 +8,7 @@ export default function ShareButton({
   text,
   url,
   buttonText = 'Share',
-  copiedText = 'Copied!',
+  copiedText = 'Link copied!',
   className = 'button',
   variant = '',
   children,
@@ -34,16 +34,25 @@ export default function ShareButton({
     setPending(true);
     const shareUrl = resolveShareUrl(url);
     const shareText = text ? text.trim() : '';
-    const clipboardPayload = [shareText, shareUrl].filter(Boolean).join('\n').trim();
+    const clipboardPayload = [shareText, shareUrl]
+      .filter(Boolean)
+      .join('\n')
+      .trim();
 
     try {
-      const copiedSuccessfully = await copyToClipboard(clipboardPayload || shareUrl);
+      const copiedSuccessfully = await copyToClipboard(
+        clipboardPayload || shareUrl
+      );
 
       if (copiedSuccessfully) {
         showCopiedState();
         onSuccess?.();
       } else if (shareUrl && typeof window !== 'undefined') {
-        const newWindow = window.open(shareUrl, '_blank', 'noopener,noreferrer');
+        const newWindow = window.open(
+          shareUrl,
+          '_blank',
+          'noopener,noreferrer'
+        );
         if (!newWindow) {
           window.location.href = shareUrl;
         }

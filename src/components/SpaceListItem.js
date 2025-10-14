@@ -106,7 +106,7 @@ export default function SpaceListItem({
   if (variant === 'detail') {
     return (
       <article
-        className={`space-detail-card bg-[var(--background)]/85 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.14)] backdrop-blur-xl ${className}`.trim()}>
+        className={`space-detail-card bg-[var(--background)]/85 py-6 backdrop-blur-xl ${className}`.trim()}>
         <div className='grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_360px]'>
           <div className='space-y-5'>
             <header className='space-y-3'>
@@ -190,8 +190,8 @@ export default function SpaceListItem({
   const compactBaseClass = 'space-card group rounded-3xl px-3 py-3 transition';
   const compactSurfaceClass =
     surface === 'overlay'
-      ? 'border border-white/70 bg-[rgba(255,255,255,0.92)] text-[#1b1b1b] shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl'
-      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
+      ? 'border border-white/70 bg-[rgba(255,255,255,0.92)] text-[#1b1b1b] backdrop-blur-xl'
+      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
   const compactActiveClass =
     surface === 'overlay'
       ? isActive
@@ -208,11 +208,11 @@ export default function SpaceListItem({
     'inline-flex h-9 w-full items-center justify-center rounded-full px-3 text-[11px] uppercase tracking-[0.32em] transition';
   const compactPrimaryActionVisual =
     surface === 'overlay'
-      ? `${overlayActionBase} bg-[#1b1b1b] text-white shadow-[0_12px_34px_rgba(0,0,0,0.25)] hover:bg-[#1b1b1b]/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]`
+      ? `${overlayActionBase} bg-[#1b1b1b] text-white hover:bg-[#1b1b1b]/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]`
       : 'nav-action nav-cta !inline-flex';
   const compactTertiaryActionVisual =
     surface === 'overlay'
-      ? `${overlayActionBase} bg-white/12 text-[#1f1f1f] border border-[#1b1b1b]/20 hover:bg-white/22 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/25`
+      ? `${overlayActionBase} text-[#1f1f1f] border border-[#1b1b1b]/20 hover:bg-white/22 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/25`
       : 'nav-action !inline-flex';
   const compactActionBase =
     surface === 'overlay'
@@ -270,9 +270,7 @@ export default function SpaceListItem({
       }}>
       <header className='flex flex-wrap items-center justify-between gap-2'>
         <div className='min-w-0 flex-1'>
-          <h3 className={titleClass}>
-            {space.name || 'Untitled space'}
-          </h3>
+          <h3 className={titleClass}>{space.name || 'Untitled space'}</h3>
           <p className={cityClass}>{cityLabel}</p>
           {displayAddress && directionsUrl ? (
             <a
@@ -287,9 +285,7 @@ export default function SpaceListItem({
             <span className={addressClass}>{displayAddress}</span>
           )}
         </div>
-        <span className={typePillClass}>
-          {typeLabel}
-        </span>
+        <span className={typePillClass}>{typeLabel}</span>
       </header>
 
       {showActions && (

@@ -63,18 +63,15 @@ export default function SpacePage() {
     }
   }, [id]);
 
-  const enrichedEvents = useMemo(
-    () => {
-      if (!space) return displayEvents;
-      return displayEvents.map((event) => ({
-        ...event,
-        space_name: space.name || space.space_name,
-        space_city: space.city || space.space_city,
-        space_country: space.country || space.space_country,
-      }));
-    },
-    [displayEvents, space]
-  );
+  const enrichedEvents = useMemo(() => {
+    if (!space) return displayEvents;
+    return displayEvents.map((event) => ({
+      ...event,
+      space_name: space.name || space.space_name,
+      space_city: space.city || space.space_city,
+      space_country: space.country || space.space_country,
+    }));
+  }, [displayEvents, space]);
 
   if (!space) {
     return <Spinner />;
