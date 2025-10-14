@@ -23,7 +23,7 @@ export default function Spinner({ fullscreen = true, size = 64 }) {
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-[var(--background)]/80 backdrop-blur-md'>
       <div className='animate-spin'>
         <Image
-          src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets/EOS24_metal_blue_transparent.png'
+          src='https://mqtcodpajykyvodmahlt.supabase.co/storage/v1/object/public/assets/eos25-1.0.png'
           alt='Loading'
           width={logoSize}
           height={logoSize}
