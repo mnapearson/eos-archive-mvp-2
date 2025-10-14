@@ -147,6 +147,15 @@ function HomePageContent() {
   const activeFilterCount = activeFilterPairs.length;
   const hasActiveFilters = activeFilterCount > 0;
 
+  function openFiltersMenu() {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new CustomEvent('ea:menu-toggle', {
+        detail: { open: true, source: 'filter-rail' },
+      })
+    );
+  }
+
   // Helper function to remove a single value from a multi-select filter
   function removeFilterValue(filterKey, value) {
     if (filterKey === 'search') {
@@ -304,8 +313,14 @@ function HomePageContent() {
             <div
               className='filter-rail__summary'
               aria-live='polite'>
-              <span>Active filters</span>
-              <span className='filter-rail__count'>{activeFilterCount}</span>
+              <button
+                type='button'
+                className='filter-rail__summary-trigger'
+                onClick={openFiltersMenu}>
+                <span>Active filters</span>
+                <span className='filter-rail__count'>{activeFilterCount}</span>
+                <span className='sr-only'>Open filters</span>
+              </button>
             </div>
             {activeFilterPairs.map(({ filterKey, val }, idx) => {
               const label = filterLabels[filterKey] || filterKey;
@@ -340,8 +355,14 @@ function HomePageContent() {
           <div
             className='filter-rail__summary'
             aria-live='polite'>
-            <span>No filters applied</span>
-            <span className='filter-rail__count'>0</span>
+            <button
+              type='button'
+              className='filter-rail__summary-trigger'
+              onClick={openFiltersMenu}>
+              <span>No filters applied</span>
+              <span className='filter-rail__count'>0</span>
+              <span className='sr-only'>Open filters</span>
+            </button>
           </div>
         )}
       </div>

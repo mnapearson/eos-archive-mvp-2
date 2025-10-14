@@ -11,6 +11,14 @@ export const metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: SITE.name, template: `%s — ${SITE.name}` },
   description: SITE.description,
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: [{ url: '/icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: [{ url: '/icon.png', type: 'image/png' }],
+  },
   openGraph: {
     siteName: SITE.name,
     images: [{ url: SITE.ogImage, width: 1200, height: 630 }],

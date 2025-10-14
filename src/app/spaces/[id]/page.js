@@ -87,7 +87,7 @@ export default function SpacePage() {
   ];
 
   return (
-    <div className='space-y-10'>
+    <div className='space-y-10 pb-10'>
       <SpaceListItem
         space={space}
         variant='detail'
@@ -143,6 +143,14 @@ export default function SpacePage() {
           </p>
         )}
       </section>
+
+      <div className='flex justify-center pt-2'>
+        <a
+          href='/map'
+          className='nav-action inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em]'>
+          Explore more spaces <span aria-hidden>→</span>
+        </a>
+      </div>
     </div>
   );
 }

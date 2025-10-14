@@ -55,6 +55,21 @@ function NavBarContent() {
 
   const toggleTheme = () => setTheme(theme === 'dawn' ? 'dusk' : 'dawn');
   const toggleMenu = () => setMenuOpen(!menuOpen);
+  const openMenu = () => setMenuOpen(true);
+
+  useEffect(() => {
+    function handleMenuToggle(event) {
+      const { open = true } = event?.detail || {};
+      if (open) {
+        openMenu();
+      } else {
+        setMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('ea:menu-toggle', handleMenuToggle);
+    return () => window.removeEventListener('ea:menu-toggle', handleMenuToggle);
+  }, []);
 
   // When the user clicks the logo (if you decide to have one) you can reset filters:
   const handleLogoClick = () => {
