@@ -192,15 +192,6 @@ export default function EventPageClient({ eventId }) {
 
   return (
     <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
-      <div className='event-page__nav'>
-        <Link
-          scroll={false}
-          href='/'
-          className='nav-action event-page__back'>
-          ← back to archive
-        </Link>
-      </div>
-
       <header className='event-page__header space-y-4'>
         <div className='flex flex-wrap items-center gap-3'>
           {statusLabel && (
@@ -232,6 +223,18 @@ export default function EventPageClient({ eventId }) {
           {eventDesigner && (
             <div className='quick-view__designer-row'>
               <span className='quick-view__designer'>Graphic design by {eventDesigner}</span>
+            </div>
+          )}
+
+          {hasMap && (
+            <div className='event-page__map-card event-page__map-card--media'>
+              <MapComponent
+                spaces={event.space ? [event.space] : undefined}
+                eventId={eventId}
+                autoFit
+                showPopups={false}
+                focusSpaceId={event.space?.id}
+              />
             </div>
           )}
         </div>
@@ -297,10 +300,13 @@ export default function EventPageClient({ eventId }) {
           )}
 
           {hasMap && (
-            <div className='event-page__map-card'>
+            <div className='event-page__map-card event-page__map-card--details'>
               <MapComponent
+                spaces={event.space ? [event.space] : undefined}
                 eventId={eventId}
-                address={displayedAddress}
+                autoFit
+                showPopups={false}
+                focusSpaceId={event.space?.id}
               />
             </div>
           )}
@@ -319,7 +325,7 @@ export default function EventPageClient({ eventId }) {
       <div className='event-page__footer-links'>
         <Link
           href='/events'
-          className='nav-action event-page__back'>
+          className='nav-action event-page__back event-page__footer-link'>
           Explore more events →
         </Link>
       </div>
