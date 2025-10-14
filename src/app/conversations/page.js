@@ -120,12 +120,12 @@ export default async function ConversationsIndex() {
                 <div className='mt-4 flex flex-col items-center gap-3'>
                   {title ? (
                     <h2 className='text-xl font-semibold leading-tight text-[var(--foreground)]'>
-                      {title}
+                      {summary}
                     </h2>
                   ) : null}
                   {showSummary ? (
                     <p className='text-sm leading-relaxed text-[var(--foreground)]/75 line-clamp-3'>
-                      {summary}
+                      {title}{' '}
                     </p>
                   ) : null}
                 </div>
