@@ -313,8 +313,14 @@ function HomePageContent() {
             <div
               className='filter-rail__summary'
               aria-live='polite'>
-              <span>Active filters</span>
-              <span className='filter-rail__count'>{activeFilterCount}</span>
+              <button
+                type='button'
+                className='filter-rail__summary-trigger'
+                onClick={openFiltersMenu}>
+                <span>Active filters</span>
+                <span className='filter-rail__count'>{activeFilterCount}</span>
+                <span className='sr-only'>Open filters</span>
+              </button>
             </div>
             {activeFilterPairs.map(({ filterKey, val }, idx) => {
               const label = filterLabels[filterKey] || filterKey;
