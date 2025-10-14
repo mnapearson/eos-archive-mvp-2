@@ -316,6 +316,13 @@ export default function EventPageClient({ eventId }) {
           )}
         </div>
       </div>
+      <div className='event-page__footer-links'>
+        <Link
+          href='/events'
+          className='nav-action event-page__back'>
+          Explore more events →
+        </Link>
+      </div>
     </div>
   );
 }

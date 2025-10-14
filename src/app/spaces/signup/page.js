@@ -120,9 +120,7 @@ export default function SpaceSignUpPage() {
 
   return (
     <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>
-      <div className='pointer-events-none absolute inset-x-0 top-[-10%] z-0 h-[120%] w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_70%)]' />
-
-      <div className='relative z-10 mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
+      <div className='mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
         <header className='space-y-4'>
           <span className='ea-label ea-label--muted'>Space Onboarding</span>
           <h1 className='quick-view__title text-balance'>
