@@ -110,7 +110,6 @@ export default async function ConversationsIndex() {
                 )}
 
                 <div className='flex flex-col items-center gap-1 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
-                  <span>Conversation {row.conversationNumber}</span>
                   {meta ? (
                     <span className='text-xs text-[var(--foreground)]/60'>
                       {meta}
