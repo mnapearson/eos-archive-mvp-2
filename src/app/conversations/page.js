@@ -1,130 +1,153 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
+import EAImage from '@/components/EAImage';
+import { supabase } from '@/lib/supabaseClient';
+import { formatDate } from '@/lib/date';
+
+function sanitizeCopy(value) {
+  return (value || '').replace(/\s+/g, ' ').trim();
+}
+
+function formatQuote(text) {
+  if (!text) return '';
+  return /^[“"']/.test(text) ? text : `“${text}”`;
+}
+
+function toTimestamp(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  const ts = date.getTime();
+  return Number.isNaN(ts) ? null : ts;
+}
 
 export default async function ConversationsIndex() {
-  const cookieStore = await cookies();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
-
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('conversations')
     .select(
-      'id, slug, title, dek, quote, convo_date, location, cover_image_url, published_at, status'
+      'id, slug, title, dek, quote, convo_date, location, cover_image_url, show_cover, published_at, status'
     )
     .eq('status', 'published');
 
-  function extractNumberFromTitle(title) {
-    const m = String(title || '').match(/(\d+)/);
-    return m ? parseInt(m[1], 10) : null;
+  if (error) {
+    console.error('Failed to load conversations', error);
   }
 
-  const rows = (data || []).slice().sort((a, b) => {
-    const an = extractNumberFromTitle(a.title);
-    const bn = extractNumberFromTitle(b.title);
-    if (an == null && bn == null) return 0;
-    if (an == null) return 1;
-    if (bn == null) return -1;
-    return bn - an; // descending
-  });
-  const total = rows.length;
+  const rows = (data || [])
+    .slice()
+    .sort((a, b) => {
+      const aConvo = toTimestamp(a?.convo_date);
+      const bConvo = toTimestamp(b?.convo_date);
+      if (aConvo !== bConvo) {
+        const aScore = aConvo ?? Number.NEGATIVE_INFINITY;
+        const bScore = bConvo ?? Number.NEGATIVE_INFINITY;
+        return bScore - aScore;
+      }
 
-  function formatDateDMY(ymd) {
-    if (!ymd) return '';
-    const [y, m, d] = String(ymd).split('T')[0].split('-');
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    const day = d.padStart(2, '0');
-    const mon = months[parseInt(m, 10) - 1] || '';
-    return `${day} ${mon} ${y}`;
-  }
+      const aPublished = toTimestamp(a?.published_at);
+      const bPublished = toTimestamp(b?.published_at);
+      if (aPublished !== bPublished) {
+        const aScore = aPublished ?? Number.NEGATIVE_INFINITY;
+        const bScore = bPublished ?? Number.NEGATIVE_INFINITY;
+        return bScore - aScore;
+      }
+
+      return (b?.id || 0) - (a?.id || 0);
+    })
+    .map((row, index) => ({
+      ...row,
+      conversationNumber: String(index + 1).padStart(2, '0'),
+    }));
 
   return (
-    <main className='px-4 py-6 sm:px-6 lg:px-8'>
-      <div className='mx-auto'>
-        <div className='ea-label ea-label--muted'>Conversations</div>
-        <p className='mt-2 max-w-2xl text-sm italic opacity-80'>
-          These dialogues highlight unique voices that shape event culture in
-          Leipzig, Berlin and beyond.
+    <div className='mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
+      <header className='space-y-4'>
+        <span className='ea-label ea-label--muted'>Conversations</span>
+        <h1 className='quick-view__title text-balance'>
+          Voices shaping the archive
+        </h1>
+        <p className='max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/70 sm:text-base'>
+          These dialogues highlight unique perspectives that shape event culture
+          in Leipzig, Berlin, and beyond.
         </p>
-      </div>
+      </header>
 
       {rows.length === 0 ? (
-        <p className='opacity-70'>No conversations published yet.</p>
+        <p className='text-sm italic text-[var(--foreground)]/60'>
+          No conversations published yet.
+        </p>
       ) : (
-        <div className='my-4 flex flex-wrap gap-4 sm:gap-6 justify-center'>
-          {rows.map((c) => {
-            const desc = (c.dek && c.dek.replace(/\n/g, ' ')) || c.title || '';
-            const dateStr = c.convo_date ? formatDateDMY(c.convo_date) : null;
+        <section className='grid gap-6 sm:grid-cols-2 xl:grid-cols-3'>
+          {rows.map((row) => {
+            const summary =
+              sanitizeCopy(row.dek) ||
+              sanitizeCopy(row.quote) ||
+              sanitizeCopy(row.title);
+            const quote = sanitizeCopy(row.quote);
+            const title = sanitizeCopy(row.title);
+            const showSummary = summary && summary !== title;
+            const dateLabel = row.convo_date ? formatDate(row.convo_date) : '';
+            const meta = [dateLabel, row.location].filter(Boolean).join(' · ');
+            const altText = summary || 'Conversation cover';
+            const formattedQuote =
+              quote && quote !== summary ? formatQuote(quote) : null;
+
             return (
               <Link
-                key={c.slug}
-                href={`/conversations/${c.slug}`}
-                aria-label={`Open ${c.title || 'conversation'}`}
-                className='border p-3 block h-[17rem] w-[350px] shrink-0'>
-                <div className='text-center flex h-full flex-col min-h-[120px]'>
-                  {/* Optional cover image (Apartamento style) */}
-                  {c.cover_image_url ? (
-                    <img
-                      src={c.cover_image_url}
-                      alt={desc || 'Conversation cover'}
-                      loading='lazy'
-                      className='mx-auto mb-3 w-full aspect-[4/3] object-cover'
+                key={row.slug}
+                href={`/conversations/${row.slug}`}
+                className='group relative flex h-full flex-col items-center overflow-hidden rounded-[28px] border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-5 text-center shadow-[0_22px_60px_rgba(0,0,0,0.10)] transition duration-300 hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_28px_90px_rgba(0,0,0,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/40'>
+                {row.cover_image_url && row.show_cover && (
+                  <div className='relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--foreground)]/5'>
+                    <EAImage
+                      src={row.cover_image_url}
+                      alt={altText}
+                      fill
+                      className='h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]'
                     />
+                  </div>
+                )}
+
+                <div className='flex flex-col items-center gap-1 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
+                  <span>Conversation {row.conversationNumber}</span>
+                  {meta ? (
+                    <span className='text-xs text-[var(--foreground)]/60'>
+                      {meta}
+                    </span>
                   ) : null}
+                </div>
 
-                  {/* Kicker: conversation title as link-style text */}
-                  <div className='ea-kicker underline decoration-[var(--foreground)]/70 underline-offset-4'>
-                    {c.title}
-                  </div>
-
-                  {/* Big line from description (dek); fall back to title */}
-                  <h3 className='mt-3 font-medium tracking-tight text-lg line-clamp-2'>
-                    {desc}
-                  </h3>
-                  {/* Meta: date · location */}
-                  {(dateStr || c.location) && (
-                    <div className='mt-2 ea-meta'>
-                      {dateStr}
-                      {dateStr && c.location ? ' · ' : ''}
-                      {c.location || ''}
-                    </div>
-                  )}
-
-                  {/* Optional quote */}
-                  {c.quote && (
-                    <p className='text-justify m-3 italic opacity-85 text-sm line-clamp-5'>
-                      {c.quote}
+                <div className='mt-4 flex flex-col items-center gap-3'>
+                  {title ? (
+                    <h2 className='text-xl font-semibold leading-tight text-[var(--foreground)]'>
+                      {title}
+                    </h2>
+                  ) : null}
+                  {showSummary ? (
+                    <p className='text-sm leading-relaxed text-[var(--foreground)]/75 line-clamp-3'>
+                      {summary}
                     </p>
-                  )}
+                  ) : null}
+                </div>
 
-                  {/* Spacer to push button down if content is short */}
-                  <div className='mt-auto' />
+                {formattedQuote ? (
+                  <p className='mt-4 text-sm italic text-[var(--foreground)]/65 line-clamp-4'>
+                    {formattedQuote}
+                  </p>
+                ) : null}
 
-                  {/* Read more button using global .button style */}
-                  <div className='mx-auto p-2'>
-                    <button className='button mx-auto'>Read more</button>
-                  </div>
+                <div className='mt-auto flex w-full justify-center pt-6'>
+                  <span className='inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/70 transition duration-200 group-hover:text-[var(--foreground)]'>
+                    Read conversation
+                    <span aria-hidden>→</span>
+                  </span>
                 </div>
               </Link>
             );
           })}
-        </div>
+        </section>
       )}
-    </main>
+    </div>
   );
 }
