@@ -13,6 +13,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getSiteUrl = () => {
+    const envUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL;
+    if (envUrl) {
+      return envUrl.replace(/\/$/, '');
+    }
+    return typeof window !== 'undefined'
+      ? window.location.origin
+      : 'http://localhost:3000';
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -36,8 +49,7 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    // Customize the redirect URL as needed.
-    const redirectTo = window.location.origin + '/reset-password';
+    const redirectTo = `${getSiteUrl()}/reset-password`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
     });
