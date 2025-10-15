@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Spinner from '@/components/Spinner';
@@ -11,6 +11,19 @@ import AdminEventsManager from '@/components/AdminEventsManager';
 import { toast } from 'react-hot-toast';
 
 export default function SpaceAdminDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className='flex justify-center py-20'>
+          <Spinner />
+        </div>
+      }>
+      <SpaceAdminDashboardContent />
+    </Suspense>
+  );
+}
+
+function SpaceAdminDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
@@ -114,7 +127,6 @@ export default function SpaceAdminDashboard() {
       description: space.description || '',
     });
     setIsEditing(false);
-    setUpdateError(null);
   };
 
   const tabOptions = useMemo(
