@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import markerColors from '@/lib/markerColors';
-import { allowedCities } from '@/lib/cities';
+import CityPicker from '@/components/CityPicker';
 import toast from 'react-hot-toast';
 
 const SPACE_TYPES = Object.keys(markerColors);
@@ -19,7 +19,11 @@ export default function SpaceSignUpPage() {
   const [spaceType, setSpaceType] = useState('');
 
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState({
+    city: '',
+    displayName: '',
+    countryCode: '',
+  });
 
   const [description, setDescription] = useState('');
   const [website, setWebsite] = useState('');
@@ -54,7 +58,13 @@ export default function SpaceSignUpPage() {
     }
 
     // 2. Combine address fields for geocoding.
-    const fullAddress = `${address}, ${city}`;
+    const cityLabel = (city.displayName || city.city || '').trim();
+    if (!cityLabel) {
+      toast.error('Please select your city.');
+      return;
+    }
+
+    const fullAddress = `${address}, ${cityLabel}`;
     let latitude = null;
     let longitude = null;
     try {
@@ -85,7 +95,7 @@ export default function SpaceSignUpPage() {
         user_id: userId,
         name: spaceName,
         type: spaceType, // Save the space type (either selected or new)
-        city,
+        city: cityLabel,
         address,
 
         description,
@@ -181,25 +191,12 @@ export default function SpaceSignUpPage() {
                     className='ea-label ea-label--muted'>
                     City*
                   </label>
-                  <select
+                  <CityPicker
                     id='space-city'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    required>
-                    <option
-                      value=''
-                      disabled>
-                      Select your city
-                    </option>
-                    {allowedCities.map((c) => (
-                      <option
-                        key={c}
-                        value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setCity}
+                    required
+                  />
                 </div>
 
                 <div className='flex-1 space-y-2'>
