@@ -187,7 +187,7 @@ export default function CityPicker({
         <ul
           id={`${id}-listbox`}
           role='listbox'
-          className='absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/95 shadow-[0_14px_38px_rgba(0,0,0,0.18)] backdrop-blur-md'>
+          className='absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)] shadow-[0_14px_38px_rgba(0,0,0,0.18)]'>
           {suggestions.map((feature) => (
             <li key={feature.id}>
               <button
