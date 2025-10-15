@@ -1,11 +1,12 @@
 'use client';
 
-import { Suspense, useState, useEffect, useContext } from 'react';
+import { Suspense, useState, useEffect, useContext, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
 import useSupabaseUser from '@/hooks/useSupabaseUser';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function NavBar(props) {
   return (
@@ -23,6 +24,7 @@ function NavBarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useSupabaseUser();
+  const supabase = useMemo(() => createClientComponentClient(), []);
 
   const pathname = usePathname();
 
@@ -116,10 +118,21 @@ function NavBarContent() {
 
   const themeToggleLabel =
     theme === 'dawn' ? 'Switch to dusk mode' : 'Switch to dawn mode';
-  const loginHref = user ? '/spaces/admin' : '/login';
+  const loginHref = user ? '/spaces/admin?tab=events' : '/login';
   const loginLabel = user ? 'Submit' : 'Login';
-  const registerHref = user ? '/spaces/admin' : '/spaces/signup';
-  const registerLabel = user ? 'Dashboard' : 'Register a space';
+  const registerHref = '/spaces/signup';
+  const registerLabel = 'Register a space';
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Failed to sign out', error);
+      return;
+    }
+    setMenuOpen(false);
+    router.push('/');
+    router.refresh();
+  };
 
   return (
     <>
@@ -195,11 +208,20 @@ function NavBarContent() {
                 className='nav-action'>
                 {loginLabel}
               </Link>
-              <Link
-                href={registerHref}
-                className='nav-cta hidden sm:inline-flex'>
-                {registerLabel}
-              </Link>
+              {user ? (
+                <button
+                  type='button'
+                  onClick={handleSignOut}
+                  className='nav-cta hidden sm:inline-flex'>
+                  Disconnect
+                </button>
+              ) : (
+                <Link
+                  href={registerHref}
+                  className='nav-cta hidden sm:inline-flex'>
+                  {registerLabel}
+                </Link>
+              )}
             </div>
           </div>
         </div>
