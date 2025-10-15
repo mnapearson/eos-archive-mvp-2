@@ -263,7 +263,19 @@ function SpaceAdminDashboardContent() {
             )}
 
             <div className='grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]'>
-              <SpaceImageUpload spaceId={space.id} />
+              <SpaceImageUpload
+                spaceId={space.id}
+                onImageSaved={(url) =>
+                  setSpace((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          image_url: url,
+                        }
+                      : prev
+                  )
+                }
+              />
               {space.image_url && (
                 <img
                   src={space.image_url}

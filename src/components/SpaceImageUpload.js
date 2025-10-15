@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
-export default function SpaceImageUpload({ spaceId }) {
+export default function SpaceImageUpload({ spaceId, onImageSaved = () => {} }) {
   const supabase = useMemo(() => createClientComponentClient(), []);
   const router = useRouter();
   const fileInputRef = useRef(null);
@@ -106,6 +106,7 @@ export default function SpaceImageUpload({ spaceId }) {
       toast.error(message);
     } else {
       toast.success('Space image updated.');
+      onImageSaved(publicUrl);
       router.refresh();
       handleRemove();
     }
