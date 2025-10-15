@@ -8,8 +8,8 @@ import useSupabaseUser from '@/hooks/useSupabaseUser';
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const user = useSupabaseUser();
-  const registerHref = user ? '/spaces/admin' : '/spaces/signup';
-  const registerLabel = user ? 'Dashboard' : 'Register';
+  const registerHref = user ? '/spaces/admin?tab=events' : '/spaces/signup';
+  const registerLabel = user ? 'Submit' : 'Register';
   return (
     <footer className='mt-20 border-t border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)]'>
       <div className='mx-auto flex max-w-6xl flex-col gap-12 px-4 py-12 lg:flex-row lg:gap-16'>

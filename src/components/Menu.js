@@ -96,11 +96,11 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
       },
     ];
 
-    const dashboardLink = user
+    const submissionLink = user
       ? {
-          href: '/spaces/admin',
-          label: 'Dashboard',
-          meta: 'Manage your space',
+          href: '/spaces/admin?tab=events',
+          label: 'Submit',
+          meta: 'Publish an event',
           type: 'link',
           isActive: pathname.startsWith('/spaces/admin'),
         }
@@ -112,7 +112,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
           isActive: pathname.startsWith('/spaces/signup'),
         };
 
-    links.push(dashboardLink);
+    links.push(submissionLink);
 
     links.push(
       {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Spinner from '@/components/Spinner';
 import EventSubmissionForm from '@/components/EventSubmissionForm';
@@ -12,6 +12,7 @@ import { toast } from 'react-hot-toast';
 
 export default function SpaceAdminDashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
   const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,11 @@ export default function SpaceAdminDashboard() {
     website: '',
     description: '',
   });
-  const [activeTab, setActiveTab] = useState('details');
+  const allowedTabs = ['details', 'events', 'archive'];
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = searchParams.get('tab');
+    return tab && allowedTabs.includes(tab) ? tab : 'details';
+  });
 
   const isValidUrl = (url) => {
     try {
