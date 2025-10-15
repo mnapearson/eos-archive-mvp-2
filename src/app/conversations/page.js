@@ -110,11 +110,9 @@ export default async function ConversationsIndex() {
                 )}
 
                 <div className='flex flex-col items-center gap-1 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
-                  {meta ? (
-                    <span className='text-xs text-[var(--foreground)]/60'>
-                      {meta}
-                    </span>
-                  ) : null}
+                  <span className='text-xs text-[var(--foreground)]/60'>
+                    {title}
+                  </span>
                 </div>
 
                 <div className='mt-4 flex flex-col items-center gap-3'>
@@ -125,7 +123,8 @@ export default async function ConversationsIndex() {
                   ) : null}
                   {showSummary ? (
                     <p className='text-sm leading-relaxed text-[var(--foreground)]/75 line-clamp-3'>
-                      {title}{' '}
+                      {' '}
+                      {meta}{' '}
                     </p>
                   ) : null}
                 </div>
