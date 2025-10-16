@@ -58,13 +58,15 @@ export default function SpaceSignUpPage() {
     }
 
     // 2. Combine address fields for geocoding.
-    const cityLabel = (city.displayName || city.city || '').trim();
-    if (!cityLabel) {
+    const cityName =
+      city.city?.trim() || (city.displayName?.split(',')[0] || '').trim();
+
+    if (!cityName) {
       toast.error('Please select your city.');
       return;
     }
 
-    const fullAddress = `${address}, ${cityLabel}`;
+    const fullAddress = `${address}, ${cityName}`;
     let latitude = null;
     let longitude = null;
     try {
@@ -95,7 +97,7 @@ export default function SpaceSignUpPage() {
         user_id: userId,
         name: spaceName,
         type: spaceType, // Save the space type (either selected or new)
-        city: cityLabel,
+        city: cityName,
         address,
 
         description,
