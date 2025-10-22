@@ -7,7 +7,7 @@ import markerColors from '@/lib/markerColors';
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 const DEFAULT_FIT_PADDING = {
-  mobile: { top: 80, right: 60, bottom: 320, left: 60 },
+  mobile: { top: 72, right: 44, bottom: 200, left: 44 },
   desktop: { top: 140, right: 240, bottom: 320, left: 240 },
 };
 
@@ -57,6 +57,27 @@ function buildPopupHTML({
 }
 
 function getViewportPadding(customPadding, defaults) {
+  const clampMobilePadding = (value) => {
+    if (typeof window === 'undefined') return value;
+    if (!value || typeof value !== 'object') return value;
+    const viewportHeight = window.innerHeight || 0;
+    if (viewportHeight <= 0) return value;
+    const maxBottom = Math.max(
+      140,
+      Math.min(
+        defaults.mobile?.bottom ?? 200,
+        Math.round(viewportHeight * 0.45)
+      )
+    );
+    return {
+      ...value,
+      bottom:
+        typeof value.bottom === 'number'
+          ? Math.min(value.bottom, maxBottom)
+          : maxBottom,
+    };
+  };
+
   if (typeof window === 'undefined') {
     if (customPadding == null) return defaults.desktop;
     if (typeof customPadding === 'number') return customPadding;
@@ -64,19 +85,27 @@ function getViewportPadding(customPadding, defaults) {
   }
 
   const isMobile = window.innerWidth < 768;
+  let resolvedPadding;
 
   if (typeof customPadding === 'number') {
-    return customPadding;
-  }
-
-  if (customPadding && typeof customPadding === 'object') {
+    resolvedPadding = customPadding;
+  } else if (customPadding && typeof customPadding === 'object') {
     if (isMobile) {
-      return customPadding.mobile ?? customPadding.desktop ?? defaults.mobile;
+      resolvedPadding =
+        customPadding.mobile ?? customPadding.desktop ?? defaults.mobile;
+    } else {
+      resolvedPadding =
+        customPadding.desktop ?? customPadding.mobile ?? defaults.desktop;
     }
-    return customPadding.desktop ?? customPadding.mobile ?? defaults.desktop;
+  } else {
+    resolvedPadding = isMobile ? defaults.mobile : defaults.desktop;
   }
 
-  return isMobile ? defaults.mobile : defaults.desktop;
+  if (!isMobile || typeof resolvedPadding !== 'object') {
+    return resolvedPadding;
+  }
+
+  return clampMobilePadding(resolvedPadding);
 }
 
 export default function MapComponent({

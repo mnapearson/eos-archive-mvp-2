@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import ToastProvider from '@/components/ToastProvider';
 import Script from 'next/script';
 import { SITE } from '@/lib/seo';
+import ScrollToTop from '@/components/ScrollToTop';
 
 export const metadata = {
   metadataBase: new URL(SITE.url),
@@ -46,6 +47,7 @@ export default function RootLayout({ children }) {
         />
 
         <FilterProvider>
+          <ScrollToTop />
           <NavBar />
           {/* Page Content */}
           <main className='flex-1 w-full py-4'>
