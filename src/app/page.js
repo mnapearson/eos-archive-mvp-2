@@ -1,6 +1,13 @@
 'use client';
 
-import { Suspense, useCallback, useContext, useMemo, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import MasonryGrid from '@/components/MasonryGrid';
@@ -116,6 +123,7 @@ function HomePageContent() {
   const [viewMode, setViewMode] = useState('list');
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [suppressPreview, setSuppressPreview] = useState(false);
 
   const searchTermRaw = (searchParams.get('search') || '').trim();
   const searchTermLower = searchTermRaw.toLowerCase();
@@ -217,13 +225,23 @@ function HomePageContent() {
       .sort((a, b) => compareEventsByTemporalOrder(a, b, referenceNow));
   }, [filteredEvents, searchTermLower]);
 
-  const handlePreview = useCallback((eventData) => {
-    if (!eventData) return;
-    setSelected(eventData);
-    setModalOpen(true);
-  }, []);
+  useEffect(() => {
+    if (!suppressPreview) return;
+    const timeout = setTimeout(() => setSuppressPreview(false), 220);
+    return () => clearTimeout(timeout);
+  }, [suppressPreview]);
+
+  const handlePreview = useCallback(
+    (eventData) => {
+      if (!eventData || suppressPreview) return;
+      setSelected(eventData);
+      setModalOpen(true);
+    },
+    [suppressPreview]
+  );
 
   const closePreview = useCallback(() => {
+    setSuppressPreview(true);
     setModalOpen(false);
     setSelected(null);
   }, []);

@@ -36,6 +36,12 @@ export default function Modal({ open, onClose, children, label = 'Dialog' }) {
     if (e.target === e.currentTarget) onClose?.();
   };
 
+  const handleCloseClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onClose?.();
+  };
+
   return (
     <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_oklab,var(--background)_35%,transparent)]'
@@ -50,7 +56,10 @@ export default function Modal({ open, onClose, children, label = 'Dialog' }) {
         className='modal-shell mx-auto my-8 w-[min(720px,92vw)] max-h-[90vh] overflow-auto rounded-xl p-4 shadow-2xl outline-none border border-[color-mix(in_oklab,var(--foreground)_20%,transparent)] bg-[color-mix(in_oklab,var(--background)_60%,transparent)] backdrop-blur-xl'>
         <button
           type='button'
-          onClick={onClose}
+          onClick={handleCloseClick}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
           className='modal__close nav-action'
           aria-label='Close dialog'>
           Close
