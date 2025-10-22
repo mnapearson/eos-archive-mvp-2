@@ -718,6 +718,8 @@ body {
   font-size: 0.68rem;
   touch-action: manipulation;
   border-radius: 999px;
+  z-index: 5;
+  pointer-events: auto;
 }
 
 @media (max-width: 640px) {
