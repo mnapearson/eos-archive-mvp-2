@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useContext, useMemo, useState } from 'react';
+import { Suspense, useCallback, useContext, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
 import MasonryGrid from '@/components/MasonryGrid';
@@ -8,7 +8,6 @@ import Spinner from '@/components/Spinner';
 import Link from 'next/link';
 import Modal from '@/components/Modal';
 import EventQuickView from '@/components/EventQuickView';
-import EAImage from '@/components/EAImage';
 
 const EVENT_STATUS_PRIORITY = {
   upcoming: 0,
@@ -114,7 +113,7 @@ function HomePageContent() {
     filtersLoading,
     recentSpaces,
   } = useContext(FilterContext);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('list');
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
@@ -218,29 +217,16 @@ function HomePageContent() {
       .sort((a, b) => compareEventsByTemporalOrder(a, b, referenceNow));
   }, [filteredEvents, searchTermLower]);
 
-  function handleGridClick(e) {
-    const a = e.target?.closest && e.target.closest('a[href^="/events/"]');
-    if (!a) return;
-    if (e.metaKey || e.ctrlKey || e.button === 1) return; // allow new tab
-    e.preventDefault();
-    try {
-      const href = a.getAttribute('href');
-      const url = new URL(href, window.location.origin);
-      const slug = url.pathname.split('/').pop();
-      const match = (events || []).find(
-        (ev) => (ev.slug && ev.slug === slug) || String(ev.id) === slug
-      );
-      if (match) {
-        setSelected(match);
-        setModalOpen(true);
-      } else {
-        window.location.href = href; // fall back if we can’t find it
-      }
-    } catch {
-      // non-standard href, just navigate
-      window.location.href = a.href;
-    }
-  }
+  const handlePreview = useCallback((eventData) => {
+    if (!eventData) return;
+    setSelected(eventData);
+    setModalOpen(true);
+  }, []);
+
+  const closePreview = useCallback(() => {
+    setModalOpen(false);
+    setSelected(null);
+  }, []);
 
   return (
     <div className='w-full flex flex-col items-center'>
@@ -372,12 +358,11 @@ function HomePageContent() {
           <Spinner fullscreen={false} size={48} />
         </div>
       ) : (
-        <div
-          onClickCapture={handleGridClick}
-          className='w-full max-w-6xl lg:max-w-5xl px-4'>
+        <div className='w-full max-w-6xl lg:max-w-5xl px-4'>
           <MasonryGrid
             items={events}
             mode={viewMode}
+            onSelectItem={handlePreview}
           />
         </div>
       )}
@@ -417,12 +402,12 @@ function HomePageContent() {
       {/* Modal for quick view */}
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closePreview}
         label='Event quick view'>
         {selected && (
           <EventQuickView
             event={selected}
-            onClose={() => setModalOpen(false)}
+            onClose={closePreview}
           />
         )}
       </Modal>
