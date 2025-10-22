@@ -22,6 +22,8 @@ const EVENT_STATUS_PRIORITY = {
   past: 2,
 };
 
+const PAST_EVENTS_CHUNK = 24;
+
 function normalizeTime(time, fallback) {
   if (!time) return fallback;
   return time.length === 5 ? `${time}:00` : time;
@@ -88,8 +90,10 @@ function compareEventsByTemporalOrder(a, b, reference) {
   const infoA = getTemporalInfo(a, reference);
   const infoB = getTemporalInfo(b, reference);
 
-  const priorityA = EVENT_STATUS_PRIORITY[infoA.status] ?? EVENT_STATUS_PRIORITY.past;
-  const priorityB = EVENT_STATUS_PRIORITY[infoB.status] ?? EVENT_STATUS_PRIORITY.past;
+  const priorityA =
+    EVENT_STATUS_PRIORITY[infoA.status] ?? EVENT_STATUS_PRIORITY.past;
+  const priorityB =
+    EVENT_STATUS_PRIORITY[infoB.status] ?? EVENT_STATUS_PRIORITY.past;
   if (priorityA !== priorityB) {
     return priorityA - priorityB;
   }
@@ -124,6 +128,7 @@ function HomePageContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [suppressPreview, setSuppressPreview] = useState(false);
+  const [pastVisibleCount, setPastVisibleCount] = useState(0);
 
   const searchTermRaw = (searchParams.get('search') || '').trim();
   const searchTermLower = searchTermRaw.toLowerCase();
@@ -197,7 +202,7 @@ function HomePageContent() {
     router.replace(query ? `/?${query}` : '/', { scroll: false });
   }
 
-  const events = useMemo(() => {
+  const { activeEvents, pastEvents, totalEvents } = useMemo(() => {
     const base = filteredEvents;
 
     const searched = !searchTermLower
@@ -220,9 +225,26 @@ function HomePageContent() {
         });
 
     const referenceNow = new Date();
-    return searched
+    const sorted = searched
       .slice()
       .sort((a, b) => compareEventsByTemporalOrder(a, b, referenceNow));
+
+    const active = [];
+    const past = [];
+    sorted.forEach((event) => {
+      const { status } = getTemporalInfo(event, referenceNow);
+      if (status === 'past') {
+        past.push(event);
+      } else {
+        active.push(event);
+      }
+    });
+
+    return {
+      activeEvents: active,
+      pastEvents: past,
+      totalEvents: sorted.length,
+    };
   }, [filteredEvents, searchTermLower]);
 
   useEffect(() => {
@@ -245,6 +267,45 @@ function HomePageContent() {
     setModalOpen(false);
     setSelected(null);
   }, []);
+
+  useEffect(() => {
+    const shouldAutoExpand =
+      hasActiveFilters || Boolean(searchTermLower) || activeEvents.length === 0;
+    const initialCount = shouldAutoExpand
+      ? Math.min(pastEvents.length, PAST_EVENTS_CHUNK)
+      : 0;
+    setPastVisibleCount((prev) =>
+      prev === initialCount ? prev : initialCount
+    );
+  }, [
+    filteredEvents,
+    searchTermLower,
+    hasActiveFilters,
+    activeEvents.length,
+    pastEvents.length,
+  ]);
+
+  const visiblePastCount = Math.min(pastVisibleCount, pastEvents.length);
+  const visiblePastEvents =
+    visiblePastCount > 0 ? pastEvents.slice(0, visiblePastCount) : [];
+  const visibleEvents = activeEvents.concat(visiblePastEvents);
+  const hasPastEvents = pastEvents.length > 0;
+  const hasHiddenPast = visiblePastCount < pastEvents.length;
+
+  const handleRevealPast = useCallback(() => {
+    if (!hasPastEvents) return;
+    setPastVisibleCount((prev) => {
+      const next = Math.min(pastEvents.length, PAST_EVENTS_CHUNK);
+      return prev >= next ? prev : next;
+    });
+  }, [hasPastEvents, pastEvents.length]);
+
+  const handleLoadMorePast = useCallback(() => {
+    if (!hasHiddenPast) return;
+    setPastVisibleCount((prev) =>
+      Math.min(prev + PAST_EVENTS_CHUNK, pastEvents.length)
+    );
+  }, [hasHiddenPast, pastEvents.length]);
 
   return (
     <div className='w-full flex flex-col items-center'>
@@ -291,7 +352,7 @@ function HomePageContent() {
           <div className='flex flex-col gap-1 text-xs uppercase tracking-[0.3em] text-[var(--foreground)]/60'>
             <span>Results</span>
             <span className='text-[var(--foreground)]'>
-              {events.length} events
+              {totalEvents} events
             </span>
           </div>
           <div className='flex flex-wrap items-center gap-2'>
@@ -373,15 +434,47 @@ function HomePageContent() {
 
       {filtersLoading ? (
         <div className='w-full max-w-6xl lg:max-w-5xl px-4'>
-          <Spinner fullscreen={false} size={48} />
+          <Spinner
+            fullscreen={false}
+            size={48}
+          />
         </div>
       ) : (
         <div className='w-full max-w-6xl lg:max-w-5xl px-4'>
           <MasonryGrid
-            items={events}
+            items={visibleEvents}
             mode={viewMode}
             onSelectItem={handlePreview}
           />
+          {hasPastEvents && (
+            <div className='mt-8 flex flex-col items-center gap-3 pb-4 text-center'>
+              {visiblePastCount === 0 ? (
+                <>
+                  <button
+                    type='button'
+                    onClick={handleRevealPast}
+                    className='nav-action px-6 text-[11px] uppercase tracking-[0.32em]'>
+                    See past events
+                  </button>
+                </>
+              ) : (
+                <>
+                  {hasHiddenPast ? (
+                    <button
+                      type='button'
+                      onClick={handleLoadMorePast}
+                      className='nav-action px-6 text-[11px] uppercase tracking-[0.32em]'>
+                      Load more past events
+                    </button>
+                  ) : (
+                    <span className='text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/40'>
+                      You’ve reached the end of the archive
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
 
