@@ -453,6 +453,15 @@ body {
   border-radius: 18px;
 }
 
+.list-card[role='button'] {
+  cursor: pointer;
+}
+
+.list-card[role='button']:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--foreground) 55%, transparent);
+  outline-offset: 4px;
+}
+
 .list-card__meta-head {
   display: flex;
   align-items: center;
@@ -681,26 +690,41 @@ body {
 
 .modal-shell {
   position: relative;
+  padding-top: calc(1.25rem + env(safe-area-inset-top));
 }
 
 @media (max-width: 640px) {
   .modal-shell {
     width: 100vw;
     max-width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     max-height: none;
     margin: 0;
     border-radius: 0;
-    padding: 1.25rem 1rem 2.5rem;
+    padding: calc(2.25rem + env(safe-area-inset-top)) 1rem 2.75rem;
   }
 }
 
 .modal__close {
   position: absolute;
-  top: 0.75rem;
+  top: calc(0.9rem + env(safe-area-inset-top));
   right: 0.75rem;
-  padding-inline: 0.6rem;
-  font-size: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+  font-size: 0.68rem;
+  touch-action: manipulation;
+  border-radius: 999px;
+}
+
+@media (max-width: 640px) {
+  .modal__close {
+    top: calc(1.6rem + env(safe-area-inset-top));
+    right: 1rem;
+  }
 }
 
 .quick-view__action {

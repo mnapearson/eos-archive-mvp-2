@@ -23,6 +23,7 @@ export default function MasonryGrid({
   mode = VIEW_MODES.GRID,
   fetchMoreData,
   hasMore,
+  onSelectItem,
 }) {
   const [isFetching, setIsFetching] = useState(false);
   const loadMoreRef = useRef(null);
@@ -67,9 +68,15 @@ export default function MasonryGrid({
   return (
     <section>
       {mode === VIEW_MODES.GRID ? (
-        <GridView items={items} />
+        <GridView
+          items={items}
+          onSelectItem={onSelectItem}
+        />
       ) : (
-        <ListView items={items} />
+        <ListView
+          items={items}
+          onSelectItem={onSelectItem}
+        />
       )}
 
       <div
@@ -83,7 +90,22 @@ export default function MasonryGrid({
   );
 }
 
-function GridView({ items }) {
+function GridView({ items, onSelectItem }) {
+  const handleCardClick = (event, item) => {
+    if (typeof onSelectItem !== 'function') return;
+    const nativeButton = event?.nativeEvent?.button ?? event?.button;
+    if (event?.metaKey || event?.ctrlKey || nativeButton === 1) return;
+    event.preventDefault();
+    onSelectItem(item);
+  };
+
+  const handleCardKeyDown = (event, item) => {
+    if (typeof onSelectItem !== 'function') return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    onSelectItem(item);
+  };
+
   return (
     <div className='grid-shell'>
       <Masonry
@@ -99,7 +121,9 @@ function GridView({ items }) {
               key={item?.id ?? index}
               href={href}
               scroll={false}
-              className='grid-card group'>
+              className='grid-card group'
+              onClick={(event) => handleCardClick(event, item)}
+              onKeyDown={(event) => handleCardKeyDown(event, item)}>
               <figure className='grid-card__media'>
                 <img
                   src={item?.image_url || '/placeholder.jpg'}
@@ -120,7 +144,37 @@ function GridView({ items }) {
   );
 }
 
-function ListView({ items }) {
+function ListView({ items, onSelectItem }) {
+  const isInteractive = typeof onSelectItem === 'function';
+
+  const previewFromEvent = (event, item) => {
+    if (!isInteractive) return false;
+    const nativeButton = event?.nativeEvent?.button ?? event?.button;
+    if (event?.metaKey || event?.ctrlKey || nativeButton === 1) {
+      return false;
+    }
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    onSelectItem(item);
+    return true;
+  };
+
+  const handleArticleClick = (event, item) => {
+    if (!isInteractive) return;
+    const bypassTarget = event.target.closest('[data-bypass-preview="true"]');
+    if (bypassTarget) return;
+    previewFromEvent(event, item);
+  };
+
+  const handleArticleKeyDown = (event, item) => {
+    if (!isInteractive) return;
+    const bypassTarget = event.target.closest('[data-bypass-preview="true"]');
+    if (bypassTarget) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    onSelectItem(item);
+  };
+
   return (
     <div className='list-view space-y-4'>
       {items.map((item) => {
@@ -136,22 +190,50 @@ function ListView({ items }) {
           .filter(Boolean)
           .join(' · ');
 
+        const interactiveProps = isInteractive
+          ? {
+              onClick: (event) => handleArticleClick(event, item),
+              onKeyDown: (event) => handleArticleKeyDown(event, item),
+              role: 'button',
+              tabIndex: 0,
+              'aria-label': `Preview ${item?.title ?? 'event'}`,
+            }
+          : {};
+
+        const media = isInteractive ? (
+          <button
+            type='button'
+            className='relative block h-32 w-full overflow-hidden rounded-lg bg-[var(--foreground)]/5 md:h-24 md:w-32'
+            onClick={(event) => previewFromEvent(event, item)}
+            aria-label={`Preview ${item?.title ?? 'event'}`}>
+            <img
+              src={item?.image_url || '/placeholder.jpg'}
+              alt={item?.title || 'Event image'}
+              className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
+            />
+            <span className='sr-only'>Open {item?.title ?? 'event'}</span>
+          </button>
+        ) : (
+          <Link
+            href={href}
+            scroll={false}
+            className='relative block h-32 w-full overflow-hidden rounded-lg bg-[var(--foreground)]/5 md:h-24 md:w-32'>
+            <img
+              src={item?.image_url || '/placeholder.jpg'}
+              alt={item?.title || 'Event image'}
+              className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
+            />
+            <span className='sr-only'>Open {item?.title ?? 'event'}</span>
+          </Link>
+        );
+
         return (
           <article
             key={item?.id ?? href}
-            className='list-card group border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_18px_40px_rgba(0,0,0,0.12)]'>
+            className='list-card group border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_18px_40px_rgba(0,0,0,0.12)]'
+            {...interactiveProps}>
             <div className='flex flex-col gap-4 md:flex-row md:items-center'>
-              <Link
-                href={href}
-                scroll={false}
-                className='relative block h-32 w-full overflow-hidden rounded-lg bg-[var(--foreground)]/5 md:h-24 md:w-32'>
-                <img
-                  src={item?.image_url || '/placeholder.jpg'}
-                  alt={item?.title || 'Event image'}
-                  className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
-                />
-                <span className='sr-only'>Open {item?.title}</span>
-              </Link>
+              {media}
 
               <div className='flex-1 space-y-2'>
                 <div className='list-card__meta-head'>
@@ -185,16 +267,19 @@ function ListView({ items }) {
                   <Link
                     href={href}
                     scroll={false}
-                    className='nav-action inline-flex'>
+                    className='nav-action inline-flex'
+                    data-bypass-preview='true'>
                     View event
                   </Link>
-                  <ShareButton
-                    title={item?.title}
-                    text={shareSummary}
-                    url={href}
-                    className='nav-action list-card__share'
-                    buttonText='Share'
-                  />
+                  <span data-bypass-preview='true'>
+                    <ShareButton
+                      title={item?.title}
+                      text={shareSummary}
+                      url={href}
+                      className='nav-action list-card__share'
+                      buttonText='Share'
+                    />
+                  </span>
                 </div>
               </div>
             </div>
