@@ -1283,6 +1283,10 @@ body {
   .newsletter__submit {
     display: inline-flex;
   }
+
+  .menu-footer .nav-cta {
+    display: inline-flex;
+  }
 }
 
 .nav-cta:hover,
