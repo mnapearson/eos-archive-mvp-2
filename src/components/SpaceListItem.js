@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -19,6 +19,7 @@ export default function SpaceListItem({
   showActions = true,
 }) {
   const router = useRouter();
+  const [detailImageAspect, setDetailImageAspect] = useState(null);
 
   const typeLabel = normalizeType(space.type);
   const cityLabel =
@@ -103,6 +104,22 @@ export default function SpaceListItem({
     event.stopPropagation();
   };
 
+  useEffect(() => {
+    setDetailImageAspect(null);
+  }, [space.image_url]);
+
+  const detailImageStyle = useMemo(() => {
+    if (!space.image_url) return undefined;
+    if (detailImageAspect?.width && detailImageAspect?.height) {
+      return {
+        aspectRatio: `${detailImageAspect.width} / ${detailImageAspect.height}`,
+      };
+    }
+    return {
+      aspectRatio: '4 / 3',
+    };
+  }, [detailImageAspect, space.image_url]);
+
   if (variant === 'detail') {
     return (
       <article
@@ -171,7 +188,9 @@ export default function SpaceListItem({
           </div>
 
           {space.image_url && (
-            <div className='relative h-[260px] overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:h-full'>
+            <div
+              className='relative w-full overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:self-start'
+              style={detailImageStyle}>
               <Image
                 src={space.image_url}
                 alt={space.name || 'Space image'}
@@ -179,6 +198,19 @@ export default function SpaceListItem({
                 sizes='(max-width: 768px) 80vw, 360px'
                 className='object-cover'
                 priority
+                onLoadingComplete={(img) => {
+                  if (!img?.naturalWidth || !img?.naturalHeight) return;
+                  if (
+                    detailImageAspect?.width === img.naturalWidth &&
+                    detailImageAspect?.height === img.naturalHeight
+                  ) {
+                    return;
+                  }
+                  setDetailImageAspect({
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                  });
+                }}
               />
             </div>
           )}
