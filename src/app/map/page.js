@@ -92,8 +92,15 @@ export default function SpacesMapPage() {
         .toLowerCase();
       return haystack.includes(q);
     };
+    const sortByName = (a, b) => {
+      const left = a?.name || '';
+      const right = b?.name || '';
+      return left.localeCompare(right, undefined, { sensitivity: 'base' });
+    };
 
-    return spaces.filter((space) => matchesType(space) && matchesQuery(space));
+    return spaces
+      .filter((space) => matchesType(space) && matchesQuery(space))
+      .sort(sortByName);
   }, [spaces, activeTypes, searchQuery]);
 
   const totalCount = filteredSpaces.length;
