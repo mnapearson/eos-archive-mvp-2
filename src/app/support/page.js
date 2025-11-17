@@ -12,11 +12,13 @@ export default function SupportPage() {
       <header className='space-y-4 max-w-3xl'>
         <span className='ea-label ea-label--muted'>Support eos archive</span>
         <h1 className='quick-view__title text-balance'>
-          Keep this project independent.
+          Help keep this platform independent and community-owned.
         </h1>
         <p className='text-sm sm:text-base leading-relaxed text-[var(--foreground)]/70'>
-          Choose an amount, enter payment details with Stripe Elements, and
-          receive a receipt instantly without leaving eos.
+          Your contribution goes directly to building the digital commons —
+          hosting, development, and time spent archiving event culture. All
+          payments are processed through Stripe. You’ll receive a receipt
+          instantly.
         </p>
       </header>
 
