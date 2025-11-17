@@ -116,11 +116,11 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
 
     links.push(
       {
-        href: 'https://donate.stripe.com/3csg0l1N5auLaTmaEF',
+        href: '/support',
         label: 'Support',
         meta: 'Fuel the living archive',
-        type: 'external',
-        isActive: false,
+        type: 'link',
+        isActive: pathname.startsWith('/support'),
       },
       {
         href: '#newsletter',
