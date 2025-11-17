@@ -330,13 +330,11 @@ function HomePageContent() {
               href='#newsletter'>
               Join the newsletter
             </a>
-            <a
+            <Link
               className='home-hero__link'
-              href='https://donate.stripe.com/3csg0l1N5auLaTmaEF'
-              target='_blank'
-              rel='noopener noreferrer'>
+              href='/support'>
               Support the archive →
-            </a>
+            </Link>
           </div>
         </div>
       </section>

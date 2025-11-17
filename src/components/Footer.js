@@ -102,13 +102,11 @@ export default function Footer() {
               className='hover:underline'>
               {registerLabel}
             </Link>
-            <a
-              href='https://donate.stripe.com/3csg0l1N5auLaTmaEF'
-              target='_blank'
-              rel='noopener noreferrer'
+            <Link
+              href='/support'
               className='hover:underline'>
               Support
-            </a>
+            </Link>
           </nav>
         </div>
 
