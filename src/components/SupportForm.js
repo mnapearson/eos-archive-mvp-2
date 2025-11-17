@@ -113,7 +113,7 @@ function PaymentStep({
         <button
           type='submit'
           disabled={!stripe || paymentStatus === 'processing'}
-          className='nav-action nav-cta flex-1 rounded-full px-4 py-3 text-center text-sm uppercase tracking-[0.3em]'>
+          className='nav-action nav-cta support-cta flex-1 rounded-full px-4 py-3 text-center text-sm uppercase tracking-[0.3em]'>
           {paymentStatus === 'processing'
             ? 'Processing...'
             : `Donate ${formatAmount(amount)}`}
@@ -398,7 +398,7 @@ export default function SupportForm() {
             type='button'
             onClick={handlePreparePayment}
             disabled={isPreparing || detailsLocked}
-            className='nav-action nav-cta w-full rounded-full px-4 py-3 text-sm uppercase tracking-[0.3em]'>
+            className='nav-action nav-cta support-cta w-full rounded-full px-4 py-3 text-sm uppercase tracking-[0.3em]'>
             {detailsLocked
               ? 'Payment form ready'
               : isPreparing

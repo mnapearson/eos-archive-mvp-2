@@ -38,7 +38,7 @@ export default function SupportPage() {
           </article>
 
           <article className='rounded-3xl border border-[var(--foreground)]/10 bg-[var(--background)]/50 p-6 space-y-3'>
-            <span className='ea-label'>Other ways to help</span>
+            <span className='ea-label'>Other ways to support</span>
             <p className='text-sm text-[var(--foreground)]/70'>
               Share this app, register a space, submit new events. Every
               contribution—financial or archival—keeps the culture accessible.

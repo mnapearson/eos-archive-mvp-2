@@ -1321,6 +1321,10 @@ textarea.ea-input {
   .menu-footer .nav-cta {
     display: inline-flex;
   }
+
+  .support-cta {
+    display: inline-flex;
+  }
 }
 
 .nav-cta:hover,
