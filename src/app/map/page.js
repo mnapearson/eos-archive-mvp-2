@@ -205,6 +205,7 @@ export default function SpacesMapPage() {
           activeTypes={activeTypes}
           autoFit
           fitKey={`split-${filteredSpaces.length}`}
+          initialAutoFitZoomOffset={1}
           focusSpaceId={focusedSpaceId}
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
