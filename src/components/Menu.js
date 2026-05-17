@@ -280,87 +280,6 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
     toggleMenu();
   }
 
-  // Helper to render a filter section with accordion behavior and accessibility
-  function renderFilterSection(title, category, options) {
-    const baseId = `${category}-section`;
-    const headingId = `${baseId}-title`;
-    const panelId = `${baseId}-panel`;
-
-    return (
-      <section
-        className='overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/60'
-        aria-labelledby={headingId}>
-        <button
-          type='button'
-          id={headingId}
-          aria-expanded={openFilters[category]}
-          aria-controls={panelId}
-          onClick={() => toggleAccordion(category)}
-          className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left focus:outline-none'>
-          <span className='ea-label'>{title}</span>
-          <span className='text-lg font-semibold leading-none'>
-            {openFilters[category] ? '–' : '+'}
-          </span>
-        </button>
-        <div
-          id={panelId}
-          role='region'
-          aria-labelledby={headingId}
-          aria-hidden={!openFilters[category]}
-          className={`px-4 transition-[max-height,opacity,padding] duration-300 ease-out ${
-            openFilters[category]
-              ? 'max-h-[28rem] py-3 opacity-100'
-              : 'max-h-0 py-0 opacity-0'
-          }`}
-          style={{ overflow: 'hidden' }}>
-          {category === 'date' ? (
-            <DateCalendar
-              counts={optionCounts?.date || {}}
-              selectedDates={selectedFilters.date}
-              onToggle={(value) => toggleValue('date', value)}
-            />
-          ) : (
-            <div className='flex max-h-52 flex-col gap-2 overflow-y-auto pr-1'>
-              {options.map((item) => {
-                const optId = `${category}-${toId(item)}`;
-                const checked = selectedFilters[category].includes(item);
-                const countsForCategory = optionCounts?.[category] || {};
-                const count = countsForCategory[item] ?? 0;
-                const isDisabled = !checked && count === 0;
-
-                if (!item) return null;
-
-                return (
-                  <label
-                    key={item}
-                    htmlFor={optId}
-                    className={`flex items-center justify-between gap-3 text-sm uppercase tracking-[0.18em] ${
-                      isDisabled ? 'opacity-40' : 'opacity-80'
-                    }`}>
-                    <span className='flex items-center gap-3'>
-                      <input
-                        id={optId}
-                        type='checkbox'
-                        checked={checked}
-                        disabled={isDisabled}
-                        onChange={() => toggleValue(category, item)}
-                        className='h-4 w-4 accent-[var(--foreground)] disabled:cursor-not-allowed'
-                      />
-                      <span>{item}</span>
-                    </span>
-                    <span className='text-[10px] tracking-[0.28em]'>
-                      {count}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-    );
-  }
-
   return (
     <div
       role='dialog'
@@ -485,10 +404,46 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
               </div>
             )}
 
-            {renderFilterSection('City', 'city', cityOptions)}
-            {renderFilterSection('Space', 'space', spaceOptions)}
-            {renderFilterSection('Date', 'date', dateOptions)}
-            {renderFilterSection('Category', 'category', categoryOptions)}
+            <FilterSection
+              title='City'
+              category='city'
+              options={cityOptions}
+              isOpen={openFilters.city}
+              onToggleAccordion={() => toggleAccordion('city')}
+              selectedValues={selectedFilters.city}
+              counts={optionCounts?.city || {}}
+              onToggleValue={(value) => toggleValue('city', value)}
+            />
+            <FilterSection
+              title='Space'
+              category='space'
+              options={spaceOptions}
+              isOpen={openFilters.space}
+              onToggleAccordion={() => toggleAccordion('space')}
+              selectedValues={selectedFilters.space}
+              counts={optionCounts?.space || {}}
+              onToggleValue={(value) => toggleValue('space', value)}
+            />
+            <FilterSection
+              title='Date'
+              category='date'
+              options={dateOptions}
+              isOpen={openFilters.date}
+              onToggleAccordion={() => toggleAccordion('date')}
+              selectedValues={selectedFilters.date}
+              counts={optionCounts?.date || {}}
+              onToggleValue={(value) => toggleValue('date', value)}
+            />
+            <FilterSection
+              title='Category'
+              category='category'
+              options={categoryOptions}
+              isOpen={openFilters.category}
+              onToggleAccordion={() => toggleAccordion('category')}
+              selectedValues={selectedFilters.category}
+              counts={optionCounts?.category || {}}
+              onToggleValue={(value) => toggleValue('category', value)}
+            />
           </div>
         </div>
 
@@ -524,6 +479,88 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
         />
       )}
     </div>
+  );
+}
+
+function FilterSection({
+  title,
+  category,
+  options,
+  isOpen,
+  onToggleAccordion,
+  selectedValues,
+  counts,
+  onToggleValue,
+}) {
+  const headingId = `${category}-section-title`;
+  const panelId = `${category}-section-panel`;
+
+  return (
+    <section
+      className='overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/60'
+      aria-labelledby={headingId}>
+      <button
+        type='button'
+        id={headingId}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        onClick={onToggleAccordion}
+        className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left focus:outline-none'>
+        <span className='ea-label'>{title}</span>
+        <span className='text-lg font-semibold leading-none'>
+          {isOpen ? '–' : '+'}
+        </span>
+      </button>
+      <div
+        id={panelId}
+        role='region'
+        aria-labelledby={headingId}
+        aria-hidden={!isOpen}
+        className={`px-4 transition-[max-height,opacity,padding] duration-300 ease-out ${
+          isOpen ? 'max-h-[28rem] py-3 opacity-100' : 'max-h-0 py-0 opacity-0'
+        }`}
+        style={{ overflow: 'hidden' }}>
+        {category === 'date' ? (
+          <DateCalendar
+            counts={counts}
+            selectedDates={selectedValues}
+            onToggle={onToggleValue}
+          />
+        ) : (
+          <div className='flex max-h-52 flex-col gap-2 overflow-y-auto pr-1'>
+            {options.map((item) => {
+              if (!item) return null;
+              const optId = `${category}-${toId(item)}`;
+              const checked = selectedValues.includes(item);
+              const count = counts[item] ?? 0;
+              const isDisabled = !checked && count === 0;
+
+              return (
+                <label
+                  key={item}
+                  htmlFor={optId}
+                  className={`flex items-center justify-between gap-3 text-sm uppercase tracking-[0.18em] ${
+                    isDisabled ? 'opacity-40' : 'opacity-80'
+                  }`}>
+                  <span className='flex items-center gap-3'>
+                    <input
+                      id={optId}
+                      type='checkbox'
+                      checked={checked}
+                      disabled={isDisabled}
+                      onChange={() => onToggleValue(item)}
+                      className='h-4 w-4 accent-[var(--foreground)] disabled:cursor-not-allowed'
+                    />
+                    <span>{item}</span>
+                  </span>
+                  <span className='text-[10px] tracking-[0.28em]'>{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
