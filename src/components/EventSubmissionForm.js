@@ -5,34 +5,14 @@ import { toast } from 'react-hot-toast';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
-const EVENT_CATEGORIES = [
-  'exhibition',
-  'opening',
-  'closing',
-  'concert',
-  'live music',
-  'dj night',
-  'day party',
-  'festival',
-  'performance',
-  'workshop',
-  'market',
-  'film',
-  'talk',
-  'community',
-  'other',
-];
-
-const FLYER_MAX_SIZE_MB = 5;
-const DOCUMENT_MAX_SIZE_MB = 10;
-const FLYER_MAX_SIZE_BYTES = FLYER_MAX_SIZE_MB * 1024 * 1024;
-const DOCUMENT_MAX_SIZE_BYTES = DOCUMENT_MAX_SIZE_MB * 1024 * 1024;
-
-const baseInputClasses =
-  'input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25';
-const helperTextClasses = 'text-xs leading-relaxed text-[var(--foreground)]/60';
-const dropzoneClasses =
-  'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--foreground)]/28 bg-[var(--background)]/70 px-4 py-10 text-center transition hover:border-[var(--foreground)]/45 hover:bg-[var(--background)]/80';
+import {
+  EVENT_CATEGORIES,
+  FLYER_MAX_SIZE_BYTES,
+  DOCUMENT_MAX_SIZE_BYTES,
+  baseInputClasses,
+  helperTextClasses,
+  dropzoneClasses,
+} from '@/lib/constants';
 
 const EMPTY_FORM = (spaceId) => ({
   space_id: spaceId || '',
