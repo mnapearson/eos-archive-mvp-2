@@ -234,6 +234,7 @@ function NavBarContent() {
         theme={theme}
         toggleTheme={toggleTheme}
         themeLabel={themeToggleLabel}
+        onSignOut={handleSignOut}
       />
     </>
   );

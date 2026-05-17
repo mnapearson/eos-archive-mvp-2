@@ -25,7 +25,7 @@ export default function Menu(props) {
   );
 }
 
-function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
+function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onSignOut }) {
   const {
     selectedFilters,
     setSelectedFilters,
@@ -357,6 +357,14 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel }) {
                 );
               })}
             </div>
+            {user && (
+              <button
+                type='button'
+                onClick={onSignOut}
+                className='nav-action w-full justify-center sm:hidden'>
+                Disconnect
+              </button>
+            )}
           </div>
 
           <div className='space-y-3'>
