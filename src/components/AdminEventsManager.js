@@ -9,6 +9,7 @@ import { formatDateRange } from '@/lib/date';
 import {
   EVENT_CATEGORIES,
   ALLOWED_IMAGE_TYPES,
+  IMAGE_MAX_SIZE_MB,
   IMAGE_MAX_SIZE_BYTES,
   baseInputClasses,
   textAreaClasses,
@@ -202,36 +203,26 @@ export default function AdminEventsManager({
       };
 
       if (newImageFile) {
-        const ext = newImageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-        const fileName = `${spaceId}-${editingEventId}-${Date.now()}.${ext}`;
+        const { data: { session } } = await supabase.auth.getSession();
+        const formData = new FormData();
+        formData.append('file', newImageFile);
+        formData.append('spaceId', spaceId);
+        formData.append('eventId', editingEventId);
 
-        const { error: uploadError } = await supabase.storage
-          .from('event-images')
-          .upload(fileName, newImageFile, {
-            cacheControl: '3600',
-            upsert: true,
-          });
+        const uploadRes = await fetch('/api/events/upload-image', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: formData,
+        });
 
-        if (uploadError) {
-          console.error('Error uploading new image:', uploadError);
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok) {
+          console.error('Error uploading new image:', uploadJson.error);
           toast.error('Error uploading the new image.');
           return;
         }
 
-        const { data: publicData, error: publicUrlError } = supabase.storage
-          .from('event-images')
-          .getPublicUrl(fileName);
-
-        if (publicUrlError || !publicData?.publicUrl) {
-          console.error(
-            'Error retrieving new image URL:',
-            publicUrlError || 'No URL'
-          );
-          toast.error('Unable to retrieve the new image URL.');
-          return;
-        }
-
-        updatedData.image_url = publicData.publicUrl;
+        updatedData.image_url = uploadJson.url;
       }
 
       const { error: updateError } = await supabase
