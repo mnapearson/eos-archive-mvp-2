@@ -3,11 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-function normalizeType(type) {
-  if (!type) return 'space';
-  return String(type).toLowerCase();
-}
+import { normalizeType } from '@/lib/normalize';
 
 export default function SpaceListItem({
   space,

@@ -15,13 +15,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
-function toId(s = '') {
-  return String(s)
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9_-]/g, '');
-}
+import { toId } from '@/lib/normalize';
 
 export default function Menu(props) {
   return (

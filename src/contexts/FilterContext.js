@@ -9,13 +9,11 @@ import {
   useState,
 } from 'react';
 
+import { normalizeValue } from '@/lib/normalize';
+
 export const FilterContext = createContext();
 
 const FILTER_KEYS = ['city', 'space', 'date', 'category'];
-
-function normalizeValue(value) {
-  return value ? String(value).trim() : '';
-}
 
 export function FilterProvider({ children }) {
   const [selectedFilters, setSelectedFilters] = useState({
