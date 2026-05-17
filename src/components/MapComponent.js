@@ -123,6 +123,7 @@ export default function MapComponent({
   fallbackToAllSpaces = true,
   fitPadding,
   maxAutoFitZoom = DEFAULT_MAX_AUTO_FIT_ZOOM,
+  initialAutoFitZoomOffset = 0,
   focusPadding,
 }) {
   const [mapData, setMapData] = useState([]);
@@ -130,6 +131,7 @@ export default function MapComponent({
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const focusMarkerRef = useRef(null);
+  const initialAutoFitOffsetAppliedRef = useRef(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -386,11 +388,47 @@ export default function MapComponent({
     if (autoFit && hasValidBounds) {
       try {
         const padding = getViewportPadding(fitPadding, DEFAULT_FIT_PADDING);
-        mapRef.current.fitBounds(bounds, {
-          padding,
-          maxZoom: maxAutoFitZoom,
-          duration: 800,
-        });
+        const map = mapRef.current;
+        const shouldApplyInitialOffset =
+          typeof initialAutoFitZoomOffset === 'number' &&
+          initialAutoFitZoomOffset !== 0 &&
+          !initialAutoFitOffsetAppliedRef.current;
+
+        if (shouldApplyInitialOffset) {
+          const camera = map.cameraForBounds(bounds, {
+            padding,
+            maxZoom: maxAutoFitZoom,
+          });
+
+          if (camera && typeof camera.zoom === 'number') {
+            initialAutoFitOffsetAppliedRef.current = true;
+            const targetZoom = Math.min(
+              map.getMaxZoom(),
+              Math.max(
+                map.getMinZoom(),
+                camera.zoom + initialAutoFitZoomOffset
+              )
+            );
+            map.easeTo({
+              ...camera,
+              zoom: targetZoom,
+              duration: 800,
+              essential: true,
+            });
+          } else {
+            map.fitBounds(bounds, {
+              padding,
+              maxZoom: maxAutoFitZoom,
+              duration: 800,
+            });
+          }
+        } else {
+          map.fitBounds(bounds, {
+            padding,
+            maxZoom: maxAutoFitZoom,
+            duration: 800,
+          });
+        }
       } catch (err) {
         console.warn('Map fitBounds failed:', err);
       }
