@@ -15,6 +15,7 @@ import Spinner from '@/components/Spinner';
 import Link from 'next/link';
 import Modal from '@/components/Modal';
 import EventQuickView from '@/components/EventQuickView';
+import { normalizeTime } from '@/lib/normalize';
 
 const EVENT_STATUS_PRIORITY = {
   upcoming: 0,
@@ -24,10 +25,6 @@ const EVENT_STATUS_PRIORITY = {
 
 const PAST_EVENTS_CHUNK = 24;
 
-function normalizeTime(time, fallback) {
-  if (!time) return fallback;
-  return time.length === 5 ? `${time}:00` : time;
-}
 
 export default function HomePage() {
   return (

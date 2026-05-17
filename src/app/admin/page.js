@@ -7,13 +7,7 @@ import Spinner from '@/components/Spinner';
 import RoadmapManager from '@/components/RoadmapManager';
 import EventApprovals from '@/components/EventApprovals';
 import Link from 'next/link';
-
-function slugify(s = '') {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
+import { slugify } from '@/lib/normalize';
 
 function ConversationsPanel() {
   const supabase = createClientComponentClient();
