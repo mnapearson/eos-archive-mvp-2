@@ -33,6 +33,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
     spaceOptions,
     dateOptions,
     categoryOptions,
+    designerOptions,
     optionCounts,
   } = useContext(FilterContext);
 
@@ -46,6 +47,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
     space: 'Space',
     date: 'Date',
     category: 'Category',
+    designer: 'Designer',
     search: 'Search',
   };
 
@@ -200,6 +202,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
     space: false,
     date: false,
     category: false,
+    designer: false,
   });
 
   useEffect(() => {
@@ -208,6 +211,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
       space: selectedFilters.space.length > 0 || prev.space,
       date: selectedFilters.date.length > 0 || prev.date,
       category: selectedFilters.category.length > 0 || prev.category,
+      designer: selectedFilters.designer.length > 0 || prev.designer,
     }));
   }, [selectedFilters]);
 
@@ -258,6 +262,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
       space: [],
       date: [],
       category: [],
+      designer: [],
     });
 
     if (searchTerm) {
@@ -451,6 +456,16 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
               selectedValues={selectedFilters.category}
               counts={optionCounts?.category || {}}
               onToggleValue={(value) => toggleValue('category', value)}
+            />
+            <FilterSection
+              title='Designer'
+              category='designer'
+              options={designerOptions}
+              isOpen={openFilters.designer}
+              onToggleAccordion={() => toggleAccordion('designer')}
+              selectedValues={selectedFilters.designer}
+              counts={optionCounts?.designer || {}}
+              onToggleValue={(value) => toggleValue('designer', value)}
             />
           </div>
         </div>

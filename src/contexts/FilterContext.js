@@ -13,7 +13,7 @@ import { normalizeValue } from '@/lib/normalize';
 
 export const FilterContext = createContext();
 
-const FILTER_KEYS = ['city', 'space', 'date', 'category'];
+const FILTER_KEYS = ['city', 'space', 'date', 'category', 'designer'];
 
 export function FilterProvider({ children }) {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -21,6 +21,7 @@ export function FilterProvider({ children }) {
     space: [],
     date: [],
     category: [],
+    designer: [],
   });
 
   const [allEvents, setAllEvents] = useState([]);
@@ -87,6 +88,7 @@ export function FilterProvider({ children }) {
     const spaces = new Set();
     const dates = new Set();
     const categories = new Set();
+    const designers = new Set();
 
     allSpaces.forEach((space) => {
       const city = normalizeValue(space.city);
@@ -101,9 +103,11 @@ export function FilterProvider({ children }) {
         ? normalizeValue(event.start_date).slice(0, 10)
         : '';
       const fallbackCity = normalizeValue(event.city);
+      const designer = normalizeValue(event.designer);
 
       if (category) categories.add(category);
       if (date) dates.add(date);
+      if (designer) designers.add(designer);
 
       if (fallbackCity && !cities.has(fallbackCity)) {
         cities.add(fallbackCity);
@@ -121,6 +125,7 @@ export function FilterProvider({ children }) {
       space: sortAlpha(spaces),
       date: sortDates(dates),
       category: sortAlpha(categories),
+      designer: sortAlpha(designers),
     };
   }, [allEvents, allSpaces]);
 
@@ -136,6 +141,8 @@ export function FilterProvider({ children }) {
         const space = spaceMap.get(event.space_id);
         const spaceName = space?.name || '';
         const spaceCity = space?.city || normalizeValue(event.city);
+
+        const designerValue = normalizeValue(event.designer);
 
         if (
           filters.category.length > 0 &&
@@ -153,6 +160,13 @@ export function FilterProvider({ children }) {
         }
 
         if (filters.city.length > 0 && !filters.city.includes(spaceCity)) {
+          return acc;
+        }
+
+        if (
+          filters.designer.length > 0 &&
+          !filters.designer.includes(designerValue)
+        ) {
           return acc;
         }
 
@@ -178,6 +192,7 @@ export function FilterProvider({ children }) {
       space: new Map(),
       date: new Map(),
       category: new Map(),
+      designer: new Map(),
     };
 
     FILTER_KEYS.forEach((key) => {
@@ -192,6 +207,7 @@ export function FilterProvider({ children }) {
           : '';
         const spaceName = space?.name || '';
         const spaceCity = space?.city || normalizeValue(event.city);
+        const designerValue = normalizeValue(event.designer);
 
         switch (key) {
           case 'city': {
@@ -225,6 +241,13 @@ export function FilterProvider({ children }) {
             }
             break;
           }
+          case 'designer': {
+            const value = designerValue;
+            if (value) {
+              counts.designer.set(value, (counts.designer.get(value) || 0) + 1);
+            }
+            break;
+          }
           default:
             break;
         }
@@ -244,6 +267,7 @@ export function FilterProvider({ children }) {
       space: mapToObject(filterOptions.space, counts.space),
       date: mapToObject(filterOptions.date, counts.date),
       category: mapToObject(filterOptions.category, counts.category),
+      designer: mapToObject(filterOptions.designer, counts.designer),
     };
   }, [applyFilters, filterOptions, selectedFilters, spaceMap]);
 
@@ -328,6 +352,7 @@ export function FilterProvider({ children }) {
       spaceOptions: filterOptions.space,
       dateOptions: filterOptions.date,
       categoryOptions: filterOptions.category,
+      designerOptions: filterOptions.designer,
       optionCounts,
       filteredEvents,
       filtersLoading: loading,
