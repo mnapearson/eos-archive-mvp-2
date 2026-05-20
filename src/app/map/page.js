@@ -105,6 +105,13 @@ export default function SpacesMapPage() {
 
   const totalCount = filteredSpaces.length;
 
+  const cityStats = useMemo(() => {
+    const cities = Array.from(
+      new Set(spaces.map((s) => s.city).filter(Boolean))
+    ).sort();
+    return { total: spaces.length, cities };
+  }, [spaces]);
+
   useEffect(() => {
     setFocusedSpaceId(null);
     setOverlayOpen(false);
@@ -166,6 +173,11 @@ export default function SpacesMapPage() {
           archive. Filter by type, search for a city or name, and dive into the
           map.
         </p>
+        {cityStats.cities.length > 0 && (
+          <p className='text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50 leading-relaxed'>
+            {cityStats.total} spaces across {cityStats.cities.join(' · ')}
+          </p>
+        )}
         <form
           role='search'
           onSubmit={(event) => event.preventDefault()}
@@ -209,6 +221,7 @@ export default function SpacesMapPage() {
           focusSpaceId={focusedSpaceId}
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
+          minAutoFitZoom={5}
           onMarkerSelect={(id) => {
             if (id == null) return;
             setFocusedSpaceId((prev) =>
@@ -228,6 +241,7 @@ export default function SpacesMapPage() {
       <SpacesListPanel
         spaces={filteredSpaces}
         totalCount={totalCount}
+        cityStats={cityStats}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onClearFilters={() => {
@@ -255,6 +269,7 @@ export default function SpacesMapPage() {
 function SpacesListPanel({
   spaces,
   totalCount,
+  cityStats,
   searchQuery,
   onSearchChange,
   onClearFilters,
@@ -272,7 +287,9 @@ function SpacesListPanel({
     ? 'Loading spaces…'
     : error
     ? error
-    : `${totalCount} space${totalCount === 1 ? '' : 's'} visible`;
+    : hasActiveFilters
+    ? `${totalCount} of ${cityStats?.total ?? totalCount} space${totalCount === 1 ? '' : 's'}`
+    : null;
 
   return (
     <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
@@ -288,6 +305,11 @@ function SpacesListPanel({
           archive. Filter by type, search for a city or name, and dive into the
           map.
         </p>
+        {cityStats?.cities.length > 0 && (
+          <p className='mt-3 text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50 leading-relaxed'>
+            {cityStats.total} spaces across {cityStats.cities.join(' · ')}
+          </p>
+        )}
         <form
           role='search'
           onSubmit={(event) => event.preventDefault()}
@@ -352,9 +374,9 @@ function SpacesListPanel({
           </div>
         )}
 
-        <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50 sm:flex-row sm:items-center sm:justify-between'>
-          <span>{statusLabel}</span>
-          <div className='flex items-center justify-between gap-3 sm:justify-end'>
+        {(statusLabel || hasActiveFilters) && (
+          <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50 sm:flex-row sm:items-center sm:justify-between'>
+            {statusLabel && <span>{statusLabel}</span>}
             {hasActiveFilters && (
               <button
                 type='button'
@@ -364,7 +386,7 @@ function SpacesListPanel({
               </button>
             )}
           </div>
-        </div>
+        )}
       </div>
 
       <div className='flex-1 overflow-y-auto px-6 py-6'>

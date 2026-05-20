@@ -123,6 +123,7 @@ export default function MapComponent({
   fallbackToAllSpaces = true,
   fitPadding,
   maxAutoFitZoom = DEFAULT_MAX_AUTO_FIT_ZOOM,
+  minAutoFitZoom = null,
   initialAutoFitZoomOffset = 0,
   focusPadding,
 }) {
@@ -389,32 +390,40 @@ export default function MapComponent({
       try {
         const padding = getViewportPadding(fitPadding, DEFAULT_FIT_PADDING);
         const map = mapRef.current;
-        const shouldApplyInitialOffset =
-          typeof initialAutoFitZoomOffset === 'number' &&
-          initialAutoFitZoomOffset !== 0 &&
-          !initialAutoFitOffsetAppliedRef.current;
 
-        if (shouldApplyInitialOffset) {
-          const camera = map.cameraForBounds(bounds, {
-            padding,
-            maxZoom: maxAutoFitZoom,
+        const camera = map.cameraForBounds(bounds, {
+          padding,
+          maxZoom: maxAutoFitZoom,
+        });
+
+        const wouldZoomOutTooFar =
+          minAutoFitZoom != null &&
+          camera &&
+          typeof camera.zoom === 'number' &&
+          camera.zoom < minAutoFitZoom;
+
+        if (wouldZoomOutTooFar) {
+          map.easeTo({
+            center: initialCenter
+              ? [initialCenter.lng, initialCenter.lat]
+              : camera.center,
+            zoom: typeof initialZoom === 'number' ? initialZoom : minAutoFitZoom,
+            duration: 800,
+            essential: true,
           });
+        } else {
+          const shouldApplyInitialOffset =
+            typeof initialAutoFitZoomOffset === 'number' &&
+            initialAutoFitZoomOffset !== 0 &&
+            !initialAutoFitOffsetAppliedRef.current;
 
-          if (camera && typeof camera.zoom === 'number') {
+          if (shouldApplyInitialOffset && camera && typeof camera.zoom === 'number') {
             initialAutoFitOffsetAppliedRef.current = true;
             const targetZoom = Math.min(
               map.getMaxZoom(),
-              Math.max(
-                map.getMinZoom(),
-                camera.zoom + initialAutoFitZoomOffset
-              )
+              Math.max(map.getMinZoom(), camera.zoom + initialAutoFitZoomOffset)
             );
-            map.easeTo({
-              ...camera,
-              zoom: targetZoom,
-              duration: 800,
-              essential: true,
-            });
+            map.easeTo({ ...camera, zoom: targetZoom, duration: 800, essential: true });
           } else {
             map.fitBounds(bounds, {
               padding,
@@ -422,12 +431,6 @@ export default function MapComponent({
               duration: 800,
             });
           }
-        } else {
-          map.fitBounds(bounds, {
-            padding,
-            maxZoom: maxAutoFitZoom,
-            duration: 800,
-          });
         }
       } catch (err) {
         console.warn('Map fitBounds failed:', err);
