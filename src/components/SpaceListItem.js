@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { normalizeType } from '@/lib/normalize';
-import markerColors from '@/lib/markerColors';
+import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
 
 export default function SpaceListItem({
   space,
@@ -303,8 +303,8 @@ export default function SpaceListItem({
       <div className='flex items-start gap-3'>
         {typeof number === 'number' && (
           <span
-            className='mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white'
-            style={{ backgroundColor: typeColor }}>
+            className='mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold'
+            style={{ backgroundColor: typeColor, color: getMarkerTextColor(typeColor) }}>
             {number}
           </span>
         )}

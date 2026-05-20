@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
-import markerColors from '@/lib/markerColors';
+import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -273,7 +273,7 @@ export default function MapComponent({
 
       const numEl = document.createElement('span');
       numEl.textContent = String(markerIndex + 1);
-      numEl.style.color = '#fff';
+      numEl.style.color = getMarkerTextColor(markerColor);
       numEl.style.fontSize = '11px';
       numEl.style.fontWeight = '700';
       numEl.style.lineHeight = '1';
