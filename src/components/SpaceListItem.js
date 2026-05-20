@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { normalizeType } from '@/lib/normalize';
+import markerColors from '@/lib/markerColors';
 
 export default function SpaceListItem({
   space,
   variant = 'compact',
+  number,
   onFocus,
   isActive = false,
   surface = 'card',
@@ -282,6 +284,8 @@ export default function SpaceListItem({
     .filter(Boolean)
     .join(' ');
 
+  const typeColor = markerColors[normalizeType(space.type)] || markerColors.other || '#888';
+
   return (
     <article
       className={compactClasses}
@@ -296,10 +300,35 @@ export default function SpaceListItem({
           handleFocus(event);
         }
       }}>
-      <header className='flex flex-wrap items-center justify-between gap-2'>
+      <div className='flex items-start gap-3'>
+        {typeof number === 'number' && (
+          <span
+            className='mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white'
+            style={{ backgroundColor: typeColor }}>
+            {number}
+          </span>
+        )}
+
+        {space.image_url && (
+          <div className='h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg'>
+            <img
+              src={space.image_url}
+              alt=''
+              aria-hidden='true'
+              className='h-full w-full object-cover'
+            />
+          </div>
+        )}
+
         <div className='min-w-0 flex-1'>
           <h3 className={titleClass}>{space.name || 'Untitled space'}</h3>
-          <p className={cityClass}>{cityLabel}</p>
+          <div className='mt-0.5 flex items-center gap-1.5'>
+            <span
+              className='h-2 w-2 flex-shrink-0 rounded-full'
+              style={{ backgroundColor: typeColor }}
+            />
+            <span className={cityClass}>{typeLabel}</span>
+          </div>
           {displayAddress && directionsUrl ? (
             <a
               href={directionsUrl}
@@ -313,8 +342,7 @@ export default function SpaceListItem({
             <span className={addressClass}>{displayAddress}</span>
           )}
         </div>
-        <span className={typePillClass}>{typeLabel}</span>
-      </header>
+      </div>
 
       {showActions && (
         <footer className={compactFooterClass}>

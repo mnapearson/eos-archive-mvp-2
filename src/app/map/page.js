@@ -29,6 +29,7 @@ export default function SpacesMapPage() {
   const [error, setError] = useState('');
   const [focusedSpaceId, setFocusedSpaceId] = useState(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const mapSectionRef = useRef(null);
 
   useEffect(() => {
@@ -115,6 +116,7 @@ export default function SpacesMapPage() {
   useEffect(() => {
     setFocusedSpaceId(null);
     setOverlayOpen(false);
+    setSheetOpen(false);
   }, [searchQuery, activeTypes]);
 
   const focusedSpace = useMemo(() => {
@@ -160,58 +162,12 @@ export default function SpacesMapPage() {
   const hasActiveFilters = activeTypes.length > 0 || searchQuery.trim();
 
   return (
-    <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
-      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 space-y-4 lg:hidden'>
-        <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
-          Spaces archive
-        </span>
-        <h1 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)]'>
-          Map of independent scenes
-        </h1>
-        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
-          Explore the venues, studios, and cultural spaces that power the
-          archive. Filter by type, search for a city or name, and dive into the
-          map.
-        </p>
-        {cityStats.cities.length > 0 && (
-          <p className='text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50 leading-relaxed'>
-            {cityStats.total} spaces across {cityStats.cities.join(' · ')}
-          </p>
-        )}
-        <form
-          role='search'
-          onSubmit={(event) => event.preventDefault()}
-          className='nav-search nav-search--panel w-full sm:max-w-xs'>
-          <input
-            type='search'
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder='Search by space or city'
-            className='nav-search__input text-sm'
-            aria-label='Search spaces'
-          />
-          <button
-            type='submit'
-            className='nav-search__submit'
-            aria-label='Search spaces'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='18'
-              height='18'
-              viewBox='0 0 24 24'
-              aria-hidden='true'>
-              <path
-                fill='currentColor'
-                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
-              />
-            </svg>
-          </button>
-        </form>
-      </section>
+    <main className='map-page relative flex overflow-hidden bg-[var(--background)] lg:flex-row' style={{ height: 'calc(100dvh - 72px)' }}>
 
+      {/* Map — full screen on mobile, fills right on desktop */}
       <section
         ref={mapSectionRef}
-        className='relative order-2 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
+        className='relative h-full w-full lg:order-2 lg:flex-1'>
         <MapComponent
           spaces={filteredSpaces}
           activeTypes={activeTypes}
@@ -228,6 +184,7 @@ export default function SpacesMapPage() {
               String(prev) === String(id) ? prev : id
             );
             setOverlayOpen(true);
+            setSheetOpen(false);
           }}
           showPopups={false}
         />
@@ -236,12 +193,102 @@ export default function SpacesMapPage() {
           open={overlayOpen}
           onClose={() => setOverlayOpen(false)}
         />
+        {/* Mobile: floating List button */}
+        {!overlayOpen && (
+          <button
+            type='button'
+            onClick={() => setSheetOpen(true)}
+            className='absolute bottom-6 left-1/2 z-10 -translate-x-1/2 lg:hidden nav-action nav-cta px-6 shadow-[0_8px_32px_rgba(0,0,0,0.18)]'>
+            List · {loading ? '…' : totalCount}
+          </button>
+        )}
       </section>
+
+      {/* Mobile bottom sheet */}
+      {sheetOpen && (
+        <div
+          className='fixed inset-0 z-40 lg:hidden'
+          onClick={() => setSheetOpen(false)}>
+          <div
+            className='absolute inset-x-0 bottom-0 flex max-h-[78vh] flex-col rounded-t-3xl border-t border-[var(--foreground)]/12 bg-[var(--background)] shadow-[0_-24px_72px_rgba(0,0,0,0.18)]'
+            onClick={(e) => e.stopPropagation()}>
+            {/* Handle + header */}
+            <div className='flex-shrink-0 border-b border-[var(--foreground)]/10 px-5 pb-4 pt-4'>
+              <div className='mx-auto mb-4 h-1 w-10 rounded-full bg-[var(--foreground)]/20' />
+              <div className='flex items-center justify-between'>
+                <span className='ea-label ea-label--muted'>
+                  {cityStats.total} spaces across {cityStats.cities.join(' · ')}
+                </span>
+                <button
+                  type='button'
+                  onClick={() => setSheetOpen(false)}
+                  className='ea-label text-[var(--foreground)]/50 hover:text-[var(--foreground)]'>
+                  Close
+                </button>
+              </div>
+              <form
+                role='search'
+                onSubmit={(e) => e.preventDefault()}
+                className='nav-search nav-search--panel mt-3 w-full'>
+                <input
+                  type='search'
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  placeholder='Search by space or city'
+                  className='nav-search__input text-sm'
+                  aria-label='Search spaces'
+                />
+              </form>
+              {typeFilters.length > 0 && (
+                <div className='mt-3 flex flex-wrap gap-2'>
+                  {typeFilters.map(([type, count]) => (
+                    <button
+                      key={type}
+                      type='button'
+                      onClick={() => toggleType(type)}
+                      className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] transition ${
+                        activeTypes.includes(type)
+                          ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
+                          : 'border-[var(--foreground)]/22 text-[var(--foreground)]/75'
+                      }`}>
+                      <span
+                        className='h-2 w-2 rounded-full'
+                        style={{ backgroundColor: markerColors[type] || markerColors.other }}
+                      />
+                      {prettifyType(type)} {count}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Space list */}
+            <div className='flex-1 overflow-y-auto px-4 py-4 space-y-2'>
+              {filteredSpaces.map((space, i) => (
+                <SpaceListItem
+                  key={space.id}
+                  space={space}
+                  variant='compact'
+                  number={i + 1}
+                  showActions={false}
+                  onFocus={(s) => {
+                    if (!s?.id) return;
+                    setFocusedSpaceId(s.id);
+                    setOverlayOpen(true);
+                    setSheetOpen(false);
+                  }}
+                  isActive={focusedSpaceId != null && String(focusedSpaceId) === String(space.id)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <SpacesListPanel
         spaces={filteredSpaces}
         totalCount={totalCount}
         cityStats={cityStats}
+        className='hidden lg:flex'
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onClearFilters={() => {
@@ -270,6 +317,7 @@ function SpacesListPanel({
   spaces,
   totalCount,
   cityStats,
+  className = '',
   searchQuery,
   onSearchChange,
   onClearFilters,
@@ -292,7 +340,7 @@ function SpacesListPanel({
     : null;
 
   return (
-    <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
+    <aside className={`order-1 h-full w-96 flex-shrink-0 flex-col border-r border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl overflow-hidden ${className}`}>
       <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
         <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
           Spaces archive
@@ -362,7 +410,7 @@ function SpacesListPanel({
                       className='h-3 w-3 rounded-full border border-[var(--foreground)]/30'
                       style={{
                         backgroundColor:
-                          markerColors[type] || markerColors.default,
+                          markerColors[type] || markerColors.other,
                       }}
                     />
                     <span>{label}</span>
@@ -401,17 +449,16 @@ function SpacesListPanel({
             No spaces match filters.
           </p>
         ) : (
-          <div className='space-y-4'>
-            {spaces.map((space) => (
+          <div className='space-y-2'>
+            {spaces.map((space, i) => (
               <SpaceListItem
                 key={space.id}
                 space={space}
                 variant='compact'
+                number={i + 1}
+                showActions={false}
                 onFocus={(value) => {
                   onFocus?.(value);
-                  if (value) {
-                    scrollToMap?.();
-                  }
                 }}
                 isActive={
                   focusedId != null && String(focusedId) === String(space.id)
