@@ -6,19 +6,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import SpaceListItem from '@/components/SpaceListItem';
 import markerColors from '@/lib/markerColors';
 
+// Defined outside the component so the reference is stable across re-renders.
+// Inline objects like {{ lat, lng }} create a new reference every render, which
+// triggers MapComponent's map-init effect and destroys/recreates the map.
+const INITIAL_CENTER = { lat: 51.3397, lng: 12.3731 };
+const INITIAL_ZOOM = 11;
+
 const MapComponent = dynamic(() => import('@/components/MapComponent'), {
   ssr: false,
-  loading: () => <div className='w-full h-full bg-[var(--background)]/60' />,
+  loading: () => <div className='w-full h-full bg-[var(--background)]/40' />,
 });
 
-function normaliseType(type) {
-  if (!type) return 'default';
-  return String(type).toLowerCase();
+function normaliseType(t) {
+  return t ? String(t).toLowerCase() : 'other';
 }
-
-function prettifyType(type) {
-  if (!type || type === 'default') return 'other';
-  return type.replace(/[_-]+/g, ' ').trim();
+function prettifyType(t) {
+  if (!t || t === 'other') return 'other';
+  return t.replace(/[_-]+/g, ' ').trim();
 }
 
 export default function SpacesMapPage() {
@@ -28,431 +32,307 @@ export default function SpacesMapPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [focusedSpaceId, setFocusedSpaceId] = useState(null);
-  const [overlayOpen, setOverlayOpen] = useState(false);
-  const mapSectionRef = useRef(null);
+  const [cardOpen, setCardOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
-    let isMounted = true;
-    async function loadSpaces() {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await fetch('/api/spaces');
-        if (!res.ok) {
-          throw new Error(`Failed to load spaces (${res.status})`);
-        }
-        const data = await res.json();
-        if (isMounted) {
-          setSpaces(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error('Error fetching spaces:', err);
-        if (isMounted) {
-          setError('Unable to load spaces right now.');
-          setSpaces([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadSpaces();
-    return () => {
-      isMounted = false;
-    };
+    let alive = true;
+    fetch('/api/spaces')
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then((d) => { if (alive) { setSpaces(Array.isArray(d) ? d : []); setLoading(false); } })
+      .catch((e) => { console.error(e); if (alive) { setError('Unable to load spaces.'); setLoading(false); } });
+    return () => { alive = false; };
   }, []);
 
   const typeFilters = useMemo(() => {
-    const counts = new Map();
-    spaces.forEach((space) => {
-      const key = normaliseType(space.type);
-      counts.set(key, (counts.get(key) || 0) + 1);
-    });
-
-    return Array.from(counts.entries()).sort((a, b) =>
-      a[0].localeCompare(b[0], undefined, { sensitivity: 'base' })
-    );
+    const c = new Map();
+    spaces.forEach((s) => { const k = normaliseType(s.type); c.set(k, (c.get(k) || 0) + 1); });
+    return Array.from(c.entries()).sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base' }));
   }, [spaces]);
 
   const filteredSpaces = useMemo(() => {
     if (!spaces.length) return [];
-
     const q = searchQuery.trim().toLowerCase();
-    const matchesType = (space) => {
-      if (activeTypes.length === 0) return true;
-      return activeTypes.includes(normaliseType(space.type));
-    };
-    const matchesQuery = (space) => {
-      if (!q) return true;
-      const haystack = [space.name, space.city, space.website]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(q);
-    };
-    const sortByName = (a, b) => {
-      const left = a?.name || '';
-      const right = b?.name || '';
-      return left.localeCompare(right, undefined, { sensitivity: 'base' });
-    };
-
     return spaces
-      .filter((space) => matchesType(space) && matchesQuery(space))
-      .sort(sortByName);
+      .filter((s) => {
+        const typeOk = !activeTypes.length || activeTypes.includes(normaliseType(s.type));
+        const queryOk = !q || [s.name, s.city, s.website].filter(Boolean).join(' ').toLowerCase().includes(q);
+        return typeOk && queryOk;
+      })
+      .sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
   }, [spaces, activeTypes, searchQuery]);
 
-  const totalCount = filteredSpaces.length;
+  const cityStats = useMemo(() => ({
+    total: spaces.length,
+    cities: Array.from(new Set(spaces.map((s) => s.city).filter(Boolean))).sort(),
+  }), [spaces]);
 
-  const cityStats = useMemo(() => {
-    const cities = Array.from(
-      new Set(spaces.map((s) => s.city).filter(Boolean))
-    ).sort();
-    return { total: spaces.length, cities };
-  }, [spaces]);
+  useEffect(() => { setFocusedSpaceId(null); setCardOpen(false); }, [searchQuery, activeTypes]);
 
-  useEffect(() => {
-    setFocusedSpaceId(null);
-    setOverlayOpen(false);
-  }, [searchQuery, activeTypes]);
+  const focusedSpace = useMemo(
+    () => spaces.find((s) => String(s.id) === String(focusedSpaceId)) || null,
+    [focusedSpaceId, spaces]
+  );
 
-  const focusedSpace = useMemo(() => {
-    if (!focusedSpaceId) return null;
-    return (
-      spaces.find((space) => String(space.id) === String(focusedSpaceId)) ||
-      null
-    );
-  }, [focusedSpaceId, spaces]);
-
-  useEffect(() => {
-    if (focusedSpaceId && !focusedSpace) {
-      setOverlayOpen(false);
-    }
-  }, [focusedSpaceId, focusedSpace]);
-
-  const scrollToMap = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    if (!mapSectionRef.current) return;
-    const shouldScroll = window.innerWidth < 1024;
-    if (!shouldScroll) return;
-    mapSectionRef.current.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
+  // Stable — empty deps because setters are guaranteed stable by React.
+  // Critical: prevents MapComponent's addMarkers effect from re-running (and
+  // calling fitBounds) when overlayOpen/cardOpen state changes.
+  const handleMarkerSelect = useCallback((id) => {
+    if (id == null) return;
+    setFocusedSpaceId((prev) => String(prev) === String(id) ? prev : id);
+    setCardOpen(true);
+    setSheetOpen(false);
   }, []);
 
-  const toggleType = (type) => {
-    setActiveTypes((prev) => {
-      if (prev.includes(type)) {
-        return prev.filter((item) => item !== type);
-      }
-      return [...prev, type];
-    });
-  };
+  const handleFocusFromList = useCallback((space) => {
+    if (!space?.id) return;
+    setFocusedSpaceId(space.id);
+    setCardOpen(true);
+    setSheetOpen(false);
+  }, []);
 
-  const clearTypes = () => setActiveTypes([]);
+  const toggleType = useCallback((type) =>
+    setActiveTypes((p) => p.includes(type) ? p.filter((t) => t !== type) : [...p, type])
+  , []);
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  const hasActiveFilters = activeTypes.length > 0 || searchQuery.trim();
+  const clearFilters = useCallback(() => { setSearchQuery(''); setActiveTypes([]); }, []);
+  const hasFilters = activeTypes.length > 0 || !!searchQuery.trim();
 
   return (
-    <main className='map-page flex min-h-[calc(100vh-72px)] flex-col bg-[var(--background)] lg:flex-row'>
-      <section className='order-1 w-full border-b border-[var(--foreground)]/12 px-6 py-6 space-y-4 lg:hidden'>
-        <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
-          Spaces archive
-        </span>
-        <h1 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)]'>
-          Map of independent scenes
-        </h1>
-        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
-          Explore the venues, studios, and cultural spaces that power the
-          archive. Filter by type, search for a city or name, and dive into the
-          map.
-        </p>
-        {cityStats.cities.length > 0 && (
-          <p className='text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50 leading-relaxed'>
-            {cityStats.total} spaces across {cityStats.cities.join(' · ')}
-          </p>
-        )}
-        <form
-          role='search'
-          onSubmit={(event) => event.preventDefault()}
-          className='nav-search nav-search--panel w-full sm:max-w-xs'>
-          <input
-            type='search'
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder='Search by space or city'
-            className='nav-search__input text-sm'
-            aria-label='Search spaces'
-          />
-          <button
-            type='submit'
-            className='nav-search__submit'
-            aria-label='Search spaces'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='18'
-              height='18'
-              viewBox='0 0 24 24'
-              aria-hidden='true'>
-              <path
-                fill='currentColor'
-                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
-              />
-            </svg>
-          </button>
-        </form>
-      </section>
+    <div
+      className='relative overflow-hidden bg-[var(--background)]'
+      style={{ height: 'calc(100dvh - 72px)' }}>
 
-      <section
-        ref={mapSectionRef}
-        className='relative order-2 h-[48vh] w-full overflow-hidden border-b border-[var(--foreground)]/12 lg:order-2 lg:h-auto lg:flex-1 lg:border-b-0'>
-        <MapComponent
-          spaces={filteredSpaces}
-          activeTypes={activeTypes}
-          autoFit
-          fitKey={`split-${filteredSpaces.length}`}
-          initialAutoFitZoomOffset={1}
-          focusSpaceId={focusedSpaceId}
-          initialCenter={{ lat: 51.3397, lng: 12.3731 }}
-          initialZoom={11}
-          minAutoFitZoom={5}
-          onMarkerSelect={(id) => {
-            if (id == null) return;
-            setFocusedSpaceId((prev) =>
-              String(prev) === String(id) ? prev : id
-            );
-            setOverlayOpen(true);
-          }}
-          showPopups={false}
-        />
-        <FocusedSpaceOverlay
-          space={focusedSpace}
-          open={overlayOpen}
-          onClose={() => setOverlayOpen(false)}
-        />
-      </section>
-
-      <SpacesListPanel
+      {/* ── Full-bleed map ──────────────────────────────────────── */}
+      <MapComponent
         spaces={filteredSpaces}
-        totalCount={totalCount}
-        cityStats={cityStats}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onClearFilters={() => {
-          setSearchQuery('');
-          clearTypes();
-        }}
-        hasActiveFilters={hasActiveFilters}
-        typeFilters={typeFilters}
         activeTypes={activeTypes}
-        toggleType={toggleType}
-        loading={loading}
-        error={error}
-        onFocus={(space) => {
-          if (!space?.id) return;
-          setFocusedSpaceId(space.id);
-          setOverlayOpen(true);
-        }}
-        focusedId={focusedSpaceId}
-        scrollToMap={scrollToMap}
+        autoFit
+        fitKey={`map-v2-${filteredSpaces.length}`}
+        initialAutoFitZoomOffset={1}
+        focusSpaceId={focusedSpaceId}
+        initialCenter={INITIAL_CENTER}
+        initialZoom={INITIAL_ZOOM}
+        minAutoFitZoom={5}
+        onMarkerSelect={handleMarkerSelect}
+        showPopups={false}
       />
-    </main>
-  );
-}
 
-function SpacesListPanel({
-  spaces,
-  totalCount,
-  cityStats,
-  searchQuery,
-  onSearchChange,
-  onClearFilters,
-  hasActiveFilters,
-  typeFilters,
-  activeTypes,
-  toggleType,
-  loading,
-  error,
-  onFocus,
-  focusedId,
-  scrollToMap,
-}) {
-  const statusLabel = loading
-    ? 'Loading spaces…'
-    : error
-    ? error
-    : hasActiveFilters
-    ? `${totalCount} of ${cityStats?.total ?? totalCount} space${totalCount === 1 ? '' : 's'}`
-    : null;
+      {/* ── Floating top bar ───────────────────────────────────── */}
+      <div className='pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-col gap-2 sm:inset-x-4 sm:top-4'>
 
-  return (
-    <aside className='order-3 flex min-h-[48vh] w-full flex-col border-t border-[var(--foreground)]/12 bg-[var(--background)]/96 backdrop-blur-xl lg:order-1 lg:h-[calc(100vh-72px)] lg:max-w-[520px] lg:border-t-0 lg:border-r lg:border-[var(--foreground)]/12'>
-      <div className='hidden border-b border-[var(--foreground)]/12 px-6 py-6 lg:block'>
-        <span className='ea-label ea-label--muted text-[var(--foreground)]/70'>
-          Spaces archive
-        </span>
-        <h1 className='mt-3 text-balance text-2xl font-semibold text-[var(--foreground)] sm:text-3xl'>
-          Map of independent scenes
-        </h1>
-        <p className='mt-2 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/70'>
-          Explore the venues, studios, and cultural spaces that power the
-          archive. Filter by type, search for a city or name, and dive into the
-          map.
-        </p>
-        {cityStats?.cities.length > 0 && (
-          <p className='mt-3 text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50 leading-relaxed'>
-            {cityStats.total} spaces across {cityStats.cities.join(' · ')}
-          </p>
-        )}
-        <form
-          role='search'
-          onSubmit={(event) => event.preventDefault()}
-          className='nav-search nav-search--panel mt-4 hidden w-full lg:flex'>
-          <input
-            type='search'
-            value={searchQuery}
-            onChange={onSearchChange}
-            placeholder='Search by space or city'
-            className='nav-search__input text-sm'
-            aria-label='Search spaces'
-          />
-          <button
-            type='submit'
-            className='nav-search__submit'
-            aria-label='Search spaces'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='18'
-              height='18'
-              viewBox='0 0 24 24'
-              aria-hidden='true'>
-              <path
-                fill='currentColor'
-                d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+        {/* Stats + search row */}
+        <div className='pointer-events-auto rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/88 px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl'>
+          <div className='flex items-center gap-3'>
+            {cityStats.cities.length > 0 ? (
+              <p className='flex-1 truncate text-[10px] uppercase tracking-[0.24em] text-[var(--foreground)]/55'>
+                {cityStats.total} spaces · {cityStats.cities.join(' · ')}
+              </p>
+            ) : (
+              <p className='flex-1 text-[10px] uppercase tracking-[0.24em] text-[var(--foreground)]/40'>
+                Spaces
+              </p>
+            )}
+            <form role='search' onSubmit={(e) => e.preventDefault()} className='flex items-center gap-2'>
+              <input
+                ref={searchRef}
+                type='search'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder='Search…'
+                className='w-36 rounded-full border border-[var(--foreground)]/14 bg-[var(--background)]/70 px-3 py-1.5 text-[11px] tracking-wide text-[var(--foreground)] placeholder:text-[var(--foreground)]/35 focus:outline-none focus:ring-1 focus:ring-[var(--foreground)]/30 sm:w-48'
+                aria-label='Search spaces'
               />
-            </svg>
-          </button>
-        </form>
-      </div>
-
-      <div className='border-b border-[var(--foreground)]/12 px-6 py-4'>
-        {typeFilters.length > 0 && (
-          <div className='mt-3 space-y-2'>
-            <div className='flex flex-wrap gap-2'>
-              {typeFilters.map(([type, count]) => {
-                const active = activeTypes.includes(type);
-                const label = prettifyType(type);
-                return (
-                  <button
-                    key={type}
-                    type='button'
-                    onClick={() => toggleType(type)}
-                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.28em] transition ${
-                      active
-                        ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
-                        : 'border-[var(--foreground)]/22 bg-[var(--background)]/80 text-[var(--foreground)]/85 hover:border-[var(--foreground)]/40'
-                    }`}>
-                    <span
-                      className='h-3 w-3 rounded-full border border-[var(--foreground)]/30'
-                      style={{
-                        backgroundColor:
-                          markerColors[type] || markerColors.default,
-                      }}
-                    />
-                    <span>{label}</span>
-                    <span className='text-[var(--foreground)]/50'>{count}</span>
-                  </button>
-                );
-              })}
-            </div>
+              {searchQuery && (
+                <button
+                  type='button'
+                  onClick={() => setSearchQuery('')}
+                  aria-label='Clear search'
+                  className='text-[var(--foreground)]/40 hover:text-[var(--foreground)]'>
+                  <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5'>
+                    <path d='M18 6 6 18M6 6l12 12'/>
+                  </svg>
+                </button>
+              )}
+            </form>
           </div>
-        )}
+        </div>
 
-        {(statusLabel || hasActiveFilters) && (
-          <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50 sm:flex-row sm:items-center sm:justify-between'>
-            {statusLabel && <span>{statusLabel}</span>}
-            {hasActiveFilters && (
+        {/* Type filter pills */}
+        {typeFilters.length > 0 && (
+          <div className='pointer-events-auto flex flex-wrap gap-1.5'>
+            {typeFilters.map(([type, count]) => {
+              const active = activeTypes.includes(type);
+              return (
+                <button
+                  key={type}
+                  type='button'
+                  onClick={() => toggleType(type)}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] shadow-sm backdrop-blur-xl transition ${
+                    active
+                      ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
+                      : 'border-[var(--foreground)]/15 bg-[var(--background)]/80 text-[var(--foreground)]/70 hover:border-[var(--foreground)]/35'
+                  }`}>
+                  <span
+                    className='h-2 w-2 rounded-full'
+                    style={{ backgroundColor: markerColors[type] || markerColors.other }}
+                  />
+                  {prettifyType(type)}
+                  {active && <span className='opacity-60'>{count}</span>}
+                </button>
+              );
+            })}
+            {hasFilters && (
               <button
                 type='button'
-                onClick={onClearFilters}
-                className='nav-action h-8 rounded-full px-4 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/75 hover:text-[var(--foreground)]'>
-                Clear filters
+                onClick={clearFilters}
+                className='rounded-full border border-[var(--foreground)]/15 bg-[var(--background)]/80 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/50 shadow-sm backdrop-blur-xl hover:text-[var(--foreground)]'>
+                Clear
               </button>
             )}
           </div>
         )}
       </div>
 
-      <div className='flex-1 overflow-y-auto px-6 py-6'>
-        {loading ? (
-          <p className='text-sm italic text-[var(--foreground)]/70'>
-            Loading spaces…
-          </p>
-        ) : error ? (
-          <p className='text-sm text-[var(--foreground)]/70'>{error}</p>
-        ) : spaces.length === 0 ? (
-          <p className='text-sm italic text-[var(--foreground)]/70'>
-            No spaces match filters.
-          </p>
-        ) : (
-          <div className='space-y-4'>
-            {spaces.map((space) => (
+      {/* ── Selected space card ────────────────────────────────── */}
+      {cardOpen && focusedSpace && (
+        <div className='pointer-events-none absolute inset-x-3 bottom-20 z-20 flex justify-center sm:inset-x-4 lg:inset-auto lg:bottom-6 lg:right-5 lg:justify-end'>
+          <div className='pointer-events-auto w-full max-w-sm overflow-hidden rounded-[22px] border border-[var(--foreground)]/10 bg-[var(--background)]/95 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-2xl'>
+            <div className='flex items-center justify-between border-b border-[var(--foreground)]/8 px-5 py-3'>
+              <span className='text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/45'>
+                Space
+              </span>
+              <button
+                type='button'
+                onClick={() => setCardOpen(false)}
+                className='text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/45 transition hover:text-[var(--foreground)]'>
+                Close
+              </button>
+            </div>
+            <div className='px-4 py-4'>
               <SpaceListItem
-                key={space.id}
-                space={space}
+                space={focusedSpace}
                 variant='compact'
-                onFocus={(value) => {
-                  onFocus?.(value);
-                  if (value) {
-                    scrollToMap?.();
-                  }
-                }}
-                isActive={
-                  focusedId != null && String(focusedId) === String(space.id)
-                }
+                isActive
+                surface='overlay'
+                showActions
               />
-            ))}
+            </div>
           </div>
-        )}
-      </div>
-    </aside>
-  );
-}
+        </div>
+      )}
 
-function FocusedSpaceOverlay({ space, open, onClose }) {
-  if (!open || !space) return null;
-
-  return (
-    <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
-      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-white/70 bg-[rgba(247,247,247,0.92)] text-[#1b1b1b] shadow-[0_34px_90px_rgba(0,0,0,0.35)] backdrop-blur-2xl'>
-        <div className='flex items-center justify-between px-5 pt-4 text-[#2a2a2a]'>
-          <span className='ea-label tracking-[0.3em] text-[#3a3a3a]'>
-            Selected space
-          </span>
+      {/* ── Bottom: List button ────────────────────────────────── */}
+      {!sheetOpen && (
+        <div className='absolute bottom-5 left-1/2 z-20 -translate-x-1/2'>
           <button
             type='button'
-            onClick={onClose}
-            aria-label='Close selected space'
-            className='ea-label text-[#3a3a3a] hover:text-[#1b1b1b]'>
-            Close
+            onClick={() => setSheetOpen(true)}
+            className='flex items-center gap-2 rounded-full border border-[var(--foreground)]/15 bg-[var(--background)]/90 px-6 py-2.5 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/75 shadow-[0_8px_32px_rgba(0,0,0,0.16)] backdrop-blur-xl transition hover:text-[var(--foreground)]'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' aria-hidden='true'>
+              <line x1='8' y1='6' x2='21' y2='6'/><line x1='8' y1='12' x2='21' y2='12'/><line x1='8' y1='18' x2='21' y2='18'/>
+              <line x1='3' y1='6' x2='3.01' y2='6'/><line x1='3' y1='12' x2='3.01' y2='12'/><line x1='3' y1='18' x2='3.01' y2='18'/>
+            </svg>
+            List
           </button>
         </div>
-        <div className='px-5 pb-5'>
-          <SpaceListItem
-            space={space}
-            variant='compact'
-            isActive
-            surface='overlay'
-            className='text-[#1b1b1b]'
-          />
+      )}
+
+      {/* ── Bottom sheet ───────────────────────────────────────── */}
+      {sheetOpen && (
+        <div
+          className='absolute inset-0 z-30'
+          onClick={() => setSheetOpen(false)}>
+          <div
+            className='absolute inset-x-0 bottom-0 flex max-h-[80vh] flex-col overflow-hidden rounded-t-[28px] border-t border-[var(--foreground)]/10 bg-[var(--background)] shadow-[0_-20px_60px_rgba(0,0,0,0.2)] lg:inset-x-auto lg:left-1/2 lg:max-w-2xl lg:-translate-x-1/2 lg:rounded-t-[28px]'
+            onClick={(e) => e.stopPropagation()}>
+
+            {/* Handle */}
+            <div className='flex-shrink-0 px-5 pt-4'>
+              <div className='mx-auto h-1 w-10 rounded-full bg-[var(--foreground)]/15' />
+            </div>
+
+            {/* Sheet header */}
+            <div className='flex-shrink-0 border-b border-[var(--foreground)]/8 px-5 py-4'>
+              <div className='flex items-start justify-between gap-4'>
+                <div>
+                  {cityStats.cities.length > 0 && (
+                    <p className='text-[10px] uppercase tracking-[0.24em] leading-relaxed text-[var(--foreground)]/50'>
+                      {loading ? 'Loading…' : `${filteredSpaces.length}${hasFilters ? ` of ${cityStats.total}` : ''} spaces · ${cityStats.cities.join(' · ')}`}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type='button'
+                  onClick={() => setSheetOpen(false)}
+                  className='flex-shrink-0 text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/40 hover:text-[var(--foreground)]'>
+                  Close
+                </button>
+              </div>
+
+              {/* Inline search + filters inside sheet */}
+              <form role='search' onSubmit={(e) => e.preventDefault()} className='mt-3 flex items-center gap-2 rounded-xl border border-[var(--foreground)]/12 bg-[var(--background)]/60 px-3 py-2'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='flex-shrink-0 text-[var(--foreground)]/35'>
+                  <circle cx='11' cy='11' r='8'/><path d='m21 21-4.35-4.35'/>
+                </svg>
+                <input
+                  type='search'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder='Search by space or city'
+                  className='flex-1 bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/35 focus:outline-none'
+                  aria-label='Search spaces'
+                />
+              </form>
+
+              {typeFilters.length > 0 && (
+                <div className='mt-3 flex flex-wrap gap-1.5'>
+                  {typeFilters.map(([type, count]) => {
+                    const active = activeTypes.includes(type);
+                    return (
+                      <button
+                        key={type}
+                        type='button'
+                        onClick={() => toggleType(type)}
+                        className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] transition ${
+                          active
+                            ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
+                            : 'border-[var(--foreground)]/18 text-[var(--foreground)]/65 hover:border-[var(--foreground)]/35'
+                        }`}>
+                        <span className='h-2 w-2 rounded-full' style={{ backgroundColor: markerColors[type] || markerColors.other }} />
+                        {prettifyType(type)} {count}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Space list */}
+            <div className='flex-1 overflow-y-auto px-4 py-3 space-y-1.5'>
+              {loading ? (
+                <p className='px-1 py-4 text-sm italic text-[var(--foreground)]/45'>Loading spaces…</p>
+              ) : error ? (
+                <p className='px-1 py-4 text-sm text-[var(--foreground)]/50'>{error}</p>
+              ) : filteredSpaces.length === 0 ? (
+                <p className='px-1 py-4 text-sm italic text-[var(--foreground)]/45'>No spaces match.</p>
+              ) : (
+                filteredSpaces.map((space) => (
+                  <SpaceListItem
+                    key={space.id}
+                    space={space}
+                    variant='compact'
+                    showActions={false}
+                    onFocus={handleFocusFromList}
+                    isActive={focusedSpaceId != null && String(focusedSpaceId) === String(space.id)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
