@@ -26,7 +26,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
     start_time: event.start_time || '',
     end_time: event.end_time || '',
     category: event.category || 'other',
-    designer: event.designer || '',
+    designers: event.designers?.length ? event.designers : [''],
     description: event.description || '',
   });
 
@@ -53,6 +53,25 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDesignerChange = (idx, value) => {
+    setFormData((prev) => {
+      const designers = [...prev.designers];
+      designers[idx] = value;
+      return { ...prev, designers };
+    });
+  };
+
+  const addDesigner = () => {
+    setFormData((prev) => ({ ...prev, designers: [...prev.designers, ''] }));
+  };
+
+  const removeDesigner = (idx) => {
+    setFormData((prev) => ({
+      ...prev,
+      designers: prev.designers.filter((_, i) => i !== idx),
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -105,7 +124,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
         start_time: formData.start_time,
         end_time: formData.end_time,
         category: formData.category,
-        designer: formData.designer,
+        designers: formData.designers.map((d) => d.trim()).filter(Boolean),
         description: formData.description,
         approved: false,
         terms_accepted: true,
@@ -292,21 +311,37 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
 
       <div className='grid gap-6 sm:grid-cols-2'>
         <div className='space-y-2'>
-          <label
-            htmlFor={`designer-${event.id}`}
-            className='ea-label ea-label--muted'>
-            Flyer designer*
-          </label>
-          <input
-            id={`designer-${event.id}`}
-            type='text'
-            name='designer'
-            value={formData.designer}
-            onChange={handleInputChange}
-            required
-            placeholder='Graphic designer credit'
-            className={baseInputClasses}
-          />
+          <span className='ea-label ea-label--muted'>Flyer designer(s)*</span>
+          <div className='space-y-2'>
+            {formData.designers.map((name, idx) => (
+              <div
+                key={idx}
+                className='flex gap-2'>
+                <input
+                  type='text'
+                  value={name}
+                  onChange={(e) => handleDesignerChange(idx, e.target.value)}
+                  required={idx === 0}
+                  placeholder='Graphic designer credit'
+                  className={`${baseInputClasses} flex-1`}
+                />
+                {formData.designers.length > 1 && (
+                  <button
+                    type='button'
+                    onClick={() => removeDesigner(idx)}
+                    className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            type='button'
+            onClick={addDesigner}
+            className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+            + Add another designer
+          </button>
         </div>
 
         <div className='space-y-2 sm:col-span-2'>

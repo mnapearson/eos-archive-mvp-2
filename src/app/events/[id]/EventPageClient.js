@@ -80,7 +80,9 @@ export default function EventPageClient({ eventId }) {
     ? `/spaces/${event.space.slug || event.space.id}`
     : null;
   const eventCategory = event?.category || '';
-  const eventDesigner = event?.designer || '';
+  const eventDesigner = event?.designers?.length
+    ? event.designers.join(' & ')
+    : '';
   const eventDateTime = event
     ? formatDateRange(
         event.start_date,

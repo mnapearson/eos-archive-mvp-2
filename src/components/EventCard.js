@@ -73,9 +73,9 @@ export default function EventCard({
                 {event.category}
               </span>
             )}
-            {event.designer && (
+            {event.designers?.length > 0 && (
               <span className='rounded-full border border-[var(--foreground)]/16 px-3 py-1'>
-                Graphic design · {event.designer}
+                Graphic design · {event.designers.join(' & ')}
               </span>
             )}
           </div>

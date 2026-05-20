@@ -33,7 +33,12 @@ export default function EventQuickView({ event, onClose }) {
   const spaceName = details?.space?.name || details?.space_name || null;
   const category =
     details?.category || details?.type || details?.tags?.[0] || null;
-  const designer = details?.designer || details?.creator || null;
+  const designerNames = details?.designers?.length
+    ? details.designers
+    : details?.creator
+    ? [details.creator]
+    : [];
+  const designer = designerNames.length ? designerNames.join(' & ') : null;
 
   const start = details?.start_date || null;
   const end = details?.end_date || null;

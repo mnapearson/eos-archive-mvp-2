@@ -16,7 +16,7 @@ The core table. Stores all event listings submitted by spaces.
 | `created_by` | uuid | FK → `auth.users.id` |
 | `title` | text | Programme/event name |
 | `category` | text | One of the 15 categories (see below) |
-| `designer` | text | Flyer graphic designer credit |
+| `designers` | text[] | Flyer graphic designer credits (array — joined with ` & ` for display, each entry filterable separately) |
 | `description` | text | Optional programme context |
 | `start_date` | date | `YYYY-MM-DD` |
 | `end_date` | date | `YYYY-MM-DD` |
