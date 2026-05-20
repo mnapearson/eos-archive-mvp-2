@@ -133,6 +133,7 @@ export default function MapComponent({
   const markersRef = useRef([]);
   const focusMarkerRef = useRef(null);
   const initialAutoFitOffsetAppliedRef = useRef(false);
+  const lastFitKeyRef = useRef(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -190,7 +191,7 @@ export default function MapComponent({
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/dark-v10',
+      style: 'mapbox://styles/mapbox/light-v11',
       center: [centerLng, centerLat],
       zoom: finalZoom,
     });
@@ -199,33 +200,20 @@ export default function MapComponent({
 
     mapRef.current = map;
     return () => map.remove();
-  }, [mapData, eventId, initialCenter, initialZoom, spaces]);
+  // initialCenter, initialZoom, spaces are initial values — re-running this
+  // effect when they change would destroy and recreate the map unnecessarily.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapData, eventId]);
 
   const updateMarkerFocusStyles = (currentFocusId) => {
-    markersRef.current.forEach(({ element, inner, id, color }) => {
+    markersRef.current.forEach(({ element, id }) => {
       if (!element) return;
-      const isActive =
-        currentFocusId != null &&
-        String(id) === String(currentFocusId);
-      element.style.transform = isActive ? 'scale(1.45)' : 'scale(1)';
-      element.style.borderColor = isActive
-        ? 'rgba(255,255,255,0.9)'
-        : 'rgba(255,255,255,0.55)';
+      const isActive = currentFocusId != null && String(id) === String(currentFocusId);
+      element.style.transform = isActive ? 'scale(1.35)' : 'scale(1)';
       element.style.boxShadow = isActive
-        ? '0 0 18px rgba(0,0,0,0.32), 0 0 0 6px rgba(255,255,255,0.22)'
-        : '0 0 16px rgba(0,0,0,0.28)';
-      element.style.opacity = isActive ? '1' : '0.85';
+        ? '0 4px 20px rgba(0,0,0,0.22), 0 0 0 3px rgba(255,255,255,0.9)'
+        : '0 2px 10px rgba(0,0,0,0.18)';
       element.style.zIndex = isActive ? '6' : '2';
-      element.style.backgroundColor = color;
-      element.style.display = 'flex';
-      element.style.visibility = 'visible';
-      if (inner) {
-        inner.style.backgroundColor = isActive
-          ? 'rgba(255,255,255,0.95)'
-          : 'rgba(255,255,255,0.85)';
-        inner.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
-        inner.style.opacity = isActive ? '1' : '0.92';
-      }
     });
   };
 
@@ -264,39 +252,25 @@ export default function MapComponent({
     let hasValidBounds = false;
 
     filteredData.forEach((item) => {
-      const markerEl = document.createElement('div');
-      markerEl.style.width = '16px';
-      markerEl.style.height = '16px';
-      markerEl.style.borderRadius = '50%';
-      markerEl.style.border = '2px solid rgba(255,255,255,0.55)';
-      markerEl.style.boxSizing = 'border-box';
-      markerEl.style.display = 'flex';
-      markerEl.style.alignItems = 'center';
-      markerEl.style.justifyContent = 'center';
-      markerEl.style.transition =
-        'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border 0.2s ease';
-      markerEl.style.cursor = 'pointer';
-      markerEl.style.pointerEvents = 'auto';
-      markerEl.style.boxShadow = '0 0 16px rgba(0,0,0,0.28)';
-      markerEl.style.opacity = '0.85';
-      markerEl.style.zIndex = '2';
-      markerEl.style.visibility = 'visible';
       const typeKey = item.type
         ? item.type.toLowerCase()
         : item.space && item.space.type
         ? item.space.type.toLowerCase()
-        : 'default';
-      const markerColor = markerColors[typeKey] || markerColors.default;
-      markerEl.style.backgroundColor = markerColor;
+        : 'other';
+      const markerColor = markerColors[typeKey] || markerColors.other || '#888';
 
-      const innerDot = document.createElement('span');
-      innerDot.style.width = '6px';
-      innerDot.style.height = '6px';
-      innerDot.style.borderRadius = '50%';
-      innerDot.style.backgroundColor = 'rgba(255,255,255,0.9)';
-      innerDot.style.boxShadow = '0 0 8px rgba(0,0,0,0.35)';
-      innerDot.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-      markerEl.appendChild(innerDot);
+      const markerEl = document.createElement('div');
+      markerEl.style.width = '16px';
+      markerEl.style.height = '16px';
+      markerEl.style.borderRadius = '50%';
+      markerEl.style.backgroundColor = markerColor;
+      markerEl.style.border = '2.5px solid rgba(255,255,255,0.95)';
+      markerEl.style.boxSizing = 'border-box';
+      markerEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.22)';
+      markerEl.style.cursor = 'pointer';
+      markerEl.style.pointerEvents = 'auto';
+      markerEl.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
+      markerEl.style.zIndex = '2';
 
       const spaceId = (item.space && item.space.id) || item.id;
       const spaceName = item.name || item.space?.name || 'UNKNOWN';
@@ -348,7 +322,6 @@ export default function MapComponent({
         id: spaceId,
         element: markerEl,
         listeners,
-        inner: innerDot,
         color: markerColor,
       });
 
@@ -386,7 +359,8 @@ export default function MapComponent({
     updateMarkerFocusStyles(focusSpaceId);
     updateFocusMarker(focusSpaceId);
 
-    if (autoFit && hasValidBounds) {
+    if (autoFit && hasValidBounds && fitKey !== lastFitKeyRef.current) {
+      lastFitKeyRef.current = fitKey;
       try {
         const padding = getViewportPadding(fitPadding, DEFAULT_FIT_PADDING);
         const map = mapRef.current;
@@ -450,14 +424,12 @@ export default function MapComponent({
     if (!entry) return;
     const coords = entry.marker.getLngLat();
     const highlightEl = document.createElement('div');
-    highlightEl.style.width = '28px';
-    highlightEl.style.height = '28px';
+    highlightEl.style.width = '32px';
+    highlightEl.style.height = '32px';
     highlightEl.style.borderRadius = '50%';
-    highlightEl.style.background =
-      'radial-gradient(circle at center, rgba(27,27,27,0.95) 0%, rgba(27,27,27,0.7) 55%, rgba(27,27,27,0.45) 100%)';
-    highlightEl.style.boxShadow =
-      '0 20px 45px rgba(0,0,0,0.45), 0 0 0 6px rgba(255,255,255,0.65)';
-    highlightEl.style.border = '2px solid rgba(255,255,255,0.85)';
+    highlightEl.style.background = 'transparent';
+    highlightEl.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.12), 0 6px 24px rgba(0,0,0,0.14)';
+    highlightEl.style.border = '2px solid rgba(255,255,255,0.8)';
     highlightEl.style.pointerEvents = 'none';
     focusMarkerRef.current = new mapboxgl.Marker({
       element: highlightEl,

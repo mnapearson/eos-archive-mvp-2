@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { normalizeType } from '@/lib/normalize';
+import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
 
 export default function SpaceListItem({
   space,
   variant = 'compact',
+  number,
   onFocus,
   isActive = false,
   surface = 'card',
@@ -282,6 +284,8 @@ export default function SpaceListItem({
     .filter(Boolean)
     .join(' ');
 
+  const typeColor = markerColors[normalizeType(space.type)] || markerColors.other || '#888';
+
   return (
     <article
       className={compactClasses}
@@ -296,25 +300,41 @@ export default function SpaceListItem({
           handleFocus(event);
         }
       }}>
-      <header className='flex flex-wrap items-center justify-between gap-2'>
+      <div className='flex items-start gap-3'>
+        {typeof number === 'number' && (
+          <span
+            className='mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold'
+            style={{ backgroundColor: typeColor, color: getMarkerTextColor(typeColor) }}>
+            {number}
+          </span>
+        )}
         <div className='min-w-0 flex-1'>
           <h3 className={titleClass}>{space.name || 'Untitled space'}</h3>
-          <p className={cityClass}>{cityLabel}</p>
+          <div className='mt-0.5 flex items-center gap-1.5'>
+            <span
+              className='h-2 w-2 flex-shrink-0 rounded-full'
+              style={{ backgroundColor: typeColor }}
+            />
+            <span className={cityClass}>{typeLabel || 'other'}</span>
+          </div>
           {displayAddress && directionsUrl ? (
             <a
               href={directionsUrl}
               target='_blank'
               rel='noopener noreferrer'
               onClick={handleExternalLinkClick}
-              className={`${addressClass} underline underline-offset-4 ${addressLinkHover}`}>
+              className={`mt-0.5 inline-flex text-[11px] uppercase tracking-[0.22em] underline underline-offset-4 ${
+                surface === 'overlay' ? 'text-[#1f1f1f] hover:text-[#000]' : 'text-[var(--foreground)]/65 hover:text-[var(--foreground)]'
+              }`}>
               {displayAddress}
             </a>
           ) : (
-            <span className={addressClass}>{displayAddress}</span>
+            <span className={`mt-0.5 inline-flex text-[11px] uppercase tracking-[0.22em] ${
+              surface === 'overlay' ? 'text-[#1f1f1f]' : 'text-[var(--foreground)]/65'
+            }`}>{displayAddress}</span>
           )}
         </div>
-        <span className={typePillClass}>{typeLabel}</span>
-      </header>
+      </div>
 
       {showActions && (
         <footer className={compactFooterClass}>
