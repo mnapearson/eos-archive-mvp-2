@@ -208,7 +208,7 @@ function HomePageContent() {
           const haystack = [
             ev.title,
             ev.category,
-            ev.designer,
+            ev.designers?.join(' ') || '',
             ev.city,
             ev.space_city,
             ev.space_name,

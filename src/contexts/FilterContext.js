@@ -103,11 +103,12 @@ export function FilterProvider({ children }) {
         ? normalizeValue(event.start_date).slice(0, 10)
         : '';
       const fallbackCity = normalizeValue(event.city);
-      const designer = normalizeValue(event.designer);
-
       if (category) categories.add(category);
       if (date) dates.add(date);
-      if (designer) designers.add(designer);
+      (event.designers || []).forEach((d) => {
+        const designer = normalizeValue(d);
+        if (designer) designers.add(designer);
+      });
 
       if (fallbackCity && !cities.has(fallbackCity)) {
         cities.add(fallbackCity);
@@ -142,7 +143,9 @@ export function FilterProvider({ children }) {
         const spaceName = space?.name || '';
         const spaceCity = space?.city || normalizeValue(event.city);
 
-        const designerValue = normalizeValue(event.designer);
+        const designerValues = (event.designers || [])
+          .map((d) => normalizeValue(d))
+          .filter(Boolean);
 
         if (
           filters.category.length > 0 &&
@@ -165,7 +168,7 @@ export function FilterProvider({ children }) {
 
         if (
           filters.designer.length > 0 &&
-          !filters.designer.includes(designerValue)
+          !filters.designer.some((d) => designerValues.includes(d))
         ) {
           return acc;
         }
@@ -207,7 +210,9 @@ export function FilterProvider({ children }) {
           : '';
         const spaceName = space?.name || '';
         const spaceCity = space?.city || normalizeValue(event.city);
-        const designerValue = normalizeValue(event.designer);
+        const designerValues = (event.designers || [])
+          .map((d) => normalizeValue(d))
+          .filter(Boolean);
 
         switch (key) {
           case 'city': {
@@ -242,10 +247,9 @@ export function FilterProvider({ children }) {
             break;
           }
           case 'designer': {
-            const value = designerValue;
-            if (value) {
+            designerValues.forEach((value) => {
               counts.designer.set(value, (counts.designer.get(value) || 0) + 1);
-            }
+            });
             break;
           }
           default:
