@@ -29,6 +29,7 @@ export default function SpacesMapPage() {
   const [error, setError] = useState('');
   const [focusedSpaceId, setFocusedSpaceId] = useState(null);
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
   const mapSectionRef = useRef(null);
 
   useEffect(() => {
@@ -105,9 +106,17 @@ export default function SpacesMapPage() {
 
   const totalCount = filteredSpaces.length;
 
+  const cityStats = useMemo(() => {
+    const cities = Array.from(
+      new Set(spaces.map((s) => s.city).filter(Boolean))
+    ).sort();
+    return { total: spaces.length, cities };
+  }, [spaces]);
+
   useEffect(() => {
     setFocusedSpaceId(null);
     setOverlayOpen(false);
+    setViewAll(false);
   }, [searchQuery, activeTypes]);
 
   const focusedSpace = useMemo(() => {
@@ -166,6 +175,11 @@ export default function SpacesMapPage() {
           archive. Filter by type, search for a city or name, and dive into the
           map.
         </p>
+        {cityStats.cities.length > 0 && (
+          <p className='text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50'>
+            {cityStats.total} spaces · {cityStats.cities.join(' · ')}
+          </p>
+        )}
         <form
           role='search'
           onSubmit={(event) => event.preventDefault()}
@@ -204,11 +218,12 @@ export default function SpacesMapPage() {
           spaces={filteredSpaces}
           activeTypes={activeTypes}
           autoFit
-          fitKey={`split-${filteredSpaces.length}`}
+          fitKey={`split-${filteredSpaces.length}-${viewAll}`}
           initialAutoFitZoomOffset={1}
           focusSpaceId={focusedSpaceId}
           initialCenter={{ lat: 51.3397, lng: 12.3731 }}
           initialZoom={11}
+          minAutoFitZoom={viewAll ? null : 5}
           onMarkerSelect={(id) => {
             if (id == null) return;
             setFocusedSpaceId((prev) =>
@@ -218,6 +233,14 @@ export default function SpacesMapPage() {
           }}
           showPopups={false}
         />
+        {!viewAll && cityStats.cities.length > 1 && (
+          <button
+            type='button'
+            onClick={() => setViewAll(true)}
+            className='absolute bottom-4 left-4 z-10 nav-action text-xs'>
+            View all spaces
+          </button>
+        )}
         <FocusedSpaceOverlay
           space={focusedSpace}
           open={overlayOpen}
@@ -228,6 +251,7 @@ export default function SpacesMapPage() {
       <SpacesListPanel
         spaces={filteredSpaces}
         totalCount={totalCount}
+        cityStats={cityStats}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onClearFilters={() => {
@@ -255,6 +279,7 @@ export default function SpacesMapPage() {
 function SpacesListPanel({
   spaces,
   totalCount,
+  cityStats,
   searchQuery,
   onSearchChange,
   onClearFilters,
@@ -288,6 +313,11 @@ function SpacesListPanel({
           archive. Filter by type, search for a city or name, and dive into the
           map.
         </p>
+        {cityStats?.cities.length > 0 && (
+          <p className='mt-3 text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/50'>
+            {cityStats.total} spaces · {cityStats.cities.join(' · ')}
+          </p>
+        )}
         <form
           role='search'
           onSubmit={(event) => event.preventDefault()}
