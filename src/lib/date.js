@@ -6,13 +6,20 @@ const TIME_FMT = 'HH:mm';
 
 export function formatDate(dateISO) {
   if (!dateISO) return '';
-  return format(parseISO(dateISO), DATE_FMT);
+  try {
+    return format(parseISO(dateISO), DATE_FMT);
+  } catch {
+    return '';
+  }
 }
 
 export function formatTime(timeISO) {
   if (!timeISO) return '';
-  // parseISO needs a full timestamp, so we fake a date
-  return format(parseISO(`1970-01-01T${timeISO}`), TIME_FMT);
+  try {
+    return format(parseISO(`1970-01-01T${timeISO}`), TIME_FMT);
+  } catch {
+    return '';
+  }
 }
 
 export function formatDateRange(start, end, startTime, endTime) {
