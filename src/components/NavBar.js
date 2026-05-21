@@ -37,14 +37,18 @@ function NavBarContent() {
 
   // Load saved theme or system preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches;
-      setTheme(prefersDark ? 'dusk' : 'dawn');
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else {
+        const prefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches;
+        setTheme(prefersDark ? 'dusk' : 'dawn');
+      }
+    } catch {
+      // localStorage unavailable (private mode, storage restrictions)
     }
   }, []);
 
@@ -52,7 +56,11 @@ function NavBarContent() {
   useEffect(() => {
     document.documentElement.classList.remove('dusk', 'dawn');
     document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {
+      // localStorage unavailable
+    }
   }, [theme]);
 
   const toggleTheme = () => setTheme(theme === 'dawn' ? 'dusk' : 'dawn');
