@@ -115,6 +115,7 @@ export default function MapComponent({
   activeTypes,
   initialCenter,
   initialZoom,
+  mapStyle = 'mapbox://styles/mapbox/light-v11',
   autoFit = false,
   fitKey,
   focusSpaceId,
@@ -191,7 +192,7 @@ export default function MapComponent({
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: mapStyle,
       center: [centerLng, centerLat],
       zoom: finalZoom,
     });
@@ -199,11 +200,17 @@ export default function MapComponent({
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     mapRef.current = map;
-    return () => map.remove();
+    return () => {
+      clearMarkers();
+      map.remove();
+      mapRef.current = null;
+    };
   // initialCenter, initialZoom, spaces are initial values — re-running this
   // effect when they change would destroy and recreate the map unnecessarily.
+  // mapStyle IS reactive: when the user toggles dawn/dusk the map reinitialises
+  // with the correct basemap style.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapData, eventId]);
+  }, [mapData, eventId, mapStyle]);
 
   const updateMarkerFocusStyles = (currentFocusId) => {
     markersRef.current.forEach(({ element, id }) => {
@@ -443,7 +450,7 @@ export default function MapComponent({
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect, showPopups]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect, showPopups, mapStyle]);
 
   useEffect(() => {
     if (!autoFit || !mapRef.current) return;
