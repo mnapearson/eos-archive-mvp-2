@@ -1,6 +1,7 @@
 // src/lib/metadata.js
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || 'https://eosarchivemvp.netlify.app';
+import { SITE } from '@/lib/seo';
+
+const baseUrl = SITE.url;
 
 /**
  * Format a date/time range as "DD.MM-DD.MM.YY @ HH.MM-HH.MM".
@@ -51,6 +52,7 @@ export function buildEventMetadata(event) {
   );
   const spaceName = event.space?.name || '';
   const description = datePart ? `${spaceName} · ${datePart}` : `${spaceName}`;
+  const image = event.image_url || SITE.ogImage;
 
   return {
     title: event.title,
@@ -61,7 +63,7 @@ export function buildEventMetadata(event) {
       url: `${baseUrl}/events/${event.id}`,
       images: [
         {
-          url: event.image_url,
+          url: image,
           width: 1200,
           height: 1200,
           alt: `${event.title} flyer`,
@@ -73,7 +75,46 @@ export function buildEventMetadata(event) {
       card: 'summary_large_image',
       title: event.title,
       description,
-      images: [event.image_url],
+      images: [image],
+    },
+  };
+}
+
+/**
+ * Build Next.js metadata object for a space, including Open Graph and Twitter Card.
+ * @param {object} space  The space record, must include id, name, city, description, image_url/hero_image_url
+ * @returns {object}      Metadata config for Next.js
+ */
+export function buildSpaceMetadata(space) {
+  const city = space.city_name || space.city || '';
+  const title = city ? `${space.name} · ${city}` : space.name;
+  const description = space.description
+    ? space.description.slice(0, 160)
+    : `${space.type || space.category || ''} · ${SITE.name}`.trim();
+  const image = space.hero_image_url || space.image_url || SITE.ogImage;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/spaces/${space.id}`,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
     },
   };
 }
