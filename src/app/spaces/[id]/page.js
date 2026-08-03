@@ -9,7 +9,7 @@ export async function generateMetadata({ params }) {
   const { data: space, error } = await supabase
     .from('spaces')
     .select(
-      'id, name, city_name, city, type, category, description, hero_image_url, image_url'
+      'id, name, city_name, city, type, category, description, hero_image_url, image_url, lng, lat, longitude, latitude'
     )
     .eq('id', id)
     .single();

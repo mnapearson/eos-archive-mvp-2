@@ -9,7 +9,9 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
   const { data: event, error } = await supabase
     .from('events')
-    .select('*, space:spaces(id, name)')
+    .select(
+      '*, space:spaces(id, name, hero_image_url, image_url, lng, lat, longitude, latitude)'
+    )
     .eq('id', id)
     .single();
 

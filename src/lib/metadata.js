@@ -1,7 +1,28 @@
 // src/lib/metadata.js
 import { SITE } from '@/lib/seo';
+import { mapboxOgImage } from '@/lib/og';
 
 const baseUrl = SITE.url;
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
+
+/**
+ * Resolve a space's OG image: hero image, else a static map of its
+ * location (if coordinates are known), else the site default.
+ * @param {object} space  Must include hero_image_url/image_url and lng/lat (or longitude/latitude)
+ * @returns {string}
+ */
+function resolveSpaceImage(space) {
+  if (!space) return SITE.ogImage;
+  if (space.hero_image_url || space.image_url) {
+    return space.hero_image_url || space.image_url;
+  }
+  const lng = space.lng ?? space.longitude;
+  const lat = space.lat ?? space.latitude;
+  if (lng != null && lat != null && mapboxToken) {
+    return mapboxOgImage(lng, lat, mapboxToken);
+  }
+  return SITE.ogImage;
+}
 
 /**
  * Format a date/time range as "DD.MM-DD.MM.YY @ HH.MM-HH.MM".
@@ -52,7 +73,7 @@ export function buildEventMetadata(event) {
   );
   const spaceName = event.space?.name || '';
   const description = datePart ? `${spaceName} · ${datePart}` : `${spaceName}`;
-  const image = event.image_url || SITE.ogImage;
+  const image = event.image_url || resolveSpaceImage(event.space);
 
   return {
     title: event.title,
@@ -91,7 +112,7 @@ export function buildSpaceMetadata(space) {
   const description = space.description
     ? space.description.slice(0, 160)
     : `${space.type || space.category || ''} · ${SITE.name}`.trim();
-  const image = space.hero_image_url || space.image_url || SITE.ogImage;
+  const image = resolveSpaceImage(space);
 
   return {
     title,
