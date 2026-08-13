@@ -45,6 +45,29 @@ async function isImageUrl(url) {
   }
 }
 
+const LINK_IN_BIO_DOMAINS = [
+  'linktr.ee',
+  'linktree.com',
+  'beacons.ai',
+  'bio.link',
+  'lnk.bio',
+  'solo.to',
+  'campsite.bio',
+  'msha.ke',
+  'linkin.bio',
+  'shor.by',
+  'carrd.co', // often used as a minimal bio page too — skip to be safe
+];
+
+function isLinkInBioUrl(url) {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    return LINK_IN_BIO_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+  } catch {
+    return false;
+  }
+}
+
 async function fetchOgImage(url) {
   try {
     const res = await fetch(url, {
@@ -131,6 +154,10 @@ async function syncSpaces() {
   // (not in parallel) so we don't hammer a batch of venue sites at once.
   const needsImage = rows.filter((r) => r.website && !r.hero_image_url);
   for (const row of needsImage) {
+    if (isLinkInBioUrl(row.website)) {
+      console.log(`⊘ skipping ${row.name} — website is a link-in-bio page (${row.website})`);
+      continue;
+    }
     const ogImage = await fetchOgImage(row.website);
     if (ogImage) {
       row.hero_image_url = ogImage;
