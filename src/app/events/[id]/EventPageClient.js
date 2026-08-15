@@ -282,7 +282,7 @@ export default function EventPageClient({ eventId }) {
               <button
                 type='button'
                 onClick={() => toggleSave(event.id)}
-                className={`nav-action ${savedIds.has(String(event.id)) ? 'border-[var(--foreground)]/60 bg-[var(--foreground)]/8' : ''}`}>
+                className={`nav-action ${savedIds.has(String(event.id)) ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
                 {savedIds.has(String(event.id)) ? 'Saved' : 'Save'}
               </button>
             )}

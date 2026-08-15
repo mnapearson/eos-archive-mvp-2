@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
-import useSupabaseUser from '@/hooks/useSupabaseUser';
+import useUserProfile from '@/hooks/useUserProfile';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function NavBar(props) {
@@ -18,12 +18,11 @@ export default function NavBar(props) {
 
 function NavBarContent() {
   const { setSelectedFilters } = useContext(FilterContext);
-  const [theme, setTheme] = useState('dawn');
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const user = useSupabaseUser();
+  const { user, profile } = useUserProfile();
   const supabase = useMemo(() => createClientComponentClient(), []);
 
   const pathname = usePathname();
@@ -35,35 +34,6 @@ function NavBarContent() {
     setSearchTerm(currentSearchValue);
   }, [currentSearchValue]);
 
-  // Load saved theme or system preference
-  useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        setTheme(savedTheme);
-      } else {
-        const prefersDark = window.matchMedia(
-          '(prefers-color-scheme: dark)'
-        ).matches;
-        setTheme(prefersDark ? 'dusk' : 'dawn');
-      }
-    } catch {
-      // localStorage unavailable (private mode, storage restrictions)
-    }
-  }, []);
-
-  // Apply theme classes to the document element
-  useEffect(() => {
-    document.documentElement.classList.remove('dusk', 'dawn');
-    document.documentElement.classList.add(theme);
-    try {
-      localStorage.setItem('theme', theme);
-    } catch {
-      // localStorage unavailable
-    }
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(theme === 'dawn' ? 'dusk' : 'dawn');
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const openMenu = () => setMenuOpen(true);
 
@@ -124,12 +94,14 @@ function NavBarContent() {
     },
   ];
 
-  const themeToggleLabel =
-    theme === 'dawn' ? 'Switch to dusk mode' : 'Switch to dawn mode';
-  const loginHref = user ? '/spaces/admin?tab=events' : '/login';
-  const loginLabel = user ? 'Submit' : 'Login';
-  const registerHref = '/spaces/signup';
-  const registerLabel = 'Register a space';
+  const isSpaceUser = profile?.role === 'space';
+  const isGeneralUser = profile?.role === 'member';
+  const loginHref = isSpaceUser
+    ? '/spaces/admin?tab=events'
+    : isGeneralUser
+    ? '/account'
+    : '/login';
+  const loginLabel = isSpaceUser ? 'Submit' : isGeneralUser ? 'Account' : 'Log in';
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -225,9 +197,9 @@ function NavBarContent() {
                 </button>
               ) : (
                 <Link
-                  href={registerHref}
+                  href='/signup'
                   className='nav-cta hidden sm:inline-flex'>
-                  {registerLabel}
+                  Sign up
                 </Link>
               )}
             </div>
@@ -239,9 +211,6 @@ function NavBarContent() {
       <Menu
         menuOpen={menuOpen}
         toggleMenu={toggleMenu}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        themeLabel={themeToggleLabel}
         onSignOut={handleSignOut}
       />
     </>

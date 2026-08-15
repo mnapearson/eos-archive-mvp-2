@@ -28,7 +28,7 @@ function prettifyType(t) {
 export default function SpacesMapPage() {
   const [spaces, setSpaces] = useState([]);
   const [activeTypes, setActiveTypes] = useState([]);
-  const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/light-v11');
+  const mapStyle = 'mapbox://styles/mapbox/dark-v11';
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -44,19 +44,6 @@ export default function SpacesMapPage() {
       .then((d) => { if (alive) { setSpaces(Array.isArray(d) ? d : []); setLoading(false); } })
       .catch((e) => { console.error(e); if (alive) { setError('Unable to load spaces.'); setLoading(false); } });
     return () => { alive = false; };
-  }, []);
-
-  useEffect(() => {
-    const getStyle = () =>
-      document.documentElement.classList.contains('dusk')
-        ? 'mapbox://styles/mapbox/dark-v11'
-        : 'mapbox://styles/mapbox/light-v11';
-
-    setMapStyle(getStyle());
-
-    const observer = new MutationObserver(() => setMapStyle(getStyle()));
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
   }, []);
 
   const typeFilters = useMemo(() => {
@@ -112,17 +99,13 @@ export default function SpacesMapPage() {
 
   const clearFilters = useCallback(() => { setSearchQuery(''); setActiveTypes([]); }, []);
   const hasFilters = activeTypes.length > 0 || !!searchQuery.trim();
-  const isDusk = mapStyle.includes('dark');
-
-  // Overlay styles adapt to map theme so text is always readable against the map background
-  const overlayBg = isDusk
-    ? 'bg-[#1e1e1e]/95 border-white/10'
-    : 'bg-white/90 border-black/8';
-  const overlayText = isDusk ? 'text-white/80' : 'text-black/60';
-  const overlayTextStrong = isDusk ? 'text-white' : 'text-black/85';
-  const inputClass = isDusk
-    ? 'bg-white/8 border-white/12 text-white placeholder:text-white/35 focus:ring-white/25'
-    : 'bg-black/5 border-black/10 text-black/80 placeholder:text-black/35 focus:ring-black/20';
+  // Map is always dark now (the app is dark-only), so these are fixed
+  // rather than switching between light/dark variants.
+  const overlayBg = 'bg-[#1e1e1e]/95 border-white/10';
+  const overlayText = 'text-white/80';
+  const overlayTextStrong = 'text-white';
+  const inputClass =
+    'bg-white/8 border-white/12 text-white placeholder:text-white/35 focus:ring-white/25';
 
   return (
     <div
@@ -197,12 +180,8 @@ export default function SpacesMapPage() {
                   onClick={() => toggleType(type)}
                   className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] shadow-sm backdrop-blur-xl transition ${
                     active
-                      ? isDusk
-                        ? 'border-white bg-white text-black'
-                        : 'border-black/80 bg-black/85 text-white'
-                      : isDusk
-                        ? 'border-white/20 bg-[#1e1e1e]/90 text-white/75 hover:border-white/40'
-                        : 'border-black/12 bg-white/88 text-black/65 hover:border-black/28'
+                      ? 'border-[var(--chrome)] bg-[var(--chrome)] text-[var(--foreground)]'
+                      : 'border-white/20 bg-[#1e1e1e]/90 text-white/75 hover:border-white/40'
                   }`}>
                   <span
                     className='h-2 w-2 rounded-full'
@@ -217,11 +196,7 @@ export default function SpacesMapPage() {
               <button
                 type='button'
                 onClick={clearFilters}
-                className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] shadow-sm backdrop-blur-xl transition ${
-                  isDusk
-                    ? 'border-white/20 bg-[#1e1e1e]/90 text-white/50 hover:text-white'
-                    : 'border-black/12 bg-white/88 text-black/45 hover:text-black/80'
-                }`}>
+                className='rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] shadow-sm backdrop-blur-xl transition border-white/20 bg-[#1e1e1e]/90 text-white/50 hover:text-white'>
                 Clear
               </button>
             )}
@@ -233,7 +208,7 @@ export default function SpacesMapPage() {
       {cardOpen && focusedSpace && (
         <div className='pointer-events-none absolute inset-x-3 bottom-20 z-20 flex justify-center sm:inset-x-4 lg:inset-auto lg:bottom-6 lg:right-5 lg:justify-end'>
           <div className={`pointer-events-auto w-full max-w-sm overflow-hidden rounded-[22px] border shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-2xl ${overlayBg}`}>
-            <div className={`flex items-center justify-between border-b px-5 py-3 ${isDusk ? 'border-white/8' : 'border-black/6'}`}>
+            <div className='flex items-center justify-between border-b px-5 py-3 border-white/8'>
               <span className={`text-[10px] uppercase tracking-[0.32em] ${overlayText}`}>
                 Space
               </span>
@@ -263,11 +238,7 @@ export default function SpacesMapPage() {
           <button
             type='button'
             onClick={() => setSheetOpen(true)}
-            className={`flex items-center gap-2 rounded-full border px-6 py-2.5 text-[11px] uppercase tracking-[0.32em] shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition ${
-              isDusk
-                ? 'border-white/18 bg-[#1e1e1e]/92 text-white/70 hover:text-white'
-                : 'border-black/12 bg-white/90 text-black/60 hover:text-black/90'
-            }`}>
+            className='flex items-center gap-2 rounded-full border px-6 py-2.5 text-[11px] uppercase tracking-[0.32em] shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition border-white/18 bg-[#1e1e1e]/92 text-white/70 hover:text-white'>
             <svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' aria-hidden='true'>
               <line x1='8' y1='6' x2='21' y2='6'/><line x1='8' y1='12' x2='21' y2='12'/><line x1='8' y1='18' x2='21' y2='18'/>
               <line x1='3' y1='6' x2='3.01' y2='6'/><line x1='3' y1='12' x2='3.01' y2='12'/><line x1='3' y1='18' x2='3.01' y2='18'/>
@@ -335,7 +306,7 @@ export default function SpacesMapPage() {
                         onClick={() => toggleType(type)}
                         className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.28em] transition ${
                           active
-                            ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
+                            ? 'border-[var(--chrome)] bg-[var(--chrome)] text-[var(--foreground)]'
                             : 'border-[var(--foreground)]/18 text-[var(--foreground)]/65 hover:border-[var(--foreground)]/35'
                         }`}>
                         <span className='h-2 w-2 rounded-full' style={{ backgroundColor: markerColors[type] || markerColors.other }} />

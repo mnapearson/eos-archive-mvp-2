@@ -1,13 +1,15 @@
+// Matches eos-archive-app/constants/theme.ts categoryColors exactly, so a
+// category reads as the same color on web and mobile.
 const markerColors = {
-  'art space': '#841FFF', // LEICO purple
-  bar: '#1F51FF', // neon blue
-  cafe: '#39FF14', // neon green
-  museum: '#FFFF00', // neon yellow
-  kino: '#FF073A', // neon red
-  club: '#FF6EC7', // neon pink
-  studio: '#FF5F1F', // neon orange
-  other: '#FFFFFF', // default white
-  theatre: '#04FFF7', // neon turquoise
+  'art space': '#a78bfa',
+  bar: '#60a5fa',
+  cafe: '#4ade80',
+  club: '#f472b6',
+  museum: '#fbbf24',
+  studio: '#fb923c',
+  theatre: '#22d3ee',
+  venue: '#f87171',
+  other: '#94a3b8',
 };
 
 export function getMarkerTextColor(hex) {

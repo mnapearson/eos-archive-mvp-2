@@ -64,9 +64,8 @@ export default function CookieConsentBar() {
             <p
               id='cookie-banner-description'
               className='cookie-banner__text'>
-              We use a minimal set of essential cookies to keep you signed in,
-              secure submissions, and remember the dawn/dusk theme. No ads, no
-              profiling.
+              We use a minimal set of essential cookies to keep you signed in
+              and secure submissions. No ads, no profiling.
             </p>
           </div>
           <div className='cookie-banner__buttons'>
@@ -112,8 +111,8 @@ export default function CookieConsentBar() {
                 you logged in for conversations and space submissions.
               </li>
               <li>
-                Local storage remembers the dawn/dusk theme and your cookie
-                choice; it never leaves your browser.
+                Local storage remembers your cookie choice; it never leaves
+                your browser.
               </li>
             </ul>
             <p className='cookie-banner__details-heading'>Analytics</p>

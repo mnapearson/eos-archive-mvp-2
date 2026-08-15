@@ -250,7 +250,7 @@ function SaveButton({ isSaved, onToggle }) {
     <button
       type='button'
       onClick={onToggle}
-      className={`nav-action quick-view__action ${isSaved ? 'border-[var(--foreground)]/60 bg-[var(--foreground)]/8' : ''}`}>
+      className={`nav-action quick-view__action ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
       {isSaved ? 'Saved' : 'Save'}
     </button>
   );

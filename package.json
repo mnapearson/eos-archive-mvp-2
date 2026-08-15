@@ -19,6 +19,7 @@
     "@supabase/supabase-js": "^2.48.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
+    "geist": "^1.7.2",
     "mapbox-gl": "^3.9.4",
     "marked": "^16.2.1",
     "next": "^15.5.18",

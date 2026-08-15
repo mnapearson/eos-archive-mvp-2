@@ -199,7 +199,7 @@ export default function SpaceListItem({
                   <button
                     type='button'
                     onClick={() => toggleFollow(space.id)}
-                    className={`nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isFollowing ? 'border-[var(--foreground)]/60 bg-[var(--foreground)]/8' : ''}`}>
+                    className={`nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isFollowing ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
                     {isFollowing ? 'Following' : 'Follow'}
                   </button>
                 );

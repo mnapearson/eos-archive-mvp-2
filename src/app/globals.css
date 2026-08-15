@@ -10,38 +10,30 @@
   }
 }
 
-/* -- Default Light Mode -- */
+/* Dark mode only — matches the mobile app's palette exactly
+   (eos-archive-app/constants/theme.ts). No light theme. */
 :root {
-  /* Use a very light background with dark text for accessibility */
-  --background: #f5f5f5;
-  --foreground: #212121;
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --foreground-secondary: #888888;
+  --card: #111111;
+  --card-border: #222222;
+  --input: #1a1a1a;
+  --input-border: #333333;
+  --chrome: #7ab4d4;
+  --silver: #b8d0e4;
+  --chrome-glow: rgba(122, 180, 212, 0.35);
+  --silver-glow: rgba(184, 208, 228, 0.2);
+  --danger: #f87171;
+  --success: #4ade80;
   --page-content-padding: 1rem;
-  /* Optionally add any accent colors if needed */
-}
-
-/* -- Dark Mode Preference -- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #212121;
-    --foreground: #dce4ef;
-  }
-}
-
-:root.dawn {
-  --background: #f5f5f5;
-  --foreground: #212121;
-}
-
-:root.dusk {
-  --background: #212121;
-  --foreground: #dce4ef;
 }
 
 /* Apply global colors and fonts */
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 /* Container to center content */
@@ -94,28 +86,15 @@ body {
 
 .glow-box {
   @apply border rounded-md flex-1 p-4;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glow-box {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  }
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 .glow-button {
   @apply block mx-auto flex pointer-events-auto items-center gap-1 px-4 py-2 rounded transition;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   background: transparent;
   color: var(--foreground);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glow-button {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
 }
 
 .glow-button:hover {
@@ -227,9 +206,8 @@ body {
 .ea-input:focus,
 .ea-input:focus-visible {
   outline: none;
-  border-color: color-mix(in oklab, var(--foreground) 60%, transparent);
-  box-shadow: 0 0 0 3px
-    color-mix(in oklab, var(--foreground) 12%, transparent);
+  border-color: var(--chrome);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--chrome) 25%, transparent);
 }
 
 textarea.ea-input {
@@ -563,8 +541,8 @@ textarea.ea-input {
 
 .list-card__share:hover,
 .list-card__share:focus-visible {
-  background: color-mix(in oklab, var(--foreground) 12%, transparent);
-  color: var(--foreground);
+  background: color-mix(in oklab, var(--chrome) 18%, transparent);
+  color: var(--chrome);
 }
 
 .quick-view {
@@ -635,8 +613,8 @@ textarea.ea-input {
 
 .quick-view__chip--link:hover,
 .quick-view__chip--link:focus-visible {
-  background: color-mix(in oklab, var(--foreground) 18%, transparent);
-  color: var(--foreground);
+  background: color-mix(in oklab, var(--chrome) 20%, transparent);
+  color: var(--chrome);
 }
 
 .quick-view__chip--button {
@@ -938,7 +916,7 @@ textarea.ea-input {
 
 .event-page__info-link {
   font-size: 0.96rem;
-  color: color-mix(in oklab, var(--foreground) 86%, transparent);
+  color: var(--chrome);
   text-decoration: underline;
   text-underline-offset: 4px;
   transition: opacity 0.2s ease;
@@ -1070,7 +1048,8 @@ textarea.ea-input {
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+  background: var(--input);
+  color: var(--foreground-secondary);
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -1080,14 +1059,19 @@ textarea.ea-input {
 }
 
 .nav-pill:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--foreground) 50%, transparent);
+  outline: 2px solid var(--chrome);
   outline-offset: 2px;
 }
 
 .nav-pill--active {
-  background: color-mix(in oklab, var(--foreground) 18%, transparent);
-  color: var(--background);
-  border-color: color-mix(in oklab, var(--foreground) 35%, transparent);
+  background: var(--chrome);
+  color: var(--foreground);
+  border-color: var(--chrome);
+}
+
+.nav-pill--active:hover {
+  background: var(--chrome);
+  color: var(--foreground);
 }
 
 .nav-action,
@@ -1300,9 +1284,9 @@ textarea.ea-input {
 }
 
 .nav-cta {
-  background: var(--foreground);
-  color: var(--background);
-  border-color: transparent;
+  background: var(--chrome);
+  color: var(--foreground);
+  border-color: var(--chrome);
 }
 
 @media (max-width: 640px) {
@@ -1329,8 +1313,8 @@ textarea.ea-input {
 
 .nav-cta:hover,
 .nav-cta:focus-visible {
-  background: color-mix(in oklab, var(--foreground) 85%, black 15%);
-  color: var(--background);
+  background: color-mix(in oklab, var(--chrome) 85%, white 15%);
+  color: var(--foreground);
 }
 
 .nav-search {
@@ -1428,9 +1412,9 @@ textarea.ea-input {
 }
 
 .menu-link[data-active='true'] {
-  background: color-mix(in oklab, var(--foreground) 16%, transparent);
-  border-color: color-mix(in oklab, var(--foreground) 36%, transparent);
-  color: var(--background);
+  background: var(--chrome);
+  border-color: var(--chrome);
+  color: var(--foreground);
 }
 
 .menu-link:hover {
@@ -1506,14 +1490,15 @@ textarea.ea-input {
 
 .home-hero__cta {
   @apply pointer-events-auto rounded-full border px-5 py-2 text-sm font-medium transition;
-  border-color: var(--foreground);
-  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  border-color: var(--chrome);
+  background: color-mix(in oklab, var(--chrome) 12%, transparent);
+  color: var(--chrome);
 }
 
 .home-hero__cta:hover,
 .home-hero__cta:focus-visible {
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--chrome);
+  color: var(--foreground);
 }
 
 .home-hero__link {

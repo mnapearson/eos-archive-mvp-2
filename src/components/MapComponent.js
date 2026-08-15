@@ -138,7 +138,7 @@ export default function MapComponent({
   activeTypes,
   initialCenter,
   initialZoom,
-  mapStyle = 'mapbox://styles/mapbox/light-v11',
+  mapStyle = 'mapbox://styles/mapbox/dark-v11',
   autoFit = false,
   fitKey,
   focusSpaceId,
@@ -232,7 +232,7 @@ export default function MapComponent({
     };
   // initialCenter, initialZoom, spaces are initial values — re-running this
   // effect when they change would destroy and recreate the map unnecessarily.
-  // mapStyle IS reactive: when the user toggles dawn/dusk the map reinitialises
+  // mapStyle IS reactive in case a caller ever passes a different style
   // with the correct basemap style.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapData, eventId, mapStyle]);

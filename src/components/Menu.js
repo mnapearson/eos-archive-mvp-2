@@ -4,7 +4,7 @@ import { Suspense, useContext, useState, useEffect, useRef, useMemo } from 'reac
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FilterContext } from '@/contexts/FilterContext';
-import useSupabaseUser from '@/hooks/useSupabaseUser';
+import useUserProfile from '@/hooks/useUserProfile';
 import {
   addMonths,
   addDays,
@@ -25,7 +25,7 @@ export default function Menu(props) {
   );
 }
 
-function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onSignOut }) {
+function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
   const {
     selectedFilters,
     setSelectedFilters,
@@ -51,7 +51,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
     search: 'Search',
   };
 
-  const user = useSupabaseUser();
+  const { user, profile } = useUserProfile();
 
   const quickLinks = useMemo(() => {
     const links = [
@@ -92,21 +92,32 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
       },
     ];
 
-    const submissionLink = user
-      ? {
-          href: '/spaces/admin?tab=events',
-          label: 'Submit',
-          meta: 'Publish an event',
-          type: 'link',
-          isActive: pathname.startsWith('/spaces/admin'),
-        }
-      : {
-          href: '/spaces/signup',
-          label: 'Register a space',
-          meta: 'Submit your venue',
-          type: 'link',
-          isActive: pathname.startsWith('/spaces/signup'),
-        };
+    let submissionLink;
+    if (profile?.role === 'space') {
+      submissionLink = {
+        href: '/spaces/admin?tab=events',
+        label: 'Submit',
+        meta: 'Publish an event',
+        type: 'link',
+        isActive: pathname.startsWith('/spaces/admin'),
+      };
+    } else if (profile?.role === 'member') {
+      submissionLink = {
+        href: '/account',
+        label: 'Account',
+        meta: 'Your profile',
+        type: 'link',
+        isActive: pathname.startsWith('/account'),
+      };
+    } else {
+      submissionLink = {
+        href: '/spaces/signup',
+        label: 'Register a space',
+        meta: 'Submit your venue',
+        type: 'link',
+        isActive: pathname.startsWith('/spaces/signup'),
+      };
+    }
 
     links.push(submissionLink);
 
@@ -128,7 +139,7 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
     );
 
     return links;
-  }, [pathname, user]);
+  }, [pathname, user, profile]);
 
   const activeFilterPairs = useMemo(() => {
     const pairs = [];
@@ -372,17 +383,6 @@ function MenuContent({ menuOpen, toggleMenu, theme, toggleTheme, themeLabel, onS
             )}
           </div>
 
-          <div className='space-y-3'>
-            <span className='ea-label'>Appearance</span>
-            <button
-              type='button'
-              onClick={toggleTheme}
-              className='nav-action w-full justify-center'
-              aria-label={themeLabel}>
-              {theme === 'dawn' ? 'Switch to dusk' : 'Switch to dawn'}
-            </button>
-          </div>
-
           <div className='space-y-4'>
             <div className='flex flex-wrap items-center justify-between gap-3'>
               <span className='ea-label'>Filters</span>
@@ -572,7 +572,7 @@ function FilterSection({
                       checked={checked}
                       disabled={isDisabled}
                       onChange={() => onToggleValue(item)}
-                      className='h-4 w-4 accent-[var(--foreground)] disabled:cursor-not-allowed'
+                      className='h-4 w-4 accent-[var(--chrome)] disabled:cursor-not-allowed'
                     />
                     <span>{item}</span>
                   </span>
@@ -651,9 +651,9 @@ function DateCalendar({ counts, selectedDates, onToggle }) {
           const baseClasses =
             'relative flex h-12 items-center justify-center rounded-2xl border text-xs tracking-[0.18em] transition';
           const stateClasses = isSelected
-            ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)] shadow-[0_12px_25px_rgba(0,0,0,0.18)]'
+            ? 'border-[var(--chrome)] bg-[var(--chrome)] text-[var(--foreground)] shadow-[0_12px_25px_rgba(0,0,0,0.18)]'
             : count > 0
-            ? 'border-[var(--foreground)]/25 text-[var(--foreground)] hover:border-[var(--foreground)]'
+            ? 'border-[var(--foreground)]/25 text-[var(--foreground)] hover:border-[var(--chrome)]'
             : 'border-transparent text-[var(--foreground)]/35';
           const outOfMonth = isCurrentMonth ? '' : 'opacity-40';
 
@@ -670,7 +670,7 @@ function DateCalendar({ counts, selectedDates, onToggle }) {
               }`}>
               <span>{format(day, 'd')}</span>
               {count > 0 && !isSelected && (
-                <span className='absolute -bottom-1 h-1.5 w-1.5 rounded-full bg-[var(--foreground)]/80'></span>
+                <span className='absolute -bottom-1 h-1.5 w-1.5 rounded-full bg-[var(--chrome)]'></span>
               )}
             </button>
           );
