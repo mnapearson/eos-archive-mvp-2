@@ -33,6 +33,7 @@ export default function SpaceSignUpPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLeico, setIsLeico] = useState(false);
+  const [done, setDone] = useState(false);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -46,13 +47,17 @@ export default function SpaceSignUpPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { account_type: 'space', username: spaceName },
+      },
     });
     if (error) {
       toast.error(error.message);
       return;
     }
     const userId = data.user?.id;
-    if (!userId) {
+    const accessToken = data.session?.access_token;
+    if (!userId || !accessToken) {
       toast.error('Please check your email to confirm your account.');
       return;
     }
@@ -91,44 +96,48 @@ export default function SpaceSignUpPage() {
       return;
     }
 
-    // 3. Insert the space record (with status set to 'pending').
-    const { error: spaceError } = await supabase.from('spaces').insert([
-      {
-        user_id: userId,
-        name: spaceName,
-        type: spaceType, // Save the space type (either selected or new)
-        city: cityName,
-        address,
-
-        description,
-        website,
-        leico: isLeico,
-        latitude,
-        longitude,
-        status: 'pending',
+    // 3. Insert the space record via server route.
+    const registerRes = await fetch('/api/spaces/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
       },
-    ]);
-    if (spaceError) {
-      console.error('Error inserting space:', spaceError);
-      toast.error('Error creating space record. Please try again.');
+      body: JSON.stringify({ spaceName, spaceType, cityName, address, description, website, isLeico, latitude, longitude }),
+    });
+    if (!registerRes.ok) {
+      const { error: spaceError } = await registerRes.json();
+      toast.error(spaceError || 'Error creating space record. Please try again.');
       return;
     }
 
-    // 4. Update the profiles table with role and username.
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({ id: userId, role: 'space', username: spaceName });
-    if (profileError) {
-      console.error('Profile update error:', profileError);
-    }
-
-    toast.success(
-      'You have successfully registered the space in the archive. Please upload a space image and submit your first event.'
-    );
-
-    // 5. Redirect to a confirmation page instructing the user to confirm their email.
-    router.push('/spaces/admin');
+    setDone(true);
   };
+
+  if (done) {
+    return (
+      <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>
+        <div className='mx-auto w-full max-w-[92vw] space-y-12 py-10 lg:max-w-5xl xl:max-w-6xl'>
+          <header className='space-y-4'>
+            <span className='ea-label ea-label--muted'>Registration received</span>
+            <h1 className='quick-view__title text-balance'>Check your email</h1>
+          </header>
+          <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
+            <div className='space-y-6 max-w-lg'>
+              <p className='text-sm leading-relaxed text-[var(--foreground)]/75 sm:text-base'>
+                Your space has been submitted and is pending review. We sent a confirmation link to{' '}
+                <span className='text-[var(--foreground)] font-medium'>{email}</span>.
+                Click it to verify your address and activate your account.
+              </p>
+              <p className='text-xs leading-relaxed text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>
+                The link expires after 24 hours. Check your spam folder if you don&apos;t see it.
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>
