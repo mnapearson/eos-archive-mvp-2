@@ -249,7 +249,7 @@ async function syncEvents() {
   return rows.length;
 }
 
-const handler = async () => {
+const runSync = async () => {
   const results = { spaces: null, events: null };
 
   try {
@@ -276,4 +276,6 @@ const handler = async () => {
 
 // Runs at 02:00 UTC every day. Netlify also exposes this at
 // /.netlify/functions/daily-sync for manual triggering via HTTP request.
-export const handler_scheduled = schedule('0 2 * * *', handler);
+// Netlify's bundler requires the scheduled export to be named `handler`
+// specifically, or it fails to recognize the schedule() usage at all.
+export const handler = schedule('0 2 * * *', runSync);
