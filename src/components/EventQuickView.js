@@ -6,9 +6,11 @@ import { formatDateRange } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
 import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
+import useSavedEvents from '@/hooks/useSavedEvents';
 
 export default function EventQuickView({ event, onClose }) {
   const [details, setDetails] = useState(event);
+  const { userId, savedIds, toggle: toggleSave } = useSavedEvents();
   const title = details?.title ?? 'Event';
   const flyer =
     details?.image_url || details?.flyer_url || details?.thumbnail_url || '';
@@ -202,20 +204,29 @@ export default function EventQuickView({ event, onClose }) {
           overrides={{ location: locationStr }}
           className='quick-view__calendar'
         />
+        {userId && details?.id ? (
+          <SaveButton
+            isSaved={savedIds.has(String(details.id))}
+            onToggle={() => toggleSave(details.id)}
+          />
+        ) : null}
       </div>
 
       <div className='quick-view__map'>
         <div className='quick-view__map-inner'>
-          {details?.space?.latitude || details?.space?.longitude ? (
+          {details?.space?.latitude ||
+          details?.space?.longitude ||
+          details?.space?.lat ||
+          details?.space?.lng ? (
             <MapComponent
               spaces={[
                 {
                   id: details.space.id,
                   name: details.space.name,
                   type: details.space.type,
-                  latitude: details.space.latitude,
-                  longitude: details.space.longitude,
-                  city: details.space.city,
+                  latitude: details.space.latitude ?? details.space.lat,
+                  longitude: details.space.longitude ?? details.space.lng,
+                  city: details.space.city_name ?? details.space.city,
                   address: details.space.address,
                 },
               ]}
@@ -231,6 +242,17 @@ export default function EventQuickView({ event, onClose }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function SaveButton({ isSaved, onToggle }) {
+  return (
+    <button
+      type='button'
+      onClick={onToggle}
+      className={`nav-action quick-view__action ${isSaved ? 'border-[var(--foreground)]/60 bg-[var(--foreground)]/8' : ''}`}>
+      {isSaved ? 'Saved' : 'Save'}
+    </button>
   );
 }
 

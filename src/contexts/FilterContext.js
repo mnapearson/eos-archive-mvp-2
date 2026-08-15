@@ -30,46 +30,46 @@ export function FilterProvider({ children }) {
   const [error, setError] = useState(null);
   const [initializedFromQuery, setInitializedFromQuery] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      try {
-        const [eventsResponse, spacesResponse] = await Promise.all([
-          fetch('/api/events'),
-          fetch('/api/spaces'),
-        ]);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [eventsResponse, spacesResponse] = await Promise.all([
+        fetch('/api/events'),
+        fetch('/api/spaces'),
+      ]);
 
-        if (!eventsResponse.ok) {
-          const payload = await eventsResponse.json().catch(() => ({}));
-          throw new Error(
-            payload?.error || `Failed to load events (${eventsResponse.status})`
-          );
-        }
-        if (!spacesResponse.ok) {
-          const payload = await spacesResponse.json().catch(() => ({}));
-          throw new Error(
-            payload?.error || `Failed to load spaces (${spacesResponse.status})`
-          );
-        }
-
-        const eventsData = await eventsResponse.json();
-        const spacesData = await spacesResponse.json();
-
-        setAllEvents((eventsData || []).filter((event) => event.approved));
-        setAllSpaces(spacesData || []);
-      } catch (err) {
-        console.error('Error fetching filter data:', err);
-        setAllEvents([]);
-        setAllSpaces([]);
-        setError(err);
-      } finally {
-        setLoading(false);
+      if (!eventsResponse.ok) {
+        const payload = await eventsResponse.json().catch(() => ({}));
+        throw new Error(
+          payload?.error || `Failed to load events (${eventsResponse.status})`
+        );
       }
-    }
+      if (!spacesResponse.ok) {
+        const payload = await spacesResponse.json().catch(() => ({}));
+        throw new Error(
+          payload?.error || `Failed to load spaces (${spacesResponse.status})`
+        );
+      }
 
-    fetchData();
+      const eventsData = await eventsResponse.json();
+      const spacesData = await spacesResponse.json();
+
+      setAllEvents((eventsData || []).filter((event) => event.approved));
+      setAllSpaces(spacesData || []);
+    } catch (err) {
+      console.error('Error fetching filter data:', err);
+      setAllEvents([]);
+      setAllSpaces([]);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const spaceMap = useMemo(() => {
     const map = new Map();
@@ -77,7 +77,7 @@ export function FilterProvider({ children }) {
       map.set(space.id, {
         ...space,
         name: normalizeValue(space.name),
-        city: normalizeValue(space.city),
+        city: normalizeValue(space.city_name ?? space.city),
       });
     });
     return map;
@@ -91,7 +91,7 @@ export function FilterProvider({ children }) {
     const designers = new Set();
 
     allSpaces.forEach((space) => {
-      const city = normalizeValue(space.city);
+      const city = normalizeValue(space.city_name ?? space.city);
       const name = normalizeValue(space.name);
       if (city) cities.add(city);
       if (name) spaces.add(name);
@@ -361,6 +361,7 @@ export function FilterProvider({ children }) {
       filteredEvents,
       filtersLoading: loading,
       filtersError: error,
+      refetchFilterData: fetchData,
       recentSpaces,
     }),
     [
@@ -371,6 +372,7 @@ export function FilterProvider({ children }) {
       filteredEvents,
       loading,
       error,
+      fetchData,
       recentSpaces,
     ]
   );

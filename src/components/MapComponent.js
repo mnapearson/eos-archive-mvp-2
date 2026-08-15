@@ -56,6 +56,29 @@ function buildPopupHTML({
     </div>`;
 }
 
+// Spaces synced via Airtable only populate lat/lng and city_name; older
+// "registered" spaces only populate latitude/longitude and city. Normalize
+// once here so the rest of this component can keep reading
+// latitude/longitude/city without every call site needing its own fallback.
+function normalizeSpaceLocation(item) {
+  if (!item) return item;
+  const normalized = {
+    ...item,
+    latitude: item.latitude ?? item.lat,
+    longitude: item.longitude ?? item.lng,
+    city: item.city ?? item.city_name,
+  };
+  if (item.space) {
+    normalized.space = {
+      ...item.space,
+      latitude: item.space.latitude ?? item.space.lat,
+      longitude: item.space.longitude ?? item.space.lng,
+      city: item.space.city ?? item.space.city_name,
+    };
+  }
+  return normalized;
+}
+
 function getViewportPadding(customPadding, defaults) {
   const clampMobilePadding = (value) => {
     if (typeof window === 'undefined') return value;
@@ -140,22 +163,24 @@ export default function MapComponent({
     async function fetchData() {
       if (eventId) {
         const response = await fetch(`/api/events/${eventId}`);
-        const data = await response.json();
+        const rawData = await response.json();
+        const data = normalizeSpaceLocation(rawData);
         if ((!data.latitude || !data.longitude) && data.space) {
           if (data.space.latitude && data.space.longitude) {
             data.latitude = data.space.latitude;
             data.longitude = data.space.longitude;
             data.type = data.space.type;
             data.name = data.space.name;
+            data.city = data.city ?? data.space.city;
           }
         }
         setMapData([data]);
       } else if (spaces && spaces.length > 0) {
-        setMapData(spaces);
+        setMapData(spaces.map(normalizeSpaceLocation));
       } else if (fallbackToAllSpaces) {
         const response = await fetch('/api/spaces');
         const data = await response.json();
-        setMapData(data);
+        setMapData(data.map(normalizeSpaceLocation));
       } else {
         setMapData([]);
       }
@@ -179,7 +204,7 @@ export default function MapComponent({
       centerLat = initialCenter.lat;
       centerLng = initialCenter.lng;
     } else if (spaces && spaces.length > 0) {
-      const firstSpace = spaces[0];
+      const firstSpace = mapData[0];
       centerLat = Number(firstSpace.latitude) || 51.3397;
       centerLng = Number(firstSpace.longitude) || 12.3731;
     } else {
@@ -259,6 +284,16 @@ export default function MapComponent({
     let hasValidBounds = false;
 
     filteredData.forEach((item) => {
+      // Number(null) is 0, not NaN — without this explicit check, a space
+      // with no coordinates at all would silently plot at [0, 0] (Null
+      // Island) instead of being skipped.
+      const hasCoords =
+        item.latitude != null &&
+        item.longitude != null &&
+        !Number.isNaN(Number(item.latitude)) &&
+        !Number.isNaN(Number(item.longitude));
+      if (!hasCoords) return;
+
       const typeKey = item.type
         ? item.type.toLowerCase()
         : item.space && item.space.type
@@ -284,8 +319,8 @@ export default function MapComponent({
       const addrParts = [];
       if (item.address) addrParts.push(item.address);
       else if (item.space?.address) addrParts.push(item.space.address);
-      if (item.city) addrParts.push(item.city);
-      else if (item.space?.city) addrParts.push(item.space.city);
+      if (item.city_name || item.city) addrParts.push(item.city_name ?? item.city);
+      else if (item.space?.city_name || item.space?.city) addrParts.push(item.space.city_name ?? item.space.city);
       const fullAddress = addrParts.join(', ');
       const popupContent = showPopups
         ? buildPopupHTML({

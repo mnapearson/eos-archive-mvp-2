@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 
 export async function GET(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
   // Query the events table and join the related space record.
   // We alias the joined data as "space" for clarity.
   const { data, error } = await supabase
@@ -15,6 +15,9 @@ export async function GET(req, { params }) {
         type,
         latitude,
         longitude,
+        lat,
+        lng,
+        city_name,
         city
       )
     `

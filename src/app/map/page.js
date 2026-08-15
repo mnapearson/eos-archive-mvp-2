@@ -71,7 +71,7 @@ export default function SpacesMapPage() {
     return spaces
       .filter((s) => {
         const typeOk = !activeTypes.length || activeTypes.includes(normaliseType(s.type));
-        const queryOk = !q || [s.name, s.city, s.website].filter(Boolean).join(' ').toLowerCase().includes(q);
+        const queryOk = !q || [s.name, s.city_name ?? s.city, s.website].filter(Boolean).join(' ').toLowerCase().includes(q);
         return typeOk && queryOk;
       })
       .sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
@@ -79,7 +79,7 @@ export default function SpacesMapPage() {
 
   const cityStats = useMemo(() => ({
     total: spaces.length,
-    cities: Array.from(new Set(spaces.map((s) => s.city).filter(Boolean))).sort(),
+    cities: Array.from(new Set(spaces.map((s) => s.city_name ?? s.city).filter(Boolean))).sort(),
   }), [spaces]);
 
   useEffect(() => { setFocusedSpaceId(null); setCardOpen(false); }, [searchQuery, activeTypes]);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { normalizeType } from '@/lib/normalize';
 import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
+import useFollowedSpaces from '@/hooks/useFollowedSpaces';
 
 export default function SpaceListItem({
   space,
@@ -18,9 +19,15 @@ export default function SpaceListItem({
 }) {
   const router = useRouter();
   const [detailImageAspect, setDetailImageAspect] = useState(null);
+  const [heroImageFailed, setHeroImageFailed] = useState(false);
+
+  useEffect(() => {
+    setHeroImageFailed(false);
+  }, [space.image_url]);
 
   const typeLabel = normalizeType(space.type);
   const cityLabel =
+    space.city_name ||
     space.city ||
     space.space_city ||
     space.address ||
@@ -47,6 +54,7 @@ export default function SpaceListItem({
     const destinationParts = [
       space.address,
       space.space_address,
+      space.city_name,
       space.city,
       space.space_city,
     ].filter(Boolean);
@@ -61,6 +69,7 @@ export default function SpaceListItem({
     space.space_longitude,
     space.address,
     space.space_address,
+    space.city_name,
     space.city,
     space.space_city,
   ]);
@@ -68,7 +77,7 @@ export default function SpaceListItem({
   const displayAddress = useMemo(() => {
     const addressParts = [
       space.address || space.space_address || '',
-      space.city || space.space_city || '',
+      space.city_name || space.city || space.space_city || '',
     ]
       .map((part) => String(part || '').trim())
       .filter(Boolean);
@@ -80,11 +89,13 @@ export default function SpaceListItem({
   }, [
     space.address,
     space.space_address,
+    space.city_name,
     space.city,
     space.space_city,
     cityLabel,
   ]);
 
+  const { userId, followedIds, toggle: toggleFollow } = useFollowedSpaces();
   const canFocus = Boolean(onFocus && space.latitude && space.longitude);
 
   const handleFocus = (event) => {
@@ -182,10 +193,21 @@ export default function SpaceListItem({
                   View on map
                 </button>
               )}
+              {userId && (() => {
+                const isFollowing = followedIds.has(String(space.id));
+                return (
+                  <button
+                    type='button'
+                    onClick={() => toggleFollow(space.id)}
+                    className={`nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isFollowing ? 'border-[var(--foreground)]/60 bg-[var(--foreground)]/8' : ''}`}>
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                );
+              })()}
             </div>
           </div>
 
-          {space.image_url && (
+          {space.image_url && !heroImageFailed && (
             <div
               className='relative w-full overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:self-start'
               style={detailImageStyle}>
@@ -196,6 +218,7 @@ export default function SpaceListItem({
                 sizes='(max-width: 768px) 80vw, 360px'
                 className='object-cover'
                 priority
+                onError={() => setHeroImageFailed(true)}
                 onLoadingComplete={(img) => {
                   if (!img?.naturalWidth || !img?.naturalHeight) return;
                   if (

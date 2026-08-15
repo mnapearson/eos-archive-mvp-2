@@ -6,6 +6,18 @@ import { createClient } from '@supabase/supabase-js';
 // only, so the sync logic is inlined here rather than shelled out to those
 // scripts. Keep this in sync manually if the mobile repo's scripts change.
 
+// Mirrors the keys in lib/cityCoordinates.ts (mobile repo) — the mobile
+// app's map only shows a city as a filter pill / camera target if it's
+// listed there. Kept as a plain duplicate here; update both when adding
+// a city.
+const KNOWN_MAPPED_CITIES = new Set([
+  'Paris', 'Berlin', 'Barcelona', 'London', 'Athens', 'Tbilisi', 'New York',
+  'Los Angeles', 'San Francisco', 'Hong Kong', 'Seoul', 'Arles', 'Leipzig',
+  'Dresden', 'Bremerhaven', 'Brussels', 'Madrid', 'Tokyo', 'Bagnolet',
+  'Chars', 'Saint-Ouen', 'Marseille', 'Munich', 'Glasgow', 'Amsterdam',
+  'Bucharest', 'Vancouver',
+]);
+
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appYNHLKlGrMQXebq';
 const SPACES_TABLE = 'tblNOa25TlexYcvQF';
 const EVENTS_TABLE = 'Events Import';
@@ -171,6 +183,15 @@ async function syncSpaces() {
   const { error } = await supabase.from('spaces').upsert(rows, { onConflict: 'airtable_id' });
   if (error) throw new Error(error.message);
   console.log(`Upserted ${rows.length} spaces`);
+
+  const unmappedCities = [...new Set(rows.map((r) => r.city_name).filter(Boolean))]
+    .filter((city) => !KNOWN_MAPPED_CITIES.has(city));
+  if (unmappedCities.length) {
+    console.warn(
+      `⚠️  New cities with no map coordinates (add to lib/cityCoordinates.ts): ${unmappedCities.join(', ')}`
+    );
+  }
+
   return rows.length;
 }
 

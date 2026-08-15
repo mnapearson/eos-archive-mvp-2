@@ -12,32 +12,33 @@ import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
 import { FilterContext } from '@/contexts/FilterContext';
 import { formatDateRange } from '@/lib/date';
+import useSavedEvents from '@/hooks/useSavedEvents';
 
 export default function EventPageClient({ eventId }) {
   const router = useRouter();
   const { setSelectedFilters } = useContext(FilterContext);
+  const { userId, savedIds, toggle: toggleSave } = useSavedEvents();
 
   const [event, setEvent] = useState(null);
   const [spaceAddress, setSpaceAddress] = useState('');
   const [loading, setLoading] = useState(true);
+  const [flyerFailed, setFlyerFailed] = useState(false);
 
   useEffect(() => {
     async function fetchEvent() {
       setLoading(true);
+      setFlyerFailed(false);
       try {
         const res = await fetch(`/api/events/${eventId}`);
         const data = await res.json();
         setEvent(data);
 
-        if (
-          data?.space &&
-          !data.space.address &&
-          data.space.latitude &&
-          data.space.longitude
-        ) {
+        const spaceLat = data?.space?.latitude ?? data?.space?.lat;
+        const spaceLng = data?.space?.longitude ?? data?.space?.lng;
+        if (data?.space && !data.space.address && spaceLat && spaceLng) {
           try {
             const geoRes = await fetch(
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${data.space.longitude},${data.space.latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${spaceLng},${spaceLat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
             );
             const geoData = await geoRes.json();
             setSpaceAddress(
@@ -70,6 +71,7 @@ export default function EventPageClient({ eventId }) {
 
   const startDate = event?.start_date ? event.start_date.slice(0, 10) : null;
   const city =
+    event?.space?.city_name ||
     event?.space?.city ||
     event?.city ||
     event?.space_city ||
@@ -103,7 +105,9 @@ export default function EventPageClient({ eventId }) {
     event?.latitude ||
       event?.longitude ||
       event?.space?.latitude ||
-      event?.space?.longitude
+      event?.space?.longitude ||
+      event?.space?.lat ||
+      event?.space?.lng
   );
 
   const infoRows = useMemo(() => {
@@ -141,6 +145,7 @@ export default function EventPageClient({ eventId }) {
     const addressValue =
       event.space?.address ||
       spaceAddress ||
+      event.space?.city_name ||
       event.space?.city ||
       event.city ||
       '';
@@ -187,6 +192,7 @@ export default function EventPageClient({ eventId }) {
   const displayedAddress =
     event.space?.address ||
     spaceAddress ||
+    event.space?.city_name ||
     event.space?.city ||
     event.city ||
     'UNKNOWN ADDRESS';
@@ -194,12 +200,13 @@ export default function EventPageClient({ eventId }) {
   const calendarLocation = [
     event.space?.name,
     event.space?.address || spaceAddress,
-    event.space?.city,
+    event.space?.city_name || event.space?.city,
   ]
     .filter(Boolean)
     .join(', ');
 
   const flyerSrc = buildOptimizedSrc(event.image_url, 1600);
+  const hasFlyer = Boolean(event.image_url) && !flyerFailed;
 
   return (
     <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
@@ -216,7 +223,7 @@ export default function EventPageClient({ eventId }) {
 
       <div className='event-page__layout'>
         <div className='event-page__media'>
-          {event.image_url ? (
+          {hasFlyer ? (
             <div className='quick-view__poster event-page__poster'>
               <Image
                 src={flyerSrc}
@@ -226,6 +233,7 @@ export default function EventPageClient({ eventId }) {
                 sizes='(max-width: 768px) 100vw, 50vw'
                 priority
                 className='quick-view__poster-image'
+                onError={() => setFlyerFailed(true)}
               />
             </div>
           ) : (
@@ -270,6 +278,14 @@ export default function EventPageClient({ eventId }) {
               overrides={{ location: calendarLocation }}
               className='event-page__calendar'
             />
+            {userId && event?.id && (
+              <button
+                type='button'
+                onClick={() => toggleSave(event.id)}
+                className={`nav-action ${savedIds.has(String(event.id)) ? 'border-[var(--foreground)]/60 bg-[var(--foreground)]/8' : ''}`}>
+                {savedIds.has(String(event.id)) ? 'Saved' : 'Save'}
+              </button>
+            )}
           </div>
 
           {infoRows.length > 0 && (

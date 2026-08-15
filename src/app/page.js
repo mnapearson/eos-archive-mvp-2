@@ -119,6 +119,8 @@ function HomePageContent() {
     setSelectedFilters,
     filteredEvents,
     filtersLoading,
+    filtersError,
+    refetchFilterData,
     recentSpaces,
   } = useContext(FilterContext);
   const [viewMode, setViewMode] = useState('list');
@@ -427,7 +429,19 @@ function HomePageContent() {
         )}
       </div>
 
-      {filtersLoading ? (
+      {filtersError ? (
+        <div className='w-full max-w-6xl lg:max-w-5xl px-4 py-16 flex flex-col items-center gap-4 text-center'>
+          <p className='text-sm opacity-70'>
+            Something went wrong loading the archive. Please try again.
+          </p>
+          <button
+            type='button'
+            onClick={refetchFilterData}
+            className='nav-action px-6 text-[11px] uppercase tracking-[0.32em]'>
+            Retry
+          </button>
+        </div>
+      ) : filtersLoading ? (
         <div className='w-full max-w-6xl lg:max-w-5xl px-4'>
           <Spinner
             fullscreen={false}

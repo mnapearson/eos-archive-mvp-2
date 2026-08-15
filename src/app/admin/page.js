@@ -113,7 +113,10 @@ function ConversationsPanel() {
       location: editing.location || null,
       instagram_url: editing.instagram_url || null,
       website_url: editing.website_url || null,
-      slug: editing.slug || slugify(editing.title || 'conversation'),
+      slug:
+        editing.slug ||
+        slugify(editing.title || 'conversation') ||
+        `conversation-${Date.now().toString(36)}`,
       status: editing.status || 'draft',
       cover_image_url: editing.cover_image_url || null,
       show_cover: !!editing.show_cover,
