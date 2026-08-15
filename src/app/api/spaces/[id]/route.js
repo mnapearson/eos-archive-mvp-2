@@ -2,7 +2,7 @@
 import { supabase } from '@/lib/supabaseClient';
 
 export async function GET(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
   if (!id) {
     return new Response(JSON.stringify({ error: 'Space ID is required' }), {
       status: 400,

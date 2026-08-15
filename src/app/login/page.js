@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import toast from 'react-hot-toast';
@@ -29,14 +30,31 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) {
-      toast.error(error.message);
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        toast.error('Please confirm your email address before signing in. Check your inbox for a confirmation link.');
+      } else {
+        toast.error(error.message);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Route by role
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    toast.success('Logged in successfully!');
+    if (profileData?.role === 'member') {
+      router.push('/account');
     } else {
-      toast.success('Logged in successfully!');
       router.push('/spaces/admin');
     }
     setLoading(false);
@@ -72,7 +90,7 @@ export default function LoginPage() {
             Sign in to eos archive
           </h1>
           <p className='max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/70 sm:text-base'>
-            Enter your credentials to manage spaces and upcoming events. Need support? Drop us a line at{' '}
+            Enter your credentials to access your account. Need support? Drop us a line at{' '}
             <a
               href='mailto:hello@eosarchive.app'
               className='underline underline-offset-4 hover:text-[var(--foreground)]'>
@@ -140,6 +158,15 @@ export default function LoginPage() {
           </div>
         </form>
         </section>
+
+        <p className='text-sm text-[var(--foreground)]/55'>
+          Don&apos;t have an account?{' '}
+          <Link
+            href='/signup'
+            className='underline underline-offset-4 hover:text-[var(--foreground)]'>
+            Sign up
+          </Link>
+        </p>
       </div>
     </main>
   );
