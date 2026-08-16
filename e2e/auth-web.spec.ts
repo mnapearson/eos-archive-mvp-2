@@ -83,14 +83,24 @@ test.describe('Web user signup', () => {
     expect(signupCalled).toBe(false);
   });
 
-  test('re-submitting the same unconfirmed email shows a graceful error', async ({
+  test('re-submitting the same unconfirmed email resends confirmation gracefully', async ({
     page,
     request,
   }) => {
     // Create the unconfirmed account directly via the admin API first
     // (equivalent to "already submitted the form once"), then submit the
-    // real form a second time with the same email and confirm it fails
-    // with a visible message rather than an unhandled exception.
+    // real form a second time with the same email.
+    //
+    // Originally written expecting a toast.error here — that assumption
+    // was based on observing Supabase's SMTP outage (signUp() returned a
+    // 500 "Error sending confirmation email" for this exact case). Now
+    // that SMTP is verified working (see the full-signup test above),
+    // re-checked what Supabase actually does for a duplicate *unconfirmed*
+    // email with working SMTP: it returns 200 and silently resends the
+    // confirmation email — not an error. That's correct, user-friendly
+    // behavior (handles "I didn't get the first one, let me retry"), so
+    // the real assertion is that the form shows the same success state
+    // again, not an error toast, and does not sign the user in.
     const { email, password } = generateQaCredentials();
     createdEmail = email;
 
@@ -114,27 +124,7 @@ test.describe('Web user signup', () => {
     await page.locator('[data-testid="signup-password-confirm"]').fill(password);
     await page.locator('[data-testid="signup-submit"]').click();
 
-    // Supabase should return an error for an existing unconfirmed email —
-    // the form's toast.error path should surface it, not crash. No specific
-    // copy assertion since Supabase's exact message text isn't part of
-    // this app's contract. .toast-message is ToastProvider's own custom
-    // render wrapper class, not a react-hot-toast default (which would be
-    // an unstable dynamically-generated class name).
-    //
-    // KNOWN CURRENT GAP (verified this session, not a code bug): as of
-    // this writing, signUp() for a duplicate unconfirmed email hangs
-    // indefinitely with no response at all — confirmed via a direct curl
-    // to /auth/v1/signup (got a 500 "Error sending confirmation email"
-    // immediately) vs. the same request through the browser (still
-    // nothing after 15s). This lines up with Supabase's outbound email
-    // being mid-migration to Resend custom SMTP (domain verification was
-    // still pending last checked) — a live external-service state, not
-    // something in this app's control. signup/page.js's handleSignUp now
-    // has proper try/catch/finally (previously missing entirely, which
-    // would have left the submit button stuck forever with zero feedback
-    // on ANY unexpected failure, not just this one) — so once Supabase's
-    // email sending is actually working again, this should pass as-is.
-    await expect(page.locator('.toast-message').first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/check your email/i)).toBeVisible({ timeout: 10000 });
     await expect(page).not.toHaveURL(/\/account/);
   });
 

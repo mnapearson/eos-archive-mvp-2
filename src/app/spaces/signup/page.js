@@ -9,6 +9,15 @@ import toast from 'react-hot-toast';
 
 const SPACE_TYPES = Object.keys(markerColors);
 
+function getSiteUrl() {
+  const envUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL;
+  if (envUrl) return envUrl.replace(/\/$/, '');
+  return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+}
+
 export default function SpaceSignUpPage() {
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -117,6 +126,7 @@ export default function SpaceSignUpPage() {
       email,
       password,
       options: {
+        emailRedirectTo: `${getSiteUrl()}/auth/callback`,
         data: { account_type: 'space', username: spaceName },
       },
     });

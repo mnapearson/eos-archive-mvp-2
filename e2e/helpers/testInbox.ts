@@ -10,6 +10,10 @@
 // unverified version of this file used it, which meant every request
 // silently ignored the tag filter and could return any email in the
 // namespace within the timestamp window).
+//
+// Verified end-to-end against a real account and a real Supabase
+// confirmation email: signup -> email arrives -> link extracted -> link
+// format is https://{project}.supabase.co/auth/v1/verify?token=...&type=signup&redirect_to=....
 
 const TESTMAIL_API_KEY = process.env.TESTMAIL_API_KEY;
 const TESTMAIL_NAMESPACE = process.env.TESTMAIL_NAMESPACE;
@@ -57,14 +61,28 @@ export async function waitForConfirmationLink(
   const email = data.emails[0];
   const body: string = email.html || email.text || '';
 
+  // Confirmed against a real received email: Supabase's template puts the
+  // link in an <a href="..."> with the query string HTML-entity-encoded
+  // (&amp; between params), same as any other href. A real email client
+  // decodes that before the link is clickable; extracting straight from
+  // raw HTML source does not, so the extracted string needs the same
+  // decoding or `&amp;type=signup` breaks into an unrecognized `amp;type`
+  // param instead of `type` once handed to page.goto().
+  const decodeHtmlEntities = (url: string) =>
+    url
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
   // Prefer an explicit Supabase verify link; fall back to any URL in the
-  // body if the template doesn't match this shape (unverified assumption
-  // — see file header).
+  // body if the template doesn't match this shape.
   const verifyMatch = body.match(/https?:\/\/[^\s"'<>]*\/auth\/v1\/verify[^\s"'<>]*/);
-  if (verifyMatch) return verifyMatch[0];
+  if (verifyMatch) return decodeHtmlEntities(verifyMatch[0]);
 
   const anyUrlMatch = body.match(/https?:\/\/[^\s"'<>]+/);
-  if (anyUrlMatch) return anyUrlMatch[0];
+  if (anyUrlMatch) return decodeHtmlEntities(anyUrlMatch[0]);
 
   throw new Error('Confirmation email arrived but no URL was found in its body.');
 }

@@ -113,6 +113,26 @@ test.describe('Space signup — registration mechanism', () => {
       'requires TESTMAIL_API_KEY/TESTMAIL_NAMESPACE — see e2e/helpers/testInbox.ts'
     );
 
+    // CONFIRMED REAL BUG (found once SMTP started working and this code
+    // path became reachable for the first time — Resend/SMTP being broken
+    // before meant nobody could ever get far enough to hit this):
+    // /spaces/signup/complete never advances past "Finishing your
+    // submission…". Traced live: the redirect chain up through
+    // /auth/callback?code=... is correct (real PKCE exchange, real session
+    // cookie set), and pendingSpaceRegistration is present in localStorage
+    // exactly as expected — but the complete page's own
+    // `await supabase.auth.getSession()` never resolves (confirmed hung
+    // for 25s+, not just slow), so POST /api/spaces/register never fires.
+    // Console shows "Multiple GoTrueClient instances detected in the same
+    // browser context" — src/app/spaces/signup/complete/page.js and
+    // src/components/NavBar.js (rendered on every page via the layout)
+    // each call createClientComponentClient() independently rather than
+    // sharing one instance; this pattern exists in 18 files across the
+    // app. Fixing it properly (a shared/singleton client) is a bigger,
+    // cross-cutting change outside this task's scope — left failing
+    // on purpose rather than weakened, since it's a real, reproducible
+    // bug, not a test issue.
+
     const { email, password, tag } = generateQaInboxCredentials();
     createdEmail = email;
     const spaceName = `QA Test Space ${Date.now()}`;
@@ -144,6 +164,11 @@ test.describe('Space signup — registration mechanism', () => {
     page,
     context,
   }) => {
+    // Hits the same confirmed bug as the test above (see its comment) —
+    // this test also lands on /spaces/signup/complete, whose
+    // getSession() hangs regardless of how the page was reached, so
+    // 'missing' status is never set either. Same root cause, not a
+    // second independent bug.
     const { email, password } = generateQaCredentials();
     createdEmail = email;
 

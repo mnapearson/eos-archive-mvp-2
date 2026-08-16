@@ -5,6 +5,16 @@ import { test, expect } from '@playwright/test';
 // (not the default 'load'/networkidle) throughout: Mapbox GL's continuous
 // tile/telemetry requests mean the page never reaches network-idle.
 
+// Whole file runs serially, not just within each describe block. Per-block
+// serial mode alone still let two separate WebGL-touching blocks (Map
+// live-data, and the mocked pulse/ring regression) run in parallel with
+// each other on separate workers — same real GPU contention as running
+// unserialized, just one level up. Confirmed: intermittent failures with
+// only per-block serial mode, consistently clean once the whole file is
+// serial. The non-WebGL Explore tests pay a small, acceptable serial-mode
+// cost for this (whole file ~45s either way).
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Explore (read-path, live data)', () => {
   test('renders real cards with working images', async ({ page, request }) => {
     await page.goto('/');
@@ -69,13 +79,9 @@ test.describe('Explore (read-path, live data)', () => {
 });
 
 test.describe('Map (read-path, live data)', () => {
-  // Mapbox GL creates a real WebGL context per test. Running these in
-  // parallel with other Chromium instances on the same machine causes
-  // real, consistent GPU/WebGL contention (verified: identical tests pass
-  // 10/10 serially, fail intermittently under fullyParallel) — this is a
-  // resource-contention issue, not app or test flakiness, so serial
-  // execution fixes the cause rather than masking it with retries.
-  test.describe.configure({ mode: 'serial' });
+  // Mapbox GL creates a real WebGL context per test — see the file-level
+  // serial config above for why this needs to not race other WebGL tests
+  // in this file, not just its own siblings.
 
   test('renders at least one marker', async ({ page }) => {
     await page.goto('/map', { waitUntil: 'domcontentloaded' });
@@ -167,12 +173,8 @@ test.describe('Map (read-path, live data)', () => {
 
 test.describe('Explore/Map regressions (mocked, deterministic)', () => {
   // The pulse/ring test below also spins up a real Mapbox GL WebGL context
-  // (mocked event data, not mocked map rendering) — same GPU contention
-  // issue as the live-data Map block above under full parallelism (verified
-  // here too: 11/11 pass with --workers=1, intermittent failures/timeouts
-  // otherwise). CI runners have few cores, so keep this serial rather than
-  // relying on retries to paper over it.
-  test.describe.configure({ mode: 'serial' });
+  // (mocked event data, not mocked map rendering) — see the file-level
+  // serial config above.
 
   test('a space with an event today shows a pulsing marker, one a week out shows a static ring', async ({
     page,
