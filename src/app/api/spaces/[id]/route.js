@@ -1,11 +1,6 @@
 'use server';
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'rejected'];
 
@@ -15,6 +10,7 @@ const ALLOWED_STATUSES = ['pending', 'approved', 'rejected'];
 // UPDATE didn't). Do the status change here instead, service-role, after
 // verifying the caller is actually an admin.
 export async function PATCH(request, { params }) {
+  const supabaseAdmin = getSupabaseAdmin();
   const { id } = await params;
   const authHeader = request.headers.get('authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
