@@ -304,7 +304,7 @@ export default function SpacesMapPage() {
 
       {/* Single-space sheet */}
       {selected && (
-        <div className='absolute inset-x-0 bottom-0 z-20 rounded-t-2xl border-t border-[var(--card-border)] bg-[var(--card)] px-5 pb-10 pt-4 shadow-[0_-20px_60px_rgba(0,0,0,0.3)]'>
+        <div className='map-space-sheet absolute inset-x-0 bottom-0 z-20 rounded-t-2xl border-t border-[var(--card-border)] bg-[var(--card)] px-5 pb-10 pt-4 shadow-[0_-20px_60px_rgba(0,0,0,0.3)]'>
           <button
             type='button'
             onClick={() => setSelected(null)}

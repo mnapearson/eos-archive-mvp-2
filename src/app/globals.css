@@ -1311,6 +1311,10 @@ textarea.ea-input {
     display: inline-flex;
   }
 
+  .map-space-sheet .nav-cta {
+    display: inline-flex;
+  }
+
   .newsletter__submit {
     display: inline-flex;
   }
