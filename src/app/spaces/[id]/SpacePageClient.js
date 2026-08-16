@@ -5,6 +5,7 @@ import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import Spinner from '@/components/Spinner';
 import MasonryGrid from '@/components/MasonryGrid';
+import SpaceVisitsAndNotes from '@/components/SpaceVisitsAndNotes';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 
 export default function SpacePageClient({ spaceId }) {
@@ -70,6 +71,7 @@ export default function SpacePageClient({ spaceId }) {
       space_name: space.name || space.space_name,
       space_city: space.city || space.space_city,
       space_country: space.country || space.space_country,
+      space_type: space.category || space.type,
     }));
   }, [displayEvents, space]);
 
@@ -100,6 +102,8 @@ export default function SpacePageClient({ spaceId }) {
           />
         </div>
       </div>
+
+      <SpaceVisitsAndNotes spaceId={space.id} />
 
       <section className='space-y-6'>
         <header className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>

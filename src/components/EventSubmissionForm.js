@@ -13,6 +13,7 @@ import {
   helperTextClasses,
   dropzoneClasses,
 } from '@/lib/constants';
+import { isValidInstagramPostUrl } from '@/lib/instagram';
 
 const EMPTY_FORM = (spaceId) => ({
   space_id: spaceId || '',
@@ -24,6 +25,7 @@ const EMPTY_FORM = (spaceId) => ({
   category: 'other',
   designers: [''],
   description: '',
+  instagram_post_url: '',
 });
 
 export default function EventSubmissionForm({ spaceId, spaces = [] }) {
@@ -142,6 +144,11 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
       return;
     }
 
+    if (formData.instagram_post_url.trim() && !isValidInstagramPostUrl(formData.instagram_post_url)) {
+      toast.error('Instagram post link must look like instagram.com/p/... or instagram.com/reel/...');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -164,9 +171,16 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
         return;
       }
 
+      // instagram_post_url is only included when actually provided, not
+      // sent as null by default — the events table needs a schema addition
+      // for this column that hasn't necessarily landed yet everywhere this
+      // code runs, and normal event submission (no Instagram link) must
+      // keep working regardless of that migration's timing.
+      const { instagram_post_url, ...formDataWithoutInstagram } = formData;
       const dataToInsert = {
-        ...formData,
+        ...formDataWithoutInstagram,
         designers: formData.designers.map((d) => d.trim()).filter(Boolean),
+        ...(instagram_post_url.trim() ? { instagram_post_url: instagram_post_url.trim() } : {}),
         space_id: eventSpaceId,
         approved: true,
         image_url: null,
@@ -479,6 +493,27 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
             />
             <p className={helperTextClasses}>
               Optional, but helps visitors understand the intent of the event.
+            </p>
+          </div>
+
+          <div className='space-y-2'>
+            <label
+              htmlFor='event-instagram-post-url'
+              className='ea-label ea-label--muted'>
+              Instagram post link
+            </label>
+            <input
+              id='event-instagram-post-url'
+              type='url'
+              name='instagram_post_url'
+              value={formData.instagram_post_url}
+              onChange={handleInputChange}
+              placeholder='https://instagram.com/p/...'
+              className={baseInputClasses}
+            />
+            <p className={helperTextClasses}>
+              Optional. Used only if no flyer image is uploaded — shows a
+              live embed of the post instead.
             </p>
           </div>
         </fieldset>

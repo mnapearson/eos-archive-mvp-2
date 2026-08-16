@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   EVENT_CATEGORIES,
   ALLOWED_IMAGE_TYPES,
@@ -15,9 +16,16 @@ import {
   primaryActionClasses,
   subtleActionClasses,
 } from '@/lib/constants';
+import { isValidInstagramPostUrl } from '@/lib/instagram';
 
 export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
   const supabase = getSupabaseBrowserClient();
+  // Only ever rendered inside /spaces/admin/page.js, which already
+  // guarantees a valid session before mounting this — session comes from
+  // AuthContext instead of a fresh getSession() call here. See
+  // AuthContext.js for why an independent auth-state read was a latent
+  // instance of the same race that hung /spaces/signup/complete.
+  const { session } = useAuth();
 
   const [formData, setFormData] = useState({
     title: event.title || '',
@@ -28,6 +36,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
     category: event.category || 'other',
     designers: event.designers?.length ? event.designers : [''],
     description: event.description || '',
+    instagram_post_url: event.instagram_post_url || '',
   });
 
   const [newImageFile, setNewImageFile] = useState(null);
@@ -114,6 +123,11 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
       return;
     }
 
+    if (formData.instagram_post_url.trim() && !isValidInstagramPostUrl(formData.instagram_post_url)) {
+      toast.error('Instagram post link must look like instagram.com/p/... or instagram.com/reel/...');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -130,8 +144,22 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
         terms_accepted: true,
       };
 
+      // instagram_post_url is only sent when it's actually changing — see
+      // EventSubmissionForm.js's handleSubmit for why this can't be sent
+      // unconditionally yet (the column may not exist everywhere this
+      // code runs). Still needs to send an explicit null on a genuine
+      // clear (had a value, now empty), not just omit the key — omitting
+      // it there would silently leave the old value in place instead of
+      // actually clearing it.
+      const trimmedInstagramUrl = formData.instagram_post_url.trim();
+      const hadInstagramUrl = Boolean(event.instagram_post_url);
+      if (trimmedInstagramUrl) {
+        updatedData.instagram_post_url = trimmedInstagramUrl;
+      } else if (hadInstagramUrl) {
+        updatedData.instagram_post_url = null;
+      }
+
       if (newImageFile) {
-        const { data: { session } } = await supabase.auth.getSession();
         const fd = new FormData();
         fd.append('file', newImageFile);
         fd.append('spaceId', spaceId);
@@ -358,6 +386,27 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
             placeholder='Additional programme context, collaborators, access notes...'
             className={textAreaClasses}
           />
+        </div>
+
+        <div className='space-y-2 sm:col-span-2'>
+          <label
+            htmlFor={`instagram-post-url-${event.id}`}
+            className='ea-label ea-label--muted'>
+            Instagram post link
+          </label>
+          <input
+            id={`instagram-post-url-${event.id}`}
+            type='url'
+            name='instagram_post_url'
+            value={formData.instagram_post_url}
+            onChange={handleInputChange}
+            placeholder='https://instagram.com/p/...'
+            className={baseInputClasses}
+          />
+          <p className={helperTextClasses}>
+            Optional. Used only if no flyer image is set — shows a live embed
+            of the post instead.
+          </p>
         </div>
       </div>
 

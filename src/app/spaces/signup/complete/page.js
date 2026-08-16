@@ -1,72 +1,53 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
-
-// getSession() on the shared client can hang indefinitely here specifically
-// (confirmed live: reproducible regardless of account type or how the page
-// is reached, and NavBar's own getSession() call hangs right alongside it —
-// a page-load-level stall, not something wrong with this page's own code).
-// Root cause isn't fully pinned down: @supabase/auth-helpers-nextjs is a
-// deprecated package (Supabase's own guidance is to migrate to
-// @supabase/ssr) pinned against @supabase/supabase-js@^2.39.8 as a peer
-// dependency, but this app runs 2.57.2, pulling in
-// @supabase/auth-js@2.71.1 — auth-js's internal session lock has changed
-// substantially since 2.39, and this old wrapper was never updated against
-// it. But a fresh, entirely unshared client hung identically in testing,
-// which points at least partly at something network/rate-limit related
-// rather than purely a stuck lock on the shared instance (this session did
-// a very large volume of real signups today and hit a hard 429 on
-// /auth/v1/signup earlier) — not cleanly distinguished from the deprecated-
-// package theory before this was shipped. A full migration off
-// auth-helpers-nextjs is the real fix if this keeps happening, but is a
-// much bigger, app-wide change than justified unilaterally here. This is a
-// bounded mitigation, not a confirmed fix: race getSession() against a
-// timeout, fall back to a fresh client on failure, and — critically — never
-// leave the user stuck on "Finishing your submission…" with zero feedback
-// if even that fails, matching the same principle behind signup/page.js's
-// earlier try/catch/finally fix (a stuck screen with no error is worse than
-// a clear failure message).
-async function getSessionWithFallback(supabase) {
-  const withTimeout = (promise, ms) =>
-    Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
-    ]);
-
-  try {
-    return await withTimeout(supabase.auth.getSession(), 5000);
-  } catch {
-    const fallbackClient = createClientComponentClient();
-    return withTimeout(fallbackClient.auth.getSession(), 5000);
-  }
-}
 
 // Finishes a space signup that was deferred because email confirmation was
 // required at signup time (see src/app/spaces/signup/page.js) — the account
 // now has a session, so the space record staged in localStorage under
 // pendingSpaceRegistration can actually be created.
+//
+// Previously called supabase.auth.getSession() directly here, which was
+// the exact call confirmed live to hang on this page (racing against
+// NavBar's own independent auth-state read on the same page load). Fixed
+// at the source: session now comes from AuthContext, the one shared
+// getSession() call for the whole app — see AuthContext.js for the full
+// writeup. This page no longer needs its own timeout/fallback logic; that
+// backstop now lives once, in the provider.
 export default function CompleteSpaceSignUpPage() {
   const router = useRouter();
-  const supabase = getSupabaseBrowserClient();
+  const { session, loading: authLoading, error: authError } = useAuth();
   const [status, setStatus] = useState('working');
   const [errorMessage, setErrorMessage] = useState('');
+  // AuthContext's onAuthStateChange can fire more than once in quick
+  // succession for the same underlying session (e.g. a SIGNED_IN event
+  // immediately followed by a TOKEN_REFRESHED one, which is common right
+  // after a PKCE code exchange) — each firing hands this effect a new
+  // `session` object, even when the login it describes hasn't changed.
+  // Confirmed live: without this guard, that could refire complete() a
+  // second time before the first POST /api/spaces/register finished,
+  // hitting spaces_name_unique on the retry. This ref makes the actual
+  // registration attempt genuinely idempotent, not just cancelled-flagged.
+  const attemptedRef = useRef(false);
 
   useEffect(() => {
+    // Don't race ahead of AuthContext resolving — reading
+    // pendingSpaceRegistration or calling the register API before the
+    // provider has settled one way or the other would repeat the exact
+    // "acted on an unknown session state" bug this page used to have.
+    if (authLoading) return;
+    if (attemptedRef.current) return;
+
     let cancelled = false;
+    attemptedRef.current = true;
 
     async function complete() {
-      let session = null;
-      try {
-        ({
-          data: { session },
-        } = await getSessionWithFallback(supabase));
-      } catch (err) {
-        console.error('getSession() did not resolve even with fallback:', err);
+      if (authError) {
+        console.error('AuthContext failed to resolve a session:', authError);
         if (!cancelled) {
           setErrorMessage(
             'We could not confirm your session. Please refresh this page, or log in again.'
@@ -75,6 +56,7 @@ export default function CompleteSpaceSignUpPage() {
         }
         return;
       }
+
       if (!session) {
         router.push('/login');
         return;
@@ -128,7 +110,7 @@ export default function CompleteSpaceSignUpPage() {
     return () => {
       cancelled = true;
     };
-  }, [router, supabase]);
+  }, [router, session, authLoading, authError]);
 
   return (
     <main className='relative isolate min-h-[calc(100vh-72px)] bg-[var(--background)]'>

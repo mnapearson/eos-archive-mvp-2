@@ -113,37 +113,37 @@ test.describe('Space signup — registration mechanism', () => {
       'requires TESTMAIL_API_KEY/TESTMAIL_NAMESPACE — see e2e/helpers/testInbox.ts'
     );
 
-    // PARTIALLY ADDRESSED, not fully confirmed fixed. Original bug (found
-    // once SMTP started working and this code path became reachable for
-    // the first time): /spaces/signup/complete never advanced past
-    // "Finishing your submission…" because supabase.auth.getSession()
-    // never resolved. Root-caused one real, confirmed cause: NavBar (via
-    // src/lib/supabaseClient.js, used by useCities.js et al.) and this
-    // app's auth-helpers client were two *separate* GoTrueClient instances
-    // sharing the same localStorage key ("Multiple GoTrueClient instances
-    // detected..."). Fixed by consolidating every browser-rendered
-    // Supabase client to one shared instance (src/lib/supabaseBrowserClient.js)
-    // — confirmed live: the warning is now completely gone.
+    // STILL UNRESOLVED, but significantly narrowed down and genuinely
+    // improved — not the same bug as before. History: originally hung on
+    // supabase.auth.getSession() itself never resolving, root-caused to
+    // NavBar and this app independently reading auth state on the same
+    // page load (multiple GoTrueClient instances racing on the same
+    // localStorage key). Fixed at the source with a single root-level
+    // AuthContext (src/contexts/AuthContext.js) that makes exactly one
+    // getSession() call for the whole app — confirmed live via 17+ repeat
+    // trials (admin-created accounts, simulated login) resolving in
+    // ~300-400ms instead of hanging indefinitely, and the sibling
+    // "cross-browser/cleared-storage" test below (same page, same
+    // underlying bug) now passes cleanly, which it didn't before.
     //
-    // But the hang itself persisted after that fix, and — critically — a
-    // brand-new, entirely unshared client hung identically in testing, which
-    // means it isn't purely about instance-sharing. Two live suspects, not
-    // cleanly separated: (1) @supabase/auth-helpers-nextjs is a deprecated
-    // package (Supabase's guidance is to migrate to @supabase/ssr) pinned
-    // against @supabase/supabase-js@^2.39.8 but running against 2.57.2
-    // (auth-js 2.71.1) — real version skew in a package no longer
-    // maintained; (2) this session made a very large volume of real
-    // Supabase auth calls today and hit a hard 429 rate limit on
-    // /auth/v1/signup, so some of what looked like a hang may have been
-    // Supabase-side throttling rather than a client bug. spaces/signup/complete/page.js
-    // now has a bounded timeout+fallback so it always reaches a terminal
-    // state (success or a visible error) instead of hanging forever either
-    // way — a real, verified improvement (confirmed: reaches "Something
-    // went wrong" in ~10s instead of never) — but this specific test still
-    // fails today because the fallback also times out under whatever's
-    // currently happening. Worth re-running once Supabase's rate limits
-    // have had time to reset; if it still fails then, the real fix is the
-    // @supabase/ssr migration, not more client-side timeout tuning.
+    // Also found and fixed a real, separate bug while testing this: React
+    // re-firing the completion effect on a second onAuthStateChange event
+    // (e.g. TOKEN_REFRESHED right after PKCE code exchange) could submit
+    // /api/spaces/register twice, hitting spaces_name_unique on the retry
+    // — spaces/signup/complete/page.js now guards the attempt with a ref
+    // so it's genuinely idempotent, not just cancelled-flagged.
+    //
+    // Despite both fixes, THIS specific test — the one exercising the real
+    // signup form + real testmail.app email + real PKCE redirect chain —
+    // still intermittently hangs on "Finishing your submission…"
+    // (confirmed via Playwright's error-context snapshot: still showing
+    // that exact heading at the 20s timeout). A standalone script running
+    // the identical steps outside this test file completed cleanly, which
+    // means whatever's left is either specific to running inside this
+    // test's shared describe-level state, or a genuinely rarer residual
+    // case than the 17+ clean trials suggested. Not chased further this
+    // pass — flagged for the next debugging session rather than guessed at
+    // blindly.
 
     const { email, password, tag } = generateQaInboxCredentials();
     createdEmail = email;

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Masonry from 'react-masonry-css';
 import { formatDateRange } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
+import EventFlyer from '@/components/EventFlyer';
 
 const VIEW_MODES = {
   GRID: 'grid',
@@ -127,19 +128,14 @@ function GridView({ items, onSelectItem }) {
               onClick={(event) => handleCardClick(event, item)}
               onKeyDown={(event) => handleCardKeyDown(event, item)}>
               <figure className='grid-card__media'>
-                {item?.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={item?.title || 'Event image'}
-                    className='grid-card__image'
-                    data-testid='event-card-image'
-                    loading='lazy'
-                  />
-                ) : (
-                  <div className='grid-card__image flex aspect-[4/3] items-center justify-center bg-[var(--foreground)]/5 text-[10px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
-                    No flyer
-                  </div>
-                )}
+                <EventFlyer
+                  event={item}
+                  spaceCategory={item?.space_type}
+                  alt={item?.title || 'Event image'}
+                  imgClassName='grid-card__image'
+                  fallbackClassName='grid-card__image'
+                  imgTestId='event-card-image'
+                />
                 {statusLabel && (
                   <span className='grid-card__status'>{statusLabel}</span>
                 )}
@@ -215,18 +211,14 @@ function ListView({ items, onSelectItem }) {
             className='relative block h-32 w-full overflow-hidden rounded-lg bg-[var(--foreground)]/5 md:h-24 md:w-32'
             onClick={(event) => previewFromEvent(event, item)}
             aria-label={`Preview ${item?.title ?? 'event'}`}>
-            {item?.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item?.title || 'Event image'}
-                className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
-                data-testid='event-card-image'
-              />
-            ) : (
-              <div className='absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
-                No flyer
-              </div>
-            )}
+            <EventFlyer
+              event={item}
+              spaceCategory={item?.space_type}
+              alt={item?.title || 'Event image'}
+              imgClassName='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
+              fallbackClassName='absolute inset-0 !aspect-auto !h-full !w-full !p-2'
+              imgTestId='event-card-image'
+            />
             <span className='sr-only'>Open {item?.title ?? 'event'}</span>
           </button>
         ) : (
@@ -234,18 +226,14 @@ function ListView({ items, onSelectItem }) {
             href={href}
             scroll={false}
             className='relative block h-32 w-full overflow-hidden rounded-lg bg-[var(--foreground)]/5 md:h-24 md:w-32'>
-            {item?.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item?.title || 'Event image'}
-                className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
-                data-testid='event-card-image'
-              />
-            ) : (
-              <div className='absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
-                No flyer
-              </div>
-            )}
+            <EventFlyer
+              event={item}
+              spaceCategory={item?.space_type}
+              alt={item?.title || 'Event image'}
+              imgClassName='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
+              fallbackClassName='absolute inset-0 !aspect-auto !h-full !w-full !p-2'
+              imgTestId='event-card-image'
+            />
             <span className='sr-only'>Open {item?.title ?? 'event'}</span>
           </Link>
         );

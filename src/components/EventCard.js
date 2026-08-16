@@ -1,6 +1,7 @@
 'use client';
 
 import ShareButton from '@/components/ShareButton';
+import EventFlyer from '@/components/EventFlyer';
 import { formatDateRange } from '@/lib/date';
 import {
   primaryActionClasses,
@@ -11,6 +12,7 @@ import {
 
 export default function EventCard({
   event,
+  spaceCategory,
   editable,
   confirmingDelete,
   deleting,
@@ -32,17 +34,13 @@ export default function EventCard({
   return (
     <div className='flex flex-col gap-6 lg:flex-row'>
       <div className='overflow-hidden rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/70 lg:w-64'>
-        {event.image_url ? (
-          <img
-            src={event.image_url}
-            alt={event.title}
-            className='h-full w-full object-cover'
-          />
-        ) : (
-          <div className='flex h-full min-h-[240px] items-center justify-center bg-[var(--foreground)]/5 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/40'>
-            No flyer
-          </div>
-        )}
+        <EventFlyer
+          event={event}
+          spaceCategory={spaceCategory}
+          alt={event.title}
+          imgClassName='h-full w-full object-cover'
+          fallbackClassName='!aspect-auto h-full min-h-[240px]'
+        />
       </div>
 
       <div className='flex flex-1 flex-col justify-between gap-6'>

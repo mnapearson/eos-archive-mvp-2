@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { useAuth } from '@/contexts/AuthContext';
 import Spinner from '@/components/Spinner';
 import RoadmapManager from '@/components/RoadmapManager';
 import EventApprovals from '@/components/EventApprovals';
@@ -427,45 +428,37 @@ function ConversationsPanel() {
 
 export default function AdminPage() {
   const router = useRouter();
-  const supabase = getSupabaseBrowserClient();
-  const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
+  // Session/role come from AuthContext instead of this page's own
+  // getSession()/profiles fetch — see AuthContext.js for why an
+  // independent auth-state read here was a latent instance of the same
+  // race that hung /spaces/signup/complete. This is a strict gate (the
+  // site admin panel), so it waits for both `loading` (session) and
+  // `profileLoading` (role) to settle before deciding — checking
+  // profile?.role too early would treat "haven't fetched yet" the same
+  // as "confirmed not admin" and could bounce a real admin.
+  const { user, profile, loading, profileLoading } = useAuth();
+  const [redirected, setRedirected] = useState(false);
 
   useEffect(() => {
-    async function checkUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    if (loading || profileLoading) return;
 
-      if (!session) {
-        router.push('/login');
-        return;
-      }
-
-      // Fetch the user's profile from the "profiles" table
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error || profile?.role !== 'admin') {
-        router.push('/', { scroll: false });
-        return;
-      }
-
-      setAuthorized(true);
-      setLoading(false);
+    if (!user) {
+      router.push('/login');
+      setRedirected(true);
+      return;
     }
 
-    checkUser();
-  }, [router, supabase]);
+    if (profile?.role !== 'admin') {
+      router.push('/', { scroll: false });
+      setRedirected(true);
+    }
+  }, [loading, profileLoading, user, profile, router]);
 
-  if (loading) {
+  if (loading || profileLoading || redirected) {
     return <Spinner />;
   }
 
-  if (!authorized) {
+  if (profile?.role !== 'admin') {
     return null;
   }
 

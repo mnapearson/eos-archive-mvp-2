@@ -1,14 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
+  const redirectTo = searchParams.get('redirect');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,6 +54,22 @@ export default function LoginPage() {
       return;
     }
 
+    toast.success('Logged in successfully!');
+
+    // A redirect param (e.g. from the space-detail "been here"/notes gate)
+    // takes priority over role-based routing, so a signed-out visitor
+    // lands back on the specific page they were trying to use rather than
+    // always on /account or /spaces/admin. Only followed if it's a
+    // same-site relative path — redirectTo comes from a URL query param, so
+    // an unvalidated value here would be an open-redirect vector (e.g.
+    // ?redirect=https://evil.example landing a just-authenticated user on
+    // an attacker-controlled page).
+    if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+      router.push(redirectTo);
+      setLoading(false);
+      return;
+    }
+
     // Route by role
     const { data: profileData } = await supabase
       .from('profiles')
@@ -51,7 +77,6 @@ export default function LoginPage() {
       .eq('id', data.user.id)
       .single();
 
-    toast.success('Logged in successfully!');
     if (profileData?.role === 'member') {
       router.push('/account');
     } else {

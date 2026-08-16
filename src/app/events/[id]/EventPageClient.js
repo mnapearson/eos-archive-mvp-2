@@ -10,6 +10,8 @@ import Spinner from '@/components/Spinner';
 import ShareButton from '@/components/ShareButton';
 import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
+import InstagramFlyerEmbed from '@/components/InstagramFlyerEmbed';
+import GeneratedFlyerCard from '@/components/GeneratedFlyerCard';
 import { FilterContext } from '@/contexts/FilterContext';
 import { formatDateRange } from '@/lib/date';
 import useSavedEvents from '@/hooks/useSavedEvents';
@@ -205,8 +207,10 @@ export default function EventPageClient({ eventId }) {
     .filter(Boolean)
     .join(', ');
 
-  const flyerSrc = buildOptimizedSrc(event.image_url, 1600);
-  const hasFlyer = Boolean(event.image_url) && !flyerFailed;
+  const directFlyerUrl = event.image_url || event.flyer_image_url;
+  const flyerSrc = buildOptimizedSrc(directFlyerUrl, 1600);
+  const hasFlyer = Boolean(directFlyerUrl) && !flyerFailed;
+  const hasAlternateFlyer = !hasFlyer && Boolean(event.instagram_post_url);
 
   return (
     <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
@@ -236,9 +240,22 @@ export default function EventPageClient({ eventId }) {
                 onError={() => setFlyerFailed(true)}
               />
             </div>
+          ) : hasAlternateFlyer ? (
+            <div className='quick-view__poster event-page__poster'>
+              <InstagramFlyerEmbed
+                event={event}
+                spaceCategory={event.space?.category || event.space?.type}
+                postUrl={event.instagram_post_url}
+                className='h-full'
+              />
+            </div>
           ) : (
-            <div className='quick-view__poster quick-view__poster--empty event-page__poster'>
-              <span>No flyer available</span>
+            <div className='quick-view__poster event-page__poster'>
+              <GeneratedFlyerCard
+                event={event}
+                spaceCategory={event.space?.category || event.space?.type}
+                className='h-full !aspect-auto'
+              />
             </div>
           )}
           {eventDesigner && (

@@ -4,19 +4,25 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatDateRange } from '@/lib/date';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
+import EventFlyer from '@/components/EventFlyer';
 
 export default function AccountPage() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  // Session and profile (role, display_name, bio, location) come from
+  // AuthContext instead of this page's own getSession()/profiles fetch —
+  // see AuthContext.js for why an independent auth-state read here was a
+  // latent instance of the same race that hung /spaces/signup/complete.
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
 
   const [status, setStatus] = useState('loading');
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [savedEvents, setSavedEvents] = useState([]);
-  const [followedSpaces, setFollowedSpaces] = useState([]);
+  const [savedSpaces, setSavedSpaces] = useState([]);
+  const [visitedSpaces, setVisitedSpaces] = useState([]);
 
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
@@ -25,42 +31,64 @@ export default function AccountPage() {
   const [tab, setTab] = useState('saved');
 
   useEffect(() => {
+    // Don't act on auth state until AuthContext has actually resolved it
+    // one way or the other.
+    if (authLoading) return;
+
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+
+    // Direct navigation / bookmark / back-button safety net — login and
+    // signup already route by role, this just guards against landing here
+    // with the wrong dashboard for the account. A missing profiles row
+    // (profile is null — no matching row) deliberately does NOT redirect:
+    // we don't actually know which dashboard is correct in that case, and
+    // redirecting on a null role risks bouncing between /account and
+    // /spaces/admin if both guards fired on the same undefined value.
+    if (profile?.role === 'space') {
+      router.replace('/spaces/admin');
+      return;
+    }
+
+    if (profile) {
+      setDisplayName(profile.display_name || '');
+      setBio(profile.bio || '');
+      setLocation(profile.location || '');
+    }
+
     async function load() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.replace('/login'); return; }
-
-      setUser(session.user);
-
-      const [profileRes, savedRes, followsRes] = await Promise.all([
-        supabase.from('profiles').select('role, display_name, bio, location').eq('id', session.user.id).single(),
-        supabase.from('saved_events').select('event_id').eq('user_id', session.user.id),
-        supabase.from('follows').select('space_id, created_at, spaces(id, name, city_name, city, type, image_url)').eq('user_id', session.user.id).order('created_at', { ascending: false }),
+      const [savedRes, savedSpacesRes, visitedSpacesRes] = await Promise.all([
+        supabase.from('saved_events').select('event_id').eq('user_id', user.id),
+        supabase.from('saved_spaces').select('space_id, created_at, spaces(id, name, city_name, city, type, image_url)').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('space_visits').select('space_id, created_at, spaces(id, name, city_name, city, type, image_url)').eq('user_id', user.id).order('created_at', { ascending: false }),
       ]);
-
-      if (profileRes.data) {
-        setProfile(profileRes.data);
-        setDisplayName(profileRes.data.display_name || '');
-        setBio(profileRes.data.bio || '');
-        setLocation(profileRes.data.location || '');
-      }
 
       if (savedRes.data?.length > 0) {
         const ids = savedRes.data.map((r) => r.event_id);
         const { data: eventsData } = await supabase
           .from('events')
-          .select('id, title, start_date, end_date, start_time, end_time, image_url, category, spaces(id, name, city_name, city)')
+          // instagram_post_url deliberately left off this explicit column
+          // list: an explicit .select() naming a column that doesn't exist
+          // yet errors the whole query (confirmed live), unlike a plain
+          // event.instagram_post_url property read on a select('*') row,
+          // which is just undefined until the events table migration
+          // lands. EventFlyer already treats it as optional either way.
+          .select('id, title, start_date, end_date, start_time, end_time, image_url, flyer_image_url, category, spaces(id, name, city_name, city, category, type)')
           .in('id', ids);
         setSavedEvents(eventsData || []);
       } else {
         setSavedEvents([]);
       }
 
-      setFollowedSpaces(followsRes.data?.map((r) => r.spaces).filter(Boolean) || []);
+      setSavedSpaces(savedSpacesRes.data?.map((r) => r.spaces).filter(Boolean) || []);
+      setVisitedSpaces(visitedSpacesRes.data?.map((r) => r.spaces).filter(Boolean) || []);
 
       setStatus('ready');
     }
     load();
-  }, [supabase, router]);
+  }, [supabase, router, user, profile, authLoading]);
 
   const { upcoming, past } = useMemo(() => {
     const today = new Date();
@@ -82,7 +110,7 @@ export default function AccountPage() {
     setSaving(false);
     if (error) { toast.error('Could not save changes.'); return; }
     toast.success('Profile updated.');
-    setProfile((prev) => ({ ...prev, display_name: displayName, bio, location }));
+    await refreshProfile();
   };
 
   const handleChangePassword = async () => {
@@ -109,7 +137,8 @@ export default function AccountPage() {
 
   const tabs = [
     { id: 'saved', label: 'Saved', count: savedEvents.length },
-    { id: 'spaces', label: 'Spaces', count: followedSpaces.length },
+    { id: 'spaces', label: 'Spaces', count: savedSpaces.length },
+    { id: 'visited', label: 'Visited', count: visitedSpaces.length },
     { id: 'profile', label: 'Profile', count: null },
   ];
 
@@ -176,18 +205,35 @@ export default function AccountPage() {
           </div>
         )}
 
-        {/* Followed spaces tab */}
+        {/* Saved spaces tab */}
         {tab === 'spaces' && (
           <div className='space-y-4'>
-            {followedSpaces.length === 0 ? (
+            {savedSpaces.length === 0 ? (
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
-                <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>Not following any spaces</p>
-                <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit Follow.</p>
+                <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No saved spaces yet</p>
+                <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit Save.</p>
                 <Link href='/map' className='nav-action mt-6 !inline-flex h-9 px-5 text-[11px]'>Explore spaces</Link>
               </div>
             ) : (
               <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
-                {followedSpaces.map((space) => <FollowedSpaceCard key={space.id} space={space} />)}
+                {savedSpaces.map((space) => <SavedSpaceCard key={space.id} space={space} />)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Visited spaces tab */}
+        {tab === 'visited' && (
+          <div className='space-y-4'>
+            {visitedSpaces.length === 0 ? (
+              <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
+                <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No visited spaces yet</p>
+                <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit &ldquo;I was here&rdquo;.</p>
+                <Link href='/map' className='nav-action mt-6 !inline-flex h-9 px-5 text-[11px]'>Explore spaces</Link>
+              </div>
+            ) : (
+              <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+                {visitedSpaces.map((space) => <SavedSpaceCard key={space.id} space={space} />)}
               </div>
             )}
           </div>
@@ -260,15 +306,15 @@ function SavedEventCard({ event }) {
   return (
     <Link href={href}
       className='group flex flex-col gap-3 overflow-hidden rounded-[24px] border border-[var(--foreground)]/12 bg-[var(--background)]/70 p-4 transition hover:border-[var(--foreground)]/30'>
-      {event.image_url ? (
-        <div className='aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[var(--foreground)]/5'>
-          <img src={event.image_url} alt={event.title} className='h-full w-full object-cover transition group-hover:scale-[1.02]' onError={(e) => { e.target.style.display = 'none'; }} />
-        </div>
-      ) : (
-        <div className='flex aspect-[4/3] w-full items-center justify-center rounded-2xl bg-[var(--foreground)]/5 text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/30'>
-          No flyer
-        </div>
-      )}
+      <div className='aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[var(--foreground)]/5'>
+        <EventFlyer
+          event={event}
+          spaceCategory={event.spaces?.category || event.spaces?.type}
+          alt={event.title}
+          imgClassName='h-full w-full object-cover transition group-hover:scale-[1.02]'
+          fallbackClassName='h-full !aspect-auto'
+        />
+      </div>
       <div className='space-y-1'>
         <p className='text-sm font-medium leading-snug text-[var(--foreground)]'>{event.title}</p>
         {when && <p className='font-mono text-xs text-[var(--foreground)]/55 uppercase tracking-[0.18em]'>{when}</p>}
@@ -282,7 +328,7 @@ function SavedEventCard({ event }) {
   );
 }
 
-function FollowedSpaceCard({ space }) {
+function SavedSpaceCard({ space }) {
   return (
     <Link href={`/spaces/${space.id}`}
       className='group flex items-center gap-4 overflow-hidden rounded-[24px] border border-[var(--foreground)]/12 bg-[var(--background)]/70 p-4 transition hover:border-[var(--foreground)]/30'>

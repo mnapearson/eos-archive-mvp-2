@@ -173,6 +173,7 @@ export function FilterProvider({ children }) {
           ...event,
           space_name: spaceName,
           space_city: spaceCity,
+          space_type: space?.category || space?.type,
         });
         return acc;
       }, []);

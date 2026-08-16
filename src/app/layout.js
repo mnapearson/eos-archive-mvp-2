@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import NavBar from '@/components/NavBar';
 import CookieConsentBar from '@/components/CookieConsentBar';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { FilterProvider } from '@/contexts/FilterContext';
 import Footer from '@/components/Footer';
 import ToastProvider from '@/components/ToastProvider';
@@ -48,18 +49,20 @@ export default function RootLayout({ children }) {
           src='https://plausible.io/js/script.js'
         />
 
-        <FilterProvider>
-          <ScrollToTop />
-          <NavBar />
-          {/* Page Content */}
-          <main className='flex-1 w-full py-4'>
-            <div className='page-content'>{children}</div>
-          </main>
-          <Footer />
-          {/* global toast container */}
-          <ToastProvider />
-        </FilterProvider>
-        <CookieConsentBar />
+        <AuthProvider>
+          <FilterProvider>
+            <ScrollToTop />
+            <NavBar />
+            {/* Page Content */}
+            <main className='flex-1 w-full py-4'>
+              <div className='page-content'>{children}</div>
+            </main>
+            <Footer />
+            {/* global toast container */}
+            <ToastProvider />
+          </FilterProvider>
+          <CookieConsentBar />
+        </AuthProvider>
       </body>
     </html>
   );

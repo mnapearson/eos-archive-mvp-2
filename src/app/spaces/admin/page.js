@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { useAuth } from '@/contexts/AuthContext';
 import Spinner from '@/components/Spinner';
 import EventSubmissionForm from '@/components/EventSubmissionForm';
 import SpaceImageUpload from '@/components/SpaceImageUpload';
@@ -27,6 +28,12 @@ function SpaceAdminDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
+  // Session/role come from AuthContext instead of this page's own
+  // getSession()/profiles fetch — see AuthContext.js for why an
+  // independent auth-state read here was a latent instance of the same
+  // race that hung /spaces/signup/complete (confirmed live on this exact
+  // page during testing, before this fix).
+  const { user, profile, loading: authLoading } = useAuth();
   const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,17 +56,8 @@ function SpaceAdminDashboardContent() {
     }
   };
 
-  async function fetchSpaceRecord(currentSpace) {
+  async function fetchSpaceRecord(currentSpace, userId) {
     setLoading(true);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-
-    const userId = session.user.id;
 
     let query = supabase.from('spaces').select('*').single();
 
@@ -84,9 +82,29 @@ function SpaceAdminDashboardContent() {
   }
 
   useEffect(() => {
-    fetchSpaceRecord(null);
+    // Don't act on auth state until AuthContext has actually resolved it
+    // one way or the other.
+    if (authLoading) return;
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    // Direct navigation / bookmark / back-button safety net (login and
+    // signup already route by role). A missing profiles row (profile is
+    // null) deliberately does NOT redirect: we don't know which dashboard
+    // is correct in that case, and redirecting on a null role risks
+    // bouncing between /account and /spaces/admin if both guards fired on
+    // the same undefined value.
+    if (profile?.role === 'member') {
+      router.replace('/account');
+      return;
+    }
+
+    fetchSpaceRecord(null, user.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading, user, profile]);
 
   const handleSave = async () => {
     if (formValues.website && !isValidUrl(formValues.website)) {
@@ -117,7 +135,7 @@ function SpaceAdminDashboardContent() {
 
     setSpace(data);
     setIsEditing(false);
-    fetchSpaceRecord(data);
+    fetchSpaceRecord(data, user.id);
     toast.success('Space details updated successfully');
   };
 
@@ -300,6 +318,7 @@ function SpaceAdminDashboardContent() {
             </h3>
             <AdminEventsManager
               spaceId={space.id}
+              spaceCategory={space.category || space.type}
               filter='archive'
               editable={true}
               emptyMessage='No archived events yet for this space.'

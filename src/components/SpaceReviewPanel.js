@@ -2,10 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
 
 export default function SpaceReviewPanel() {
   const supabase = getSupabaseBrowserClient();
+  // Only ever rendered inside /admin/page.js, which already guarantees a
+  // valid admin session before mounting this — session comes from
+  // AuthContext instead of a fresh getSession() call here. See
+  // AuthContext.js for why an independent auth-state read was a latent
+  // instance of the same race that hung /spaces/signup/complete.
+  const { session } = useAuth();
   const [pendingSpaces, setPendingSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +36,6 @@ export default function SpaceReviewPanel() {
   }
 
   async function updateSpaceStatus(spaceId, newStatus) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
     if (!session) {
       toast.error('Your session has expired — please log in again.');
       return;

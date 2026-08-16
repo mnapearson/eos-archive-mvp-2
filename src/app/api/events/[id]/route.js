@@ -13,6 +13,7 @@ export async function GET(req, { params }) {
         id,
         name,
         type,
+        category,
         latitude,
         longitude,
         lat,

@@ -22,6 +22,22 @@ export function formatTime(timeISO) {
   }
 }
 
+// Matches eos-archive-app/app/space/[id].tsx's formatRelativeTime exactly,
+// for the ported space notes section.
+export function formatRelativeTime(dateStr) {
+  if (!dateStr) return '';
+  const diffDays = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (diffDays <= 0) return 'today';
+  if (diffDays === 1) return '1 day ago';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks === 1) return '1 week ago';
+  if (diffWeeks < 5) return `${diffWeeks} weeks ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths <= 1) return '1 month ago';
+  return `${diffMonths} months ago`;
+}
+
 export function formatDateRange(start, end, startTime, endTime) {
   const d1 = formatDate(start);
   const d2 = end && end !== start ? formatDate(end) : null;

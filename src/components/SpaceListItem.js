@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { normalizeType } from '@/lib/normalize';
 import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
-import useFollowedSpaces from '@/hooks/useFollowedSpaces';
+import useSavedSpaces from '@/hooks/useSavedSpaces';
 import { getMarkerState } from '@/lib/markerState';
 import { formatDate } from '@/lib/date';
 import MarkerDot from './MarkerDot';
@@ -105,7 +105,7 @@ export default function SpaceListItem({
     cityLabel,
   ]);
 
-  const { userId, followedIds, toggle: toggleFollow } = useFollowedSpaces();
+  const { userId, savedIds, toggle: toggleSave } = useSavedSpaces();
   const canFocus = Boolean(onFocus && space.latitude && space.longitude);
 
   const handleFocus = (event) => {
@@ -204,13 +204,13 @@ export default function SpaceListItem({
                 </button>
               )}
               {userId && (() => {
-                const isFollowing = followedIds.has(String(space.id));
+                const isSaved = savedIds.has(String(space.id));
                 return (
                   <button
                     type='button'
-                    onClick={() => toggleFollow(space.id)}
-                    className={`nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isFollowing ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
-                    {isFollowing ? 'Following' : 'Follow'}
+                    onClick={() => toggleSave(space.id)}
+                    className={`nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
+                    {isSaved ? 'Saved' : 'Save'}
                   </button>
                 );
               })()}

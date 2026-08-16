@@ -10,6 +10,7 @@ import EventCard from '@/components/EventCard';
 export default function AdminEventsManager({
   initialEvents,
   spaceId,
+  spaceCategory,
   filter = '',
   editable,
   emptyMessage = 'No events found yet for this space.',
@@ -135,6 +136,7 @@ export default function AdminEventsManager({
           ) : (
             <EventCard
               event={event}
+              spaceCategory={spaceCategory}
               editable={editable}
               confirmingDelete={confirmingDeleteId === event.id}
               deleting={deletingId === event.id}
