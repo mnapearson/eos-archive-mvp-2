@@ -320,6 +320,8 @@ export default function SpaceListItem({
   return (
     <article
       className={compactClasses}
+      data-testid='space-card'
+      data-space-id={space.id}
       role={canFocus ? 'button' : undefined}
       tabIndex={canFocus ? 0 : undefined}
       onClick={handleFocus}
@@ -350,7 +352,7 @@ export default function SpaceListItem({
               className={`mt-0.5 truncate text-[11px] ${
                 surface === 'overlay' ? 'text-[#454545]' : 'text-[var(--foreground)]/55'
               }`}>
-              Next event — {formatDate(nextEventDate)}, {nextEventTitle}
+              Next event — <span className='font-mono'>{formatDate(nextEventDate)}</span>, {nextEventTitle}
             </p>
           )}
           {displayAddress && directionsUrl ? (

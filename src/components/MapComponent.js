@@ -394,6 +394,8 @@ export default function MapComponent({
       markerEl.style.pointerEvents = 'auto';
       markerEl.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
       markerEl.style.zIndex = '2';
+      markerEl.setAttribute('data-testid', 'map-marker');
+      markerEl.setAttribute('data-space-id', String(spaceId));
 
       // Event-state underlay — pulses for an event today/tomorrow ('live'),
       // a static ring for one further out but within 7 days ('soon'), or

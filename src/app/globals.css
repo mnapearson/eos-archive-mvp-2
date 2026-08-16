@@ -33,7 +33,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 /* Container to center content */
@@ -1455,6 +1455,7 @@ textarea.ea-input {
 }
 
 .menu-link__meta {
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 0.62rem;
   letter-spacing: 0.16em;
   opacity: 0.72;

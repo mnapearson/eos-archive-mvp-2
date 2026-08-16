@@ -136,7 +136,7 @@ export default function EventQuickView({ event, onClose }) {
                 <a
                   key={id}
                   href={href}
-                  className='quick-view__chip quick-view__chip--link'
+                  className={`quick-view__chip quick-view__chip--link ${id === 'date' ? 'font-mono' : ''}`}
                   target={external ? '_blank' : undefined}
                   rel={external ? 'noopener noreferrer' : undefined}>
                   {label}
@@ -144,7 +144,7 @@ export default function EventQuickView({ event, onClose }) {
               ) : (
                 <span
                   key={id}
-                  className='quick-view__chip'>
+                  className={`quick-view__chip ${id === 'date' ? 'font-mono' : ''}`}>
                   {label}
                 </span>
               )

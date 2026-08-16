@@ -62,7 +62,7 @@ export default function EventCard({
           </div>
 
           {dateSummary && (
-            <p className='text-sm leading-relaxed text-[var(--foreground)]/70'>
+            <p className='font-mono text-sm leading-relaxed text-[var(--foreground)]/70'>
               {dateSummary}
             </p>
           )}

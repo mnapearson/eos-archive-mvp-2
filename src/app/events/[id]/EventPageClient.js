@@ -299,14 +299,14 @@ export default function EventPageClient({ eventId }) {
                     {filters ? (
                       <button
                         type='button'
-                        className='event-page__info-link'
+                        className={`event-page__info-link ${id === 'info-date' ? 'font-mono' : ''}`}
                         onClick={() => applyFiltersAndNavigate(filters)}>
                         {value}
                       </button>
                     ) : href ? (
                       <Link
                         href={href}
-                        className='event-page__info-link'>
+                        className={`event-page__info-link ${id === 'info-date' ? 'font-mono' : ''}`}>
                         {value}
                       </Link>
                     ) : externalHref ? (
@@ -314,11 +314,11 @@ export default function EventPageClient({ eventId }) {
                         href={externalHref}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='event-page__info-link'>
+                        className={`event-page__info-link ${id === 'info-date' ? 'font-mono' : ''}`}>
                         {value}
                       </a>
                     ) : (
-                      <span className='event-page__info-value'>{value}</span>
+                      <span className={`event-page__info-value ${id === 'info-date' ? 'font-mono' : ''}`}>{value}</span>
                     )}
                   </div>
                 )

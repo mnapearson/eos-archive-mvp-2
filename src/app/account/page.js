@@ -271,7 +271,7 @@ function SavedEventCard({ event }) {
       )}
       <div className='space-y-1'>
         <p className='text-sm font-medium leading-snug text-[var(--foreground)]'>{event.title}</p>
-        {when && <p className='text-xs text-[var(--foreground)]/55 uppercase tracking-[0.18em]'>{when}</p>}
+        {when && <p className='font-mono text-xs text-[var(--foreground)]/55 uppercase tracking-[0.18em]'>{when}</p>}
         {(spaceName || city) && (
           <p className='text-xs text-[var(--foreground)]/40 uppercase tracking-[0.18em]'>
             {[spaceName, city].filter(Boolean).join(' · ')}

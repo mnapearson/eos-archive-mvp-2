@@ -37,6 +37,7 @@ export default function CityPicker({
   required = false,
   placeholder = 'Start typing your city',
   disabled = false,
+  'data-testid': dataTestId,
 }) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const [inputValue, setInputValue] = useState(
@@ -161,6 +162,7 @@ export default function CityPicker({
       <input
         id={id}
         type='text'
+        data-testid={dataTestId}
         value={inputValue}
         onChange={handleChange}
         onBlur={handleBlur}

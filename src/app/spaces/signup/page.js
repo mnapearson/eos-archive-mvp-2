@@ -228,6 +228,7 @@ export default function SpaceSignUpPage() {
                 <input
                   id='space-name'
                   type='text'
+                  data-testid='space-signup-name'
                   className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={spaceName}
                   onChange={(e) => setSpaceName(e.target.value)}
@@ -244,6 +245,7 @@ export default function SpaceSignUpPage() {
                 <input
                   id='space-address'
                   type='text'
+                  data-testid='space-signup-address'
                   className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
@@ -260,6 +262,7 @@ export default function SpaceSignUpPage() {
                   </label>
                   <CityPicker
                     id='space-city'
+                    data-testid='space-signup-city'
                     value={city}
                     onChange={setCity}
                     required
@@ -274,6 +277,7 @@ export default function SpaceSignUpPage() {
                   </label>
                   <select
                     id='space-type'
+                    data-testid='space-signup-type'
                     className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={spaceType}
                     onChange={(e) => setSpaceType(e.target.value)}
@@ -348,6 +352,7 @@ export default function SpaceSignUpPage() {
                 <input
                   id='account-email'
                   type='email'
+                  data-testid='space-signup-email'
                   className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -366,6 +371,7 @@ export default function SpaceSignUpPage() {
                   <input
                     id='account-password'
                     type='password'
+                    data-testid='space-signup-password'
                     className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -399,6 +405,7 @@ export default function SpaceSignUpPage() {
               </p>
               <button
                 type='submit'
+                data-testid='space-signup-submit'
                 className='nav-action nav-cta !inline-flex h-11 w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
                 Submit space
               </button>

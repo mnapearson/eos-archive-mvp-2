@@ -1,4 +1,5 @@
 import './globals.css';
+import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import NavBar from '@/components/NavBar';
 import CookieConsentBar from '@/components/CookieConsentBar';
@@ -33,7 +34,7 @@ export default function RootLayout({ children }) {
     process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || 'eosarchive.app';
 
   return (
-    <html lang='en' className={GeistMono.variable}>
+    <html lang='en' className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body
         className='min-h-screen flex flex-col'
         style={{ overscrollBehaviorX: 'auto' }}

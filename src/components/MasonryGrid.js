@@ -122,6 +122,8 @@ function GridView({ items, onSelectItem }) {
               href={href}
               scroll={false}
               className='grid-card group'
+              data-testid='event-card'
+              data-event-id={item?.id}
               onClick={(event) => handleCardClick(event, item)}
               onKeyDown={(event) => handleCardKeyDown(event, item)}>
               <figure className='grid-card__media'>
@@ -130,6 +132,7 @@ function GridView({ items, onSelectItem }) {
                     src={item.image_url}
                     alt={item?.title || 'Event image'}
                     className='grid-card__image'
+                    data-testid='event-card-image'
                     loading='lazy'
                   />
                 ) : (
@@ -217,6 +220,7 @@ function ListView({ items, onSelectItem }) {
                 src={item.image_url}
                 alt={item?.title || 'Event image'}
                 className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
+                data-testid='event-card-image'
               />
             ) : (
               <div className='absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
@@ -235,6 +239,7 @@ function ListView({ items, onSelectItem }) {
                 src={item.image_url}
                 alt={item?.title || 'Event image'}
                 className='absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.05]'
+                data-testid='event-card-image'
               />
             ) : (
               <div className='absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
@@ -249,6 +254,8 @@ function ListView({ items, onSelectItem }) {
           <article
             key={item?.id ?? href}
             className='list-card group border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_18px_40px_rgba(0,0,0,0.12)]'
+            data-testid='event-card'
+            data-event-id={item?.id}
             {...interactiveProps}>
             <div className='flex flex-col gap-4 md:flex-row md:items-center'>
               {media}
@@ -272,7 +279,7 @@ function ListView({ items, onSelectItem }) {
                     {locationDetails.map((detail, detailIdx) => (
                       <span
                         key={`${item?.id ?? href}-detail-${detailIdx}`}
-                        className='list-card__detail'>
+                        className={`list-card__detail ${detail === dateLabel ? 'font-mono' : ''}`}>
                         {detail}
                       </span>
                     ))}

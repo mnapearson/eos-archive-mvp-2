@@ -373,7 +373,7 @@ export default function CoverFlowGallery({
                             {meta.map((detail, metaIndex) => (
                               <span
                                 key={`${event.id ?? index}-meta-${metaIndex}`}
-                                className='cover-flow__meta-chip'>
+                                className={`cover-flow__meta-chip ${detail === dateLabel ? 'font-mono' : ''}`}>
                                 {detail}
                               </span>
                             ))}

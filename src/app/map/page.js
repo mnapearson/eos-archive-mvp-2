@@ -198,7 +198,8 @@ export default function SpacesMapPage() {
   return (
     <div
       className='relative overflow-hidden bg-[var(--background)]'
-      style={{ height: 'calc(100dvh - 72px)' }}>
+      style={{ height: 'calc(100dvh - 72px)' }}
+      data-testid='map-container'>
       <MapComponent
         spaces={filteredSpaces}
         eventMap={eventMap}
@@ -225,12 +226,14 @@ export default function SpacesMapPage() {
               placeholder='Search spaces…'
               className='nav-search__input'
               aria-label='Search spaces'
+              data-testid='map-space-search'
             />
           </form>
           <button
             type='button'
             onClick={() => setFilterSheetOpen(true)}
             aria-label={hasActiveFilters ? `Filters, ${activeFilterGroups} active` : 'Filters'}
+            data-testid='filter-button'
             className='nav-action relative !inline-flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center !p-0'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -286,6 +289,7 @@ export default function SpacesMapPage() {
                 key={cat}
                 type='button'
                 onClick={() => toggleCategory(cat)}
+                data-testid={`legend-chip-${cat}`}
                 className='pointer-events-auto flex items-center gap-1 rounded-lg border border-transparent bg-black/65 px-1.5 py-1'
                 style={active ? { backgroundColor: `${color}33`, borderColor: color } : undefined}>
                 <span
@@ -293,7 +297,7 @@ export default function SpacesMapPage() {
                   style={{ backgroundColor: color, opacity: active ? 1 : 0.6 }}
                 />
                 <span
-                  className={`text-[7px] tracking-wide ${active ? 'text-[var(--foreground)]' : 'text-[var(--foreground-secondary)]'}`}>
+                  className={`font-mono text-[7px] tracking-wide ${active ? 'text-[var(--foreground)]' : 'text-[var(--foreground-secondary)]'}`}>
                   {CATEGORY_ABBREV[cat] || cat.slice(0, 3).toUpperCase()}
                 </span>
               </button>
@@ -304,7 +308,9 @@ export default function SpacesMapPage() {
 
       {/* Single-space sheet */}
       {selected && (
-        <div className='map-space-sheet absolute inset-x-0 bottom-0 z-20 rounded-t-2xl border-t border-[var(--card-border)] bg-[var(--card)] px-5 pb-10 pt-4 shadow-[0_-20px_60px_rgba(0,0,0,0.3)]'>
+        <div
+          className='map-space-sheet absolute inset-x-0 bottom-0 z-20 rounded-t-2xl border-t border-[var(--card-border)] bg-[var(--card)] px-5 pb-10 pt-4 shadow-[0_-20px_60px_rgba(0,0,0,0.3)]'
+          data-testid='marker-sheet'>
           <button
             type='button'
             onClick={() => setSelected(null)}
@@ -329,12 +335,12 @@ export default function SpacesMapPage() {
           )}
 
           {selectedState === 'live' && selectedNextEventDate && (
-            <p className='mt-3 text-xs font-medium' style={{ color: 'var(--chrome)' }}>
+            <p className='mt-3 font-mono text-xs font-medium' style={{ color: 'var(--chrome)' }}>
               ● {selectedNextEventDate === today ? 'Tonight' : 'Tomorrow'} · {formatDate(selectedNextEventDate)}
             </p>
           )}
           {selectedState === 'soon' && selectedNextEventDate && (
-            <p className='mt-3 text-xs font-medium text-[var(--foreground-secondary)]'>
+            <p className='mt-3 font-mono text-xs font-medium text-[var(--foreground-secondary)]'>
               Next event · {formatDate(selectedNextEventDate)}
             </p>
           )}
@@ -349,7 +355,7 @@ export default function SpacesMapPage() {
 
       {/* Filter sheet */}
       <Modal open={filterSheetOpen} onClose={() => setFilterSheetOpen(false)} label='Map filters'>
-        <div className='flex max-h-[75vh] flex-col'>
+        <div className='flex max-h-[75vh] flex-col' data-testid='filter-sheet'>
           <div className='flex items-center justify-between pb-4'>
             <span className='ea-label'>Filters</span>
             {hasActiveFilters && (
@@ -370,7 +376,8 @@ export default function SpacesMapPage() {
                       key={cat}
                       type='button'
                       onClick={() => toggleCategory(cat)}
-                      className={`nav-pill ${active ? 'nav-pill--active' : ''}`}>
+                      data-testid={`category-chip-${cat}`}
+                      className={`nav-pill font-mono ${active ? 'nav-pill--active' : ''}`}>
                       {cat}
                     </button>
                   );

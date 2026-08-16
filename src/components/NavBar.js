@@ -163,6 +163,7 @@ function NavBarContent() {
                 placeholder='Search the archive'
                 className='nav-search__input'
                 aria-label='Search archived events'
+                data-testid='search-input'
               />
               <button
                 type='submit'

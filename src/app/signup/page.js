@@ -138,6 +138,7 @@ export default function SignUpPage() {
                 <input
                   id='email'
                   type='email'
+                  data-testid='signup-email'
                   className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -156,6 +157,7 @@ export default function SignUpPage() {
                   <input
                     id='password'
                     type='password'
+                    data-testid='signup-password'
                     className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -173,6 +175,7 @@ export default function SignUpPage() {
                   <input
                     id='confirm-password'
                     type='password'
+                    data-testid='signup-password-confirm'
                     className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -186,6 +189,7 @@ export default function SignUpPage() {
             <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
               <button
                 type='submit'
+                data-testid='signup-submit'
                 className='nav-action nav-cta !inline-flex h-11 flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60'
                 disabled={loading}>
                 {loading ? 'Creating account…' : 'Create account'}
