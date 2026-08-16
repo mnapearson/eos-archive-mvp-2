@@ -6,6 +6,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Spinner from '@/components/Spinner';
 import RoadmapManager from '@/components/RoadmapManager';
 import EventApprovals from '@/components/EventApprovals';
+import SpaceReviewPanel from '@/components/SpaceReviewPanel';
 import Link from 'next/link';
 import { slugify } from '@/lib/normalize';
 
@@ -473,6 +474,7 @@ export default function AdminPage() {
       <ConversationsPanel />
       <RoadmapManager />
       <EventApprovals />
+      <SpaceReviewPanel />
     </main>
   );
 }

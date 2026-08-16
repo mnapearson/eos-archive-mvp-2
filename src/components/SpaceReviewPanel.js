@@ -1,77 +1,127 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient'; // make sure you export your supabase client
-import Toast from '@/components/Toast'; // your in-app notification component
+import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'react-hot-toast';
 
 export default function SpaceReviewPanel() {
   const [pendingSpaces, setPendingSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchPendingSpaces() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('spaces')
-        .select('*')
-        .eq('status', 'pending');
-      if (error) {
-        console.error('Error fetching pending spaces:', error);
-      } else {
-        setPendingSpaces(data || []);
-      }
-      setLoading(false);
-    }
     fetchPendingSpaces();
   }, []);
 
-  async function updateSpaceStatus(spaceId, newStatus) {
-    const { error } = await supabase
+  async function fetchPendingSpaces() {
+    setLoading(true);
+    const { data, error } = await supabase
       .from('spaces')
-      .update({ status: newStatus })
-      .eq('id', spaceId);
+      .select('*')
+      .eq('status', 'pending');
     if (error) {
-      console.error(`Error updating space ${spaceId} status:`, error);
+      console.error('Error fetching pending spaces:', error);
+      toast.error('Unable to load pending spaces.');
     } else {
-      // Remove updated space from the pending list
+      setPendingSpaces(data || []);
+    }
+    setLoading(false);
+  }
+
+  async function updateSpaceStatus(spaceId, newStatus) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Your session has expired — please log in again.');
+      return;
+    }
+
+    const res = await fetch(`/api/spaces/${spaceId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({}));
+      console.error(`Error updating space ${spaceId} status:`, error);
+      toast.error(error || 'Unable to update this space right now.');
+    } else {
       setPendingSpaces((prev) => prev.filter((s) => s.id !== spaceId));
-      // Show a notification
-      Toast.success(`Space ${newStatus}`);
+      toast.success(`Space ${newStatus}.`);
     }
   }
 
-  if (loading) return <p>Loading pending spaces...</p>;
-
   return (
-    <div className='p-4'>
-      <h2 className='text-xl font-bold mb-4'>Pending Space Registrations</h2>
-      {pendingSpaces.length === 0 ? (
-        <p>No pending registrations.</p>
+    <section className='p-4 space-y-4'>
+      <h2 className='text-lg font-semibold text-[var(--foreground)]'>
+        Space submissions
+      </h2>
+
+      {loading ? (
+        <p className='text-sm text-[var(--foreground)]/60'>Loading pending spaces…</p>
+      ) : pendingSpaces.length === 0 ? (
+        <p className='text-sm text-[var(--foreground)]/60'>No pending registrations.</p>
       ) : (
-        <ul className='space-y-4'>
-          {pendingSpaces.map((space) => (
-            <li
-              key={space.id}
-              className='border p-4 rounded bg-[var(--background)] shadow'>
-              <h3 className='text-lg font-semibold'>{space.name}</h3>
-              <p>{space.description}</p>
-              <p className='text-sm text-gray-500'>{space.address}</p>
-              <div className='mt-2 flex gap-2'>
-                <button
-                  onClick={() => updateSpaceStatus(space.id, 'approved')}
-                  className='px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition'>
-                  Approve
-                </button>
-                <button
-                  onClick={() => updateSpaceStatus(space.id, 'rejected')}
-                  className='px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition'>
-                  Reject
-                </button>
-              </div>
-            </li>
-          ))}
+        <ul className='space-y-3'>
+          {pendingSpaces.map((space) => {
+            const imageUrl = space.image_url || space.hero_image_url;
+            return (
+              <li
+                key={space.id}
+                className='flex gap-4 rounded-2xl border border-[var(--foreground)]/14 bg-[var(--background)]/80 p-4'>
+                <div className='relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-[var(--foreground)]/5'>
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={space.name || 'Space image'}
+                      className='h-full w-full object-cover'
+                    />
+                  ) : (
+                    <div className='flex h-full w-full items-center justify-center text-center text-[9px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                <div className='min-w-0 flex-1'>
+                  <h3 className='text-base font-semibold text-[var(--foreground)]'>
+                    {space.name}
+                  </h3>
+                  {space.description && (
+                    <p className='mt-1 text-sm text-[var(--foreground)]/70'>
+                      {space.description}
+                    </p>
+                  )}
+                  <p className='mt-1 text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/50'>
+                    {[space.address, space.city_name ?? space.city]
+                      .filter(Boolean)
+                      .join(', ')}
+                    {space.type ? ` · ${space.type}` : ''}
+                  </p>
+                  <div className='mt-3 flex gap-2'>
+                    <button
+                      type='button'
+                      onClick={() => updateSpaceStatus(space.id, 'approved')}
+                      className='nav-action nav-cta !inline-flex h-9 px-4 text-[11px] uppercase tracking-[0.28em]'>
+                      Approve
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => updateSpaceStatus(space.id, 'rejected')}
+                      className='nav-action !inline-flex h-9 px-4 text-[11px] uppercase tracking-[0.28em] text-[var(--danger)]'>
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
-    </div>
+    </section>
   );
 }
