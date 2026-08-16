@@ -396,6 +396,7 @@ export default function MapComponent({
       markerEl.style.zIndex = '2';
       markerEl.setAttribute('data-testid', 'map-marker');
       markerEl.setAttribute('data-space-id', String(spaceId));
+      markerEl.setAttribute('data-category', typeKey);
 
       // Event-state underlay — pulses for an event today/tomorrow ('live'),
       // a static ring for one further out but within 7 days ('soon'), or
@@ -410,6 +411,9 @@ export default function MapComponent({
         underlayEl.style.pointerEvents = 'none';
         underlayEl.style.zIndex = '1';
         underlayEl.style.animation = 'marker-pulse 1400ms ease-out infinite';
+        underlayEl.setAttribute('data-testid', 'map-marker-underlay');
+        underlayEl.setAttribute('data-marker-state', 'live');
+        underlayEl.setAttribute('data-space-id', String(spaceId));
       } else if (eventState === 'soon') {
         underlayEl = document.createElement('div');
         underlayEl.style.width = '30px';
@@ -419,6 +423,9 @@ export default function MapComponent({
         underlayEl.style.backgroundColor = 'transparent';
         underlayEl.style.pointerEvents = 'none';
         underlayEl.style.zIndex = '1';
+        underlayEl.setAttribute('data-testid', 'map-marker-underlay');
+        underlayEl.setAttribute('data-marker-state', 'soon');
+        underlayEl.setAttribute('data-space-id', String(spaceId));
       }
 
       const spaceName = item.name || item.space?.name || 'UNKNOWN';

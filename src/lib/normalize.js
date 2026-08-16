@@ -26,3 +26,13 @@ export function normalizeType(type) {
   if (!type) return 'space';
   return String(type).toLowerCase();
 }
+
+// Airtable-synced spaces populate city_name; older "registered" spaces only
+// populate the legacy city column. Root cause of a real bug (city blank for
+// half the spaces) found and fixed in the pre-launch audit — kept as a
+// single shared helper, with a regression test, so the fallback can't
+// silently drop out of one call site again.
+export function resolveCity(entity) {
+  if (!entity) return '';
+  return normalizeValue(entity.city_name ?? entity.city);
+}

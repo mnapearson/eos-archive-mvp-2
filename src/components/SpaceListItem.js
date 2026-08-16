@@ -26,9 +26,14 @@ export default function SpaceListItem({
   const [detailImageAspect, setDetailImageAspect] = useState(null);
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
+  // image_url is set once a space owner uploads their own photo; until
+  // then, fall back to hero_image_url (the Airtable-synced og:image) so
+  // Airtable-sourced spaces aren't left with no image at all.
+  const displayImageUrl = space.image_url || space.hero_image_url;
+
   useEffect(() => {
     setHeroImageFailed(false);
-  }, [space.image_url]);
+  }, [displayImageUrl]);
 
   const typeLabel = normalizeType(space.category || space.type);
   const cityLabel =
@@ -120,10 +125,10 @@ export default function SpaceListItem({
 
   useEffect(() => {
     setDetailImageAspect(null);
-  }, [space.image_url]);
+  }, [displayImageUrl]);
 
   const detailImageStyle = useMemo(() => {
-    if (!space.image_url) return undefined;
+    if (!displayImageUrl) return undefined;
     if (detailImageAspect?.width && detailImageAspect?.height) {
       return {
         aspectRatio: `${detailImageAspect.width} / ${detailImageAspect.height}`,
@@ -132,7 +137,7 @@ export default function SpaceListItem({
     return {
       aspectRatio: '4 / 3',
     };
-  }, [detailImageAspect, space.image_url]);
+  }, [detailImageAspect, displayImageUrl]);
 
   if (variant === 'detail') {
     return (
@@ -212,12 +217,12 @@ export default function SpaceListItem({
             </div>
           </div>
 
-          {space.image_url && !heroImageFailed && (
+          {displayImageUrl && !heroImageFailed && (
             <div
               className='relative w-full overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:self-start'
               style={detailImageStyle}>
               <Image
-                src={space.image_url}
+                src={displayImageUrl}
                 alt={space.name || 'Space image'}
                 fill
                 sizes='(max-width: 768px) 80vw, 360px'

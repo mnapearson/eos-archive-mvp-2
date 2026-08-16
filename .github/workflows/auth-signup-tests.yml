@@ -1,0 +1,32 @@
+name: Auth & Signup Tests
+on:
+  pull_request:
+    paths:
+      - 'src/app/signup/**'
+      - 'src/app/spaces/signup/**'
+      - 'src/app/api/spaces/register/**'
+      - 'src/app/account/**'
+      - 'src/app/auth/**'
+  schedule:
+    - cron: '0 6 * * *'
+jobs:
+  auth-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/auth-web.spec.ts e2e/auth-space-signup.spec.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          TESTMAIL_API_KEY: ${{ secrets.TESTMAIL_API_KEY }}
+          TESTMAIL_NAMESPACE: ${{ secrets.TESTMAIL_NAMESPACE }}
+      - run: node scripts/qa-cleanup.js --sweep
+        if: always()
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

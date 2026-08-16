@@ -9,25 +9,12 @@ import {
   useState,
 } from 'react';
 
-import { normalizeValue } from '@/lib/normalize';
+import { normalizeValue, resolveCity } from '@/lib/normalize';
+import { eventMatchesFilters, deriveEventFields } from '@/lib/filterEvents';
 
 export const FilterContext = createContext();
 
 const FILTER_KEYS = ['city', 'space', 'date', 'category', 'designer'];
-
-// Mirrors getMarkerState's live ('today') vs soon ('upcoming') thresholds
-// (src/lib/markerState.js), applied to a single event's own start_date
-// rather than a space's earliest event.
-function matchesEventStatus(startDate, status) {
-  if (status === 'all') return true;
-  if (!startDate) return false;
-  const today = new Date().toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-  const in7Days = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-  if (status === 'today') return startDate >= today && startDate <= tomorrow;
-  if (status === 'upcoming') return startDate >= today && startDate <= in7Days;
-  return true;
-}
 
 export function FilterProvider({ children }) {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -119,7 +106,7 @@ export function FilterProvider({ children }) {
       map.set(space.id, {
         ...space,
         name: normalizeValue(space.name),
-        city: normalizeValue(space.city_name ?? space.city),
+        city: resolveCity(space),
       });
     });
     return map;
@@ -133,7 +120,7 @@ export function FilterProvider({ children }) {
     const designers = new Set();
 
     allSpaces.forEach((space) => {
-      const city = normalizeValue(space.city_name ?? space.city);
+      const city = resolveCity(space);
       const name = normalizeValue(space.name);
       if (city) cities.add(city);
       if (name) spaces.add(name);
@@ -177,48 +164,11 @@ export function FilterProvider({ children }) {
       if (!allEvents.length) return [];
 
       return allEvents.reduce((acc, event) => {
-        const categoryValue = normalizeValue(event.category);
-        const dateValue = normalizeValue(event.start_date)
-          ? normalizeValue(event.start_date).slice(0, 10)
-          : '';
         const space = spaceMap.get(event.space_id);
-        const spaceName = space?.name || '';
-        const spaceCity = space?.city || normalizeValue(event.city);
-
-        const designerValues = (event.designers || [])
-          .map((d) => normalizeValue(d))
-          .filter(Boolean);
-
-        if (!matchesEventStatus(dateValue, status)) {
+        if (!eventMatchesFilters(event, space, filters, status)) {
           return acc;
         }
-
-        if (
-          filters.category.length > 0 &&
-          !filters.category.includes(categoryValue)
-        ) {
-          return acc;
-        }
-
-        if (filters.date.length > 0 && !filters.date.includes(dateValue)) {
-          return acc;
-        }
-
-        if (filters.space.length > 0 && !filters.space.includes(spaceName)) {
-          return acc;
-        }
-
-        if (filters.city.length > 0 && !filters.city.includes(spaceCity)) {
-          return acc;
-        }
-
-        if (
-          filters.designer.length > 0 &&
-          !filters.designer.some((d) => designerValues.includes(d))
-        ) {
-          return acc;
-        }
-
+        const { spaceName, spaceCity } = deriveEventFields(event, space);
         acc.push({
           ...event,
           space_name: spaceName,
@@ -250,15 +200,8 @@ export function FilterProvider({ children }) {
 
       eventsForCounts.forEach((event) => {
         const space = spaceMap.get(event.space_id);
-        const categoryValue = normalizeValue(event.category);
-        const dateValue = normalizeValue(event.start_date)
-          ? normalizeValue(event.start_date).slice(0, 10)
-          : '';
-        const spaceName = space?.name || '';
-        const spaceCity = space?.city || normalizeValue(event.city);
-        const designerValues = (event.designers || [])
-          .map((d) => normalizeValue(d))
-          .filter(Boolean);
+        const { categoryValue, dateValue, spaceName, spaceCity, designerValues } =
+          deriveEventFields(event, space);
 
         switch (key) {
           case 'city': {

@@ -41,23 +41,32 @@ export default function SignUpPage() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${getSiteUrl()}/auth/callback`,
-        data: { display_name: displayName, account_type: 'member' },
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
+          data: { display_name: displayName, account_type: 'member' },
+        },
+      });
 
-    if (error) {
-      toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      setDone(true);
+    } catch (err) {
+      // Belt-and-suspenders: supabase-js normally resolves to {error}
+      // rather than throwing, but an unexpected failure (network drop,
+      // malformed response) would otherwise leave the button stuck on
+      // "Creating account…" forever with no feedback at all.
+      console.error('Unexpected error during sign up:', err);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setLoading(false);
-    setDone(true);
   };
 
   if (done) {
