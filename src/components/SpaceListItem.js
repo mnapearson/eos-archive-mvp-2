@@ -6,6 +6,9 @@ import Image from 'next/image';
 import { normalizeType } from '@/lib/normalize';
 import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
 import useFollowedSpaces from '@/hooks/useFollowedSpaces';
+import { getMarkerState } from '@/lib/markerState';
+import { formatDate } from '@/lib/date';
+import MarkerDot from './MarkerDot';
 
 export default function SpaceListItem({
   space,
@@ -16,6 +19,8 @@ export default function SpaceListItem({
   surface = 'card',
   className = '',
   showActions = true,
+  eventMap = {},
+  eventTitleMap = {},
 }) {
   const router = useRouter();
   const [detailImageAspect, setDetailImageAspect] = useState(null);
@@ -25,7 +30,7 @@ export default function SpaceListItem({
     setHeroImageFailed(false);
   }, [space.image_url]);
 
-  const typeLabel = normalizeType(space.type);
+  const typeLabel = normalizeType(space.category || space.type);
   const cityLabel =
     space.city_name ||
     space.city ||
@@ -307,7 +312,10 @@ export default function SpaceListItem({
     .filter(Boolean)
     .join(' ');
 
-  const typeColor = markerColors[normalizeType(space.type)] || markerColors.other || '#888';
+  const typeColor = markerColors[normalizeType(space.category || space.type)] || markerColors.other || '#888';
+  const eventState = getMarkerState(space.id, eventMap);
+  const nextEventDate = eventMap[space.id];
+  const nextEventTitle = eventTitleMap[space.id];
 
   return (
     <article
@@ -334,12 +342,17 @@ export default function SpaceListItem({
         <div className='min-w-0 flex-1'>
           <h3 className={titleClass}>{space.name || 'Untitled space'}</h3>
           <div className='mt-0.5 flex items-center gap-1.5'>
-            <span
-              className='h-2 w-2 flex-shrink-0 rounded-full'
-              style={{ backgroundColor: typeColor }}
-            />
+            <MarkerDot state={eventState} color={typeColor} dotSize={6} ringSize={12} />
             <span className={cityClass}>{typeLabel || 'other'}</span>
           </div>
+          {nextEventDate && nextEventTitle && (
+            <p
+              className={`mt-0.5 truncate text-[11px] ${
+                surface === 'overlay' ? 'text-[#454545]' : 'text-[var(--foreground)]/55'
+              }`}>
+              Next event — {formatDate(nextEventDate)}, {nextEventTitle}
+            </p>
+          )}
           {displayAddress && directionsUrl ? (
             <a
               href={directionsUrl}

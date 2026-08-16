@@ -1,4 +1,4 @@
-@import url('https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css');
+@import url('https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -1034,6 +1034,19 @@ textarea.ea-input {
   .flow-card__image,
   .grid-card__image {
     transition-duration: 0.001s !important;
+  }
+}
+
+/* Map marker event-state pulse — mirrors eos-archive-app's MarkerDot.tsx
+   (scale 1 -> 2.5, opacity 1 -> 0, 1400ms ease-out, looping). */
+@keyframes marker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
   }
 }
 

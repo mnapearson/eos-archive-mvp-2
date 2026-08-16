@@ -12,6 +12,20 @@ const markerColors = {
   other: '#94a3b8',
 };
 
+// Matches eos-archive-app/app/(tabs)/map.tsx's CATEGORY_ABBREV, lowercased
+// to match this file's keys.
+export const CATEGORY_ABBREV = {
+  'art space': 'ART',
+  bar: 'BAR',
+  cafe: 'CAFE',
+  club: 'CLUB',
+  museum: 'MUS',
+  studio: 'STU',
+  theatre: 'THE',
+  venue: 'VEN',
+  other: 'OTH',
+};
+
 export function getMarkerTextColor(hex) {
   if (!hex || hex.length < 7) return '#fff';
   const r = parseInt(hex.slice(1, 3), 16);

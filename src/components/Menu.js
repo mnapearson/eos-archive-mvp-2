@@ -35,6 +35,8 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
     categoryOptions,
     designerOptions,
     optionCounts,
+    eventStatus,
+    setEventStatus,
   } = useContext(FilterContext);
 
   const router = useRouter();
@@ -49,7 +51,16 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
     category: 'Category',
     designer: 'Designer',
     search: 'Search',
+    eventStatus: 'Events',
   };
+
+  const EVENT_STATUS_OPTIONS = [
+    { value: 'all', label: 'All' },
+    { value: 'today', label: 'Happening today' },
+    { value: 'upcoming', label: 'Upcoming' },
+  ];
+  const eventStatusLabel =
+    EVENT_STATUS_OPTIONS.find((o) => o.value === eventStatus)?.label || 'All';
 
   const { user, profile } = useUserProfile();
 
@@ -153,8 +164,11 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
     if (searchTerm) {
       pairs.push({ filterKey: 'search', value: searchTerm });
     }
+    if (eventStatus !== 'all') {
+      pairs.push({ filterKey: 'eventStatus', value: eventStatusLabel });
+    }
     return pairs;
-  }, [selectedFilters, searchTerm]);
+  }, [selectedFilters, searchTerm, eventStatus, eventStatusLabel]);
 
   const activeFilterCount = activeFilterPairs.length;
   const hasActiveFilters = activeFilterCount > 0;
@@ -257,6 +271,11 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
       return;
     }
 
+    if (filterKey === 'eventStatus') {
+      setEventStatus('all');
+      return;
+    }
+
     setSelectedFilters((prev) => {
       const current = prev[filterKey] || [];
       return {
@@ -275,6 +294,7 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
       category: [],
       designer: [],
     });
+    setEventStatus('all');
 
     if (searchTerm) {
       clearSearchParam();
@@ -467,6 +487,21 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
               counts={optionCounts?.designer || {}}
               onToggleValue={(value) => toggleValue('designer', value)}
             />
+
+            <div className='space-y-2'>
+              <span className='ea-label ea-label--muted'>Events</span>
+              <div className='flex flex-wrap gap-2'>
+                {EVENT_STATUS_OPTIONS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type='button'
+                    onClick={() => setEventStatus(value)}
+                    className={`nav-pill ${eventStatus === value ? 'nav-pill--active' : ''}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

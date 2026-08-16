@@ -15,6 +15,20 @@ export const FilterContext = createContext();
 
 const FILTER_KEYS = ['city', 'space', 'date', 'category', 'designer'];
 
+// Mirrors getMarkerState's live ('today') vs soon ('upcoming') thresholds
+// (src/lib/markerState.js), applied to a single event's own start_date
+// rather than a space's earliest event.
+function matchesEventStatus(startDate, status) {
+  if (status === 'all') return true;
+  if (!startDate) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const in7Days = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+  if (status === 'today') return startDate >= today && startDate <= tomorrow;
+  if (status === 'upcoming') return startDate >= today && startDate <= in7Days;
+  return true;
+}
+
 export function FilterProvider({ children }) {
   const [selectedFilters, setSelectedFilters] = useState({
     city: [],
@@ -29,6 +43,10 @@ export function FilterProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [initializedFromQuery, setInitializedFromQuery] = useState(false);
+  // Mirrors mobile's Map tab eventFilter: 'all' | 'today' | 'upcoming'.
+  // Kept separate from selectedFilters since it's single-select, not an
+  // array like the other filter dimensions.
+  const [eventStatus, setEventStatus] = useState('all');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -70,6 +88,30 @@ export function FilterProvider({ children }) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // space_id -> earliest upcoming start_date (ISO string) / that event's
+  // title, within the next 7 days — mirrors mobile's fetchEvents() window
+  // exactly. Powers marker/card pulse-vs-ring state via getMarkerState()
+  // without a separate query.
+  const { eventMap, eventTitleMap } = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const in7Days = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+    const map = {};
+    const titleMap = {};
+    allEvents.forEach((event) => {
+      const startDate = normalizeValue(event.start_date)
+        ? normalizeValue(event.start_date).slice(0, 10)
+        : '';
+      if (!startDate || startDate < today || startDate > in7Days) return;
+      const spaceId = event.space_id;
+      if (spaceId == null) return;
+      if (!map[spaceId] || startDate < map[spaceId]) {
+        map[spaceId] = startDate;
+        titleMap[spaceId] = event.title;
+      }
+    });
+    return { eventMap: map, eventTitleMap: titleMap };
+  }, [allEvents]);
 
   const spaceMap = useMemo(() => {
     const map = new Map();
@@ -131,7 +173,7 @@ export function FilterProvider({ children }) {
   }, [allEvents, allSpaces]);
 
   const applyFilters = useCallback(
-    (filters) => {
+    (filters, status = eventStatus) => {
       if (!allEvents.length) return [];
 
       return allEvents.reduce((acc, event) => {
@@ -146,6 +188,10 @@ export function FilterProvider({ children }) {
         const designerValues = (event.designers || [])
           .map((d) => normalizeValue(d))
           .filter(Boolean);
+
+        if (!matchesEventStatus(dateValue, status)) {
+          return acc;
+        }
 
         if (
           filters.category.length > 0 &&
@@ -181,7 +227,7 @@ export function FilterProvider({ children }) {
         return acc;
       }, []);
     },
-    [allEvents, spaceMap]
+    [allEvents, spaceMap, eventStatus]
   );
 
   const filteredEvents = useMemo(
@@ -363,6 +409,11 @@ export function FilterProvider({ children }) {
       filtersError: error,
       refetchFilterData: fetchData,
       recentSpaces,
+      eventMap,
+      eventTitleMap,
+      eventStatus,
+      setEventStatus,
+      allSpaces,
     }),
     [
       selectedFilters,
@@ -374,6 +425,10 @@ export function FilterProvider({ children }) {
       error,
       fetchData,
       recentSpaces,
+      eventMap,
+      eventTitleMap,
+      eventStatus,
+      allSpaces,
     ]
   );
 

@@ -25,6 +25,8 @@ const EVENT_STATUS_PRIORITY = {
 
 const PAST_EVENTS_CHUNK = 24;
 
+const EVENT_FILTER_LABELS = { today: 'Happening today', upcoming: 'Upcoming' };
+
 
 export default function HomePage() {
   return (
@@ -122,6 +124,8 @@ function HomePageContent() {
     filtersError,
     refetchFilterData,
     recentSpaces,
+    eventStatus,
+    setEventStatus,
   } = useContext(FilterContext);
   const [viewMode, setViewMode] = useState('list');
   const [modalOpen, setModalOpen] = useState(false);
@@ -138,6 +142,7 @@ function HomePageContent() {
     date: 'Date',
     category: 'Category',
     search: 'Search',
+    eventStatus: 'Events',
   };
 
   const activeFilterPairs = useMemo(() => {
@@ -152,8 +157,11 @@ function HomePageContent() {
     if (searchTermRaw) {
       pairs.push({ filterKey: 'search', val: searchTermRaw });
     }
+    if (eventStatus !== 'all') {
+      pairs.push({ filterKey: 'eventStatus', val: EVENT_FILTER_LABELS[eventStatus] });
+    }
     return pairs;
-  }, [selectedFilters, searchTermRaw]);
+  }, [selectedFilters, searchTermRaw, eventStatus]);
 
   const activeFilterCount = activeFilterPairs.length;
   const hasActiveFilters = activeFilterCount > 0;
@@ -173,6 +181,10 @@ function HomePageContent() {
       clearSearch();
       return;
     }
+    if (filterKey === 'eventStatus') {
+      setEventStatus('all');
+      return;
+    }
     setSelectedFilters((prev) => {
       const updated = { ...prev };
       // Filter out the clicked value
@@ -189,6 +201,7 @@ function HomePageContent() {
       date: [],
       category: [],
     });
+    setEventStatus('all');
     if (searchTermRaw) {
       clearSearch();
     }

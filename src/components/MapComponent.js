@@ -3,8 +3,67 @@
 import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import markerColors from '@/lib/markerColors';
+import { getMarkerState } from '@/lib/markerState';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+const ZOOM_ICON_PLUS =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+const ZOOM_ICON_MINUS =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+
+// Custom Mapbox GL IControl — replaces the browser-default NavigationControl
+// with buttons styled/positioned to match eos-archive-app's Map tab
+// zoomControls (rounded card, divider between + and -).
+class ZoomControl {
+  onAdd(map) {
+    this._map = map;
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.background = 'var(--card)';
+    container.style.border = '1px solid var(--card-border)';
+    container.style.borderRadius = '8px';
+    container.style.overflow = 'hidden';
+    container.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+
+    const makeButton = (icon, label, onClick) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('aria-label', label);
+      button.innerHTML = icon;
+      button.style.width = '40px';
+      button.style.height = '40px';
+      button.style.display = 'flex';
+      button.style.alignItems = 'center';
+      button.style.justifyContent = 'center';
+      button.style.background = 'transparent';
+      button.style.border = 'none';
+      button.style.color = 'var(--foreground)';
+      button.style.cursor = 'pointer';
+      button.addEventListener('click', onClick);
+      return button;
+    };
+
+    const zoomInBtn = makeButton(ZOOM_ICON_PLUS, 'Zoom in', () => map.zoomIn());
+    const divider = document.createElement('div');
+    divider.style.height = '1px';
+    divider.style.background = 'var(--card-border)';
+    const zoomOutBtn = makeButton(ZOOM_ICON_MINUS, 'Zoom out', () => map.zoomOut());
+
+    container.appendChild(zoomInBtn);
+    container.appendChild(divider);
+    container.appendChild(zoomOutBtn);
+
+    this._container = container;
+    return container;
+  }
+
+  onRemove() {
+    this._container.parentNode?.removeChild(this._container);
+    this._map = undefined;
+  }
+}
 
 const DEFAULT_FIT_PADDING = {
   mobile: { top: 72, right: 44, bottom: 200, left: 44 },
@@ -136,6 +195,7 @@ export default function MapComponent({
   spaces,
   address: fallbackAddress,
   activeTypes,
+  eventMap = {},
   initialCenter,
   initialZoom,
   mapStyle = 'mapbox://styles/mapbox/dark-v11',
@@ -150,6 +210,12 @@ export default function MapComponent({
   minAutoFitZoom = null,
   initialAutoFitZoomOffset = 0,
   focusPadding,
+  // Imperative camera move independent of the spaces/autoFit pipeline —
+  // { bounds: [[minLng,minLat],[maxLng,maxLat]] } or { center: [lng,lat], zoom }.
+  // Used by the Map tab's city pills, which move the camera to a city
+  // regardless of which category/event filters are currently narrowing
+  // the visible markers.
+  cameraTarget = null,
 }) {
   const [mapData, setMapData] = useState([]);
   const mapContainerRef = useRef(null);
@@ -188,30 +254,16 @@ export default function MapComponent({
     fetchData();
   }, [eventId, spaces, fallbackToAllSpaces]);
 
+  // Creates the map exactly once per mount (or when mapStyle genuinely
+  // changes). Previously this also depended on `mapData`, which meant the
+  // whole Mapbox instance was torn down and recreated on every filter/search
+  // change — silently undoing any flyTo/fitBounds call (e.g. from a city
+  // pill) that had just run moments earlier in the same tick.
   useEffect(() => {
-    if (mapData.length === 0 || !mapContainerRef.current) return;
+    if (!mapContainerRef.current || mapRef.current) return;
 
-    let centerLng, centerLat;
-    if (eventId) {
-      const eventData = mapData[0];
-      centerLat = Number(eventData.latitude);
-      centerLng = Number(eventData.longitude);
-      if (isNaN(centerLat) || isNaN(centerLng)) {
-        centerLat = 51.3397;
-        centerLng = 12.3731;
-      }
-    } else if (initialCenter) {
-      centerLat = initialCenter.lat;
-      centerLng = initialCenter.lng;
-    } else if (spaces && spaces.length > 0) {
-      const firstSpace = mapData[0];
-      centerLat = Number(firstSpace.latitude) || 51.3397;
-      centerLng = Number(firstSpace.longitude) || 12.3731;
-    } else {
-      centerLat = 51.3397;
-      centerLng = 12.3731;
-    }
-
+    const centerLat = initialCenter ? initialCenter.lat : 51.3397;
+    const centerLng = initialCenter ? initialCenter.lng : 12.3731;
     const finalZoom =
       typeof initialZoom === 'number' ? initialZoom : eventId ? 14 : 12;
 
@@ -222,7 +274,7 @@ export default function MapComponent({
       zoom: finalZoom,
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new ZoomControl(), 'bottom-right');
 
     mapRef.current = map;
     return () => {
@@ -230,12 +282,35 @@ export default function MapComponent({
       map.remove();
       mapRef.current = null;
     };
-  // initialCenter, initialZoom, spaces are initial values — re-running this
-  // effect when they change would destroy and recreate the map unnecessarily.
-  // mapStyle IS reactive in case a caller ever passes a different style
-  // with the correct basemap style.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapData, eventId, mapStyle]);
+  }, [mapStyle]);
+
+  // For callers that don't pass initialCenter (event/space detail embeds),
+  // center on the data once it first arrives — without recreating the map.
+  const didInitialCenterRef = useRef(false);
+  useEffect(() => {
+    if (initialCenter || didInitialCenterRef.current) return;
+    if (!mapRef.current || mapData.length === 0) return;
+
+    let centerLng, centerLat;
+    if (eventId) {
+      const eventData = mapData[0];
+      centerLat = Number(eventData.latitude);
+      centerLng = Number(eventData.longitude);
+      if (isNaN(centerLat) || isNaN(centerLng)) return;
+    } else if (spaces && spaces.length > 0) {
+      const firstSpace = mapData[0];
+      centerLat = Number(firstSpace.latitude);
+      centerLng = Number(firstSpace.longitude);
+      if (isNaN(centerLat) || isNaN(centerLng)) return;
+    } else {
+      return;
+    }
+
+    didInitialCenterRef.current = true;
+    const finalZoom =
+      typeof initialZoom === 'number' ? initialZoom : eventId ? 14 : 12;
+    mapRef.current.jumpTo({ center: [centerLng, centerLat], zoom: finalZoom });
+  }, [mapData, eventId, spaces, initialCenter, initialZoom]);
 
   const updateMarkerFocusStyles = (currentFocusId) => {
     markersRef.current.forEach(({ element, id }) => {
@@ -250,13 +325,14 @@ export default function MapComponent({
   };
 
   const clearMarkers = () => {
-    markersRef.current.forEach(({ marker, element, listeners }) => {
+    markersRef.current.forEach(({ marker, element, listeners, underlayMarker }) => {
       if (element && Array.isArray(listeners)) {
         listeners.forEach(([event, handler]) => {
           element.removeEventListener(event, handler);
         });
       }
       marker.remove();
+      underlayMarker?.remove();
     });
     markersRef.current = [];
     if (focusMarkerRef.current) {
@@ -271,11 +347,12 @@ export default function MapComponent({
     const filteredData =
       activeTypes && activeTypes.length > 0
         ? mapData.filter((item) => {
-            const typeKey = item.type
-              ? item.type.toLowerCase()
-              : item.space && item.space.type
-              ? item.space.type.toLowerCase()
-              : 'default';
+            const typeKey = (
+              item.category ||
+              item.type ||
+              (item.space && (item.space.category || item.space.type)) ||
+              'other'
+            ).toLowerCase();
             return activeTypes.includes(typeKey);
           })
         : mapData;
@@ -294,12 +371,16 @@ export default function MapComponent({
         !Number.isNaN(Number(item.longitude));
       if (!hasCoords) return;
 
-      const typeKey = item.type
-        ? item.type.toLowerCase()
-        : item.space && item.space.type
-        ? item.space.type.toLowerCase()
-        : 'other';
+      const typeKey = (
+        item.category ||
+        item.type ||
+        (item.space && (item.space.category || item.space.type)) ||
+        'other'
+      ).toLowerCase();
       const markerColor = markerColors[typeKey] || markerColors.other || '#888';
+
+      const spaceId = (item.space && item.space.id) || item.id;
+      const eventState = getMarkerState(spaceId, eventMap);
 
       const markerEl = document.createElement('div');
       markerEl.style.width = '16px';
@@ -314,7 +395,30 @@ export default function MapComponent({
       markerEl.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
       markerEl.style.zIndex = '2';
 
-      const spaceId = (item.space && item.space.id) || item.id;
+      // Event-state underlay — pulses for an event today/tomorrow ('live'),
+      // a static ring for one further out but within 7 days ('soon'), or
+      // nothing for 'default'. Mirrors eos-archive-app's MarkerDot.tsx.
+      let underlayEl = null;
+      if (eventState === 'live') {
+        underlayEl = document.createElement('div');
+        underlayEl.style.width = '16px';
+        underlayEl.style.height = '16px';
+        underlayEl.style.borderRadius = '50%';
+        underlayEl.style.backgroundColor = markerColor;
+        underlayEl.style.pointerEvents = 'none';
+        underlayEl.style.zIndex = '1';
+        underlayEl.style.animation = 'marker-pulse 1400ms ease-out infinite';
+      } else if (eventState === 'soon') {
+        underlayEl = document.createElement('div');
+        underlayEl.style.width = '30px';
+        underlayEl.style.height = '30px';
+        underlayEl.style.borderRadius = '50%';
+        underlayEl.style.border = '1.5px solid var(--silver)';
+        underlayEl.style.backgroundColor = 'transparent';
+        underlayEl.style.pointerEvents = 'none';
+        underlayEl.style.zIndex = '1';
+      }
+
       const spaceName = item.name || item.space?.name || 'UNKNOWN';
       const addrParts = [];
       if (item.address) addrParts.push(item.address);
@@ -336,6 +440,16 @@ export default function MapComponent({
       const lat = Number(item.latitude);
       const markerLng = isNaN(lng) ? 12.3731 : lng;
       const markerLat = isNaN(lat) ? 51.3397 : lat;
+
+      let underlayMarker = null;
+      if (underlayEl) {
+        underlayMarker = new mapboxgl.Marker({
+          element: underlayEl,
+          anchor: 'center',
+        })
+          .setLngLat([markerLng, markerLat])
+          .addTo(mapRef.current);
+      }
 
       const marker = new mapboxgl.Marker({
         element: markerEl,
@@ -365,6 +479,7 @@ export default function MapComponent({
         element: markerEl,
         listeners,
         color: markerColor,
+        underlayMarker,
       });
 
       if (!Number.isNaN(markerLng) && !Number.isNaN(markerLat)) {
@@ -485,7 +600,7 @@ export default function MapComponent({
     if (mapData.length > 0 && mapRef.current) {
       addMarkers();
     }
-  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect, showPopups, mapStyle]);
+  }, [mapData, activeTypes, eventId, fallbackAddress, autoFit, fitKey, onMarkerSelect, showPopups, mapStyle, eventMap]);
 
   useEffect(() => {
     if (!autoFit || !mapRef.current) return;
@@ -495,6 +610,25 @@ export default function MapComponent({
     window.addEventListener('resize', resizeHandler);
     return () => window.removeEventListener('resize', resizeHandler);
   }, [autoFit, mapData, activeTypes, fallbackAddress, fitKey, showPopups]);
+
+  useEffect(() => {
+    if (!mapRef.current || !cameraTarget) return;
+    const map = mapRef.current;
+    if (cameraTarget.bounds) {
+      map.fitBounds(cameraTarget.bounds, {
+        padding: 80,
+        maxZoom: 14,
+        duration: 700,
+      });
+    } else if (cameraTarget.center) {
+      map.flyTo({
+        center: cameraTarget.center,
+        zoom: cameraTarget.zoom ?? 11,
+        duration: 700,
+        essential: true,
+      });
+    }
+  }, [cameraTarget]);
 
   useEffect(() => {
     if (!mapRef.current) return;
