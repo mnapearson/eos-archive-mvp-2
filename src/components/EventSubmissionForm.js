@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -28,7 +28,7 @@ const EMPTY_FORM = (spaceId) => ({
 
 export default function EventSubmissionForm({ spaceId, spaces = [] }) {
   const router = useRouter();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [formData, setFormData] = useState(() => EMPTY_FORM(spaceId));
   const [imageFile, setImageFile] = useState(null);

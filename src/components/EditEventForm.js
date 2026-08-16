@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import {
   EVENT_CATEGORIES,
   ALLOWED_IMAGE_TYPES,
@@ -17,7 +17,7 @@ import {
 } from '@/lib/constants';
 
 export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
 
   const [formData, setFormData] = useState({
     title: event.title || '',

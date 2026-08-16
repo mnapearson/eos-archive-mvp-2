@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { toast } from 'react-hot-toast';
 
 export default function SpaceReviewPanel() {
+  const supabase = getSupabaseBrowserClient();
   const [pendingSpaces, setPendingSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
 

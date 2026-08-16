@@ -3,14 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { formatDateRange } from '@/lib/date';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 
 export default function AccountPage() {
   const router = useRouter();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [status, setStatus] = useState('loading');
   const [user, setUser] = useState(null);

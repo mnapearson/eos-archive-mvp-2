@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import markerColors from '@/lib/markerColors';
 import CityPicker from '@/components/CityPicker';
 import toast from 'react-hot-toast';
@@ -20,7 +20,7 @@ function getSiteUrl() {
 
 export default function SpaceSignUpPage() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
 
   // Space info fields
   const [spaceName, setSpaceName] = useState('');

@@ -6,7 +6,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
 import useUserProfile from '@/hooks/useUserProfile';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 
 export default function NavBar(props) {
   return (
@@ -23,7 +23,7 @@ function NavBarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useUserProfile();
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const pathname = usePathname();
 

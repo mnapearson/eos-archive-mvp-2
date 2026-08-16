@@ -1,8 +1,9 @@
 // src/components/RoadmapManager.js
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 
 export default function RoadmapManager() {
+  const supabase = getSupabaseBrowserClient();
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     title: '',

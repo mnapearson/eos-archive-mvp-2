@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import EditEventForm from '@/components/EditEventForm';
@@ -14,7 +14,7 @@ export default function AdminEventsManager({
   editable,
   emptyMessage = 'No events found yet for this space.',
 }) {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
   const router = useRouter();
 
   const [events, setEvents] = useState(initialEvents || []);

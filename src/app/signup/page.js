@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import toast from 'react-hot-toast';
 
 export default function SignUpPage() {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');

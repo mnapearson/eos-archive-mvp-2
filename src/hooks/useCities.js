@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { CITY_COORDINATES } from '@/lib/cityCoordinates';
 
 // Ported from eos-archive-app/lib/useCities.ts.
@@ -11,6 +11,7 @@ export default function useCities() {
 
   useEffect(() => {
     let alive = true;
+    const supabase = getSupabaseBrowserClient();
     supabase
       .from('spaces')
       .select('city_name, city')

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import SpaceListItem from '@/components/SpaceListItem';
 import Spinner from '@/components/Spinner';
 import markerColors from '@/lib/markerColors';
@@ -27,7 +27,7 @@ function prettifyType(type) {
 }
 
 export default function LeicoPage() {
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] = useState(true);

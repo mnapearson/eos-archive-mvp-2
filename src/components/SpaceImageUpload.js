@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -9,7 +9,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 export default function SpaceImageUpload({ spaceId, onImageSaved = () => {} }) {
-  const supabase = useMemo(() => createClientComponentClient(), []);
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const router = useRouter();
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);

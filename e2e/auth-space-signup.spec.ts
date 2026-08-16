@@ -113,25 +113,37 @@ test.describe('Space signup — registration mechanism', () => {
       'requires TESTMAIL_API_KEY/TESTMAIL_NAMESPACE — see e2e/helpers/testInbox.ts'
     );
 
-    // CONFIRMED REAL BUG (found once SMTP started working and this code
-    // path became reachable for the first time — Resend/SMTP being broken
-    // before meant nobody could ever get far enough to hit this):
-    // /spaces/signup/complete never advances past "Finishing your
-    // submission…". Traced live: the redirect chain up through
-    // /auth/callback?code=... is correct (real PKCE exchange, real session
-    // cookie set), and pendingSpaceRegistration is present in localStorage
-    // exactly as expected — but the complete page's own
-    // `await supabase.auth.getSession()` never resolves (confirmed hung
-    // for 25s+, not just slow), so POST /api/spaces/register never fires.
-    // Console shows "Multiple GoTrueClient instances detected in the same
-    // browser context" — src/app/spaces/signup/complete/page.js and
-    // src/components/NavBar.js (rendered on every page via the layout)
-    // each call createClientComponentClient() independently rather than
-    // sharing one instance; this pattern exists in 18 files across the
-    // app. Fixing it properly (a shared/singleton client) is a bigger,
-    // cross-cutting change outside this task's scope — left failing
-    // on purpose rather than weakened, since it's a real, reproducible
-    // bug, not a test issue.
+    // PARTIALLY ADDRESSED, not fully confirmed fixed. Original bug (found
+    // once SMTP started working and this code path became reachable for
+    // the first time): /spaces/signup/complete never advanced past
+    // "Finishing your submission…" because supabase.auth.getSession()
+    // never resolved. Root-caused one real, confirmed cause: NavBar (via
+    // src/lib/supabaseClient.js, used by useCities.js et al.) and this
+    // app's auth-helpers client were two *separate* GoTrueClient instances
+    // sharing the same localStorage key ("Multiple GoTrueClient instances
+    // detected..."). Fixed by consolidating every browser-rendered
+    // Supabase client to one shared instance (src/lib/supabaseBrowserClient.js)
+    // — confirmed live: the warning is now completely gone.
+    //
+    // But the hang itself persisted after that fix, and — critically — a
+    // brand-new, entirely unshared client hung identically in testing, which
+    // means it isn't purely about instance-sharing. Two live suspects, not
+    // cleanly separated: (1) @supabase/auth-helpers-nextjs is a deprecated
+    // package (Supabase's guidance is to migrate to @supabase/ssr) pinned
+    // against @supabase/supabase-js@^2.39.8 but running against 2.57.2
+    // (auth-js 2.71.1) — real version skew in a package no longer
+    // maintained; (2) this session made a very large volume of real
+    // Supabase auth calls today and hit a hard 429 rate limit on
+    // /auth/v1/signup, so some of what looked like a hang may have been
+    // Supabase-side throttling rather than a client bug. spaces/signup/complete/page.js
+    // now has a bounded timeout+fallback so it always reaches a terminal
+    // state (success or a visible error) instead of hanging forever either
+    // way — a real, verified improvement (confirmed: reaches "Something
+    // went wrong" in ~10s instead of never) — but this specific test still
+    // fails today because the fallback also times out under whatever's
+    // currently happening. Worth re-running once Supabase's rate limits
+    // have had time to reset; if it still fails then, the real fix is the
+    // @supabase/ssr migration, not more client-side timeout tuning.
 
     const { email, password, tag } = generateQaInboxCredentials();
     createdEmail = email;
@@ -164,11 +176,11 @@ test.describe('Space signup — registration mechanism', () => {
     page,
     context,
   }) => {
-    // Hits the same confirmed bug as the test above (see its comment) —
-    // this test also lands on /spaces/signup/complete, whose
-    // getSession() hangs regardless of how the page was reached, so
-    // 'missing' status is never set either. Same root cause, not a
-    // second independent bug.
+    // Hits the same issue as the test above (see its comment) — this test
+    // also lands on /spaces/signup/complete, whose getSession() can still
+    // stall regardless of how the page was reached, so 'missing' status
+    // isn't reached within this test's 10s window either. Same underlying
+    // issue, not a second independent bug.
     const { email, password } = generateQaCredentials();
     createdEmail = email;
 

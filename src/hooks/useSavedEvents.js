@@ -1,11 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import toast from 'react-hot-toast';
 
 export default function useSavedEvents() {
-  const supabase = useRef(createClientComponentClient()).current;
+  const supabase = useRef(getSupabaseBrowserClient()).current;
   const [userId, setUserId] = useState(null);
   const [savedIds, setSavedIds] = useState(new Set());
 

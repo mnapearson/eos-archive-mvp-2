@@ -5,9 +5,10 @@ import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import Spinner from '@/components/Spinner';
 import MasonryGrid from '@/components/MasonryGrid';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 
 export default function SpacePageClient({ spaceId }) {
+  const supabase = getSupabaseBrowserClient();
   const id = spaceId;
   const [space, setSpace] = useState(null);
   const [events, setEvents] = useState([]);

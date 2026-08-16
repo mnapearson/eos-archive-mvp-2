@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import Spinner from '@/components/Spinner';
 import RoadmapManager from '@/components/RoadmapManager';
 import EventApprovals from '@/components/EventApprovals';
@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { slugify } from '@/lib/normalize';
 
 function ConversationsPanel() {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [editing, setEditing] = React.useState(null); // conversation row
@@ -427,7 +427,7 @@ function ConversationsPanel() {
 
 export default function AdminPage() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
 
