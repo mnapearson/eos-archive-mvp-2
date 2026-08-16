@@ -9,6 +9,7 @@ on:
       - 'src/app/auth/**'
   schedule:
     - cron: '0 6 * * *'
+  workflow_dispatch: {}
 jobs:
   auth-e2e:
     runs-on: ubuntu-latest
