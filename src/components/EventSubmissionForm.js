@@ -512,8 +512,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
               className={baseInputClasses}
             />
             <p className={helperTextClasses}>
-              Optional. Used only if no flyer image is uploaded — shows a
-              live embed of the post instead.
+              Optional. Shown as an "Organizer" link on the event page.
             </p>
           </div>
         </fieldset>

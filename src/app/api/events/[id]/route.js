@@ -14,6 +14,7 @@ export async function GET(req, { params }) {
         name,
         type,
         category,
+        address,
         latitude,
         longitude,
         lat,

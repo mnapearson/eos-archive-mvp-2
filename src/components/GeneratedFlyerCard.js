@@ -4,11 +4,10 @@ import markerColors, { CATEGORY_ABBREV } from '@/lib/markerColors';
 import { normalizeType } from '@/lib/normalize';
 import { formatDate } from '@/lib/date';
 
-// Used whenever an event has no flyer_image_url/image_url and no
-// instagram_post_url, and as the permanent fallback for a broken Instagram
-// embed (post deleted/private). No image dependency — built entirely from
-// data already on the event/space record, so there's always a working end
-// state instead of a broken image or blank space.
+// Used whenever an event has no flyer_image_url/image_url. No image
+// dependency — built entirely from data already on the event/space record,
+// so there's always a working end state instead of a broken image or blank
+// space.
 //
 // Color/abbreviation come from the event's SPACE category, not the event's
 // own category: event categories (exhibition, concert, workshop...) and

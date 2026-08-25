@@ -404,8 +404,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
             className={baseInputClasses}
           />
           <p className={helperTextClasses}>
-            Optional. Used only if no flyer image is set — shows a live embed
-            of the post instead.
+            Optional. Shown as an "Organizer" link on the event page.
           </p>
         </div>
       </div>

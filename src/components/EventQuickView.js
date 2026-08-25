@@ -6,14 +6,22 @@ import { formatDateRange } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
 import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
+import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
+import { normalizeType } from '@/lib/normalize';
+import { mapboxThumbnail } from '@/lib/mapboxStatic';
 import useSavedEvents from '@/hooks/useSavedEvents';
 
 export default function EventQuickView({ event, onClose }) {
   const [details, setDetails] = useState(event);
   const { userId, savedIds, toggle: toggleSave } = useSavedEvents();
   const title = details?.title ?? 'Event';
-  const flyer =
-    details?.image_url || details?.flyer_url || details?.thumbnail_url || '';
+  // image_url is what this app's frontend actually reads (owner-uploaded);
+  // flyer_image_url is the Airtable-synced fallback (see EventFlyer.js for
+  // the full writeup on this field split). flyer_url/thumbnail_url were
+  // dead checks — no such columns exist on the events table, so those were
+  // always undefined.
+  const flyer = details?.image_url || details?.flyer_image_url || '';
+  const instagramPostUrl = details?.instagram_post_url || '';
 
   const venue =
     details?.space?.name ||
@@ -35,6 +43,63 @@ export default function EventQuickView({ event, onClose }) {
   const spaceName = details?.space?.name || details?.space_name || null;
   const category =
     details?.category || details?.type || details?.tags?.[0] || null;
+
+  // The event's own category (exhibition, concert...) and a space's
+  // category (bar, club, museum...) are different vocabularies —
+  // markerColors/CATEGORY_ABBREV are keyed by space category only, same
+  // distinction already established in GeneratedFlyerCard.js/EventFlyer.js.
+  const spaceCategory = details?.space?.category || details?.space?.type || null;
+  const markerTypeKey = normalizeType(spaceCategory) || 'other';
+  const markerColor = markerColors[markerTypeKey] || markerColors.other;
+  const markerTextColor = getMarkerTextColor(markerColor);
+
+  const eventLat = details?.space?.latitude ?? details?.space?.lat ?? null;
+  const eventLng = details?.space?.longitude ?? details?.space?.lng ?? null;
+  const mapThumbnailUrl =
+    eventLat != null && eventLng != null
+      ? mapboxThumbnail(eventLng, eventLat, markerColor)
+      : null;
+  // Prefers address over venue/city — venue and city already have their
+  // own chips in the pill row above the media area, so repeating either
+  // here would just say the same thing twice; the address is the one
+  // location detail not already shown anywhere in this modal.
+  const mapCaptionText = address || venue || city || null;
+
+  // Static map thumbnail — the modal's fallback when there's no flyer and
+  // no Instagram post to embed (also reused as the Instagram embed's own
+  // fallback on failure, so a deleted/private post doesn't fall back to a
+  // GeneratedFlyerCard that would repeat name/date/category already shown
+  // in the pill row above). Genuinely new information for this view: where
+  // the event is, not a restatement of what's already on screen.
+  const renderMapThumbnail = () => (
+    <div className='quick-view__poster relative'>
+      {mapThumbnailUrl ? (
+        <img
+          src={mapThumbnailUrl}
+          alt={`Map showing the location of ${title}`}
+          className='quick-view__poster-image absolute inset-0 h-full w-full object-cover'
+        />
+      ) : (
+        <div
+          className='absolute inset-0'
+          style={{
+            background: `color-mix(in oklab, ${markerColor} 22%, var(--background) 78%)`,
+          }}
+        />
+      )}
+      {mapCaptionText && (
+        <span
+          className='absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] shadow-[0_8px_20px_rgba(0,0,0,0.18)]'
+          style={{
+            background: `color-mix(in oklab, ${markerColor} 55%, var(--background) 45%)`,
+            color: markerTextColor,
+          }}>
+          {mapCaptionText}
+        </span>
+      )}
+    </div>
+  );
+
   const designerNames = details?.designers?.length
     ? details.designers
     : details?.creator
@@ -100,8 +165,16 @@ export default function EventQuickView({ event, onClose }) {
   }, [when, startDate, spaceId, spaceName, spaceSlug, city, address, locationStr]);
 
   useEffect(() => {
+    // Also fires when only coordinates are missing, not just when venue/
+    // address/city are all absent — the map thumbnail needs lat/lng
+    // specifically, which callers that only pass flat space_name/space_city
+    // (the Explore homepage grid, the space detail page's event list) never
+    // include. Confirmed live: without this, the thumbnail silently
+    // rendered a blank tinted box, since venue/city being present already
+    // satisfied the original narrower check and skipped this fetch.
     const needsLocation = !venue && !address && !city;
-    if (!needsLocation || !details?.id) return;
+    const needsCoords = eventLat == null && eventLng == null;
+    if ((!needsLocation && !needsCoords) || !details?.id) return;
     let cancelled = false;
     (async () => {
       try {
@@ -116,7 +189,7 @@ export default function EventQuickView({ event, onClose }) {
     return () => {
       cancelled = true;
     };
-  }, [details?.id, venue, address, city]);
+  }, [details?.id, venue, address, city, eventLat, eventLng]);
 
   return (
     <section className='quick-view space-y-6'>
@@ -165,9 +238,7 @@ export default function EventQuickView({ event, onClose }) {
             />
           </div>
         ) : (
-          <div className='quick-view__poster quick-view__poster--empty'>
-            <span>No flyer available</span>
-          </div>
+          renderMapThumbnail()
         )}
       </div>
 
@@ -204,6 +275,15 @@ export default function EventQuickView({ event, onClose }) {
           overrides={{ location: locationStr }}
           className='quick-view__calendar'
         />
+        {instagramPostUrl && (
+          <a
+            href={instagramPostUrl}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='nav-action quick-view__action'>
+            Organizer
+          </a>
+        )}
         {userId && details?.id ? (
           <SaveButton
             isSaved={savedIds.has(String(details.id))}

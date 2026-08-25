@@ -666,16 +666,6 @@ textarea.ea-input {
   object-fit: cover;
 }
 
-.quick-view__poster--empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 60%, transparent);
-}
-
 .quick-view__description {
   padding: 1rem 1.1rem;
   border-radius: 1rem;

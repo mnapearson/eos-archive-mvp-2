@@ -10,7 +10,6 @@ import Spinner from '@/components/Spinner';
 import ShareButton from '@/components/ShareButton';
 import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
-import InstagramFlyerEmbed from '@/components/InstagramFlyerEmbed';
 import GeneratedFlyerCard from '@/components/GeneratedFlyerCard';
 import { FilterContext } from '@/contexts/FilterContext';
 import { formatDateRange } from '@/lib/date';
@@ -210,7 +209,6 @@ export default function EventPageClient({ eventId }) {
   const directFlyerUrl = event.image_url || event.flyer_image_url;
   const flyerSrc = buildOptimizedSrc(directFlyerUrl, 1600);
   const hasFlyer = Boolean(directFlyerUrl) && !flyerFailed;
-  const hasAlternateFlyer = !hasFlyer && Boolean(event.instagram_post_url);
 
   return (
     <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
@@ -238,15 +236,6 @@ export default function EventPageClient({ eventId }) {
                 priority
                 className='quick-view__poster-image'
                 onError={() => setFlyerFailed(true)}
-              />
-            </div>
-          ) : hasAlternateFlyer ? (
-            <div className='quick-view__poster event-page__poster'>
-              <InstagramFlyerEmbed
-                event={event}
-                spaceCategory={event.space?.category || event.space?.type}
-                postUrl={event.instagram_post_url}
-                className='h-full'
               />
             </div>
           ) : (
@@ -295,6 +284,15 @@ export default function EventPageClient({ eventId }) {
               overrides={{ location: calendarLocation }}
               className='event-page__calendar'
             />
+            {event.instagram_post_url && (
+              <a
+                href={event.instagram_post_url}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='nav-action'>
+                Organizer
+              </a>
+            )}
             {userId && event?.id && (
               <button
                 type='button'

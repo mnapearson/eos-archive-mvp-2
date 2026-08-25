@@ -5,19 +5,6 @@ import Link from 'next/link';
 
 const CONSENT_STORAGE_KEY = 'cookieConsent';
 const CONSENT_TIMESTAMP_KEY = `${CONSENT_STORAGE_KEY}:timestamp`;
-export const CONSENT_EVENT = 'cookieconsentchange';
-
-// Shared consent check for anything that needs to gate a third-party
-// script/embed behind the same choice this banner already collects (e.g.
-// InstagramFlyerEmbed.js) — single source of truth for the storage key and
-// what counts as "accepted", instead of each consumer re-deriving it.
-export function hasAcceptedCookies() {
-  try {
-    return localStorage.getItem(CONSENT_STORAGE_KEY) === 'accepted';
-  } catch {
-    return false;
-  }
-}
 
 export default function CookieConsentBar() {
   const [visible, setVisible] = useState(false);
@@ -41,12 +28,6 @@ export default function CookieConsentBar() {
       localStorage.setItem(CONSENT_TIMESTAMP_KEY, new Date().toISOString());
     } catch (error) {
       // Fallback: if storage fails we still proceed, but future visits will surface the banner again.
-    }
-
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent(CONSENT_EVENT, { detail: { status } })
-      );
     }
 
     setVisible(false);
