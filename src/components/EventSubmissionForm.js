@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
+import { withTimeout } from '@/lib/withTimeout';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -155,7 +156,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
       const {
         data: { user },
         error: userError,
-      } = await supabase.auth.getUser();
+      } = await withTimeout(supabase.auth.getUser());
 
       if (userError || !user) {
         toast.error('Authentication error. Please sign in again.');
@@ -249,6 +250,13 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
       toast.success('Event submitted successfully!');
       resetForm();
       router.refresh();
+    } catch (err) {
+      // withTimeout() rejects instead of hanging if getUser() never
+      // resolves (known Supabase auth-client issue, see withTimeout.js) —
+      // without this catch that rejection had nowhere to go, leaving the
+      // submit button stuck on "Submitting..." forever with no feedback.
+      console.error('Error submitting event:', err);
+      toast.error('Something went wrong submitting your event. Please try again.');
     } finally {
       setSubmitting(false);
     }
