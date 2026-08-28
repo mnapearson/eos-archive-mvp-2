@@ -43,5 +43,21 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Mark this account as a space in the profiles table so the app can
+  // route them to /spaces/admin instead of /account. The profiles row is
+  // created by a Supabase trigger on user signup and defaults role to
+  // 'member' — we update it here once the space record exists.
+  const { error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .update({ role: 'space' })
+    .eq('id', user.id);
+
+  if (profileError) {
+    // Non-fatal: space was registered, but role update failed. Log it so
+    // it can be fixed manually — the space admin can be corrected in the
+    // Supabase dashboard by setting profiles.role = 'space' for this user.
+    console.error('Space registered but failed to set profiles.role:', profileError);
+  }
+
   return NextResponse.json({ success: true });
 }

@@ -33,7 +33,7 @@ function SpaceAdminDashboardContent() {
   // independent auth-state read here was a latent instance of the same
   // race that hung /spaces/signup/complete (confirmed live on this exact
   // page during testing, before this fix).
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, profileLoading } = useAuth();
   const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -82,9 +82,13 @@ function SpaceAdminDashboardContent() {
   }
 
   useEffect(() => {
-    // Don't act on auth state until AuthContext has actually resolved it
-    // one way or the other.
-    if (authLoading) return;
+    // Don't act on auth state until AuthContext has fully resolved both
+    // the session AND the profile fetch — profileLoading covers the window
+    // between session resolving and the profiles row arriving. Acting on
+    // profile?.role before profileLoading settles would treat "not yet
+    // fetched" the same as "confirmed member" and bounce a space admin back
+    // to /account during that brief gap.
+    if (authLoading || profileLoading) return;
 
     if (!user) {
       router.push('/login');
@@ -104,7 +108,7 @@ function SpaceAdminDashboardContent() {
 
     fetchSpaceRecord(null, user.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoading, user, profile]);
+  }, [authLoading, profileLoading, user, profile]);
 
   const handleSave = async () => {
     if (formValues.website && !isValidUrl(formValues.website)) {
