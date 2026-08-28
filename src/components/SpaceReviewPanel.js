@@ -61,11 +61,7 @@ export default function SpaceReviewPanel() {
   }
 
   return (
-    <section className='p-4 space-y-4'>
-      <h2 className='text-lg font-semibold text-[var(--foreground)]'>
-        Space submissions
-      </h2>
-
+    <section className='space-y-4'>
       {loading ? (
         <p className='text-sm text-[var(--foreground)]/60'>Loading pending spaces…</p>
       ) : pendingSpaces.length === 0 ? (

@@ -48,6 +48,10 @@ export function AuthProvider({ children }) {
         } = await withTimeout(supabase.auth.getSession());
         if (cancelled) return;
         setSession(initialSession ?? null);
+        // Set alongside session, in the same batch, not left for the
+        // profile-fetch effect to flip on its own render cycle later — see
+        // the profileLoading state declaration for why that gap matters.
+        setProfileLoading(Boolean(initialSession?.user?.id));
         setError(null);
       } catch (err) {
         // Bounded-timeout backstop: with the race eliminated at the
@@ -71,6 +75,7 @@ export function AuthProvider({ children }) {
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (cancelled) return;
       setSession(nextSession ?? null);
+      setProfileLoading(Boolean(nextSession?.user?.id));
       setLoading(false);
       setError(null);
     });
@@ -100,6 +105,7 @@ export function AuthProvider({ children }) {
     const userId = session?.user?.id;
     if (!userId) {
       setProfile(null);
+      setProfileLoading(false);
       return;
     }
     fetchProfile(userId);

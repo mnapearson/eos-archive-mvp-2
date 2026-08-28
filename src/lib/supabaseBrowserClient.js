@@ -16,7 +16,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 // sites racing each other (each already correctly returned the same cached
 // instance) — it was src/lib/supabaseClient.js, a *separate* plain
 // createClient() wrapper used by several other client-rendered
-// files (e.g. useCities.js, RoadmapManager.js), constructing its own
+// files (e.g. useCities.js, SpaceReviewPanel.js), constructing its own
 // independent GoTrueClient against the same Supabase project. Both clients
 // end up managing the same localStorage session key concurrently ("Multiple
 // GoTrueClient instances detected..."), which is what caused
