@@ -192,6 +192,27 @@ function SpaceAdminDashboardContent() {
           </p>
         </header>
 
+        {space.status === 'pending' && (
+          <div className='rounded-2xl border border-[var(--chrome)]/35 bg-[var(--chrome)]/10 px-6 py-4 text-sm text-[var(--foreground)]/80'>
+            <span className='font-semibold text-[var(--chrome)]'>Pending approval — </span>
+            your space is being reviewed by the eos archive team. You can still update
+            details and prepare events below, but your listing won&rsquo;t appear
+            publicly until it&rsquo;s approved.
+          </div>
+        )}
+
+        {space.status === 'rejected' && (
+          <div className='rounded-2xl border border-[var(--danger)]/35 bg-[var(--danger)]/10 px-6 py-4 text-sm text-[var(--foreground)]/80'>
+            <span className='font-semibold text-[var(--danger)]'>Not approved — </span>
+            your submission wasn&rsquo;t approved for the archive. If you think this is a
+            mistake, contact{' '}
+            <a href='mailto:hello@eosarchive.app' className='underline hover:text-[var(--foreground)]'>
+              hello@eosarchive.app
+            </a>
+            .
+          </div>
+        )}
+
         <nav className='flex flex-wrap gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
           {tabOptions.map((tab) => {
             const isActive = activeTab === tab.id;
