@@ -9,6 +9,7 @@ import EventSubmissionForm from '@/components/EventSubmissionForm';
 import SpaceImageUpload from '@/components/SpaceImageUpload';
 import SpaceListItem from '@/components/SpaceListItem';
 import AdminEventsManager from '@/components/AdminEventsManager';
+import SpaceAnalytics from '@/components/SpaceAnalytics';
 import { toast } from 'react-hot-toast';
 
 export default function SpaceAdminDashboard() {
@@ -41,7 +42,7 @@ function SpaceAdminDashboardContent() {
     website: '',
     description: '',
   });
-  const allowedTabs = ['details', 'events', 'archive'];
+  const allowedTabs = ['details', 'events', 'archive', 'analytics'];
   const [activeTab, setActiveTab] = useState(() => {
     const tab = searchParams.get('tab');
     return tab && allowedTabs.includes(tab) ? tab : 'details';
@@ -156,6 +157,7 @@ function SpaceAdminDashboardContent() {
       { id: 'details', label: 'Space details' },
       { id: 'events', label: 'Submit events' },
       { id: 'archive', label: 'Archive' },
+      { id: 'analytics', label: 'Analytics' },
     ],
     []
   );
@@ -348,6 +350,15 @@ function SpaceAdminDashboardContent() {
               editable={true}
               emptyMessage='No archived events yet for this space.'
             />
+          </section>
+        )}
+
+        {activeTab === 'analytics' && (
+          <section className='space-y-4 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+            <h3 className='text-lg font-semibold tracking-tight text-[var(--foreground)]'>
+              Analytics
+            </h3>
+            <SpaceAnalytics spaceId={space.id} />
           </section>
         )}
         <div className='flex justify-end border-t border-[var(--foreground)]/12 pt-6'>
