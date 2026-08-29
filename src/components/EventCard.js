@@ -1,6 +1,7 @@
 'use client';
 
 import ShareButton from '@/components/ShareButton';
+import ShareToSocial from '@/components/ShareToSocial';
 import EventFlyer from '@/components/EventFlyer';
 import { formatDateRange } from '@/lib/date';
 import {
@@ -13,6 +14,8 @@ import {
 export default function EventCard({
   event,
   spaceCategory,
+  spaceName,
+  spaceCity,
   editable,
   confirmingDelete,
   deleting,
@@ -112,6 +115,12 @@ export default function EventCard({
             buttonText='Share'
             copiedText='Copied'
             disabled={!event.approved}
+            className={`${subtleActionClasses} w-full sm:w-auto`}
+          />
+
+          <ShareToSocial
+            event={event}
+            space={{ name: spaceName, city_name: spaceCity }}
             className={`${subtleActionClasses} w-full sm:w-auto`}
           />
 

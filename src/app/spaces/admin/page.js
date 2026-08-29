@@ -346,6 +346,8 @@ function SpaceAdminDashboardContent() {
             <AdminEventsManager
               spaceId={space.id}
               spaceCategory={space.category || space.type}
+              spaceName={space.name}
+              spaceCity={space.city_name ?? space.city}
               filter='archive'
               editable={true}
               emptyMessage='No archived events yet for this space.'

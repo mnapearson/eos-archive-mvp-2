@@ -140,7 +140,6 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
         category: formData.category,
         designers: formData.designers.map((d) => d.trim()).filter(Boolean),
         description: formData.description,
-        approved: false,
         terms_accepted: true,
       };
 
@@ -193,7 +192,13 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
         return;
       }
 
-      toast.success('Updates saved. The event is pending approval.');
+      // Best-effort — a stale share card isn't worth failing the save over.
+      fetch(`/api/events/${event.id}/share-card`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {});
+
+      toast.success('Updates saved.');
       onSaved({ ...updatedData, id: event.id });
     } catch (err) {
       console.error('Unexpected error saving event edits:', err);

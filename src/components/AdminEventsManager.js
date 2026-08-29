@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import EditEventForm from '@/components/EditEventForm';
 import EventCard from '@/components/EventCard';
 
@@ -11,12 +12,15 @@ export default function AdminEventsManager({
   initialEvents,
   spaceId,
   spaceCategory,
+  spaceName,
+  spaceCity,
   filter = '',
   editable,
   emptyMessage = 'No events found yet for this space.',
 }) {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
+  const { session } = useAuth();
 
   const [events, setEvents] = useState(initialEvents || []);
   const [editingEventId, setEditingEventId] = useState(null);
@@ -84,6 +88,16 @@ export default function AdminEventsManager({
     setDeletingId(eventId);
 
     try {
+      // Invalidate before the row is gone — the share-card route looks up
+      // the event to verify ownership, so this has to run first. Best-
+      // effort: a failure here shouldn't block the actual delete.
+      if (session?.access_token) {
+        await fetch(`/api/events/${eventId}/share-card`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }).catch(() => {});
+      }
+
       const { error } = await supabase
         .from('events')
         .delete()
@@ -137,6 +151,8 @@ export default function AdminEventsManager({
             <EventCard
               event={event}
               spaceCategory={spaceCategory}
+              spaceName={spaceName}
+              spaceCity={spaceCity}
               editable={editable}
               confirmingDelete={confirmingDeleteId === event.id}
               deleting={deletingId === event.id}
