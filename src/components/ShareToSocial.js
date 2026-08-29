@@ -21,6 +21,12 @@ function buildCaption(event, space) {
     .join('\n');
 }
 
+// Hidden on the live site while this feature is still being worked on
+// locally — set NEXT_PUBLIC_ENABLE_SHARE_TO_SOCIAL=true in .env.local to
+// see it in dev. Checked after the hooks below, not before, so hook call
+// order stays identical across renders regardless of the flag.
+const SHARE_TO_SOCIAL_ENABLED = process.env.NEXT_PUBLIC_ENABLE_SHARE_TO_SOCIAL === 'true';
+
 export default function ShareToSocial({ event, space, className = '' }) {
   const [open, setOpen] = useState(false);
   const [format, setFormat] = useState('story');
@@ -58,6 +64,8 @@ export default function ShareToSocial({ event, space, className = '' }) {
       toast.error('Could not copy the caption.');
     }
   };
+
+  if (!SHARE_TO_SOCIAL_ENABLED) return null;
 
   return (
     <>
