@@ -164,6 +164,13 @@ export function FilterProvider({ children }) {
       if (!allEvents.length) return [];
 
       return allEvents.reduce((acc, event) => {
+        // Explore is a visual, flyer-led grid — an event with no flyer has
+        // nothing to show there. This only affects what's rendered/counted
+        // here, not allEvents itself, which eventMap (map marker state)
+        // also derives from and should keep seeing every approved event.
+        if (!event.image_url && !event.flyer_image_url) {
+          return acc;
+        }
         const space = spaceMap.get(event.space_id);
         if (!eventMatchesFilters(event, space, filters, status)) {
           return acc;
