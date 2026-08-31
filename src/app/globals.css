@@ -18,11 +18,14 @@
   --foreground-secondary: #888888;
   --card: #111111;
   --card-border: #222222;
+  --surface: #161616;
+  --dim: #3a3a3a;
   --input: #1a1a1a;
   --input-border: #333333;
   --chrome: #7ab4d4;
   --silver: #b8d0e4;
   --chrome-glow: rgba(122, 180, 212, 0.35);
+  --chrome-dim: rgba(122, 180, 212, 0.10);
   --silver-glow: rgba(184, 208, 228, 0.2);
   --danger: #f87171;
   --success: #4ade80;
@@ -131,14 +134,18 @@ body {
   --ea-text-xl: 22px;
 }
 
-/* Shared label styling */
+/* Shared label styling — Geist Mono, matching the same rule mobile's
+   label pattern now follows (constants/theme.ts): Mono for labels/data,
+   Geist sans for body/headings. Was Geist sans at 0.32em/weight 600
+   before the design-pass unification. */
 .ea-label {
   display: inline-flex;
   align-items: center;
   text-transform: uppercase;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.12em;
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: clamp(0.58rem, 0.78vw, 0.74rem);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.1;
   font-feature-settings: 'case' 1, 'calt' 0;
 }
