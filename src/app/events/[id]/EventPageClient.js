@@ -11,6 +11,7 @@ import ShareButton from '@/components/ShareButton';
 import AddToCalendar from '@/components/AddToCalendar';
 import MapComponent from '@/components/MapComponent';
 import GeneratedFlyerCard from '@/components/GeneratedFlyerCard';
+import { ShareIcon, HeartIcon } from '@/components/Icons';
 import { FilterContext } from '@/contexts/FilterContext';
 import { formatDateRange } from '@/lib/date';
 import useSavedEvents from '@/hooks/useSavedEvents';
@@ -111,7 +112,7 @@ export default function EventPageClient({ eventId }) {
       event?.space?.lng
   );
 
-  const infoRows = useMemo(() => {
+  const filterableRows = useMemo(() => {
     if (!event) return [];
 
     const rows = [];
@@ -122,6 +123,7 @@ export default function EventPageClient({ eventId }) {
         label: 'When',
         value: eventDateTime,
         filters: { date: [startDate] },
+        mono: true,
       });
     }
 
@@ -134,44 +136,16 @@ export default function EventPageClient({ eventId }) {
       });
     }
 
-    if (venueName) {
-      rows.push({
-        id: 'info-space',
-        label: 'Space',
-        value: venueName,
-        href: spaceHref,
-      });
-    }
-
-    const addressValue =
-      event.space?.address ||
-      spaceAddress ||
-      event.space?.city_name ||
-      event.space?.city ||
-      event.city ||
-      '';
-    if (addressValue) {
-      rows.push({
-        id: 'info-location',
-        label: 'Location',
-        value: addressValue,
-        externalHref: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          addressValue
-        )}`,
-      });
-    }
-
     return rows;
-  }, [
-    event,
-    startDate,
-    eventDateTime,
-    eventCategory,
-    venueName,
-    spaceHref,
-    spaceAddress,
-    eventDesigner,
-  ]);
+  }, [event, startDate, eventDateTime, eventCategory]);
+
+  const addressValue =
+    event?.space?.address ||
+    spaceAddress ||
+    event?.space?.city_name ||
+    event?.space?.city ||
+    event?.city ||
+    '';
 
   if (loading) {
     return (
@@ -210,167 +184,170 @@ export default function EventPageClient({ eventId }) {
   const flyerSrc = buildOptimizedSrc(directFlyerUrl, 1600);
   const hasFlyer = Boolean(directFlyerUrl) && !flyerFailed;
 
+  const isSaved = userId ? savedIds.has(String(event.id)) : false;
+  const metaLine = [eventDateTime, city].filter(Boolean).join(' · ');
+
   return (
     <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
-      <header className='event-page__header space-y-4'>
-        <div className='flex flex-wrap items-center gap-3'>
-          {statusLabel && (
-            <span className='nav-pill quick-view__badge'>
-              {statusLabel}
-            </span>
+      <div className='detail-hero'>
+        {hasFlyer ? (
+          <Image
+            src={flyerSrc}
+            alt={`Flyer for ${eventTitle}`}
+            fill
+            sizes='100vw'
+            priority
+            className='detail-hero__image'
+            onError={() => setFlyerFailed(true)}
+          />
+        ) : (
+          <GeneratedFlyerCard
+            event={event}
+            spaceCategory={event.space?.category || event.space?.type}
+            className='absolute inset-0 !h-full !w-full !aspect-auto !rounded-none'
+            showText={false}
+          />
+        )}
+        <div
+          className='detail-hero__gradient'
+          aria-hidden='true'
+        />
+        {statusLabel && (
+          <span className='detail-hero__status'>{statusLabel}</span>
+        )}
+        <h1 className='detail-hero__name'>{eventTitle}</h1>
+        <div className='detail-hero__actions'>
+          <ShareButton
+            title={eventTitle}
+            text={shareSummary}
+            url={eventUrl}
+            imageUrl={event.image_url}
+            className='detail-hero__circle-btn'
+            copiedText='✓'
+            aria-label='Share event'>
+            <ShareIcon />
+          </ShareButton>
+          {userId && event?.id && (
+            <button
+              type='button'
+              onClick={() => toggleSave(event.id)}
+              className='detail-hero__circle-btn'
+              aria-label={isSaved ? 'Remove from saved' : 'Save event'}>
+              <HeartIcon filled={isSaved} />
+            </button>
           )}
         </div>
-        <h1 className='quick-view__title event-page__title'>{eventTitle}</h1>
-      </header>
+      </div>
 
-      <div className='event-page__layout'>
-        <div className='event-page__media'>
-          {hasFlyer ? (
-            <div className='quick-view__poster event-page__poster'>
-              <Image
-                src={flyerSrc}
-                alt={`Flyer for ${eventTitle}`}
-                width={1600}
-                height={2000}
-                sizes='(max-width: 768px) 100vw, 50vw'
-                priority
-                className='quick-view__poster-image'
-                onError={() => setFlyerFailed(true)}
-              />
-            </div>
-          ) : (
-            <div className='quick-view__poster event-page__poster'>
-              <GeneratedFlyerCard
-                event={event}
-                spaceCategory={event.space?.category || event.space?.type}
-                className='h-full !aspect-auto'
-                showText={false}
-              />
-            </div>
-          )}
-          {eventDesigner && (
-            <div className='quick-view__designer-row'>
-              <span className='quick-view__designer'>
-                Graphic design by {eventDesigner}
-              </span>
-            </div>
-          )}
+      {metaLine && <p className='detail-hero__meta'>{metaLine}</p>}
 
-          {hasMap && (
-            <div className='event-page__map-card event-page__map-card--media'>
-              <MapComponent
-                spaces={event.space ? [event.space] : undefined}
-                eventId={eventId}
-                autoFit
-                showPopups={false}
-                focusSpaceId={event.space?.id}
-              />
-            </div>
-          )}
-        </div>
+      <div className='space-y-5 pt-5'>
+        {filterableRows.map(({ id, label, value, filters, mono }) => (
+          <div
+            key={id}
+            className='space-y-1.5'>
+            <span className='ea-label ea-label--muted'>{label}</span>
+            <button
+              type='button'
+              onClick={() => applyFiltersAndNavigate(filters)}
+              className={`block text-sm font-semibold text-[var(--foreground)] hover:text-[var(--chrome)] ${mono ? 'font-mono' : ''}`}>
+              {value}
+            </button>
+          </div>
+        ))}
 
-        <div className='event-page__details'>
-          <div className='event-page__actions'>
-            <ShareButton
-              title={eventTitle}
-              text={shareSummary}
-              url={eventUrl}
-              imageUrl={event.image_url}
-              className='nav-action'
-              buttonText='Share'
-              copiedText='Copied'
-            />
-            <AddToCalendar
-              event={event}
-              overrides={{ location: calendarLocation }}
-              className='event-page__calendar'
-            />
-            {event.instagram_post_url && (
+        {venueName && (
+          <div className='space-y-1.5'>
+            <span className='ea-label ea-label--muted'>At</span>
+            {spaceHref ? (
+              <Link
+                href={spaceHref}
+                className='event-page__space-row'>
+                {venueName}
+                <span aria-hidden>→</span>
+              </Link>
+            ) : (
+              <p className='text-sm text-[var(--foreground)]/85'>{venueName}</p>
+            )}
+          </div>
+        )}
+
+        {event.description && (
+          <div className='space-y-1.5'>
+            <span className='ea-label ea-label--muted'>About</span>
+            <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
+              {event.description}
+            </p>
+          </div>
+        )}
+
+        {event.instagram_post_url && (
+          <div className='space-y-1.5'>
+            <span className='ea-label ea-label--muted'>Organizer</span>
+            <div>
               <a
                 href={event.instagram_post_url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='nav-action'>
+                className='nav-action rounded-full px-4'>
                 Organizer
               </a>
+            </div>
+          </div>
+        )}
+
+        <div className='space-y-1.5'>
+          <span className='ea-label ea-label--muted'>Add to calendar</span>
+          <AddToCalendar
+            event={event}
+            overrides={{ location: calendarLocation }}
+            className='event-page__calendar'
+          />
+        </div>
+
+        {(addressValue || hasMap) && (
+          <div className='space-y-1.5'>
+            <span className='ea-label ea-label--muted'>Location</span>
+            {addressValue && (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressValue)}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='block text-sm text-[var(--foreground)]/85 underline underline-offset-4 hover:text-[var(--foreground)]'>
+                {addressValue}
+              </a>
             )}
-            {userId && event?.id && (
-              <button
-                type='button'
-                onClick={() => toggleSave(event.id)}
-                className={`nav-action ${savedIds.has(String(event.id)) ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
-                {savedIds.has(String(event.id)) ? 'Saved' : 'Save'}
-              </button>
+            {hasMap && (
+              <div className='event-page__map-card'>
+                <MapComponent
+                  spaces={event.space ? [event.space] : undefined}
+                  eventId={eventId}
+                  autoFit
+                  showPopups={false}
+                  focusSpaceId={event.space?.id}
+                />
+              </div>
             )}
           </div>
+        )}
 
-          {infoRows.length > 0 && (
-            <div className='event-page__info-grid'>
-              {infoRows.map(
-                ({ id, label, value, filters, href, externalHref }) => (
-                  <div
-                    key={id}
-                    className='event-page__info-item'>
-                    <span className='event-page__info-label'>{label}</span>
-                    {filters ? (
-                      <button
-                        type='button'
-                        className={`event-page__info-link ${id === 'info-date' ? 'font-mono' : ''}`}
-                        onClick={() => applyFiltersAndNavigate(filters)}>
-                        {value}
-                      </button>
-                    ) : href ? (
-                      <Link
-                        href={href}
-                        className={`event-page__info-link ${id === 'info-date' ? 'font-mono' : ''}`}>
-                        {value}
-                      </Link>
-                    ) : externalHref ? (
-                      <a
-                        href={externalHref}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className={`event-page__info-link ${id === 'info-date' ? 'font-mono' : ''}`}>
-                        {value}
-                      </a>
-                    ) : (
-                      <span className={`event-page__info-value ${id === 'info-date' ? 'font-mono' : ''}`}>{value}</span>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-          )}
+        {event.document_url && (
+          <a
+            href={event.document_url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='nav-action rounded-full px-4'>
+            Download PDF
+          </a>
+        )}
 
-          {event.description && (
-            <div className='event-page__description'>
-              <p className='whitespace-pre-line'>{event.description}</p>
-            </div>
-          )}
-
-          {hasMap && (
-            <div className='event-page__map-card event-page__map-card--details'>
-              <MapComponent
-                spaces={event.space ? [event.space] : undefined}
-                eventId={eventId}
-                autoFit
-                showPopups={false}
-                focusSpaceId={event.space?.id}
-              />
-            </div>
-          )}
-
-          {event.document_url && (
-            <a
-              href={event.document_url}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='event-page__info-link'>
-              Download PDF
-            </a>
-          )}
-        </div>
+        {eventDesigner && (
+          <p className='text-xs text-[var(--foreground)]/55'>
+            Graphic design by {eventDesigner}
+          </p>
+        )}
       </div>
+
       <div className='event-page__footer-links'>
         <Link
           href='/'

@@ -9,6 +9,7 @@ import useSavedSpaces from '@/hooks/useSavedSpaces';
 import { getMarkerState } from '@/lib/markerState';
 import { formatDate } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
+import { ShareIcon, HeartIcon } from '@/components/Icons';
 import MarkerDot from './MarkerDot';
 
 export default function SpaceListItem({
@@ -128,30 +129,30 @@ export default function SpaceListItem({
 
     return (
       <article className={className}>
-        <div className='space-hero'>
+        <div className='detail-hero'>
           {displayImageUrl && !heroImageFailed ? (
             <Image
               src={displayImageUrl}
               alt={space.name || 'Space image'}
               fill
               sizes='100vw'
-              className='space-hero__image'
+              className='detail-hero__image'
               priority
               onError={() => setHeroImageFailed(true)}
             />
           ) : (
-            <div className='space-hero__image space-hero__image--placeholder' />
+            <div className='detail-hero__image detail-hero__image--placeholder' />
           )}
           <div
-            className='space-hero__gradient'
+            className='detail-hero__gradient'
             aria-hidden='true'
           />
-          <h1 className='space-hero__name'>{space.name || 'Untitled space'}</h1>
-          <div className='space-hero__actions'>
+          <h1 className='detail-hero__name'>{space.name || 'Untitled space'}</h1>
+          <div className='detail-hero__actions'>
             <ShareButton
               title={space.name}
               text={space.name}
-              className='space-hero__circle-btn'
+              className='detail-hero__circle-btn'
               copiedText='✓'
               aria-label='Share space'>
               <ShareIcon />
@@ -160,7 +161,7 @@ export default function SpaceListItem({
               <button
                 type='button'
                 onClick={() => toggleSave(space.id)}
-                className='space-hero__circle-btn'
+                className='detail-hero__circle-btn'
                 aria-label={isSaved ? 'Remove from saved' : 'Save space'}>
                 <HeartIcon filled={isSaved} />
               </button>
@@ -168,7 +169,7 @@ export default function SpaceListItem({
           </div>
         </div>
 
-        {metaLine && <p className='space-hero__meta'>{metaLine}</p>}
+        {metaLine && <p className='detail-hero__meta'>{metaLine}</p>}
 
         <div className='space-y-5 pt-5'>
           {displayAddress && (
@@ -324,43 +325,3 @@ export default function SpaceListItem({
   );
 }
 
-function ShareIcon() {
-  return (
-    <svg
-      width='16'
-      height='16'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden='true'>
-      <path d='M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6' />
-      <polyline points='16 6 12 2 8 6' />
-      <line
-        x1='12'
-        y1='2'
-        x2='12'
-        y2='15'
-      />
-    </svg>
-  );
-}
-
-function HeartIcon({ filled }) {
-  return (
-    <svg
-      width='16'
-      height='16'
-      viewBox='0 0 24 24'
-      fill={filled ? 'var(--chrome)' : 'none'}
-      stroke={filled ? 'var(--chrome)' : 'currentColor'}
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden='true'>
-      <path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z' />
-    </svg>
-  );
-}
