@@ -121,7 +121,7 @@ export default function SpacePageClient({ spaceId }) {
                 <button
                   key={value}
                   onClick={() => setTimeFilter(active ? null : value)}
-                  className={`nav-action h-9 px-4 text-[11px] uppercase tracking-[0.28em] ${
+                  className={`nav-action px-4 text-[11px] uppercase tracking-[0.28em] ${
                     active
                       ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
                       : ''

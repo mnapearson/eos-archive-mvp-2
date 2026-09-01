@@ -182,7 +182,7 @@ export default function ResetPasswordPage() {
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <button
               type='submit'
-              className='nav-action nav-cta !inline-flex h-11 flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'
+              className='nav-action nav-cta !inline-flex flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'
               disabled={loading}>
               {loading ? 'Updating…' : 'Update password'}
             </button>
@@ -190,7 +190,7 @@ export default function ResetPasswordPage() {
             <button
               type='button'
               onClick={() => router.push('/login')}
-              className='nav-action !inline-flex h-10 justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35'>
+              className='nav-action !inline-flex justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35'>
               Return to login
             </button>
           </div>

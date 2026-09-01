@@ -223,7 +223,7 @@ function SpaceAdminDashboardContent() {
                 key={tab.id}
                 type='button'
                 onClick={() => setActiveTab(tab.id)}
-                className={`nav-action !inline-flex h-10 px-4 transition ${
+                className={`nav-action !inline-flex px-4 transition ${
                   isActive
                     ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
                     : ''
@@ -277,12 +277,12 @@ function SpaceAdminDashboardContent() {
                 <div className='flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4'>
                   <button
                     onClick={handleSave}
-                    className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] disabled:opacity-60 sm:w-auto'>
+                    className='nav-action nav-cta !inline-flex w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] disabled:opacity-60 sm:w-auto'>
                     Save changes
                   </button>
                   <button
                     onClick={handleCancel}
-                    className='nav-action !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
+                    className='nav-action !inline-flex w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
                     Cancel
                   </button>
                 </div>
@@ -300,7 +300,7 @@ function SpaceAdminDashboardContent() {
               <div>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
+                  className='nav-action nav-cta !inline-flex w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
                   Edit details
                 </button>
               </div>
@@ -368,7 +368,7 @@ function SpaceAdminDashboardContent() {
               await supabase.auth.signOut();
               router.push('/login');
             }}
-            className='nav-action !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
+            className='nav-action !inline-flex w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
             Disconnect
           </button>
         </div>

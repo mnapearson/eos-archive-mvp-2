@@ -187,7 +187,7 @@ function ConversationsPanel() {
           <button
             type='button'
             onClick={startNew}
-            className='nav-action nav-cta !inline-flex h-9 px-4 text-[11px] uppercase tracking-[0.28em]'>
+            className='nav-action nav-cta !inline-flex px-4 text-[11px] uppercase tracking-[0.28em]'>
             New
           </button>
         </div>
@@ -227,13 +227,13 @@ function ConversationsPanel() {
                   <button
                     type='button'
                     onClick={() => editRow(r)}
-                    className='nav-action !inline-flex h-8 px-3 text-[10px] uppercase tracking-[0.24em]'>
+                    className='nav-action !inline-flex px-3 text-[10px] uppercase tracking-[0.24em]'>
                     Edit
                   </button>
                   <Link
                     href={`/conversations/${r.slug}`}
                     target='_blank'
-                    className='nav-action !inline-flex h-8 px-3 text-[10px] uppercase tracking-[0.24em]'>
+                    className='nav-action !inline-flex px-3 text-[10px] uppercase tracking-[0.24em]'>
                     View
                   </Link>
                 </div>
@@ -372,14 +372,14 @@ function ConversationsPanel() {
               <button
                 type='button'
                 onClick={save}
-                className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
+                className='nav-action nav-cta !inline-flex w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
                 Save
               </button>
               <button
                 type='button'
                 onClick={publishNow}
                 disabled={!editing?.id}
-                className='nav-action !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] disabled:opacity-50 sm:w-auto'>
+                className='nav-action !inline-flex w-full justify-center px-6 text-[11px] uppercase tracking-[0.28em] disabled:opacity-50 sm:w-auto'>
                 Publish
               </button>
             </div>
@@ -477,7 +477,7 @@ function AdminPageContent() {
                 key={tab.id}
                 type='button'
                 onClick={() => setActiveTab(tab.id)}
-                className={`nav-action !inline-flex h-10 px-4 transition ${
+                className={`nav-action !inline-flex px-4 transition ${
                   isActive
                     ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
                     : ''

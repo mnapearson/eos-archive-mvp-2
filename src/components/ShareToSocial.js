@@ -86,7 +86,7 @@ export default function ShareToSocial({ event, space, className = '' }) {
             <button
               type='button'
               onClick={() => setFormat('story')}
-              className={`nav-action !inline-flex h-9 px-4 ${
+              className={`nav-action !inline-flex px-4 ${
                 format === 'story'
                   ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
                   : ''
@@ -96,7 +96,7 @@ export default function ShareToSocial({ event, space, className = '' }) {
             <button
               type='button'
               onClick={() => setFormat('square')}
-              className={`nav-action !inline-flex h-9 px-4 ${
+              className={`nav-action !inline-flex px-4 ${
                 format === 'square'
                   ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
                   : ''
@@ -136,7 +136,7 @@ export default function ShareToSocial({ event, space, className = '' }) {
             type='button'
             onClick={handleShare}
             disabled={status === 'loading'}
-            className='nav-action nav-cta !flex h-11 w-full justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'>
+            className='nav-action nav-cta !flex w-full justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'>
             {status === 'loading' ? 'Preparing…' : 'Share'}
           </button>
           <p className='text-center text-xs text-[var(--foreground)]/50'>

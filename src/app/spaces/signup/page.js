@@ -416,7 +416,7 @@ export default function SpaceSignUpPage() {
               <button
                 type='submit'
                 data-testid='space-signup-submit'
-                className='nav-action nav-cta !inline-flex h-11 w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
+                className='nav-action nav-cta !inline-flex w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
                 Submit space
               </button>
             </footer>

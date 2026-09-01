@@ -180,7 +180,7 @@ export default function AccountPage() {
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
                 <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No saved events yet</p>
                 <p className='mt-2 text-xs text-[var(--foreground)]/35'>Open any event and hit Save to add it here.</p>
-                <Link href='/' className='nav-action mt-6 !inline-flex h-9 px-5 text-[11px]'>Explore events</Link>
+                <Link href='/' className='nav-action mt-6 !inline-flex px-5 text-[11px]'>Explore events</Link>
               </div>
             ) : (
               <>
@@ -212,7 +212,7 @@ export default function AccountPage() {
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
                 <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No saved spaces yet</p>
                 <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit Save.</p>
-                <Link href='/map' className='nav-action mt-6 !inline-flex h-9 px-5 text-[11px]'>Explore spaces</Link>
+                <Link href='/map' className='nav-action mt-6 !inline-flex px-5 text-[11px]'>Explore spaces</Link>
               </div>
             ) : (
               <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
@@ -229,7 +229,7 @@ export default function AccountPage() {
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
                 <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No visited spaces yet</p>
                 <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit &ldquo;I was here&rdquo;.</p>
-                <Link href='/map' className='nav-action mt-6 !inline-flex h-9 px-5 text-[11px]'>Explore spaces</Link>
+                <Link href='/map' className='nav-action mt-6 !inline-flex px-5 text-[11px]'>Explore spaces</Link>
               </div>
             ) : (
               <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
@@ -275,16 +275,16 @@ export default function AccountPage() {
 
               <div className='flex flex-wrap gap-3'>
                 <button type='submit'
-                  className='nav-action nav-cta !inline-flex h-11 px-6 text-[12px] uppercase tracking-[0.32em] disabled:opacity-60'
+                  className='nav-action nav-cta !inline-flex px-6 text-[12px] uppercase tracking-[0.32em] disabled:opacity-60'
                   disabled={saving}>
                   {saving ? 'Saving…' : 'Save changes'}
                 </button>
                 <button type='button' onClick={handleChangePassword}
-                  className='nav-action !inline-flex h-10 px-6 text-[11px] uppercase tracking-[0.28em]'>
+                  className='nav-action !inline-flex px-6 text-[11px] uppercase tracking-[0.28em]'>
                   Change password
                 </button>
                 <button type='button' onClick={handleSignOut}
-                  className='nav-action !inline-flex h-10 px-6 text-[11px] uppercase tracking-[0.28em]'>
+                  className='nav-action !inline-flex px-6 text-[11px] uppercase tracking-[0.28em]'>
                   Sign out
                 </button>
               </div>

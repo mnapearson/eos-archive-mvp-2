@@ -180,7 +180,7 @@ export default function SpaceListItem({
                     target='_blank'
                     rel='noopener noreferrer'
                     onClick={handleExternalLinkClick}
-                    className='nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                    className='nav-action rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
                     Visit website
                   </a>
                 )}
@@ -198,7 +198,7 @@ export default function SpaceListItem({
                 <button
                   type='button'
                   onClick={handleFocus}
-                  className='nav-action nav-cta h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                  className='nav-action nav-cta rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
                   View on map
                 </button>
               )}
@@ -208,7 +208,7 @@ export default function SpaceListItem({
                   <button
                     type='button'
                     onClick={() => toggleSave(space.id)}
-                    className={`nav-action h-8 rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
+                    className={`nav-action rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
                     {isSaved ? 'Saved' : 'Save'}
                   </button>
                 );
