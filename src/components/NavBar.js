@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect, useContext, useMemo } from 'react';
+import { Suspense, useState, useEffect, useContext, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
@@ -20,12 +20,19 @@ export default function NavBar(props) {
 function NavBarContent() {
   const { setSelectedFilters } = useContext(FilterContext);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useUserProfile();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const desktopSearchInputRef = useRef(null);
+
+  useEffect(() => {
+    if (searchOpen) {
+      desktopSearchInputRef.current?.focus();
+    }
+  }, [searchOpen]);
 
   // Sync search input with current query string
   const currentSearchValue = searchParams.get('search') || '';
@@ -73,7 +80,7 @@ function NavBarContent() {
       router.push('/');
       setSearchTerm('');
     }
-    setMobileSearchOpen(false);
+    setSearchOpen(false);
   };
 
   const isSpaceUser = profile?.role === 'space';
@@ -105,54 +112,61 @@ function NavBarContent() {
         Skip to content
       </a>
 
-      {/* Desktop/tablet: minimal top bar. Small screens get a bottom bar
-          instead (below), mirroring the mobile app's own bottom tab bar
-          rather than cramming everything into a fixed header. */}
+      {/* Desktop/tablet: the same bar as the mobile bottom bar below, just
+          docked to the top instead of the bottom — flat icon/text items,
+          no pill button chrome, search expands inline from its own icon
+          instead of opening a separate row. */}
       <header className='!hidden sm:!block fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl'>
-        <div className='mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 lg:max-w-5xl'>
-          <Link
-            href='/'
-            onClick={handleLogoClick}
-            className='flex-shrink-0'
-            aria-label='eos archive home'>
-            <Wordmark />
-          </Link>
+        <div className='mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 lg:max-w-5xl'>
+          <div className='flex items-center gap-3'>
+            <Link
+              href='/'
+              onClick={handleLogoClick}
+              className='flex-shrink-0'
+              aria-label='eos archive home'>
+              <Wordmark />
+            </Link>
 
-          <form
-            onSubmit={handleSearchSubmit}
-            className='nav-search flex flex-1 items-center justify-between max-w-sm'
-            role='search'>
-            <input
-              type='search'
-              name='search'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder='Search the archive'
-              className='nav-search__input'
-              aria-label='Search archived events'
-              data-testid='search-input'
-            />
-            <button
-              type='submit'
-              className='nav-search__submit'
-              aria-label='Search'>
-              <SearchIcon />
-            </button>
-          </form>
-
-          <div className='flex flex-none items-center gap-2'>
             <button
               type='button'
               onClick={toggleMenu}
               aria-label='Open menu'
               aria-controls='primary-menu'
-              className='nav-action'>
-              Menu
+              className='nav-flat-item h-8 w-8'>
+              <MenuIcon />
             </button>
+          </div>
+
+          <div className='flex flex-none items-center'>
+            <form
+              onSubmit={handleSearchSubmit}
+              className={`nav-search-inline ${searchOpen ? 'nav-search-inline--open' : ''}`}
+              role='search'>
+              <button
+                type='button'
+                onClick={() => setSearchOpen((open) => !open)}
+                aria-label={searchOpen ? 'Close search' : 'Search'}
+                aria-expanded={searchOpen}
+                className='nav-flat-item h-8 w-8 flex-shrink-0'>
+                <SearchIcon />
+              </button>
+              <input
+                ref={desktopSearchInputRef}
+                type='search'
+                name='search'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder='Search the archive'
+                className='nav-search-inline__input'
+                aria-label='Search archived events'
+                data-testid='search-input'
+                tabIndex={searchOpen ? 0 : -1}
+              />
+            </form>
 
             <Link
               href={loginHref}
-              className='nav-action'>
+              className='nav-flat-item ml-4 text-sm font-medium'>
               {loginLabel}
             </Link>
 
@@ -160,13 +174,13 @@ function NavBarContent() {
               <button
                 type='button'
                 onClick={handleSignOut}
-                className='nav-cta'>
+                className='nav-flat-item nav-flat-item--accent ml-4 text-sm'>
                 Disconnect
               </button>
             ) : (
               <Link
                 href='/signup'
-                className='nav-cta'>
+                className='nav-flat-item nav-flat-item--accent ml-4 text-sm'>
                 Sign up
               </Link>
             )}
@@ -182,7 +196,7 @@ function NavBarContent() {
           href='/'
           onClick={handleLogoClick}
           aria-label='eos archive home'
-          className='nav-bottom-bar__item'>
+          className='nav-bottom-bar__item nav-flat-item'>
           <span
             className='h-2 w-2 rounded-full'
             style={{ background: 'var(--chrome)', boxShadow: '0 0 8px var(--chrome-glow)' }}
@@ -191,10 +205,10 @@ function NavBarContent() {
 
         <button
           type='button'
-          onClick={() => setMobileSearchOpen((open) => !open)}
-          aria-label={mobileSearchOpen ? 'Close search' : 'Search'}
-          aria-expanded={mobileSearchOpen}
-          className='nav-bottom-bar__item'>
+          onClick={() => setSearchOpen((open) => !open)}
+          aria-label={searchOpen ? 'Close search' : 'Search'}
+          aria-expanded={searchOpen}
+          className='nav-bottom-bar__item nav-flat-item'>
           <SearchIcon />
         </button>
 
@@ -203,13 +217,13 @@ function NavBarContent() {
           onClick={toggleMenu}
           aria-label='Open menu'
           aria-controls='primary-menu'
-          className='nav-bottom-bar__item'>
+          className='nav-bottom-bar__item nav-flat-item'>
           <MenuIcon />
         </button>
 
         <Link
           href={loginHref}
-          className='nav-bottom-bar__item nav-bottom-bar__item--label'>
+          className='nav-bottom-bar__item nav-flat-item nav-bottom-bar__item--label'>
           {loginLabel}
         </Link>
 
@@ -217,19 +231,19 @@ function NavBarContent() {
           <button
             type='button'
             onClick={handleSignOut}
-            className='nav-bottom-bar__item nav-bottom-bar__item--label nav-bottom-bar__item--accent'>
+            className='nav-bottom-bar__item nav-flat-item nav-flat-item--accent nav-bottom-bar__item--label'>
             Disconnect
           </button>
         ) : (
           <Link
             href='/signup'
-            className='nav-bottom-bar__item nav-bottom-bar__item--label nav-bottom-bar__item--accent'>
+            className='nav-bottom-bar__item nav-flat-item nav-flat-item--accent nav-bottom-bar__item--label'>
             Sign up
           </Link>
         )}
       </nav>
 
-      {mobileSearchOpen && (
+      {searchOpen && (
         <div className='sm:!hidden fixed inset-x-0 z-40 border-t border-[var(--foreground)]/12 bg-[var(--background)]/98 backdrop-blur-xl px-4 py-3 nav-bottom-bar__search'>
           <form
             onSubmit={handleSearchSubmit}

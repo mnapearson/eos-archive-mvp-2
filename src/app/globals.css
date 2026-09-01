@@ -928,23 +928,41 @@ textarea.ea-input {
 
 /* Mobile bottom bar — replaces the top header on small screens, mirroring
    the app's own bottom tab bar (Are.na uses the same pattern on web). */
-.nav-bottom-bar__item {
-  display: flex;
-  flex: 1;
+/* Flat nav item — icon or text, no pill background/border, just a color
+   change on hover/focus. The desktop header and the mobile bottom bar
+   both use this for search/menu/login/signup (only the layout wrapper
+   differs between them), instead of each having its own button chrome. */
+.nav-flat-item {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 56px;
   color: color-mix(in oklab, var(--foreground) 70%, transparent);
+  transition: color 0.2s ease;
+}
+
+.nav-flat-item:hover,
+.nav-flat-item:focus-visible {
+  color: var(--foreground);
+}
+
+.nav-flat-item--accent {
+  color: var(--chrome);
+  font-weight: 600;
+}
+
+.nav-flat-item--accent:hover,
+.nav-flat-item--accent:focus-visible {
+  color: color-mix(in oklab, var(--chrome) 80%, white 20%);
+}
+
+.nav-bottom-bar__item {
+  flex: 1;
+  height: 56px;
 }
 
 .nav-bottom-bar__item--label {
   font-size: 0.78rem;
   font-weight: 500;
-}
-
-.nav-bottom-bar__item--accent {
-  color: var(--chrome);
-  font-weight: 600;
 }
 
 .nav-bottom-bar__search {
@@ -953,6 +971,43 @@ textarea.ea-input {
 
 .nav-bottom-bar__search .nav-search {
   max-width: none;
+}
+
+/* Desktop header search — expands inline next to the icon that opened it,
+   rather than a separate panel/row. */
+.nav-search-inline {
+  display: flex;
+  align-items: center;
+}
+
+.nav-search-inline__input {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: width 0.25s ease, opacity 0.2s ease, padding 0.25s ease,
+    border-color 0.25s ease, margin 0.25s ease;
+}
+
+.nav-search-inline__input::placeholder {
+  color: color-mix(in oklab, var(--foreground) 50%, transparent);
+}
+
+.nav-search-inline__input:focus {
+  outline: none;
+}
+
+.nav-search-inline--open .nav-search-inline__input {
+  width: 200px;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0;
+  border-bottom-color: color-mix(in oklab, var(--foreground) 30%, transparent);
+  opacity: 1;
 }
 
 .menu-link {

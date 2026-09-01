@@ -250,6 +250,12 @@ export default function EventPageClient({ eventId }) {
         </div>
       </div>
 
+      {eventDesigner && (
+        <p className='mt-2 text-xs text-[var(--foreground)]/55'>
+          Graphic design by {eventDesigner}
+        </p>
+      )}
+
       <div className='event-page__meta-row'>
         {fullDateLabel && (
           <button
@@ -361,12 +367,6 @@ export default function EventPageClient({ eventId }) {
             className='nav-action rounded-full px-4'>
             Download PDF
           </a>
-        )}
-
-        {eventDesigner && (
-          <p className='text-xs text-[var(--foreground)]/55'>
-            Graphic design by {eventDesigner}
-          </p>
         )}
       </div>
 
