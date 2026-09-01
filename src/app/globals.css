@@ -316,6 +316,81 @@ textarea.ea-input {
   background: color-mix(in oklab, var(--chrome) 55%, rgba(0, 0, 0, 0.68) 45%);
 }
 
+/* Space hero — mirrors eos-archive-app's app/space/[id].tsx hero block: a
+   full-bleed image, a bottom gradient, the space name overlaid on it, and
+   share/save circle buttons in the corner. */
+.space-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.4 / 1;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--card);
+}
+
+.space-hero__image {
+  object-fit: cover;
+}
+
+.space-hero__image--placeholder {
+  position: absolute;
+  inset: 0;
+  background: var(--card);
+}
+
+.space-hero__gradient {
+  position: absolute;
+  inset: 0;
+  top: 35%;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+}
+
+.space-hero__name {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.space-hero__actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.space-hero__circle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.68);
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.space-hero__circle-btn:hover,
+.space-hero__circle-btn:focus-visible {
+  background: color-mix(in oklab, var(--chrome) 55%, rgba(0, 0, 0, 0.68) 45%);
+}
+
+.space-hero__meta {
+  margin-top: 0.75rem;
+  color: var(--chrome);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .quick-view__title {
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   line-height: 1.15;

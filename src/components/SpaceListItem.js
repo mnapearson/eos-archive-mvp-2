@@ -8,6 +8,7 @@ import markerColors, { getMarkerTextColor } from '@/lib/markerColors';
 import useSavedSpaces from '@/hooks/useSavedSpaces';
 import { getMarkerState } from '@/lib/markerState';
 import { formatDate } from '@/lib/date';
+import ShareButton from '@/components/ShareButton';
 import MarkerDot from './MarkerDot';
 
 export default function SpaceListItem({
@@ -22,7 +23,6 @@ export default function SpaceListItem({
   eventTitleMap = {},
 }) {
   const router = useRouter();
-  const [detailImageAspect, setDetailImageAspect] = useState(null);
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
   // image_url is set once a space owner uploads their own photo; until
@@ -122,126 +122,95 @@ export default function SpaceListItem({
     event.stopPropagation();
   };
 
-  useEffect(() => {
-    setDetailImageAspect(null);
-  }, [displayImageUrl]);
-
-  const detailImageStyle = useMemo(() => {
-    if (!displayImageUrl) return undefined;
-    if (detailImageAspect?.width && detailImageAspect?.height) {
-      return {
-        aspectRatio: `${detailImageAspect.width} / ${detailImageAspect.height}`,
-      };
-    }
-    return {
-      aspectRatio: '4 / 3',
-    };
-  }, [detailImageAspect, displayImageUrl]);
-
   if (variant === 'detail') {
+    const isSaved = userId ? savedIds.has(String(space.id)) : false;
+    const metaLine = [cityLabel, typeLabel].filter(Boolean).join(' · ');
+
     return (
-      <article
-        className={`space-detail-card bg-[var(--background)]/85 py-6 backdrop-blur-xl ${className}`.trim()}>
-        <div className='grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] lg:grid-cols-[minmax(0,1fr)_360px]'>
-          <div className='space-y-5'>
-            <header className='space-y-3'>
-              <span className='ea-label ea-label--muted'>
-                {cityLabel.toUpperCase()}
-              </span>
-              <h1 className='text-3xl font-semibold tracking-tight text-[var(--foreground)]'>
-                {space.name || 'Untitled space'}
-              </h1>
-              {displayAddress && directionsUrl ? (
+      <article className={className}>
+        <div className='space-hero'>
+          {displayImageUrl && !heroImageFailed ? (
+            <Image
+              src={displayImageUrl}
+              alt={space.name || 'Space image'}
+              fill
+              sizes='100vw'
+              className='space-hero__image'
+              priority
+              onError={() => setHeroImageFailed(true)}
+            />
+          ) : (
+            <div className='space-hero__image space-hero__image--placeholder' />
+          )}
+          <div
+            className='space-hero__gradient'
+            aria-hidden='true'
+          />
+          <h1 className='space-hero__name'>{space.name || 'Untitled space'}</h1>
+          <div className='space-hero__actions'>
+            <ShareButton
+              title={space.name}
+              text={space.name}
+              className='space-hero__circle-btn'
+              copiedText='✓'
+              aria-label='Share space'>
+              <ShareIcon />
+            </ShareButton>
+            {userId && (
+              <button
+                type='button'
+                onClick={() => toggleSave(space.id)}
+                className='space-hero__circle-btn'
+                aria-label={isSaved ? 'Remove from saved' : 'Save space'}>
+                <HeartIcon filled={isSaved} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {metaLine && <p className='space-hero__meta'>{metaLine}</p>}
+
+        <div className='space-y-5 pt-5'>
+          {displayAddress && (
+            <div className='space-y-1.5'>
+              <span className='ea-label ea-label--muted'>Location</span>
+              {directionsUrl ? (
                 <a
                   href={directionsUrl}
                   target='_blank'
                   rel='noopener noreferrer'
                   onClick={handleExternalLinkClick}
-                  className='text-sm text-[var(--foreground)]/70 underline underline-offset-4 hover:text-[var(--foreground)]'>
+                  className='block text-sm text-[var(--foreground)]/85 underline underline-offset-4 hover:text-[var(--foreground)]'>
                   {displayAddress}
                 </a>
               ) : (
-                displayAddress && (
-                  <p className='text-sm text-[var(--foreground)]/60'>
-                    {displayAddress}
-                  </p>
-                )
+                <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
               )}
-              <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
-                <div className='inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-3 py-1 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/70'>
-                  <span className='text-[var(--foreground)]'>
-                    {typeLabel || 'other'}
-                  </span>
-                </div>
+            </div>
+          )}
 
-                {websiteLabel && (
-                  <a
-                    href={space.website}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    onClick={handleExternalLinkClick}
-                    className='nav-action rounded-full px-4 '>
-                    Visit website
-                  </a>
-                )}
-              </div>
-            </header>
-
-            {space.description && (
+          {space.description && (
+            <div className='space-y-1.5'>
+              <span className='ea-label ea-label--muted'>About</span>
               <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
                 {space.description}
               </p>
-            )}
-
-            <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
-              {onFocus && space.latitude && space.longitude && (
-                <button
-                  type='button'
-                  onClick={handleFocus}
-                  className='nav-action nav-cta rounded-full px-4 '>
-                  View on map
-                </button>
-              )}
-              {userId && (() => {
-                const isSaved = savedIds.has(String(space.id));
-                return (
-                  <button
-                    type='button'
-                    onClick={() => toggleSave(space.id)}
-                    className={`nav-action rounded-full px-4 ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
-                    {isSaved ? 'Saved' : 'Save'}
-                  </button>
-                );
-              })()}
             </div>
-          </div>
+          )}
 
-          {displayImageUrl && !heroImageFailed && (
-            <div
-              className='relative w-full overflow-hidden rounded-3xl border border-[var(--foreground)]/12 md:self-start'
-              style={detailImageStyle}>
-              <Image
-                src={displayImageUrl}
-                alt={space.name || 'Space image'}
-                fill
-                sizes='(max-width: 768px) 80vw, 360px'
-                className='object-cover'
-                priority
-                onError={() => setHeroImageFailed(true)}
-                onLoadingComplete={(img) => {
-                  if (!img?.naturalWidth || !img?.naturalHeight) return;
-                  if (
-                    detailImageAspect?.width === img.naturalWidth &&
-                    detailImageAspect?.height === img.naturalHeight
-                  ) {
-                    return;
-                  }
-                  setDetailImageAspect({
-                    width: img.naturalWidth,
-                    height: img.naturalHeight,
-                  });
-                }}
-              />
+          {websiteLabel && (
+            <div className='space-y-1.5'>
+              <span className='ea-label ea-label--muted'>Links</span>
+              <div>
+                <a
+                  href={space.website}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  onClick={handleExternalLinkClick}
+                  className='nav-action rounded-full px-4'>
+                  Visit website
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -352,5 +321,46 @@ export default function SpaceListItem({
         </footer>
       )}
     </article>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg
+      width='16'
+      height='16'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      aria-hidden='true'>
+      <path d='M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6' />
+      <polyline points='16 6 12 2 8 6' />
+      <line
+        x1='12'
+        y1='2'
+        x2='12'
+        y2='15'
+      />
+    </svg>
+  );
+}
+
+function HeartIcon({ filled }) {
+  return (
+    <svg
+      width='16'
+      height='16'
+      viewBox='0 0 24 24'
+      fill={filled ? 'var(--chrome)' : 'none'}
+      stroke={filled ? 'var(--chrome)' : 'currentColor'}
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      aria-hidden='true'>
+      <path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z' />
+    </svg>
   );
 }
