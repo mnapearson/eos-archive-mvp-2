@@ -1,4 +1,5 @@
 @import url('https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css');
+@import './tokens.generated.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,25 +11,17 @@
   }
 }
 
-/* Dark mode only — matches the mobile app's palette exactly
-   (eos-archive-app/constants/theme.ts). No light theme. */
+/* Dark mode only. Colors (--background, --foreground, --card, --chrome,
+   etc.) come from tokens.generated.css, generated from mobile's
+   constants/theme.ts — see scripts/generate-tokens.js. Mobile is the
+   reference design; this keeps web's colors from drifting away from it
+   again. --surface/--dim/--chrome-dim/radius below have no mobile
+   equivalent (theme.ts doesn't define them) and stay hand-maintained
+   here. */
 :root {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --foreground-secondary: #888888;
-  --card: #111111;
-  --card-border: #222222;
   --surface: #161616;
   --dim: #3a3a3a;
-  --input: #1a1a1a;
-  --input-border: #333333;
-  --chrome: #7ab4d4;
-  --silver: #b8d0e4;
-  --chrome-glow: rgba(122, 180, 212, 0.35);
   --chrome-dim: rgba(122, 180, 212, 0.10);
-  --silver-glow: rgba(184, 208, 228, 0.2);
-  --danger: #f87171;
-  --success: #4ade80;
   --page-content-padding: 1rem;
 
   /* Radius scale — consolidates what used to be ~15 independently-drifted

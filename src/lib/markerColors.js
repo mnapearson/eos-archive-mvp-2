@@ -1,19 +1,21 @@
-// Matches eos-archive-app/constants/theme.ts categoryColors exactly, so a
-// category reads as the same color on web and mobile.
+// GENERATED FILE — do not edit by hand.
+// Source: eos-archive-app/constants/theme.ts's categoryColors (the
+// reference design). Regenerate with `npm run sync-tokens` after
+// changing theme.ts. Keys are lowercased from theme.ts's Title Case to
+// match this file's existing lookup convention (normalizeType() already
+// lowercases whatever category string it's given).
 const markerColors = {
   'art space': '#a78bfa',
-  bar: '#60a5fa',
-  cafe: '#4ade80',
-  club: '#f472b6',
-  museum: '#fbbf24',
-  studio: '#fb923c',
-  theatre: '#22d3ee',
-  venue: '#f87171',
-  other: '#94a3b8',
+  'bar': '#60a5fa',
+  'cafe': '#4ade80',
+  'club': '#f472b6',
+  'museum': '#fbbf24',
+  'studio': '#fb923c',
+  'theatre': '#22d3ee',
+  'venue': '#f87171',
+  'other': '#94a3b8',
 };
 
-// Matches eos-archive-app/app/(tabs)/map.tsx's CATEGORY_ABBREV, lowercased
-// to match this file's keys.
 export const CATEGORY_ABBREV = {
   'art space': 'ART',
   bar: 'BAR',
