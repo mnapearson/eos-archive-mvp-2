@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useContext, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
+import Wordmark from './Wordmark';
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
 import useUserProfile from '@/hooks/useUserProfile';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
@@ -126,6 +127,14 @@ function NavBarContent() {
 
         <div className='mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3 md:flex-row md:items-center md:gap-4 lg:max-w-5xl'>
           <div className='flex w-full items-center gap-2 flex-wrap md:flex-nowrap md:gap-3 md:flex-1'>
+            <Link
+              href='/'
+              onClick={handleLogoClick}
+              className='flex-shrink-0'
+              aria-label='eos archive home'>
+              <Wordmark />
+            </Link>
+
             <button
               type='button'
               onClick={toggleMenu}
