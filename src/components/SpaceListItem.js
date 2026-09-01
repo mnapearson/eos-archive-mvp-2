@@ -219,7 +219,7 @@ export default function SpaceListItem({
 
           {displayImageUrl && !heroImageFailed && (
             <div
-              className='relative w-full overflow-hidden rounded-3xl border border-[var(--foreground)]/12 shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:self-start'
+              className='relative w-full overflow-hidden rounded-3xl border border-[var(--foreground)]/12 md:self-start'
               style={detailImageStyle}>
               <Image
                 src={displayImageUrl}
@@ -261,7 +261,7 @@ export default function SpaceListItem({
         ? 'bg-white'
         : ''
       : isActive
-      ? 'border-[var(--foreground)]/55 bg-[var(--background)] shadow-[0_16px_44px_rgba(0,0,0,0.2)]'
+      ? 'border-[var(--chrome)] bg-[var(--chrome-dim)]'
       : '';
   const compactFocusClass = canFocus
     ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'

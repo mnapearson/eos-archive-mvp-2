@@ -283,7 +283,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
               {spaceId ? (
                 <>
                   <span className='ea-label ea-label--muted'>Space</span>
-                  <div className='rounded-2xl border border-[var(--foreground)]/16 bg-[var(--background)]/70 px-4 py-3 text-sm text-[var(--foreground)]/70 shadow-[0_12px_32px_rgba(0,0,0,0.08)]'>
+                  <div className='rounded-2xl border border-[var(--foreground)]/16 bg-[var(--background)]/70 px-4 py-3 text-sm text-[var(--foreground)]/70'>
                     {currentSpace?.name || 'This space'}
                   </div>
                   <p className={helperTextClasses}>
@@ -638,7 +638,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
             <button
               type='submit'
               disabled={submitting}
-              className='nav-action nav-cta !inline-flex h-11 w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
+              className='nav-action nav-cta !inline-flex h-11 w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
               {submitting ? 'Submitting…' : 'Submit event'}
             </button>
             <button

@@ -322,7 +322,7 @@ function LeicoFocusedOverlay({ space, open, onClose }) {
 
   return (
     <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
-      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-white/70 bg-[rgba(247,247,247,0.92)] text-[#1b1b1b] shadow-[0_34px_90px_rgba(0,0,0,0.35)] backdrop-blur-2xl'>
+      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-white/70 bg-[rgba(247,247,247,0.92)] text-[#1b1b1b] backdrop-blur-2xl'>
         <div className='flex items-center justify-between px-5 pt-4 text-[#2a2a2a]'>
           <span className='ea-label tracking-[0.3em] text-[#3a3a3a]'>
             Selected space

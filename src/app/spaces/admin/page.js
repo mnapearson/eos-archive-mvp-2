@@ -235,9 +235,9 @@ function SpaceAdminDashboardContent() {
         </nav>
 
         {activeTab === 'details' && (
-          <section className='space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+          <section className='space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 backdrop-blur-2xl sm:p-10'>
             {isEditing ? (
-              <div className='space-y-6 rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8'>
+              <div className='space-y-6 rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 sm:p-8'>
                 <div className='space-y-2'>
                   <label className='ea-label ea-label--muted' htmlFor='details-website'>
                     Website
@@ -277,7 +277,7 @@ function SpaceAdminDashboardContent() {
                 <div className='flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4'>
                   <button
                     onClick={handleSave}
-                    className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] shadow-[0_18px_40px_rgba(0,0,0,0.24)] disabled:opacity-60 sm:w-auto'>
+                    className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] disabled:opacity-60 sm:w-auto'>
                     Save changes
                   </button>
                   <button
@@ -293,7 +293,7 @@ function SpaceAdminDashboardContent() {
                 variant='compact'
                 surface='overlay'
                 showActions={false}
-                className='border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8'
+                className='border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 sm:p-8'
               />
             )}
 
@@ -301,7 +301,7 @@ function SpaceAdminDashboardContent() {
               <div>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] shadow-[0_18px_40px_rgba(0,0,0,0.24)] sm:w-auto'>
+                  className='nav-action nav-cta !inline-flex h-10 w-full justify-center px-6 text-[11px] uppercase tracking-[0.32em] sm:w-auto'>
                   Edit details
                 </button>
               </div>
@@ -325,7 +325,7 @@ function SpaceAdminDashboardContent() {
                 <img
                   src={space.image_url}
                   alt={space.name}
-                  className='w-full rounded-3xl object-cover shadow-[0_18px_48px_rgba(0,0,0,0.18)]'
+                  className='w-full rounded-3xl object-cover'
                 />
               )}
             </div>
@@ -333,13 +333,13 @@ function SpaceAdminDashboardContent() {
         )}
 
         {activeTab === 'events' && (
-          <section className='space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+          <section className='space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 backdrop-blur-2xl sm:p-10'>
             <EventSubmissionForm spaceId={space.id} />
           </section>
         )}
 
         {activeTab === 'archive' && (
-          <section className='space-y-4 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+          <section className='space-y-4 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 backdrop-blur-2xl sm:p-10'>
             <h3 className='text-lg font-semibold tracking-tight text-[var(--foreground)]'>
               Archived events
             </h3>
@@ -356,7 +356,7 @@ function SpaceAdminDashboardContent() {
         )}
 
         {activeTab === 'analytics' && (
-          <section className='space-y-4 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+          <section className='space-y-4 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 backdrop-blur-2xl sm:p-10'>
             <h3 className='text-lg font-semibold tracking-tight text-[var(--foreground)]'>
               Analytics
             </h3>

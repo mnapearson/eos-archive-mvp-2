@@ -117,7 +117,7 @@ function NavBarContent() {
 
   return (
     <>
-      <header className='fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)]'>
+      <header className='fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl'>
         {/* Skip link for keyboard users */}
         <a
           href='#main'

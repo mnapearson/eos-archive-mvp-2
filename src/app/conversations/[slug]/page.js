@@ -236,7 +236,7 @@ export default async function ConversationPublicPage({ params }) {
       </header>
 
       {conversation.cover_image_url && conversation.show_cover && (
-        <figure className='relative mx-auto w-full max-w-4xl overflow-hidden rounded-[32px] border border-[var(--foreground)]/12 bg-[var(--foreground)]/5 shadow-[0_26px_80px_rgba(0,0,0,0.18)]'>
+        <figure className='relative mx-auto w-full max-w-4xl overflow-hidden rounded-[32px] border border-[var(--foreground)]/12 bg-[var(--foreground)]/5'>
           <div className='relative aspect-[4/3] w-full'>
             <EAImage
               src={conversation.cover_image_url}
@@ -250,7 +250,7 @@ export default async function ConversationPublicPage({ params }) {
         </figure>
       )}
 
-      <section className='mx-auto max-w-3xl space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/85 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.12)] sm:p-10'>
+      <section className='mx-auto max-w-3xl space-y-8 rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/85 p-6 sm:p-10'>
         <article className='ea-prose space-y-6'>
           {blocks.length > 0 ? (
             blocks.map((block) => (

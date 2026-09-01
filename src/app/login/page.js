@@ -125,7 +125,7 @@ function LoginPageContent() {
           </p>
         </header>
 
-        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-8 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-8 backdrop-blur-2xl sm:px-12 sm:py-12'>
         <form
           onSubmit={handleLogin}
           className='mt-10 space-y-6'>
@@ -139,7 +139,7 @@ function LoginPageContent() {
               <input
                 id='email'
                 type='email'
-                className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete='email'
@@ -156,7 +156,7 @@ function LoginPageContent() {
               <input
                 id='password'
                 type='password'
-                className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete='current-password'
@@ -168,7 +168,7 @@ function LoginPageContent() {
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <button
               type='submit'
-              className='nav-action nav-cta !inline-flex h-11 flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60'
+              className='nav-action nav-cta !inline-flex h-11 flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'
               disabled={loading}>
               {loading ? 'Connecting…' : 'Connect'}
             </button>

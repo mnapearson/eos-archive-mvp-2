@@ -686,7 +686,7 @@ function DateCalendar({ counts, selectedDates, onToggle }) {
           const baseClasses =
             'relative flex h-12 items-center justify-center rounded-2xl border text-xs tracking-[0.18em] transition';
           const stateClasses = isSelected
-            ? 'border-[var(--chrome)] bg-[var(--chrome)] text-[var(--foreground)] shadow-[0_12px_25px_rgba(0,0,0,0.18)]'
+            ? 'border-[var(--chrome)] bg-[var(--chrome)] text-[var(--foreground)]'
             : count > 0
             ? 'border-[var(--foreground)]/25 text-[var(--foreground)] hover:border-[var(--chrome)]'
             : 'border-transparent text-[var(--foreground)]/35';

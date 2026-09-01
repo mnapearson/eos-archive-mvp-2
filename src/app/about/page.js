@@ -15,7 +15,7 @@ export default function AboutPage() {
       </header>
 
       <div className='grid gap-6 md:grid-cols-2'>
-        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]'>
+        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4'>
           <span className='ea-label'>What we collect</span>
           <p className='text-sm sm:text-base leading-relaxed text-[var(--foreground)]/85'>
             Each contribution is curated from the independent scene—events,
@@ -25,7 +25,7 @@ export default function AboutPage() {
           </p>
         </article>
 
-        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]'>
+        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4'>
           <span className='ea-label'>How to explore</span>
           <p className='text-sm sm:text-base leading-relaxed text-[var(--foreground)]/85'>
             Browse by city, category, or time period. Jump into spaces to see
@@ -35,7 +35,7 @@ export default function AboutPage() {
           </p>
         </article>
 
-        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]'>
+        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4'>
           <span className='ea-label'>Why it matters</span>
           <p className='text-sm sm:text-base leading-relaxed text-[var(--foreground)]/85'>
             Independent scenes are constantly shifting. By preserving their
@@ -46,7 +46,7 @@ export default function AboutPage() {
           </p>
         </article>
 
-        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]'>
+        <article className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-6 sm:p-8 space-y-4'>
           <span className='ea-label'>Get in touch</span>
           <p className='text-sm sm:text-base leading-relaxed text-[var(--foreground)]/85'>
             We’re always collecting new ideas, spaces, and collaborations. Share

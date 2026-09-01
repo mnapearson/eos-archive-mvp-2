@@ -241,7 +241,7 @@ export default function AccountPage() {
 
         {/* Profile tab */}
         {tab === 'profile' && (
-          <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-8 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
+          <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-8 backdrop-blur-2xl sm:px-12 sm:py-12'>
             <form onSubmit={handleSaveProfile} className='space-y-6'>
               <fieldset className='space-y-6'>
                 <legend className='ea-label ea-label--muted'>Edit profile</legend>
@@ -254,28 +254,28 @@ export default function AccountPage() {
                 <div className='space-y-2'>
                   <label htmlFor='display-name' className='ea-label ea-label--muted'>Display name</label>
                   <input id='display-name' type='text'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={displayName} onChange={(e) => setDisplayName(e.target.value)} autoComplete='name' />
                 </div>
 
                 <div className='space-y-2'>
                   <label htmlFor='location' className='ea-label ea-label--muted'>Location</label>
                   <input id='location' type='text'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={location} onChange={(e) => setLocation(e.target.value)} placeholder='City, country' />
                 </div>
 
                 <div className='space-y-2'>
                   <label htmlFor='bio' className='ea-label ea-label--muted'>Bio</label>
                   <textarea id='bio'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_30px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
                 </div>
               </fieldset>
 
               <div className='flex flex-wrap gap-3'>
                 <button type='submit'
-                  className='nav-action nav-cta !inline-flex h-11 px-6 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:opacity-60'
+                  className='nav-action nav-cta !inline-flex h-11 px-6 text-[12px] uppercase tracking-[0.32em] disabled:opacity-60'
                   disabled={saving}>
                   {saving ? 'Saving…' : 'Save changes'}
                 </button>

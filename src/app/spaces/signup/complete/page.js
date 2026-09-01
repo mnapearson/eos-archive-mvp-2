@@ -124,7 +124,7 @@ export default function CompleteSpaceSignUpPage() {
           </h1>
         </header>
 
-        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 backdrop-blur-2xl sm:px-12 sm:py-12'>
           <div className='space-y-6 max-w-lg'>
             {status === 'working' && (
               <p className='text-sm leading-relaxed text-[var(--foreground)]/75 sm:text-base'>

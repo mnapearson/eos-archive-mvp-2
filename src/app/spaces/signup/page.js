@@ -178,7 +178,7 @@ export default function SpaceSignUpPage() {
             </span>
             <h1 className='quick-view__title text-balance'>Check your email</h1>
           </header>
-          <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
+          <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/88 px-8 py-10 backdrop-blur-2xl sm:px-12 sm:py-12'>
             <div className='space-y-6 max-w-lg'>
               {awaitingConfirmation ? (
                 <p className='text-sm leading-relaxed text-[var(--foreground)]/75 sm:text-base'>
@@ -220,7 +220,7 @@ export default function SpaceSignUpPage() {
           </p>
         </header>
 
-        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/90 px-6 py-8 shadow-[0_26px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:px-12 sm:py-12'>
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/90 px-6 py-8 backdrop-blur-2xl sm:px-12 sm:py-12'>
           <form
             onSubmit={handleSignUp}
             className='mt-10 space-y-10'>
@@ -239,7 +239,7 @@ export default function SpaceSignUpPage() {
                   id='space-name'
                   type='text'
                   data-testid='space-signup-name'
-                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={spaceName}
                   onChange={(e) => setSpaceName(e.target.value)}
                   required
@@ -256,7 +256,7 @@ export default function SpaceSignUpPage() {
                   id='space-address'
                   type='text'
                   data-testid='space-signup-address'
-                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
@@ -288,7 +288,7 @@ export default function SpaceSignUpPage() {
                   <select
                     id='space-type'
                     data-testid='space-signup-type'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={spaceType}
                     onChange={(e) => setSpaceType(e.target.value)}
                     required>
@@ -316,7 +316,7 @@ export default function SpaceSignUpPage() {
                 </label>
                 <textarea
                   id='space-description'
-                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
@@ -333,7 +333,7 @@ export default function SpaceSignUpPage() {
                 <input
                   id='space-website'
                   type='url'
-                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder='https://your-space.example'
@@ -363,7 +363,7 @@ export default function SpaceSignUpPage() {
                   id='account-email'
                   type='email'
                   data-testid='space-signup-email'
-                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                  className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete='email'
@@ -382,7 +382,7 @@ export default function SpaceSignUpPage() {
                     id='account-password'
                     type='password'
                     data-testid='space-signup-password'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete='new-password'
@@ -399,7 +399,7 @@ export default function SpaceSignUpPage() {
                   <input
                     id='account-password-confirm'
                     type='password'
-                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+                    className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     autoComplete='new-password'
@@ -416,7 +416,7 @@ export default function SpaceSignUpPage() {
               <button
                 type='submit'
                 data-testid='space-signup-submit'
-                className='nav-action nav-cta !inline-flex h-11 w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] shadow-[0_18px_48px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
+                className='nav-action nav-cta !inline-flex h-11 w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
                 Submit space
               </button>
             </footer>

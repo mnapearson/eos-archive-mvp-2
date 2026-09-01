@@ -126,7 +126,7 @@ export default function AdminEventsManager({
 
   if (!events.length) {
     return (
-      <div className='rounded-3xl border border-[var(--foreground)]/14 bg-[var(--background)]/85 px-6 py-10 text-sm leading-relaxed text-[var(--foreground)]/70 shadow-[0_24px_70px_rgba(0,0,0,0.18)]'>
+      <div className='rounded-3xl border border-[var(--foreground)]/14 bg-[var(--background)]/85 px-6 py-10 text-sm leading-relaxed text-[var(--foreground)]/70'>
         {emptyMessage}
       </div>
     );

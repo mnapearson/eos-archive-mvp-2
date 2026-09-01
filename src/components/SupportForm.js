@@ -272,7 +272,7 @@ export default function SupportForm() {
 
   return (
     <div className='space-y-8'>
-      <div className='rounded-3xl border border-[var(--foreground)]/10 bg-[var(--background)]/80 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.08)] space-y-6'>
+      <div className='rounded-3xl border border-[var(--foreground)]/10 bg-[var(--background)]/80 p-6 space-y-6'>
         <div className='space-y-4'>
           <label className='ea-label block'>Choose an amount</label>
           <div className='flex flex-wrap gap-3'>
@@ -414,7 +414,7 @@ export default function SupportForm() {
       </div>
 
       {successInfo ? (
-        <div className='rounded-3xl border border-emerald-200 bg-emerald-50/70 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] space-y-3'>
+        <div className='rounded-3xl border border-emerald-200 bg-emerald-50/70 p-6 space-y-3'>
           <span className='ea-label text-emerald-600'>Thank you</span>
           <p className='text-lg font-semibold text-[var(--foreground)]'>
             Your contribution of{' '}
@@ -445,7 +445,7 @@ export default function SupportForm() {
           stripe={stripePromise}
           options={elementOptions}
           key={clientSecret}>
-          <div className='rounded-3xl border border-[var(--foreground)]/12 bg-white/90 p-6 shadow-[0_22px_70px_rgba(0,0,0,0.1)] space-y-4'>
+          <div className='rounded-3xl border border-[var(--foreground)]/12 bg-white/90 p-6 space-y-4'>
             <span className='ea-label'>Payment details</span>
             <PaymentStep
               amount={amount}

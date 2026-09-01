@@ -175,7 +175,7 @@ export default function CityPicker({
           }
         }}
         placeholder={placeholder}
-        className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm shadow-[0_12px_32px_rgba(0,0,0,0.08)] focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
+        className='input rounded-2xl border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-4 py-3 text-sm focus:border-[var(--foreground)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--foreground)]/25'
         required={required}
         disabled={disabled}
         autoComplete='off'
@@ -189,7 +189,7 @@ export default function CityPicker({
         <ul
           id={`${id}-listbox`}
           role='listbox'
-          className='absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)] shadow-[0_14px_38px_rgba(0,0,0,0.18)]'>
+          className='absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]'>
           {suggestions.map((feature) => (
             <li key={feature.id}>
               <button

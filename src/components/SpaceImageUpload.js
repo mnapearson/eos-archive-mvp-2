@@ -159,7 +159,7 @@ export default function SpaceImageUpload({ spaceId, onImageSaved = () => {} }) {
           type='button'
           onClick={handleUpload}
           disabled={!file || uploading}
-          className='nav-action nav-cta !inline-flex h-10 justify-center px-6 text-[11px] uppercase tracking-[0.32em] shadow-[0_18px_40px_rgba(0,0,0,0.24)] disabled:cursor-not-allowed disabled:opacity-60'>
+          className='nav-action nav-cta !inline-flex h-10 justify-center px-6 text-[11px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'>
           {uploading ? 'Uploading…' : 'Upload image'}
         </button>
         {previewUrl && (

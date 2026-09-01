@@ -245,7 +245,7 @@ function ConversationsPanel() {
 
       <div>
         {editing ? (
-          <div className='space-y-6 rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8'>
+          <div className='space-y-6 rounded-3xl border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 sm:p-8'>
             <div className='grid gap-4 md:grid-cols-2'>
               <label className='space-y-2'>
                 <span className='ea-label ea-label--muted'>Title</span>
@@ -488,7 +488,7 @@ function AdminPageContent() {
           })}
         </nav>
 
-        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:p-10'>
+        <section className='rounded-[32px] border border-[var(--foreground)]/14 bg-[var(--background)]/92 p-6 backdrop-blur-2xl sm:p-10'>
           {activeTab === 'conversations' ? <ConversationsPanel /> : <SpaceReviewPanel />}
         </section>
       </div>
