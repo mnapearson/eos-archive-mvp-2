@@ -13,8 +13,6 @@ import { FilterContext } from '@/contexts/FilterContext';
 import MasonryGrid from '@/components/MasonryGrid';
 import Spinner from '@/components/Spinner';
 import Link from 'next/link';
-import Modal from '@/components/Modal';
-import EventQuickView from '@/components/EventQuickView';
 import { normalizeTime } from '@/lib/normalize';
 
 const EVENT_STATUS_PRIORITY = {
@@ -128,9 +126,6 @@ function HomePageContent() {
     setEventStatus,
   } = useContext(FilterContext);
   const [viewMode, setViewMode] = useState('list');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [suppressPreview, setSuppressPreview] = useState(false);
   const [pastVisibleCount, setPastVisibleCount] = useState(0);
 
   const searchTermRaw = (searchParams.get('search') || '').trim();
@@ -258,27 +253,6 @@ function HomePageContent() {
       totalEvents: sorted.length,
     };
   }, [filteredEvents, searchTermLower]);
-
-  useEffect(() => {
-    if (!suppressPreview) return;
-    const timeout = setTimeout(() => setSuppressPreview(false), 220);
-    return () => clearTimeout(timeout);
-  }, [suppressPreview]);
-
-  const handlePreview = useCallback(
-    (eventData) => {
-      if (!eventData || suppressPreview) return;
-      setSelected(eventData);
-      setModalOpen(true);
-    },
-    [suppressPreview]
-  );
-
-  const closePreview = useCallback(() => {
-    setSuppressPreview(true);
-    setModalOpen(false);
-    setSelected(null);
-  }, []);
 
   useEffect(() => {
     const shouldAutoExpand =
@@ -466,7 +440,6 @@ function HomePageContent() {
           <MasonryGrid
             items={visibleEvents}
             mode={viewMode}
-            onSelectItem={handlePreview}
           />
           {hasPastEvents && (
             <div className='mt-8 flex flex-col items-center gap-3 pb-4 text-center'>
@@ -531,19 +504,6 @@ function HomePageContent() {
           </div>
         </section>
       )}
-
-      {/* Modal for quick view */}
-      <Modal
-        open={modalOpen}
-        onClose={closePreview}
-        label='Event quick view'>
-        {selected && (
-          <EventQuickView
-            event={selected}
-            onClose={closePreview}
-          />
-        )}
-      </Modal>
     </div>
   );
 }

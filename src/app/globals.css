@@ -316,27 +316,6 @@ textarea.ea-input {
   background: color-mix(in oklab, var(--chrome) 55%, rgba(0, 0, 0, 0.68) 45%);
 }
 
-.quick-view {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  color: color-mix(in oklab, var(--foreground) 94%, transparent);
-}
-
-.quick-view__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 1.75rem;
-  position: relative;
-}
-
-.quick-view__title-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .quick-view__title {
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   line-height: 1.15;
@@ -359,49 +338,8 @@ textarea.ea-input {
   padding-top: 0.25rem;
 }
 
-.quick-view__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-}
-
-.quick-view__chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--foreground) 12%, transparent);
-  font-size: 0.78rem;
-  letter-spacing: 0.02em;
-  color: color-mix(in oklab, var(--foreground) 86%, transparent);
-  text-decoration: none;
-}
-
-.quick-view__chip--link {
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.quick-view__chip--link:hover,
-.quick-view__chip--link:focus-visible {
-  background: color-mix(in oklab, var(--chrome) 20%, transparent);
-  color: var(--chrome);
-}
-
 .nav-pill.quick-view__badge {
   background: color-mix(in oklab, var(--foreground) 24%, transparent);
-}
-
-.quick-view__badge--floating {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: translateY(-0.4rem);
-}
-
-.quick-view__media {
-  display: flex;
-  justify-content: center;
 }
 
 .quick-view__poster {
@@ -412,35 +350,10 @@ textarea.ea-input {
   overflow: hidden;
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--foreground) 6%, transparent);
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.2);
 }
 
 .quick-view__poster-image {
   object-fit: cover;
-}
-
-.quick-view__description {
-  padding: 1rem 1.1rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
-  background: color-mix(in oklab, var(--background) 88%, rgba(0, 0, 0, 0.04));
-  color: color-mix(in oklab, var(--foreground) 90%, transparent);
-}
-
-.quick-view__description-text {
-  white-space: pre-line;
-  line-height: 1.5;
-  font-size: 0.96rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.quick-view__actions {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
 }
 
 .modal-shell {
@@ -482,68 +395,6 @@ textarea.ea-input {
     top: calc(1.6rem + env(safe-area-inset-top));
     right: 1rem;
   }
-}
-
-.quick-view__action {
-  min-width: fit-content;
-}
-
-.quick-view__action--primary {
-  display: inline-flex;
-  justify-content: center;
-}
-
-@media (max-width: 640px) {
-  .quick-view__actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .quick-view__action--primary {
-    width: 100%;
-  }
-}
-
-.quick-view__calendar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.quick-view__calendar .button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
-  background: color-mix(in oklab, var(--background) 96%, rgba(0, 0, 0, 0.04));
-  color: color-mix(in oklab, var(--foreground) 70%, transparent);
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-.quick-view__calendar .button:hover,
-.quick-view__calendar .button:focus-visible {
-  background: color-mix(in oklab, var(--foreground) 14%, transparent);
-  border-color: color-mix(in oklab, var(--foreground) 40%, transparent);
-  color: var(--foreground);
-}
-
-.quick-view__map {
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-  overflow: hidden;
-  background: color-mix(in oklab, var(--foreground) 8%, transparent);
-}
-
-.quick-view__map-inner {
-  position: relative;
-  width: 100%;
-  height: clamp(240px, 36vh, 320px);
 }
 
 .event-page {
@@ -733,20 +584,12 @@ textarea.ea-input {
 }
 
 @media (max-width: 640px) {
-  .quick-view__title-row {
-    gap: 0.35rem;
-  }
-
   .quick-view__title {
     font-size: clamp(1.45rem, 6vw, 1.85rem);
   }
 
   .quick-view__poster {
     width: 100%;
-  }
-
-  .quick-view__description {
-    padding: 0.9rem 1rem;
   }
 
   .event-page__actions {
