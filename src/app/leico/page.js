@@ -250,7 +250,7 @@ function LeicoListPanel({
                     key={type}
                     type='button'
                     onClick={() => toggleType(type)}
-                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.28em] transition ${
+                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.04em] transition ${
                       active
                         ? 'border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]'
                         : 'border-[var(--foreground)]/22 bg-[var(--background)]/80 text-[var(--foreground)]/85 hover:border-[var(--foreground)]/40'
@@ -271,7 +271,7 @@ function LeicoListPanel({
           </div>
         )}
 
-        <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 sm:flex-row sm:items-center sm:justify-between'>
+        <div className='mt-4 flex flex-col gap-3 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/55 sm:flex-row sm:items-center sm:justify-between'>
           <span>{statusLabel}</span>
           <div className='flex items-center justify-between gap-3 sm:justify-end'>
             {hasActiveFilters && (

@@ -14,7 +14,7 @@ export default function Footer() {
     <footer className='mt-20 border-t border-[var(--foreground)]/20 bg-[var(--background)] text-[var(--foreground)]'>
       <div className='mx-auto flex max-w-6xl flex-col gap-12 px-4 py-12 lg:flex-row lg:gap-16'>
         <div className='lg:w-1/3 space-y-4'>
-          <span className='ea-label tracking-[0.4em]'>Til dawn</span>
+          <span className='ea-label'>Til dawn</span>
           <p className='max-w-xs text-sm leading-relaxed opacity-75'>
             eos archive preserves the visual memory of independent culture. From
             flyers to conversations, we index the beats of the underground so
@@ -124,7 +124,7 @@ export default function Footer() {
       </div>
 
       <div className='border-t border-[var(--foreground)]/15'>
-        <div className='mx-auto flex max-w-6xl flex-col-reverse gap-4 px-4 py-6 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/60 md:flex-row md:items-center md:justify-between'>
+        <div className='mx-auto flex max-w-6xl flex-col-reverse gap-4 px-4 py-6 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/60 md:flex-row md:items-center md:justify-between'>
           <p>&copy; {currentYear} eos archive. All rights reserved.</p>
           <div className='flex flex-wrap items-center gap-4'>
             <p>Crafted between Leipzig and Berlin.</p>

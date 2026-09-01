@@ -40,7 +40,7 @@ export default function GeneratedFlyerCard({
         border: `1px solid color-mix(in oklab, ${color} 40%, transparent)`,
       }}>
       <span
-        className='inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.24em]'
+        className='inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.04em]'
         style={{
           backgroundColor: `color-mix(in oklab, ${color} 55%, var(--background) 45%)`,
           color: 'var(--foreground)',
@@ -54,7 +54,7 @@ export default function GeneratedFlyerCard({
             {title}
           </p>
           {dateLabel && (
-            <p className='font-mono text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/70'>
+            <p className='font-mono text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/70'>
               {dateLabel}
             </p>
           )}

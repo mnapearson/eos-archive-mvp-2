@@ -362,7 +362,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
                   <button
                     type='button'
                     onClick={() => removeDesigner(idx)}
-                    className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+                    className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
                     Remove
                   </button>
                 )}
@@ -372,7 +372,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
           <button
             type='button'
             onClick={addDesigner}
-            className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+            className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
             + Add another designer
           </button>
         </div>
@@ -450,7 +450,7 @@ export default function EditEventForm({ event, spaceId, onSaved, onCancel }) {
             <button
               type='button'
               onClick={clearNewImage}
-              className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+              className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
               Remove selected image
             </button>
           )}

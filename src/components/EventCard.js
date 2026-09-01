@@ -68,7 +68,7 @@ export default function EventCard({
             </p>
           )}
 
-          <div className='flex flex-wrap gap-3 text-xs uppercase tracking-[0.24em] text-[var(--foreground)]/60'>
+          <div className='flex flex-wrap gap-3 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/60'>
             {event.category && (
               <span className='rounded-full border border-[var(--foreground)]/16 px-3 py-1'>
                 {event.category}

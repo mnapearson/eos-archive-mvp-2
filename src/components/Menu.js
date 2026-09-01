@@ -406,7 +406,7 @@ function MenuContent({ menuOpen, toggleMenu, onSignOut }) {
           <div className='space-y-4'>
             <div className='flex flex-wrap items-center justify-between gap-3'>
               <span className='ea-label'>Filters</span>
-              <span className='text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/60'>
+              <span className='text-[10px] uppercase tracking-[0.04em] text-[var(--foreground)]/60'>
                 Active {activeFilterCount}
               </span>
             </div>
@@ -597,7 +597,7 @@ function FilterSection({
                 <label
                   key={item}
                   htmlFor={optId}
-                  className={`flex items-center justify-between gap-3 text-sm uppercase tracking-[0.18em] ${
+                  className={`flex items-center justify-between gap-3 text-sm uppercase tracking-[0.04em] ${
                     isDisabled ? 'opacity-40' : 'opacity-80'
                   }`}>
                   <span className='flex items-center gap-3'>
@@ -658,19 +658,19 @@ function DateCalendar({ counts, selectedDates, onToggle }) {
         <button
           type='button'
           onClick={() => setMonth((prev) => startOfMonth(addMonths(prev, -1)))}
-          className='nav-action px-3 py-1 tracking-[0.24em]'>
+          className='nav-action px-3 py-1'>
           Prev
         </button>
         <span className='ea-label'>{format(month, 'MMMM yyyy')}</span>
         <button
           type='button'
           onClick={() => setMonth((prev) => startOfMonth(addMonths(prev, 1)))}
-          className='nav-action px-3 py-1 tracking-[0.24em]'>
+          className='nav-action px-3 py-1'>
           Next
         </button>
       </div>
 
-      <div className='grid grid-cols-7 gap-2 text-center text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/60'>
+      <div className='grid grid-cols-7 gap-2 text-center text-[10px] uppercase tracking-[0.04em] text-[var(--foreground)]/60'>
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
           <span key={label}>{label}</span>
         ))}

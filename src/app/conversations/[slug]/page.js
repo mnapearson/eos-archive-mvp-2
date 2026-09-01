@@ -177,7 +177,7 @@ export default async function ConversationPublicPage({ params }) {
           <h1 className='quick-view__title text-balance'>{summary}</h1>
           {conversation.title &&
           summary !== sanitizeCopy(conversation.title) ? (
-            <p className='text-sm uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
+            <p className='text-sm uppercase tracking-[0.04em] text-[var(--foreground)]/55'>
               {conversation.title}
             </p>
           ) : null}

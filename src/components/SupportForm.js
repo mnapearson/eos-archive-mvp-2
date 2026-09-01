@@ -113,7 +113,7 @@ function PaymentStep({
         <button
           type='submit'
           disabled={!stripe || paymentStatus === 'processing'}
-          className='nav-action nav-cta support-cta flex-1 rounded-full px-4 py-3 text-center text-sm uppercase tracking-[0.3em]'>
+          className='nav-action nav-cta support-cta flex-1 rounded-full px-4 py-3 text-center '>
           {paymentStatus === 'processing'
             ? 'Processing...'
             : `Donate ${formatAmount(amount)}`}
@@ -121,7 +121,7 @@ function PaymentStep({
         <button
           type='button'
           onClick={onEdit}
-          className='nav-action flex-1 rounded-full px-4 py-3 text-sm uppercase tracking-[0.3em]'>
+          className='nav-action flex-1 rounded-full px-4 py-3 '>
           Edit details
         </button>
       </div>
@@ -398,7 +398,7 @@ export default function SupportForm() {
             type='button'
             onClick={handlePreparePayment}
             disabled={isPreparing || detailsLocked}
-            className='nav-action nav-cta support-cta w-full rounded-full px-4 py-3 text-sm uppercase tracking-[0.3em]'>
+            className='nav-action nav-cta support-cta w-full rounded-full px-4 py-3 '>
             {detailsLocked
               ? 'Payment form ready'
               : isPreparing
@@ -427,7 +427,7 @@ export default function SupportForm() {
           </p>
           <button
             type='button'
-            className='nav-action mt-4 rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]'
+            className='nav-action mt-4 rounded-full px-4 py-2 '
             onClick={() => {
               setSuccessInfo(null);
               setDetailsLocked(false);

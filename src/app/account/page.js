@@ -160,7 +160,7 @@ export default function AccountPage() {
               key={t.id}
               type='button'
               onClick={() => setTab(t.id)}
-              className={`relative pb-3 text-[11px] uppercase tracking-[0.28em] transition-colors ${
+              className={`relative pb-3 text-sm transition-colors ${
                 tab === t.id
                   ? 'text-[var(--foreground)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[var(--foreground)]'
                   : 'text-[var(--foreground)]/45 hover:text-[var(--foreground)]/70'
@@ -178,9 +178,9 @@ export default function AccountPage() {
           <div className='space-y-8'>
             {savedEvents.length === 0 ? (
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
-                <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No saved events yet</p>
+                <p className='text-sm text-[var(--foreground)]/50'>No saved events yet</p>
                 <p className='mt-2 text-xs text-[var(--foreground)]/35'>Open any event and hit Save to add it here.</p>
-                <Link href='/' className='nav-action mt-6 !inline-flex px-5 text-[11px]'>Explore events</Link>
+                <Link href='/' className='nav-action mt-6 !inline-flex px-5'>Explore events</Link>
               </div>
             ) : (
               <>
@@ -210,9 +210,9 @@ export default function AccountPage() {
           <div className='space-y-4'>
             {savedSpaces.length === 0 ? (
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
-                <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No saved spaces yet</p>
+                <p className='text-sm text-[var(--foreground)]/50'>No saved spaces yet</p>
                 <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit Save.</p>
-                <Link href='/map' className='nav-action mt-6 !inline-flex px-5 text-[11px]'>Explore spaces</Link>
+                <Link href='/map' className='nav-action mt-6 !inline-flex px-5'>Explore spaces</Link>
               </div>
             ) : (
               <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
@@ -227,9 +227,9 @@ export default function AccountPage() {
           <div className='space-y-4'>
             {visitedSpaces.length === 0 ? (
               <div className='rounded-[28px] border border-[var(--foreground)]/10 bg-[var(--background)]/70 px-8 py-12 text-center'>
-                <p className='text-sm text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>No visited spaces yet</p>
+                <p className='text-sm text-[var(--foreground)]/50'>No visited spaces yet</p>
                 <p className='mt-2 text-xs text-[var(--foreground)]/35'>Visit a space page and hit &ldquo;I was here&rdquo;.</p>
-                <Link href='/map' className='nav-action mt-6 !inline-flex px-5 text-[11px]'>Explore spaces</Link>
+                <Link href='/map' className='nav-action mt-6 !inline-flex px-5'>Explore spaces</Link>
               </div>
             ) : (
               <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
@@ -275,16 +275,16 @@ export default function AccountPage() {
 
               <div className='flex flex-wrap gap-3'>
                 <button type='submit'
-                  className='nav-action nav-cta !inline-flex px-6 text-[12px] uppercase tracking-[0.32em] disabled:opacity-60'
+                  className='nav-action nav-cta !inline-flex px-6 disabled:opacity-60'
                   disabled={saving}>
                   {saving ? 'Saving…' : 'Save changes'}
                 </button>
                 <button type='button' onClick={handleChangePassword}
-                  className='nav-action !inline-flex px-6 text-[11px] uppercase tracking-[0.28em]'>
+                  className='nav-action !inline-flex px-6'>
                   Change password
                 </button>
                 <button type='button' onClick={handleSignOut}
-                  className='nav-action !inline-flex px-6 text-[11px] uppercase tracking-[0.28em]'>
+                  className='nav-action !inline-flex px-6'>
                   Sign out
                 </button>
               </div>
@@ -317,9 +317,9 @@ function SavedEventCard({ event }) {
       </div>
       <div className='space-y-1'>
         <p className='text-sm font-medium leading-snug text-[var(--foreground)]'>{event.title}</p>
-        {when && <p className='font-mono text-xs text-[var(--foreground)]/55 uppercase tracking-[0.18em]'>{when}</p>}
+        {when && <p className='font-mono text-xs text-[var(--foreground)]/55 uppercase tracking-[0.04em]'>{when}</p>}
         {(spaceName || city) && (
-          <p className='text-xs text-[var(--foreground)]/40 uppercase tracking-[0.18em]'>
+          <p className='text-xs text-[var(--foreground)]/40 uppercase tracking-[0.04em]'>
             {[spaceName, city].filter(Boolean).join(' · ')}
           </p>
         )}
@@ -337,14 +337,14 @@ function SavedSpaceCard({ space }) {
           <img src={space.image_url} alt={space.name} className='h-full w-full object-cover' onError={(e) => { e.target.style.display = 'none'; }} />
         </div>
       ) : (
-        <div className='flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--foreground)]/5 text-[10px] uppercase tracking-[0.2em] text-[var(--foreground)]/30'>
+        <div className='flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--foreground)]/5 text-[10px] uppercase tracking-[0.04em] text-[var(--foreground)]/30'>
           —
         </div>
       )}
       <div className='min-w-0 space-y-0.5'>
         <p className='truncate text-sm font-medium text-[var(--foreground)]'>{space.name}</p>
-        {(space.city_name || space.city) && <p className='text-xs uppercase tracking-[0.18em] text-[var(--foreground)]/45'>{space.city_name || space.city}</p>}
-        {space.type && <p className='text-xs uppercase tracking-[0.18em] text-[var(--foreground)]/30'>{space.type}</p>}
+        {(space.city_name || space.city) && <p className='text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/45'>{space.city_name || space.city}</p>}
+        {space.type && <p className='text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/30'>{space.type}</p>}
       </div>
     </Link>
   );

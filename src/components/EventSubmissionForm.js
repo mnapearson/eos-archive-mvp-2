@@ -390,7 +390,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
                       <button
                         type='button'
                         onClick={() => removeDesigner(idx)}
-                        className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+                        className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
                         Remove
                       </button>
                     )}
@@ -400,7 +400,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
               <button
                 type='button'
                 onClick={addDesigner}
-                className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+                className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
                 + Add another designer
               </button>
             </div>
@@ -557,7 +557,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
                   <button
                     type='button'
                     onClick={resetFlyerSelection}
-                    className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+                    className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
                     Remove
                   </button>
                 </div>
@@ -597,7 +597,7 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
                   <button
                     type='button'
                     onClick={resetDocumentSelection}
-                    className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
+                    className='text-xs text-[var(--foreground)]/55 transition hover:text-[var(--foreground)]'>
                     Remove
                   </button>
                 </div>

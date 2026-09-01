@@ -89,7 +89,7 @@ export default function EventQuickView({ event, onClose }) {
       )}
       {mapCaptionText && (
         <span
-          className='absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.18em]'
+          className='absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.04em]'
           style={{
             background: `color-mix(in oklab, ${markerColor} 55%, var(--background) 45%)`,
             color: markerTextColor,

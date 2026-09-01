@@ -195,7 +195,7 @@ export default function SpaceSignUpPage() {
                   Click it to verify your address and activate your account.
                 </p>
               )}
-              <p className='text-xs leading-relaxed text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>
+              <p className='text-xs leading-relaxed text-[var(--foreground)]/50'>
                 The link expires after 24 hours. Check your spam folder if you don&apos;t see it.
               </p>
             </div>
@@ -410,7 +410,7 @@ export default function SpaceSignUpPage() {
             </fieldset>
 
             <footer className='space-y-4 sm:flex sm:items-center sm:justify-between sm:space-y-0'>
-              <p className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50 sm:max-w-sm'>
+              <p className='text-xs text-[var(--foreground)]/50 sm:max-w-sm'>
                 After submitting, you can upload imagery and publish events.
               </p>
               <button

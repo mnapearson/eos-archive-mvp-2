@@ -201,7 +201,7 @@ export default function CityPicker({
                 <span className='font-medium text-[var(--foreground)]'>
                   {feature.text}
                 </span>
-                <span className='text-xs uppercase tracking-[0.18em] text-[var(--foreground)]/55'>
+                <span className='text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/55'>
                   {feature.context
                     ?.filter((ctx) => ctx.id.startsWith('country.') || ctx.id.startsWith('region.'))
                     .map((ctx) => ctx.short_code?.toUpperCase() || ctx.text)

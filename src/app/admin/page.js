@@ -210,7 +210,7 @@ function ConversationsPanel() {
                   <div className='truncate text-sm font-semibold text-[var(--foreground)]'>
                     {r.title}
                   </div>
-                  <div className='mt-1 text-[11px] uppercase tracking-[0.16em] text-[var(--foreground)]/50'>
+                  <div className='mt-1 text-[11px] uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
                     {r.status} · /conversations/{r.slug}
                     {(r.convo_date || r.location) && (
                       <>
@@ -469,7 +469,7 @@ function AdminPageContent() {
           </p>
         </header>
 
-        <nav className='flex flex-wrap gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
+        <nav className='flex flex-wrap gap-3'>
           {tabOptions.map((tab) => {
             const isActive = activeTab === tab.id;
             return (

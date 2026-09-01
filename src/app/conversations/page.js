@@ -109,7 +109,7 @@ export default async function ConversationsIndex() {
                   </div>
                 )}
 
-                <div className='flex flex-col items-center gap-1 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55'>
+                <div className='flex flex-col items-center gap-1 text-[11px] uppercase tracking-[0.04em] text-[var(--foreground)]/55'>
                   <span className='text-xs text-[var(--foreground)]/60'>
                     {title}
                   </span>
@@ -136,7 +136,7 @@ export default async function ConversationsIndex() {
                 ) : null}
 
                 <div className='mt-auto flex w-full justify-center pt-6'>
-                  <span className='inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/70 transition duration-200 group-hover:text-[var(--foreground)]'>
+                  <span className='inline-flex items-center gap-2 text-sm text-[var(--foreground)]/70 transition duration-200 group-hover:text-[var(--foreground)]'>
                     Read conversation
                     <span aria-hidden>→</span>
                   </span>

@@ -82,7 +82,7 @@ export default function ShareToSocial({ event, space, className = '' }) {
             </h3>
           </div>
 
-          <div className='flex gap-3 text-xs uppercase tracking-[0.24em]'>
+          <div className='flex gap-3'>
             <button
               type='button'
               onClick={() => setFormat('story')}
@@ -123,7 +123,7 @@ export default function ShareToSocial({ event, space, className = '' }) {
               <button
                 type='button'
                 onClick={handleCopyCaption}
-                className='text-xs uppercase tracking-[0.2em] text-[var(--chrome)] hover:underline'>
+                className='text-xs text-[var(--chrome)] hover:underline'>
                 Copy
               </button>
             </div>

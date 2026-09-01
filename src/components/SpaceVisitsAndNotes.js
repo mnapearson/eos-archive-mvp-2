@@ -188,7 +188,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
           <ul className='divide-y divide-[var(--foreground)]/10'>
             {notes.map((note) => (
               <li key={note.id} className='space-y-1 py-3 first:pt-0'>
-                <p className='text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/50'>
+                <p className='text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
                   @{note.username ?? 'anonymous'}
                   <span className='text-[var(--foreground)]/35'>
                     {' '}

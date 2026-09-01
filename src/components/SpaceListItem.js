@@ -157,18 +157,18 @@ export default function SpaceListItem({
                   target='_blank'
                   rel='noopener noreferrer'
                   onClick={handleExternalLinkClick}
-                  className='text-sm uppercase tracking-[0.22em] text-[var(--foreground)]/70 underline underline-offset-4 hover:text-[var(--foreground)]'>
+                  className='text-sm text-[var(--foreground)]/70 underline underline-offset-4 hover:text-[var(--foreground)]'>
                   {displayAddress}
                 </a>
               ) : (
                 displayAddress && (
-                  <p className='text-sm uppercase tracking-[0.22em] text-[var(--foreground)]/60'>
+                  <p className='text-sm text-[var(--foreground)]/60'>
                     {displayAddress}
                   </p>
                 )
               )}
               <div className='flex flex-wrap items-center gap-3 text-sm text-[var(--foreground)]/75'>
-                <div className='inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-3 py-1 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
+                <div className='inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/80 px-3 py-1 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/70'>
                   <span className='text-[var(--foreground)]'>
                     {typeLabel || 'other'}
                   </span>
@@ -263,8 +263,8 @@ export default function SpaceListItem({
   const compactFooterClass = 'mt-3 flex flex-wrap items-center gap-2';
 
   const titleClass = 'truncate text-base font-semibold text-[var(--foreground)]';
-  const cityClass = 'text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55';
-  const addressClass = 'mt-0.5 inline-flex text-[11px] uppercase tracking-[0.22em] text-[var(--foreground)]/65';
+  const cityClass = 'text-[11px] uppercase tracking-[0.04em] text-[var(--foreground)]/55';
+  const addressClass = 'mt-0.5 inline-flex text-[11px] text-[var(--foreground)]/65';
 
   const compactClasses = [
     compactBaseClass,

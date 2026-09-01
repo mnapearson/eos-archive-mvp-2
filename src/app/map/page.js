@@ -173,7 +173,7 @@ export default function SpacesMapPage() {
   if (filtersLoading) {
     return (
       <div
-        className='flex items-center justify-center bg-[var(--background)] text-sm uppercase tracking-[0.24em] text-[var(--foreground)]/50'
+        className='flex items-center justify-center bg-[var(--background)] text-sm uppercase tracking-[0.04em] text-[var(--foreground)]/50'
         style={{ height: 'calc(100dvh - 72px)' }}>
         Loading map…
       </div>
@@ -326,7 +326,7 @@ export default function SpacesMapPage() {
           {(selected.city || selected.category) && (
             <div className='mt-1 flex items-center gap-1.5'>
               <MarkerDot state={selectedState} color={selectedColor} dotSize={8} ringSize={16} />
-              <span className='text-[11px] uppercase tracking-[0.14em] text-[var(--foreground-secondary)]'>
+              <span className='text-[11px] uppercase tracking-[0.04em] text-[var(--foreground-secondary)]'>
                 {selected.city}
                 {selected.city && selected.category ? ' · ' : ''}
                 {selected.category}

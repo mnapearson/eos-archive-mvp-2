@@ -359,7 +359,7 @@ function HomePageContent() {
           className='filter-rail__row'
           role='toolbar'
           aria-label='Explorer modes'>
-          <div className='flex flex-col gap-1 text-xs uppercase tracking-[0.3em] text-[var(--foreground)]/60'>
+          <div className='flex flex-col gap-1 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/60'>
             <span>Results</span>
             <span className='text-[var(--foreground)]'>
               {totalEvents} events
@@ -489,7 +489,7 @@ function HomePageContent() {
                       Load more past events
                     </button>
                   ) : (
-                    <span className='text-[10px] uppercase tracking-[0.28em] text-[var(--foreground)]/40'>
+                    <span className='text-xs text-[var(--foreground)]/40'>
                       You’ve reached the end of the archive
                     </span>
                   )}
@@ -522,7 +522,7 @@ function HomePageContent() {
                 <p className='mt-1 text-sm opacity-70'>
                   {space.city || 'Unknown city'}
                 </p>
-                <p className='mt-4 text-xs uppercase tracking-[0.32em] text-[var(--foreground)]/60'>
+                <p className='mt-4 text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/60'>
                   {space.eventCount} event{space.eventCount === 1 ? '' : 's'}{' '}
                   archived
                 </p>

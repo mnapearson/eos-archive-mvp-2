@@ -11,7 +11,7 @@ export default function Spinner({ fullscreen = true, size = 64 }) {
           className='animate-spin rounded-full border-2 border-[var(--foreground)]/20 border-t-[var(--foreground)]'
           style={{ width: inlineSize, height: inlineSize }}
         />
-        <span className='text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/50'>
+        <span className='text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
           Loading…
         </span>
       </div>

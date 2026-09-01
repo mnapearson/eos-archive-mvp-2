@@ -103,7 +103,7 @@ export default function SpaceAnalytics({ spaceId }) {
                     {event.title}
                   </div>
                   {event.start_date && (
-                    <div className='mt-0.5 text-[11px] uppercase tracking-[0.16em] text-[var(--foreground)]/50'>
+                    <div className='mt-0.5 text-[11px] uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
                       {formatDate(event.start_date)}
                     </div>
                   )}
@@ -112,7 +112,7 @@ export default function SpaceAnalytics({ spaceId }) {
                   <div className='text-lg font-semibold text-[var(--foreground)]'>
                     {eventSaves[event.id] ?? 0}
                   </div>
-                  <div className='text-[10px] uppercase tracking-[0.16em] text-[var(--foreground)]/50'>
+                  <div className='text-[10px] uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
                     saves
                   </div>
                 </div>

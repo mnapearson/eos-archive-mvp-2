@@ -85,7 +85,7 @@ export default function SignUpPage() {
                 <span className='text-[var(--foreground)] font-medium'>{email}</span>.
                 Click it to verify your address and activate your account.
               </p>
-              <p className='text-xs leading-relaxed text-[var(--foreground)]/50 uppercase tracking-[0.2em]'>
+              <p className='text-xs leading-relaxed text-[var(--foreground)]/50'>
                 The link expires after 24 hours. Check your spam folder if you don&apos;t see it.
               </p>
               <Link

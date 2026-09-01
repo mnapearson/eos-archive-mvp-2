@@ -36,4 +36,4 @@ export const primaryActionClasses = `${actionButtonClasses} nav-cta`;
 export const subtleActionClasses = `${actionButtonClasses} hover:border-[var(--foreground)]/35`;
 export const dangerActionClasses = `${actionButtonClasses} border border-red-500 text-red-400 hover:bg-red-500/10`;
 export const statusBadgeClasses =
-  'inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/14 bg-[var(--background)]/80 px-3 py-1 text-[10px] uppercase tracking-[0.28em]';
+  'inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/14 bg-[var(--background)]/80 px-3 py-1 text-[10px] uppercase tracking-[0.04em]';

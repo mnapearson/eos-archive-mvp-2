@@ -82,7 +82,7 @@ export default function SpaceReviewPanel() {
                       className='h-full w-full object-cover'
                     />
                   ) : (
-                    <div className='flex h-full w-full items-center justify-center text-center text-[9px] uppercase tracking-[0.2em] text-[var(--foreground)]/40'>
+                    <div className='flex h-full w-full items-center justify-center text-center text-[9px] uppercase tracking-[0.04em] text-[var(--foreground)]/40'>
                       No image
                     </div>
                   )}
@@ -97,7 +97,7 @@ export default function SpaceReviewPanel() {
                       {space.description}
                     </p>
                   )}
-                  <p className='mt-1 text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/50'>
+                  <p className='mt-1 text-xs text-[var(--foreground)]/50'>
                     {[space.address, space.city_name ?? space.city]
                       .filter(Boolean)
                       .join(', ')}

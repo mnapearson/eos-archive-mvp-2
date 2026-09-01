@@ -215,7 +215,7 @@ function SpaceAdminDashboardContent() {
           </div>
         )}
 
-        <nav className='flex flex-wrap gap-3 text-xs uppercase tracking-[0.28em] text-[var(--foreground)]/70'>
+        <nav className='flex flex-wrap gap-3'>
           {tabOptions.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
