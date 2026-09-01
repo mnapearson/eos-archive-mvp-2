@@ -811,8 +811,9 @@ textarea.ea-input {
   padding: 0.45rem 0.95rem;
   border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   background: var(--input);
   color: var(--foreground-secondary);
@@ -846,11 +847,12 @@ textarea.ea-input {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  padding: 0.45rem 0.9rem;
+  padding: 0.55rem 1rem;
   border-radius: 999px;
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
   border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
   background: color-mix(in oklab, var(--background) 96%, rgba(0, 0, 0, 0.04));
   color: color-mix(in oklab, var(--foreground) 70%, transparent);
@@ -1053,32 +1055,6 @@ textarea.ea-input {
   background: var(--chrome);
   color: var(--foreground);
   border-color: var(--chrome);
-}
-
-@media (max-width: 640px) {
-  .nav-cta {
-    display: none;
-  }
-
-  .quick-view__actions .nav-cta {
-    display: inline-flex;
-  }
-
-  .map-space-sheet .nav-cta {
-    display: inline-flex;
-  }
-
-  .newsletter__submit {
-    display: inline-flex;
-  }
-
-  .menu-footer .nav-cta {
-    display: inline-flex;
-  }
-
-  .support-cta {
-    display: inline-flex;
-  }
 }
 
 .nav-cta:hover,

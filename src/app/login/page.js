@@ -168,7 +168,7 @@ function LoginPageContent() {
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <button
               type='submit'
-              className='nav-action nav-cta !inline-flex flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'
+              className='nav-action nav-cta !inline-flex flex-1 justify-center px-6 disabled:cursor-not-allowed disabled:opacity-60'
               disabled={loading}>
               {loading ? 'Connecting…' : 'Connect'}
             </button>
@@ -177,7 +177,7 @@ function LoginPageContent() {
               type='button'
               onClick={handleResetPassword}
               disabled={loading}
-              className='nav-action !inline-flex justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 disabled:cursor-not-allowed disabled:opacity-60'>
+              className='nav-action !inline-flex justify-center px-6 hover:border-[var(--foreground)]/35 disabled:cursor-not-allowed disabled:opacity-60'>
               {loading ? 'Sending…' : 'Reset password'}
             </button>
           </div>

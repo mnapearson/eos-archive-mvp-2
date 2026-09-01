@@ -90,7 +90,7 @@ export default function SignUpPage() {
               </p>
               <Link
                 href='/login'
-                className='nav-action !inline-flex px-6 text-[11px] uppercase tracking-[0.28em]'>
+                className='nav-action !inline-flex px-6 '>
                 Back to login
               </Link>
             </div>
@@ -199,14 +199,14 @@ export default function SignUpPage() {
               <button
                 type='submit'
                 data-testid='signup-submit'
-                className='nav-action nav-cta !inline-flex flex-1 justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'
+                className='nav-action nav-cta !inline-flex flex-1 justify-center px-6 disabled:cursor-not-allowed disabled:opacity-60'
                 disabled={loading}>
                 {loading ? 'Creating account…' : 'Create account'}
               </button>
 
               <Link
                 href='/login'
-                className='nav-action !inline-flex justify-center px-6 text-[11px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35'>
+                className='nav-action !inline-flex justify-center px-6 hover:border-[var(--foreground)]/35'>
                 Already have an account
               </Link>
             </div>

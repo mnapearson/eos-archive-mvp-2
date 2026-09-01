@@ -31,7 +31,7 @@ export const helperTextClasses = 'text-xs leading-relaxed text-[var(--foreground
 export const dropzoneClasses =
   'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--foreground)]/28 bg-[var(--background)]/70 px-4 py-10 text-center transition hover:border-[var(--foreground)]/45 hover:bg-[var(--background)]/80';
 export const actionButtonClasses =
-  'nav-action !inline-flex items-center justify-center px-8 text-[11px] uppercase tracking-[0.28em]';
+  'nav-action !inline-flex items-center justify-center px-8 ';
 export const primaryActionClasses = `${actionButtonClasses} nav-cta`;
 export const subtleActionClasses = `${actionButtonClasses} hover:border-[var(--foreground)]/35`;
 export const dangerActionClasses = `${actionButtonClasses} border border-red-500 text-red-400 hover:bg-red-500/10`;

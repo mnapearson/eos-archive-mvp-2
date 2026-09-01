@@ -121,11 +121,7 @@ export default function SpacePageClient({ spaceId }) {
                 <button
                   key={value}
                   onClick={() => setTimeFilter(active ? null : value)}
-                  className={`nav-action px-4 text-[11px] uppercase tracking-[0.28em] ${
-                    active
-                      ? 'bg-[var(--foreground)] text-[var(--background)] border-transparent'
-                      : ''
-                  }`}>
+                  className={`nav-pill ${active ? 'nav-pill--active' : ''}`}>
                   {label}
                 </button>
               );
@@ -148,7 +144,7 @@ export default function SpacePageClient({ spaceId }) {
       <div className='flex justify-center pt-2'>
         <a
           href='/map'
-          className='nav-action inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em]'>
+          className='nav-action inline-flex items-center gap-2'>
           Explore more spaces <span aria-hidden>→</span>
         </a>
       </div>

@@ -450,7 +450,7 @@ function HomePageContent() {
           <button
             type='button'
             onClick={refetchFilterData}
-            className='nav-action px-6 text-[11px] uppercase tracking-[0.32em]'>
+            className='nav-action px-6 '>
             Retry
           </button>
         </div>
@@ -475,7 +475,7 @@ function HomePageContent() {
                   <button
                     type='button'
                     onClick={handleRevealPast}
-                    className='nav-action px-6 text-[11px] uppercase tracking-[0.32em]'>
+                    className='nav-action px-6 '>
                     See past events
                   </button>
                 </>
@@ -485,7 +485,7 @@ function HomePageContent() {
                     <button
                       type='button'
                       onClick={handleLoadMorePast}
-                      className='nav-action px-6 text-[11px] uppercase tracking-[0.32em]'>
+                      className='nav-action px-6 '>
                       Load more past events
                     </button>
                   ) : (

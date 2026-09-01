@@ -180,7 +180,7 @@ export default function SpaceListItem({
                     target='_blank'
                     rel='noopener noreferrer'
                     onClick={handleExternalLinkClick}
-                    className='nav-action rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                    className='nav-action rounded-full px-4 '>
                     Visit website
                   </a>
                 )}
@@ -198,7 +198,7 @@ export default function SpaceListItem({
                 <button
                   type='button'
                   onClick={handleFocus}
-                  className='nav-action nav-cta rounded-full px-4 text-xs uppercase tracking-[0.28em]'>
+                  className='nav-action nav-cta rounded-full px-4 '>
                   View on map
                 </button>
               )}
@@ -208,7 +208,7 @@ export default function SpaceListItem({
                   <button
                     type='button'
                     onClick={() => toggleSave(space.id)}
-                    className={`nav-action rounded-full px-4 text-xs uppercase tracking-[0.28em] ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
+                    className={`nav-action rounded-full px-4 ${isSaved ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''}`}>
                     {isSaved ? 'Saved' : 'Save'}
                   </button>
                 );
@@ -259,7 +259,7 @@ export default function SpaceListItem({
 
   const compactPrimaryActionVisual = 'nav-action nav-cta !inline-flex';
   const compactTertiaryActionVisual = 'nav-action !inline-flex';
-  const compactActionBase = 'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
+  const compactActionBase = 'w-full rounded-full px-3 sm:w-auto';
   const compactFooterClass = 'mt-3 flex flex-wrap items-center gap-2';
 
   const titleClass = 'truncate text-base font-semibold text-[var(--foreground)]';
@@ -339,7 +339,7 @@ export default function SpaceListItem({
             type='button'
             onClick={handleNavigate}
             className={`${compactPrimaryActionVisual} ${compactActionBase}`}>
-            DETAILS
+            Details
           </button>
           {onFocus && space.latitude && space.longitude && (
             <button

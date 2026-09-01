@@ -142,7 +142,7 @@ export default function CompleteSpaceSignUpPage() {
                 </p>
                 <Link
                   href='/spaces/signup'
-                  className='nav-action nav-cta !inline-flex px-8 text-[12px] uppercase tracking-[0.32em]'>
+                  className='nav-action nav-cta !inline-flex px-8 '>
                   Register your space
                 </Link>
               </>
@@ -155,7 +155,7 @@ export default function CompleteSpaceSignUpPage() {
                 </p>
                 <Link
                   href='/spaces/signup'
-                  className='nav-action nav-cta !inline-flex px-8 text-[12px] uppercase tracking-[0.32em]'>
+                  className='nav-action nav-cta !inline-flex px-8 '>
                   Try again
                 </Link>
               </>

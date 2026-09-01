@@ -278,7 +278,7 @@ function LeicoListPanel({
               <button
                 type='button'
                 onClick={onClearFilters}
-                className='nav-action rounded-full px-4 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/75 hover:text-[var(--foreground)]'>
+                className='nav-action rounded-full px-4 text-[var(--foreground)]/75 hover:text-[var(--foreground)]'>
                 Clear filters
               </button>
             )}

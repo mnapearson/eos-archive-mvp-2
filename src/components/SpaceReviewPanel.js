@@ -107,13 +107,13 @@ export default function SpaceReviewPanel() {
                     <button
                       type='button'
                       onClick={() => updateSpaceStatus(space.id, 'approved')}
-                      className='nav-action nav-cta !inline-flex px-4 text-[11px] uppercase tracking-[0.28em]'>
+                      className='nav-action nav-cta !inline-flex px-4 '>
                       Approve
                     </button>
                     <button
                       type='button'
                       onClick={() => updateSpaceStatus(space.id, 'rejected')}
-                      className='nav-action !inline-flex px-4 text-[11px] uppercase tracking-[0.28em] text-[var(--danger)]'>
+                      className='nav-action !inline-flex px-4 text-[var(--danger)]'>
                       Reject
                     </button>
                   </div>

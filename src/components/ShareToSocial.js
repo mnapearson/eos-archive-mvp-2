@@ -136,7 +136,7 @@ export default function ShareToSocial({ event, space, className = '' }) {
             type='button'
             onClick={handleShare}
             disabled={status === 'loading'}
-            className='nav-action nav-cta !flex w-full justify-center px-6 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60'>
+            className='nav-action nav-cta !flex w-full justify-center px-6 disabled:cursor-not-allowed disabled:opacity-60'>
             {status === 'loading' ? 'Preparing…' : 'Share'}
           </button>
           <p className='text-center text-xs text-[var(--foreground)]/50'>

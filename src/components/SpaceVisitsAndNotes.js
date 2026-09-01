@@ -166,7 +166,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
           <button
             type='button'
             onClick={toggleVisit}
-            className={`nav-action rounded-full px-5 text-xs uppercase tracking-[0.28em] ${
+            className={`nav-action rounded-full px-5 ${
               myVisit ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''
             }`}>
             {myVisit ? '✓ I was here' : 'I was here'}
@@ -206,7 +206,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
         <button
           type='button'
           onClick={openNoteModal}
-          className='nav-action rounded-full px-5 text-xs uppercase tracking-[0.28em]'>
+          className='nav-action rounded-full px-5 '>
           {myNote ? 'Edit your note' : '+ Leave a note'}
         </button>
       </section>
@@ -231,13 +231,13 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
               type='button'
               onClick={saveNote}
               disabled={savingNote || !noteDraft.trim()}
-              className='nav-action nav-cta px-6 text-xs uppercase tracking-[0.28em] disabled:cursor-not-allowed disabled:opacity-60'>
+              className='nav-action nav-cta px-6 disabled:cursor-not-allowed disabled:opacity-60'>
               {savingNote ? 'Saving…' : 'Save note'}
             </button>
             <button
               type='button'
               onClick={() => setNoteModalOpen(false)}
-              className='nav-action px-6 text-xs uppercase tracking-[0.28em]'>
+              className='nav-action px-6 '>
               Cancel
             </button>
             {myNote && (
@@ -245,7 +245,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
                 type='button'
                 onClick={deleteNote}
                 disabled={savingNote}
-                className='nav-action px-6 text-xs uppercase tracking-[0.28em] text-red-400 disabled:cursor-not-allowed disabled:opacity-60'>
+                className='nav-action px-6 text-red-400 disabled:cursor-not-allowed disabled:opacity-60'>
                 Remove note
               </button>
             )}

@@ -638,13 +638,13 @@ export default function EventSubmissionForm({ spaceId, spaces = [] }) {
             <button
               type='submit'
               disabled={submitting}
-              className='nav-action nav-cta !inline-flex w-full justify-center px-8 text-[12px] uppercase tracking-[0.32em] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
+              className='nav-action nav-cta !inline-flex w-full justify-center px-8 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto'>
               {submitting ? 'Submitting…' : 'Submit event'}
             </button>
             <button
               type='button'
               onClick={resetForm}
-              className='nav-action !inline-flex w-full justify-center px-8 text-[12px] uppercase tracking-[0.28em] hover:border-[var(--foreground)]/35 sm:w-auto'>
+              className='nav-action !inline-flex w-full justify-center px-8 hover:border-[var(--foreground)]/35 sm:w-auto'>
               Reset form
             </button>
           </div>

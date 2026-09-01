@@ -168,7 +168,7 @@ export default async function ConversationPublicPage({ params }) {
         <div className='flex justify-center'>
           <Link
             href='/conversations'
-            className='nav-action inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.32em]'>
+            className='nav-action inline-flex items-center gap-2 '>
             <span aria-hidden>←</span> Back to conversations
           </Link>
         </div>
@@ -270,7 +270,7 @@ export default async function ConversationPublicPage({ params }) {
       <footer className='flex justify-center'>
         <Link
           href='/conversations'
-          className='nav-action inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.32em]'>
+          className='nav-action inline-flex items-center gap-2 '>
           Browse all conversations
           <span aria-hidden>→</span>
         </Link>
