@@ -118,16 +118,6 @@ export default function EventPageClient({ eventId }) {
 
     const rows = [];
 
-    if (startDate && eventDateTime) {
-      rows.push({
-        id: 'info-date',
-        label: 'When',
-        value: eventDateTime,
-        filters: { date: [startDate] },
-        mono: true,
-      });
-    }
-
     if (eventCategory) {
       rows.push({
         id: 'info-category',
@@ -138,7 +128,28 @@ export default function EventPageClient({ eventId }) {
     }
 
     return rows;
-  }, [event, startDate, eventDateTime, eventCategory]);
+  }, [event, eventCategory]);
+
+  // Mobile (app/event/[id].tsx) only ever has a single start_date/start_time
+  // — one prominent date line plus a "Doors · HH:MM" line. Web events can
+  // span a date range, which that format can't express, so multi-day
+  // events fall back to the existing compact range string instead.
+  const isMultiDay = Boolean(
+    event?.end_date && event.end_date !== event.start_date
+  );
+  const fullDateLabel =
+    !isMultiDay && event?.start_date
+      ? new Date(`${event.start_date}T00:00:00`).toLocaleDateString('en-GB', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      : eventDateTime;
+  const doorsLabel =
+    !isMultiDay && event?.start_time
+      ? `Doors · ${event.start_time.slice(0, 5)}`
+      : null;
 
   const addressValue =
     event?.space?.address ||
@@ -186,7 +197,6 @@ export default function EventPageClient({ eventId }) {
   const hasFlyer = Boolean(directFlyerUrl) && !flyerFailed;
 
   const isSaved = userId ? savedIds.has(String(event.id)) : false;
-  const metaLine = [eventDateTime, city].filter(Boolean).join(' · ');
 
   return (
     <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
@@ -240,7 +250,18 @@ export default function EventPageClient({ eventId }) {
         </div>
       </div>
 
-      {metaLine && <p className='detail-hero__meta'>{metaLine}</p>}
+      <div className='event-page__meta-row'>
+        {fullDateLabel && (
+          <button
+            type='button'
+            onClick={() => startDate && applyFiltersAndNavigate({ date: [startDate] })}
+            className='event-page__meta-date'>
+            {fullDateLabel}
+          </button>
+        )}
+        {doorsLabel && <p className='event-page__meta-doors'>{doorsLabel}</p>}
+        {city && <p className='detail-hero__meta event-page__meta-city'>{city}</p>}
+      </div>
 
       <div className='space-y-5 pt-5'>
         {filterableRows.map(({ id, label, value, filters, mono }) => (

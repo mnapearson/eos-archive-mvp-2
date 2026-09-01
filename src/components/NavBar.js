@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useContext, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Menu from './Menu'; // Import the Menu component
 import Wordmark from './Wordmark';
 import { FilterContext } from '@/contexts/FilterContext'; // Import filter context
@@ -26,8 +26,6 @@ function NavBarContent() {
   const searchParams = useSearchParams();
   const { user, profile } = useUserProfile();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
-
-  const pathname = usePathname();
 
   // Sync search input with current query string
   const currentSearchValue = searchParams.get('search') || '';
@@ -78,24 +76,6 @@ function NavBarContent() {
     setMobileSearchOpen(false);
   };
 
-  const primaryLinks = [
-    {
-      href: '/',
-      label: 'Explore',
-      isActive: pathname === '/',
-    },
-    {
-      href: '/map',
-      label: 'Spaces',
-      isActive: pathname.startsWith('/map') || pathname.startsWith('/spaces'),
-    },
-    {
-      href: '/conversations',
-      label: 'Conversations',
-      isActive: pathname.startsWith('/conversations'),
-    },
-  ];
-
   const isSpaceUser = profile?.role === 'space';
   const isGeneralUser = profile?.role === 'member';
   const loginHref = isSpaceUser
@@ -137,22 +117,6 @@ function NavBarContent() {
             aria-label='eos archive home'>
             <Wordmark />
           </Link>
-
-          <nav
-            aria-label='Primary'
-            className='hidden lg:flex items-center gap-2'>
-            {primaryLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-pill ${
-                  item.isActive ? 'nav-pill--active' : ''
-                }`}
-                prefetch={false}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
 
           <form
             onSubmit={handleSearchSubmit}

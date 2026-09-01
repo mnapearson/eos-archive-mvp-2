@@ -432,6 +432,37 @@ textarea.ea-input {
   text-transform: uppercase;
 }
 
+/* Event detail meta — mirrors mobile's metaRow: one date line, an
+   optional doors line, an optional city line, single instance (no
+   duplicate date lower on the page). */
+.event-page__meta-row {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.event-page__meta-date {
+  text-align: left;
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.event-page__meta-date:hover,
+.event-page__meta-date:focus-visible {
+  color: var(--chrome);
+}
+
+.event-page__meta-doors {
+  color: color-mix(in oklab, var(--foreground) 65%, transparent);
+  font-size: 0.85rem;
+}
+
+.event-page__meta-city {
+  margin-top: 0.15rem;
+}
+
 .quick-view__title {
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   line-height: 1.15;
