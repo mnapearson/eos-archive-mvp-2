@@ -14,7 +14,18 @@ import { formatDate } from '@/lib/date';
 // space categories (bar, club, museum...) are two different vocabularies —
 // markerColors/CATEGORY_ABBREV are keyed by space category only, so an
 // event's own category can't be looked up in that mapping directly.
-export default function GeneratedFlyerCard({ event, spaceCategory, className = '' }) {
+export default function GeneratedFlyerCard({
+  event,
+  spaceCategory,
+  className = '',
+  // Grid/list views need the title+date on the card itself — there's no
+  // shared heading for the whole grid. The event detail page already has
+  // the same title as its <h1> right above this card, so repeating it
+  // here just duplicates what's already on screen (mobile's equivalent
+  // no-flyer state is a plain blank/tinted block, no text) — pass false
+  // there.
+  showText = true,
+}) {
   const typeKey = normalizeType(spaceCategory) || 'other';
   const color = markerColors[typeKey] || markerColors.other;
   const abbrev = CATEGORY_ABBREV[typeKey] || CATEGORY_ABBREV.other;
@@ -37,16 +48,18 @@ export default function GeneratedFlyerCard({ event, spaceCategory, className = '
         {abbrev}
       </span>
 
-      <div className='space-y-2'>
-        <p className='line-clamp-3 text-base font-medium leading-snug text-[var(--foreground)]'>
-          {title}
-        </p>
-        {dateLabel && (
-          <p className='font-mono text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/70'>
-            {dateLabel}
+      {showText && (
+        <div className='space-y-2'>
+          <p className='line-clamp-3 text-base font-medium leading-snug text-[var(--foreground)]'>
+            {title}
           </p>
-        )}
-      </div>
+          {dateLabel && (
+            <p className='font-mono text-xs uppercase tracking-[0.2em] text-[var(--foreground)]/70'>
+              {dateLabel}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

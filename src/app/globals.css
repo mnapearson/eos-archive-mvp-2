@@ -640,57 +640,67 @@ textarea.ea-input {
   color: var(--foreground);
 }
 
+/* Flowing, hairline-divided rows — not individually bordered boxes. Was
+   a multi-column grid of bordered/background-filled cards, one per
+   field (When/Category/Space/Location each its own little card); mobile's
+   equivalent (app/event/[id].tsx) is a single flowing column with small
+   chrome labels and hairline dividers between sections, no per-field
+   card chrome. This was one of the clearest "web looks busier than
+   mobile" gaps — same information, presented with far more visual noise
+   around it. */
 .event-page__info-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-direction: column;
 }
 
 .event-page__info-item {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 1rem 1.1rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.05));
+  gap: 0.3rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   align-items: flex-start;
   text-align: left;
 }
 
+.event-page__info-item:last-child {
+  border-bottom: none;
+}
+
 .event-page__info-label {
-  font-size: 0.65rem;
+  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: color-mix(in oklab, var(--foreground) 58%, transparent);
+  letter-spacing: 0.12em;
+  color: var(--chrome);
 }
 
 .event-page__info-value {
-  font-size: 0.96rem;
-  color: color-mix(in oklab, var(--foreground) 88%, transparent);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--foreground);
 }
 
 .event-page__info-link {
-  font-size: 0.96rem;
-  color: var(--chrome);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  transition: opacity 0.2s ease;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--foreground);
+  text-decoration: none;
+  transition: color 0.2s ease;
   align-self: flex-start;
 }
 
 .event-page__info-link:hover,
 .event-page__info-link:focus-visible {
-  opacity: 0.75;
+  color: var(--chrome);
 }
 
 .event-page__description {
-  padding: 1.1rem 1.2rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-  background: color-mix(in oklab, var(--background) 90%, rgba(0, 0, 0, 0.05));
+  padding-top: 0.9rem;
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   color: color-mix(in oklab, var(--foreground) 88%, transparent);
-  line-height: 1.55;
+  line-height: 1.6;
   font-size: 0.98rem;
 }
 

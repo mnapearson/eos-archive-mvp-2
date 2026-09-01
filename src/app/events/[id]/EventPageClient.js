@@ -244,6 +244,7 @@ export default function EventPageClient({ eventId }) {
                 event={event}
                 spaceCategory={event.space?.category || event.space?.type}
                 className='h-full !aspect-auto'
+                showText={false}
               />
             </div>
           )}
