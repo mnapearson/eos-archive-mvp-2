@@ -16,7 +16,6 @@ export default function SpaceListItem({
   number,
   onFocus,
   isActive = false,
-  surface = 'card',
   className = '',
   showActions = true,
   eventMap = {},
@@ -252,60 +251,20 @@ export default function SpaceListItem({
 
   const compactBaseClass = 'space-card group rounded-3xl px-3 py-3 transition';
   const compactSurfaceClass =
-    surface === 'overlay'
-      ? 'border border-white/70 bg-[rgba(255,255,255,0.92)] text-[#1b1b1b] backdrop-blur-xl'
-      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 transition-colors hover:border-[var(--foreground)]/28';
-  const compactActiveClass =
-    surface === 'overlay'
-      ? isActive
-        ? 'bg-white'
-        : ''
-      : isActive
-      ? 'border-[var(--chrome)] bg-[var(--chrome-dim)]'
-      : '';
+    'border border-[var(--foreground)]/12 bg-[var(--background)]/85 transition-colors hover:border-[var(--foreground)]/28';
+  const compactActiveClass = isActive ? 'border-[var(--chrome)] bg-[var(--chrome-dim)]' : '';
   const compactFocusClass = canFocus
     ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/35'
     : '';
 
-  const overlayActionBase =
-    'inline-flex h-9 w-full items-center justify-center rounded-full px-3 text-[11px] uppercase tracking-[0.32em] transition';
-  const compactPrimaryActionVisual =
-    surface === 'overlay'
-      ? `${overlayActionBase} bg-[#1b1b1b] text-white hover:bg-[#1b1b1b]/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]`
-      : 'nav-action nav-cta !inline-flex';
-  const compactTertiaryActionVisual =
-    surface === 'overlay'
-      ? `${overlayActionBase} text-[#1f1f1f] border border-[#1b1b1b]/20 hover:bg-white/22 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1b1b1b]/25`
-      : 'nav-action !inline-flex';
-  const compactActionBase =
-    surface === 'overlay'
-      ? ''
-      : 'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
-  const compactFooterClass =
-    surface === 'overlay'
-      ? 'mt-3 flex flex-col gap-2'
-      : 'mt-3 flex flex-wrap items-center gap-2';
+  const compactPrimaryActionVisual = 'nav-action nav-cta !inline-flex';
+  const compactTertiaryActionVisual = 'nav-action !inline-flex';
+  const compactActionBase = 'h-8 w-full rounded-full px-3 text-[11px] uppercase tracking-[0.32em] sm:w-auto';
+  const compactFooterClass = 'mt-3 flex flex-wrap items-center gap-2';
 
-  const titleClass =
-    surface === 'overlay'
-      ? 'truncate text-base font-semibold text-[#1b1b1b]'
-      : 'truncate text-base font-semibold text-[var(--foreground)]';
-  const cityClass =
-    surface === 'overlay'
-      ? 'text-[11px] uppercase tracking-[0.32em] text-[#454545]'
-      : 'text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55';
-  const typePillClass =
-    surface === 'overlay'
-      ? 'shrink-0 rounded-full border border-[#1b1b1b]/25 bg-white/65 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[#1b1b1b]'
-      : 'shrink-0 rounded-full border border-[var(--foreground)]/18 bg-[var(--background)]/70 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-[var(--foreground)]/70';
-  const addressClass =
-    surface === 'overlay'
-      ? 'mt-1 inline-flex text-[11px] uppercase tracking-[0.22em] text-[#1f1f1f]'
-      : 'mt-1 inline-flex text-[11px] uppercase tracking-[0.22em] text-[var(--foreground)]/65';
-  const addressLinkHover =
-    surface === 'overlay'
-      ? 'hover:text-[#000]'
-      : 'hover:text-[var(--foreground)]';
+  const titleClass = 'truncate text-base font-semibold text-[var(--foreground)]';
+  const cityClass = 'text-[11px] uppercase tracking-[0.32em] text-[var(--foreground)]/55';
+  const addressClass = 'mt-0.5 inline-flex text-[11px] uppercase tracking-[0.22em] text-[var(--foreground)]/65';
 
   const compactClasses = [
     compactBaseClass,
@@ -353,10 +312,7 @@ export default function SpaceListItem({
             <span className={cityClass}>{typeLabel || 'other'}</span>
           </div>
           {nextEventDate && nextEventTitle && (
-            <p
-              className={`mt-0.5 truncate text-[11px] ${
-                surface === 'overlay' ? 'text-[#454545]' : 'text-[var(--foreground)]/55'
-              }`}>
+            <p className='mt-0.5 truncate text-[11px] text-[var(--foreground)]/55'>
               Next event — <span className='font-mono'>{formatDate(nextEventDate)}</span>, {nextEventTitle}
             </p>
           )}
@@ -366,15 +322,13 @@ export default function SpaceListItem({
               target='_blank'
               rel='noopener noreferrer'
               onClick={handleExternalLinkClick}
-              className={`mt-0.5 inline-flex text-[11px] uppercase tracking-[0.22em] underline underline-offset-4 ${
-                surface === 'overlay' ? 'text-[#1f1f1f] hover:text-[#000]' : 'text-[var(--foreground)]/65 hover:text-[var(--foreground)]'
-              }`}>
+              className={`${addressClass} underline underline-offset-4 hover:text-[var(--foreground)]`}>
               {displayAddress}
             </a>
           ) : (
-            <span className={`mt-0.5 inline-flex text-[11px] uppercase tracking-[0.22em] ${
-              surface === 'overlay' ? 'text-[#1f1f1f]' : 'text-[var(--foreground)]/65'
-            }`}>{displayAddress}</span>
+            <span className={addressClass}>
+              {displayAddress}
+            </span>
           )}
         </div>
       </div>
@@ -384,18 +338,14 @@ export default function SpaceListItem({
           <button
             type='button'
             onClick={handleNavigate}
-            className={`${compactPrimaryActionVisual} ${
-              surface === 'overlay' ? '' : compactActionBase
-            }`}>
+            className={`${compactPrimaryActionVisual} ${compactActionBase}`}>
             DETAILS
           </button>
           {onFocus && space.latitude && space.longitude && (
             <button
               type='button'
               onClick={handleFocus}
-              className={`${compactTertiaryActionVisual} ${
-                surface === 'overlay' ? '' : compactActionBase
-              }`}>
+              className={`${compactTertiaryActionVisual} ${compactActionBase}`}>
               View on map
             </button>
           )}

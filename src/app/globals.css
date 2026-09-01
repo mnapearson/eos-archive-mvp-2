@@ -30,6 +30,16 @@
   --danger: #f87171;
   --success: #4ade80;
   --page-content-padding: 1rem;
+
+  /* Radius scale — consolidates what used to be ~15 independently-drifted
+     values (1rem vs 1.1rem, 18px vs 20px vs 26px, etc.) for what were
+     conceptually the same tier. Pills stay 999px directly at each call
+     site rather than a token, since that value means "fully round given
+     this element's own height" and isn't a fixed size to name. */
+  --radius-sm: 6px; /* chips, small inner elements */
+  --radius-md: 10px; /* cards — the default card radius */
+  --radius-lg: 16px; /* content panels — was scattered across 1rem, 1.1rem, 18px, 20px */
+  --radius-xl: 28px; /* hero/showcase surfaces, prominent modals — was 1.8rem, 26px */
 }
 
 /* Apply global colors and fonts */
@@ -162,7 +172,7 @@ body {
 .ea-card {
   background: var(--background);
   border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
-  border-radius: 6px; /* or 0 for sharper look */
+  border-radius: var(--radius-sm); /* or 0 for sharper look */
   transition: border-color 0.2s ease;
 }
 .ea-card:hover {
@@ -311,7 +321,7 @@ textarea.ea-input {
 .flow-card__media {
   position: relative;
   overflow: hidden;
-  border-radius: 1.8rem;
+  border-radius: var(--radius-xl);
   border: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
   background: color-mix(in oklab, var(--background) 95%, rgba(0, 0, 0, 0.08));
   box-shadow: 0 26px 65px rgba(0, 0, 0, 0.16);
@@ -344,7 +354,7 @@ textarea.ea-input {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  color: #fff;
+  color: var(--foreground);
   text-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
 }
 
@@ -668,7 +678,7 @@ textarea.ea-input {
 
 .quick-view__description {
   padding: 1rem 1.1rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
   background: color-mix(in oklab, var(--background) 88%, rgba(0, 0, 0, 0.04));
   color: color-mix(in oklab, var(--foreground) 90%, transparent);
@@ -781,7 +791,7 @@ textarea.ea-input {
 }
 
 .quick-view__map {
-  border-radius: 1.1rem;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   overflow: hidden;
   background: color-mix(in oklab, var(--foreground) 8%, transparent);
@@ -885,7 +895,7 @@ textarea.ea-input {
   flex-direction: column;
   gap: 0.35rem;
   padding: 1rem 1.1rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.05));
   align-items: flex-start;
@@ -920,7 +930,7 @@ textarea.ea-input {
 
 .event-page__description {
   padding: 1.1rem 1.2rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--background) 90%, rgba(0, 0, 0, 0.05));
   color: color-mix(in oklab, var(--foreground) 88%, transparent);
@@ -929,7 +939,7 @@ textarea.ea-input {
 }
 
 .event-page__map-card {
-  border-radius: 1.1rem;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   overflow: hidden;
   height: clamp(240px, 34vh, 320px);
@@ -970,16 +980,8 @@ textarea.ea-input {
 }
 
 @media (max-width: 640px) {
-  .grid-card {
-    border-radius: 16px;
-  }
-
   .grid-card__media {
     padding: 0.5rem;
-  }
-
-  .list-card {
-    border-radius: 16px;
   }
 
   .list-card__description {
@@ -1013,7 +1015,7 @@ textarea.ea-input {
 }
 
 .recent-space-card {
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1116,7 +1118,7 @@ textarea.ea-input {
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.7rem;
-  border-radius: 26px;
+  border-radius: var(--radius-xl);
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--background) 96%, transparent);
   backdrop-filter: blur(18px);
@@ -1222,7 +1224,7 @@ textarea.ea-input {
 
 .cookie-banner__details {
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 1.25rem 1.4rem;
   display: grid;
   gap: 0.9rem;
@@ -1412,7 +1414,7 @@ textarea.ea-input {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.65rem 0.9rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
   background: color-mix(in oklab, var(--background) 92%, rgba(0, 0, 0, 0.04));
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;

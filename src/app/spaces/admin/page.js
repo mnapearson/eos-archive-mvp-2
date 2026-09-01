@@ -291,7 +291,6 @@ function SpaceAdminDashboardContent() {
               <SpaceListItem
                 space={space}
                 variant='compact'
-                surface='overlay'
                 showActions={false}
                 className='border border-[var(--foreground)]/16 bg-[var(--background)]/75 p-6 sm:p-8'
               />

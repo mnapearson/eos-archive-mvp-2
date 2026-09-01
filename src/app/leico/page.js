@@ -322,27 +322,19 @@ function LeicoFocusedOverlay({ space, open, onClose }) {
 
   return (
     <div className='pointer-events-none absolute inset-x-4 bottom-4 z-30 flex justify-center lg:inset-auto lg:bottom-auto lg:right-6 lg:top-6 lg:left-auto lg:justify-end'>
-      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-white/70 bg-[rgba(247,247,247,0.92)] text-[#1b1b1b] backdrop-blur-2xl'>
-        <div className='flex items-center justify-between px-5 pt-4 text-[#2a2a2a]'>
-          <span className='ea-label tracking-[0.3em] text-[#3a3a3a]'>
-            Selected space
-          </span>
+      <div className='pointer-events-auto w-full max-w-md rounded-[28px] border border-[var(--card-border)] bg-[var(--card)]/95 text-[var(--foreground)] backdrop-blur-2xl'>
+        <div className='flex items-center justify-between px-5 pt-4'>
+          <span className='ea-label ea-label--muted'>Selected space</span>
           <button
             type='button'
             onClick={onClose}
             aria-label='Close selected space'
-            className='ea-label text-[#3a3a3a] hover:text-[#1b1b1b]'>
+            className='ea-label ea-label--muted hover:text-[var(--foreground)]'>
             Close
           </button>
         </div>
         <div className='px-5 pb-5'>
-          <SpaceListItem
-            space={space}
-            variant='compact'
-            isActive
-            surface='overlay'
-            className='text-[#1b1b1b]'
-          />
+          <SpaceListItem space={space} variant='compact' isActive />
         </div>
       </div>
     </div>
