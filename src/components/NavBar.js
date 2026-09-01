@@ -60,6 +60,7 @@ function NavBarContent() {
       space: [],
       date: [],
       category: [],
+      designer: [],
     });
   };
 

@@ -65,6 +65,7 @@ export default function EventPageClient({ eventId }) {
         space: filters.space ?? [],
         date: filters.date ?? [],
         category: filters.category ?? [],
+        designer: filters.designer ?? [],
       });
       router.push(buildFilterHref(filters));
     },

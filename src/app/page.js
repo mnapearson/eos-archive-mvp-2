@@ -195,6 +195,7 @@ function HomePageContent() {
       space: [],
       date: [],
       category: [],
+      designer: [],
     });
     setEventStatus('all');
     if (searchTermRaw) {
