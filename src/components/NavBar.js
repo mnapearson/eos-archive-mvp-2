@@ -20,6 +20,7 @@ export default function NavBar(props) {
 function NavBarContent() {
   const { setSelectedFilters } = useContext(FilterContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -73,8 +74,7 @@ function NavBarContent() {
       router.push('/');
       setSearchTerm('');
     }
-    const mobileSearch = document.getElementById('nav-mobile-search');
-    mobileSearch?.classList.add('hidden');
+    setMobileSearchOpen(false);
   };
 
   const primaryLinks = [
@@ -117,24 +117,65 @@ function NavBarContent() {
 
   return (
     <>
-      <header className='fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl'>
-        {/* Skip link for keyboard users */}
-        <a
-          href='#main'
-          className='sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-[var(--foreground)] focus:text-[var(--background)] focus:px-3 focus:py-2'>
-          Skip to content
-        </a>
+      {/* Skip link for keyboard users */}
+      <a
+        href='#main'
+        className='sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-[var(--foreground)] focus:text-[var(--background)] focus:px-3 focus:py-2'>
+        Skip to content
+      </a>
 
-        <div className='mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-2 sm:py-3 md:flex-row md:items-center md:gap-4 lg:max-w-5xl'>
-          <div className='flex w-full items-center gap-2 flex-wrap md:flex-nowrap md:gap-3 md:flex-1'>
-            <Link
-              href='/'
-              onClick={handleLogoClick}
-              className='flex-shrink-0'
-              aria-label='eos archive home'>
-              <Wordmark />
-            </Link>
+      {/* Desktop/tablet: minimal top bar. Small screens get a bottom bar
+          instead (below), mirroring the mobile app's own bottom tab bar
+          rather than cramming everything into a fixed header. */}
+      <header className='!hidden sm:!block fixed top-0 inset-x-0 z-50 border-b border-[var(--foreground)]/12 bg-[var(--background)]/92 backdrop-blur-xl'>
+        <div className='mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 lg:max-w-5xl'>
+          <Link
+            href='/'
+            onClick={handleLogoClick}
+            className='flex-shrink-0'
+            aria-label='eos archive home'>
+            <Wordmark />
+          </Link>
 
+          <nav
+            aria-label='Primary'
+            className='hidden lg:flex items-center gap-2'>
+            {primaryLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-pill ${
+                  item.isActive ? 'nav-pill--active' : ''
+                }`}
+                prefetch={false}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <form
+            onSubmit={handleSearchSubmit}
+            className='nav-search flex flex-1 items-center justify-between max-w-sm'
+            role='search'>
+            <input
+              type='search'
+              name='search'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder='Search the archive'
+              className='nav-search__input'
+              aria-label='Search archived events'
+              data-testid='search-input'
+            />
+            <button
+              type='submit'
+              className='nav-search__submit'
+              aria-label='Search'>
+              <SearchIcon />
+            </button>
+          </form>
+
+          <div className='flex flex-none items-center gap-2'>
             <button
               type='button'
               onClick={toggleMenu}
@@ -144,78 +185,110 @@ function NavBarContent() {
               Menu
             </button>
 
-            <nav
-              aria-label='Primary'
-              className='hidden lg:flex items-center gap-2'>
-              {primaryLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`nav-pill ${
-                    item.isActive ? 'nav-pill--active' : ''
-                  }`}
-                  prefetch={false}>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <Link
+              href={loginHref}
+              className='nav-action'>
+              {loginLabel}
+            </Link>
 
-            <form
-              onSubmit={handleSearchSubmit}
-              className='nav-search flex items-center justify-between flex-1 md:max-w-sm'
-              role='search'>
-              <input
-                type='search'
-                name='search'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder='Search the archive'
-                className='nav-search__input'
-                aria-label='Search archived events'
-                data-testid='search-input'
-              />
+            {user ? (
               <button
-                type='submit'
-                className='nav-search__submit'
-                aria-label='Search'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='18'
-                  height='18'
-                  viewBox='0 0 24 24'
-                  aria-hidden='true'>
-                  <path
-                    fill='currentColor'
-                    d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
-                  />
-                </svg>
+                type='button'
+                onClick={handleSignOut}
+                className='nav-cta'>
+                Disconnect
               </button>
-            </form>
-
-            <div className='flex items-center gap-2 text-xs sm:text-sm flex-shrink-0'>
+            ) : (
               <Link
-                href={loginHref}
-                className='nav-action'>
-                {loginLabel}
+                href='/signup'
+                className='nav-cta'>
+                Sign up
               </Link>
-              {user ? (
-                <button
-                  type='button'
-                  onClick={handleSignOut}
-                  className='nav-cta hidden sm:inline-flex'>
-                  Disconnect
-                </button>
-              ) : (
-                <Link
-                  href='/signup'
-                  className='nav-cta hidden sm:inline-flex'>
-                  Sign up
-                </Link>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </header>
+
+      {/* Small screens: fixed bottom bar, like the app's own tab bar. */}
+      <nav
+        aria-label='Primary'
+        className='sm:!hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-[var(--foreground)]/12 bg-[var(--background)]/94 backdrop-blur-xl px-2 pb-[env(safe-area-inset-bottom)]'>
+        <Link
+          href='/'
+          onClick={handleLogoClick}
+          aria-label='eos archive home'
+          className='nav-bottom-bar__item'>
+          <span
+            className='h-2 w-2 rounded-full'
+            style={{ background: 'var(--chrome)', boxShadow: '0 0 8px var(--chrome-glow)' }}
+          />
+        </Link>
+
+        <button
+          type='button'
+          onClick={() => setMobileSearchOpen((open) => !open)}
+          aria-label={mobileSearchOpen ? 'Close search' : 'Search'}
+          aria-expanded={mobileSearchOpen}
+          className='nav-bottom-bar__item'>
+          <SearchIcon />
+        </button>
+
+        <button
+          type='button'
+          onClick={toggleMenu}
+          aria-label='Open menu'
+          aria-controls='primary-menu'
+          className='nav-bottom-bar__item'>
+          <MenuIcon />
+        </button>
+
+        <Link
+          href={loginHref}
+          className='nav-bottom-bar__item nav-bottom-bar__item--label'>
+          {loginLabel}
+        </Link>
+
+        {user ? (
+          <button
+            type='button'
+            onClick={handleSignOut}
+            className='nav-bottom-bar__item nav-bottom-bar__item--label nav-bottom-bar__item--accent'>
+            Disconnect
+          </button>
+        ) : (
+          <Link
+            href='/signup'
+            className='nav-bottom-bar__item nav-bottom-bar__item--label nav-bottom-bar__item--accent'>
+            Sign up
+          </Link>
+        )}
+      </nav>
+
+      {mobileSearchOpen && (
+        <div className='sm:!hidden fixed inset-x-0 z-40 border-t border-[var(--foreground)]/12 bg-[var(--background)]/98 backdrop-blur-xl px-4 py-3 nav-bottom-bar__search'>
+          <form
+            onSubmit={handleSearchSubmit}
+            className='nav-search flex items-center justify-between'
+            role='search'>
+            <input
+              type='search'
+              name='search'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder='Search the archive'
+              className='nav-search__input'
+              aria-label='Search archived events'
+              autoFocus
+            />
+            <button
+              type='submit'
+              className='nav-search__submit'
+              aria-label='Search'>
+              <SearchIcon />
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Menu Component */}
       <Menu
@@ -224,5 +297,55 @@ function NavBarContent() {
         onSignOut={handleSignOut}
       />
     </>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      width='18'
+      height='18'
+      viewBox='0 0 24 24'
+      aria-hidden='true'>
+      <path
+        fill='currentColor'
+        d='M9.539 15.23q-2.398 0-4.065-1.666Q3.808 11.899 3.808 9.5t1.666-4.065T9.539 3.77t4.064 1.666T15.269 9.5q0 1.042-.369 2.017t-.97 1.668l5.909 5.907q.14.14.15.345q.009.203-.15.363q-.16.16-.354.16t-.354-.16l-5.908-5.908q-.75.639-1.725.989t-1.96.35m0-1q1.99 0 3.361-1.37q1.37-1.37 1.37-3.361T12.9 6.14T9.54 4.77q-1.991 0-3.361 1.37T4.808 9.5t1.37 3.36t3.36 1.37'
+      />
+    </svg>
+  );
+}
+
+function MenuIcon({ className = '' }) {
+  return (
+    <svg
+      className={className}
+      width='18'
+      height='18'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      aria-hidden='true'>
+      <line
+        x1='4'
+        y1='6'
+        x2='20'
+        y2='6'
+      />
+      <line
+        x1='4'
+        y1='12'
+        x2='20'
+        y2='12'
+      />
+      <line
+        x1='4'
+        y1='18'
+        x2='20'
+        y2='18'
+      />
+    </svg>
   );
 }

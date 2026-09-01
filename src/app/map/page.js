@@ -173,8 +173,7 @@ export default function SpacesMapPage() {
   if (filtersLoading) {
     return (
       <div
-        className='flex items-center justify-center bg-[var(--background)] text-sm uppercase tracking-[0.04em] text-[var(--foreground)]/50'
-        style={{ height: 'calc(100dvh - 72px)' }}>
+        className='map-page-viewport flex items-center justify-center bg-[var(--background)] text-sm uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
         Loading map…
       </div>
     );
@@ -183,8 +182,7 @@ export default function SpacesMapPage() {
   if (filtersError) {
     return (
       <div
-        className='flex flex-col items-center justify-center gap-4 bg-[var(--background)] px-4 text-center'
-        style={{ height: 'calc(100dvh - 72px)' }}>
+        className='map-page-viewport flex flex-col items-center justify-center gap-4 bg-[var(--background)] px-4 text-center'>
         <p className='text-sm text-[var(--foreground)]/70'>
           Something went wrong loading the map.
         </p>
@@ -197,8 +195,7 @@ export default function SpacesMapPage() {
 
   return (
     <div
-      className='relative overflow-hidden bg-[var(--background)]'
-      style={{ height: 'calc(100dvh - 72px)' }}
+      className='map-page-viewport relative overflow-hidden bg-[var(--background)]'
       data-testid='map-container'>
       <MapComponent
         spaces={filteredSpaces}

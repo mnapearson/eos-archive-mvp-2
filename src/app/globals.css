@@ -40,6 +40,13 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  body {
+    padding-bottom: 0;
+  }
 }
 
 /* Container to center content */
@@ -55,10 +62,16 @@ body {
   margin-right: auto;
   padding-left: var(--page-content-padding);
   padding-right: var(--page-content-padding);
-  padding-top: 3rem;
+  padding-top: 1rem;
   flex: 1 1 auto;
   display: block;
   overflow: visible;
+}
+
+@media (min-width: 640px) {
+  .page-content {
+    padding-top: 3rem;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -72,6 +85,18 @@ body {
   max-width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
+}
+
+/* No fixed top header on mobile (bottom bar instead) but there is a fixed
+   bottom bar to clear; desktop/tablet is the reverse. */
+.map-page-viewport {
+  height: calc(100dvh - 56px - env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .map-page-viewport {
+    height: calc(100dvh - 72px);
+  }
 }
 
 
@@ -1000,22 +1025,6 @@ textarea.ea-input {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-@media (max-width: 640px) {
-  .nav-search {
-    gap: 0.3rem;
-    padding: 0.26rem 0.5rem;
-    max-width: min(210px, 75vw);
-  }
-
-  .nav-search__input {
-    font-size: 0.7rem;
-  }
-
-  .nav-search__submit {
-    padding: 0.24rem;
-  }
-}
-
 .nav-search__submit:hover {
   background: color-mix(in oklab, var(--foreground) 18%, transparent);
   color: var(--background);
@@ -1026,6 +1035,35 @@ textarea.ea-input {
   color: var(--background);
   outline: 2px solid color-mix(in oklab, var(--foreground) 50%, transparent);
   outline-offset: 2px;
+}
+
+/* Mobile bottom bar — replaces the top header on small screens, mirroring
+   the app's own bottom tab bar (Are.na uses the same pattern on web). */
+.nav-bottom-bar__item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  color: color-mix(in oklab, var(--foreground) 70%, transparent);
+}
+
+.nav-bottom-bar__item--label {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.nav-bottom-bar__item--accent {
+  color: var(--chrome);
+  font-weight: 600;
+}
+
+.nav-bottom-bar__search {
+  bottom: 56px;
+}
+
+.nav-bottom-bar__search .nav-search {
+  max-width: none;
 }
 
 .menu-link {
