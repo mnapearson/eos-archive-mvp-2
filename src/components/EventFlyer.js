@@ -17,6 +17,7 @@ export default function EventFlyer({
   imgClassName = '',
   fallbackClassName = '',
   imgTestId,
+  showText = true,
 }) {
   const directUrl = event?.image_url || event?.flyer_image_url;
 
@@ -37,6 +38,7 @@ export default function EventFlyer({
       event={event}
       spaceCategory={spaceCategory}
       className={fallbackClassName}
+      showText={showText}
     />
   );
 }

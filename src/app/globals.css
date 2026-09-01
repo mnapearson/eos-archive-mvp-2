@@ -189,144 +189,131 @@ textarea.ea-input {
   gap: clamp(0.75rem, 2vw, 1.4rem);
 }
 
-.grid-card {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid var(--card-border);
-  background: var(--card);
-  transition: border-color 0.2s ease;
-}
-
-.grid-card:hover {
-  border-color: var(--dim);
-}
-
-.grid-card__media {
-  position: relative;
-  width: 100%;
-  padding: clamp(0.6rem, 1.8vw, 1rem);
-  background: var(--card);
-}
-
-.grid-card__image {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.grid-card__status {
-  position: absolute;
-  top: clamp(0.6rem, 2vw, 1rem);
-  left: clamp(0.6rem, 2vw, 1rem);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.28rem 0.75rem;
-  border-radius: 999px;
-  background: color-mix(
-    in oklab,
-    rgba(0, 0, 0, 0.78) 70%,
-    rgba(255, 255, 255, 0.2) 30%
-  );
-  color: #f5f7fb;
-  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 0.58rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .list-view {
   display: flex;
   flex-direction: column;
 }
 
-.list-card {
-  border-radius: 10px;
+/* Event card — mirrors eos-archive-app's EventCard.tsx: a full-bleed image,
+   a bottom gradient, title/date/venue overlaid on it, and a small circular
+   share button. Used for both the grid and list feed layouts (and the
+   space-detail events list) — only the outer aspect ratio differs between
+   them, via the --grid/--list modifier below. */
+.event-feed-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--card);
 }
 
-.list-card[role='button'] {
-  cursor: pointer;
+.event-feed-card--grid {
+  aspect-ratio: 4 / 3;
 }
 
-.list-card[role='button']:focus-visible {
+.event-feed-card--list {
+  aspect-ratio: 12 / 5;
+}
+
+.event-feed-card__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.event-feed-card__link:focus-visible {
   outline: 2px solid color-mix(in oklab, var(--foreground) 55%, transparent);
-  outline-offset: 4px;
+  outline-offset: -2px;
 }
 
-.list-card__meta-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+.event-feed-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
 }
 
-.list-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.event-feed-card:hover .event-feed-card__image {
+  transform: scale(1.03);
 }
 
-.list-card__badge {
+.event-feed-card__gradient {
+  position: absolute;
+  inset: 0;
+  top: 40%;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+}
+
+.event-feed-card__status {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.75rem;
+  padding: 0.28rem 0.75rem;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--foreground) 16%, transparent);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  background: color-mix(in oklab, rgba(0, 0, 0, 0.78) 70%, rgba(255, 255, 255, 0.2) 30%);
+  color: #f5f7fb;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.list-card__details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.015em;
-  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+.event-feed-card__overlay {
+  position: absolute;
+  left: 0.9rem;
+  right: 2.6rem;
+  bottom: 0.7rem;
 }
 
-.list-card__detail {
-  display: inline-flex;
+.event-feed-card__title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-feed-card__date {
+  margin-top: 0.2rem;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.event-feed-card__venue {
+  margin-top: 0.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.78rem;
+}
+
+.event-feed-card__share-wrap {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 1;
+}
+
+.event-feed-card__share {
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.75rem;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+  background: rgba(0, 0, 0, 0.68);
+  color: #fff;
+  transition: background 0.2s ease;
 }
 
-.list-card__description {
-  margin-top: 0.35rem;
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: color-mix(in oklab, var(--foreground) 82%, transparent);
-}
-
-.list-card__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-  margin-top: 0.75rem;
-}
-
-.list-card__share {
-  background: transparent;
-  color: color-mix(in oklab, var(--foreground) 70%, transparent);
-}
-
-.list-card__share:hover,
-.list-card__share:focus-visible {
-  background: color-mix(in oklab, var(--chrome) 18%, transparent);
-  color: var(--chrome);
+.event-feed-card__share:hover,
+.event-feed-card__share:focus-visible {
+  background: color-mix(in oklab, var(--chrome) 55%, rgba(0, 0, 0, 0.68) 45%);
 }
 
 .quick-view {
@@ -401,7 +388,7 @@ textarea.ea-input {
   color: var(--chrome);
 }
 
-.quick-view__badge {
+.nav-pill.quick-view__badge {
   background: color-mix(in oklab, var(--foreground) 24%, transparent);
 }
 
@@ -746,14 +733,6 @@ textarea.ea-input {
 }
 
 @media (max-width: 640px) {
-  .grid-card__media {
-    padding: 0.5rem;
-  }
-
-  .list-card__description {
-    font-size: 0.9rem;
-  }
-
   .quick-view__title-row {
     gap: 0.35rem;
   }
@@ -785,7 +764,7 @@ textarea.ea-input {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .grid-card__image {
+  .event-feed-card__image {
     transition-duration: 0.001s !important;
   }
 }

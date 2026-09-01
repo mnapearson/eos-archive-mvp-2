@@ -215,7 +215,7 @@ export default function EventPageClient({ eventId }) {
       <header className='event-page__header space-y-4'>
         <div className='flex flex-wrap items-center gap-3'>
           {statusLabel && (
-            <span className='list-card__badge quick-view__badge'>
+            <span className='nav-pill quick-view__badge'>
               {statusLabel}
             </span>
           )}

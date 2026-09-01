@@ -195,7 +195,7 @@ export default function EventQuickView({ event, onClose }) {
     <section className='quick-view space-y-6'>
       <header className='quick-view__header space-y-3'>
         {statusLabel && (
-          <span className='list-card__badge quick-view__badge quick-view__badge--floating'>
+          <span className='nav-pill quick-view__badge quick-view__badge--floating'>
             {statusLabel}
           </span>
         )}
