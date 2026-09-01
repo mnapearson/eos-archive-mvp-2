@@ -254,7 +254,7 @@ export default function SpaceListItem({
   const compactSurfaceClass =
     surface === 'overlay'
       ? 'border border-white/70 bg-[rgba(255,255,255,0.92)] text-[#1b1b1b] backdrop-blur-xl'
-      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 hover:-translate-y-1 hover:border-[var(--foreground)]/28 hover:shadow-[0_20px_48px_rgba(0,0,0,0.16)]';
+      : 'border border-[var(--foreground)]/12 bg-[var(--background)]/85 transition-colors hover:border-[var(--foreground)]/28';
   const compactActiveClass =
     surface === 'overlay'
       ? isActive

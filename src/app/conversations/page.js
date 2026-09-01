@@ -97,7 +97,7 @@ export default async function ConversationsIndex() {
               <Link
                 key={row.slug}
                 href={`/conversations/${row.slug}`}
-                className='group relative flex h-full flex-col items-center overflow-hidden rounded-[28px] border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-5 text-center shadow-[0_22px_60px_rgba(0,0,0,0.10)] transition duration-300 hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_28px_90px_rgba(0,0,0,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/40'>
+                className='group relative flex h-full flex-col items-center overflow-hidden rounded-[28px] border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-5 text-center transition-colors duration-300 hover:border-[var(--foreground)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)]/40'>
                 {row.cover_image_url && row.show_cover && (
                   <div className='relative mb-4 aspect-[4/3] overflow-hidden rounded-2xl border border-[var(--foreground)]/12 bg-[var(--foreground)]/5'>
                     <EAImage

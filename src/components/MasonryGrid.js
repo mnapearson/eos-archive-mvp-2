@@ -241,7 +241,7 @@ function ListView({ items, onSelectItem }) {
         return (
           <article
             key={item?.id ?? href}
-            className='list-card group border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_18px_40px_rgba(0,0,0,0.12)]'
+            className='list-card group border border-[var(--foreground)]/12 bg-[var(--background)]/80 p-4 transition-colors hover:border-[var(--foreground)]/30'
             data-testid='event-card'
             data-event-id={item?.id}
             {...interactiveProps}>

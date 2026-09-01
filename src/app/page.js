@@ -517,7 +517,7 @@ function HomePageContent() {
               <Link
                 key={space.id}
                 href={`/spaces/${space.id}`}
-                className='recent-space-card group rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/85 p-4 transition hover:-translate-y-1 hover:border-[var(--foreground)]/30 hover:shadow-[0_18px_40px_rgba(0,0,0,0.12)]'>
+                className='recent-space-card group rounded-2xl border border-[var(--foreground)]/12 bg-[var(--background)]/85 p-4 transition-colors hover:border-[var(--foreground)]/30'>
                 <div className='ea-label ea-label--muted'>{space.name}</div>
                 <p className='mt-1 text-sm opacity-70'>
                   {space.city || 'Unknown city'}
