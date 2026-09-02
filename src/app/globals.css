@@ -100,8 +100,28 @@ body {
 
 
 /* Simple reusable button styling */
+/* Single source of truth for every pill action button on the event/space
+   detail pages (calendar, document, directions, organizer, website...) —
+   mobile's linkButton/linkButtonText (app/event/[id].tsx, app/space/[id].tsx):
+   a card-colored pill with chrome text. */
 .button {
-  @apply uppercase flex pointer-events-auto items-center gap-1 px-2 py-1 text-xs rounded border border-[var(--foreground)] bg-transparent text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--chrome);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  border-color: color-mix(in oklab, var(--chrome) 45%, var(--card-border) 55%);
 }
 
 /* Input styling */
@@ -466,30 +486,6 @@ textarea.ea-input {
   margin-bottom: 1.25rem;
 }
 
-/* "Link out" button — Website/Instagram on a space, Organizer on an
-   event. Mobile's linkButton (app/space/[id].tsx, app/event/[id].tsx):
-   a card-colored pill with chrome text, not the plain nav-action look
-   used for on-page actions like Save/Share. */
-.detail-link-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1rem;
-  border-radius: 999px;
-  border: 1px solid var(--card-border);
-  background: var(--card);
-  color: var(--chrome);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.detail-link-btn:hover,
-.detail-link-btn:focus-visible {
-  border-color: color-mix(in oklab, var(--chrome) 45%, var(--card-border) 55%);
-}
-
 /* Full-width primary share CTA at the bottom of the event detail page —
    mobile's shareCta (app/event/[id].tsx), in addition to the small share
    icon already in the hero, not instead of it. */
@@ -629,44 +625,18 @@ textarea.ea-input {
   }
 }
 
-.event-page {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-}
-
 .event-page__back {
   font-size: 0.65rem;
   padding-inline: 0.7rem;
 }
 
+/* Layout only — button appearance comes from .button, the single
+   pill-button style shared by every action button on the event/space
+   detail pages (calendar, document, directions, organizer, website...). */
 .event-page__calendar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
-
-.event-page__calendar .button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 18%, transparent);
-  background: color-mix(in oklab, var(--background) 96%, rgba(0, 0, 0, 0.04));
-  color: color-mix(in oklab, var(--foreground) 70%, transparent);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-.event-page__calendar .button:hover,
-.event-page__calendar .button:focus-visible {
-  background: color-mix(in oklab, var(--foreground) 14%, transparent);
-  border-color: color-mix(in oklab, var(--foreground) 40%, transparent);
-  color: var(--foreground);
 }
 
 .event-page__space-row {

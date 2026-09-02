@@ -184,7 +184,7 @@ export default function SpaceListItem({
                   target='_blank'
                   rel='noopener noreferrer'
                   onClick={handleExternalLinkClick}
-                  className='detail-link-btn'>
+                  className='button'>
                   {displayAddress}
                 </a>
               ) : (
