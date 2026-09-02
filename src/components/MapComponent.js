@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import markerColors from '@/lib/markerColors';
 import { getMarkerState } from '@/lib/markerState';
 

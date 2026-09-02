@@ -110,26 +110,20 @@ export default function EventPageClient({ eventId }) {
       event?.space?.lng
   );
 
-  // Mobile (app/event/[id].tsx) only ever has a single start_date/start_time
-  // — one prominent date line plus a "Doors · HH:MM" line. Web events can
-  // span a date range, which that format can't express, so multi-day
-  // events fall back to the existing compact range string instead.
-  const isMultiDay = Boolean(
-    event?.end_date && event.end_date !== event.start_date
-  );
-  const fullDateLabel =
-    !isMultiDay && event?.start_date
-      ? new Date(`${event.start_date}T00:00:00`).toLocaleDateString('en-GB', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        })
-      : eventDateTime;
-  const doorsLabel =
-    !isMultiDay && event?.start_time
-      ? `Doors · ${event.start_time.slice(0, 5)}`
-      : null;
+  // Mobile (app/event/[id].tsx) always formats off start_date only, with no
+  // multi-day handling at all — replicate that exactly rather than falling
+  // back to a different format for date-range events.
+  const fullDateLabel = event?.start_date
+    ? new Date(`${event.start_date}T00:00:00`).toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '';
+  const doorsLabel = event?.start_time
+    ? `Doors · ${event.start_time.slice(0, 5)}`
+    : null;
 
   const addressValue =
     event?.space?.address ||
@@ -179,7 +173,7 @@ export default function EventPageClient({ eventId }) {
   const isSaved = userId ? savedIds.has(String(event.id)) : false;
 
   return (
-    <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl py-8'>
+    <div className='event-page mx-auto w-full max-w-6xl pb-8 lg:max-w-5xl'>
       <div className='detail-hero'>
         {hasFlyer ? (
           <Image
@@ -336,13 +330,18 @@ export default function EventPageClient({ eventId }) {
         )}
 
         {event.document_url && (
-          <a
-            href={event.document_url}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='nav-action rounded-full px-4'>
-            Download PDF
-          </a>
+          <div className='space-y-1.5'>
+            <span className='ea-label'>Document</span>
+            <div className='event-page__calendar'>
+              <a
+                href={event.document_url}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='button'>
+                PDF
+              </a>
+            </div>
+          </div>
         )}
 
         <ShareButton
