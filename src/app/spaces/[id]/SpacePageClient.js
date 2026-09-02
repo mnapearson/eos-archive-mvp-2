@@ -85,7 +85,7 @@ export default function SpacePageClient({ spaceId }) {
 
       {(instagramUrl || space.website) && (
         <section className='space-y-4'>
-          <span className='ea-label ea-label--muted'>Links</span>
+          <span className='ea-label'>Links</span>
           <div className='flex flex-wrap gap-3'>
             {instagramUrl && (
               <a
@@ -111,7 +111,7 @@ export default function SpacePageClient({ spaceId }) {
 
       {enrichedUpcoming.length > 0 && (
         <section className='space-y-4'>
-          <span className='ea-label ea-label--muted'>Upcoming events</span>
+          <span className='ea-label'>Upcoming events</span>
           <div className='space-y-4'>
             {enrichedUpcoming.map((event) => (
               <EventFeedCard
@@ -126,7 +126,7 @@ export default function SpacePageClient({ spaceId }) {
 
       {enrichedPast.length > 0 && (
         <section className='space-y-3'>
-          <span className='ea-label ea-label--muted'>Past events</span>
+          <span className='ea-label'>Past events</span>
           <p className='text-xs text-[var(--foreground)]/55'>
             A record of everything that&rsquo;s happened at this space.
           </p>

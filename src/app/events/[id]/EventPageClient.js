@@ -85,9 +85,6 @@ export default function EventPageClient({ eventId }) {
     ? `/spaces/${event.space.slug || event.space.id}`
     : null;
   const eventCategory = event?.category || '';
-  const eventDesigner = event?.designers?.length
-    ? event.designers.join(' & ')
-    : '';
   const eventDateTime = event
     ? formatDateRange(
         event.start_date,
@@ -233,11 +230,6 @@ export default function EventPageClient({ eventId }) {
         </div>
       </div>
 
-      {eventDesigner && (
-        <p className='mt-2 text-xs text-[var(--foreground)]/55'>
-          Graphic design by {eventDesigner}
-        </p>
-      )}
 
       <div className='event-page__meta-row'>
         {fullDateLabel && (
@@ -255,7 +247,7 @@ export default function EventPageClient({ eventId }) {
       <div className='space-y-5 pt-5'>
         {venueName && (
           <div className='space-y-1.5'>
-            <span className='ea-label ea-label--muted'>At</span>
+            <span className='ea-label'>At</span>
             {spaceHref ? (
               <Link
                 href={spaceHref}
@@ -271,7 +263,7 @@ export default function EventPageClient({ eventId }) {
 
         {event.description && (
           <div className='space-y-1.5'>
-            <span className='ea-label ea-label--muted'>About event</span>
+            <span className='ea-label'>About event</span>
             <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
               {event.description}
             </p>
@@ -280,7 +272,7 @@ export default function EventPageClient({ eventId }) {
 
         {event.instagram_post_url && (
           <div className='space-y-1.5'>
-            <span className='ea-label ea-label--muted'>Organizer</span>
+            <span className='ea-label'>Organizer</span>
             <div>
               <a
                 href={event.instagram_post_url}
@@ -295,7 +287,7 @@ export default function EventPageClient({ eventId }) {
 
         {eventCategory && (
           <div className='space-y-1.5'>
-            <span className='ea-label ea-label--muted'>Category</span>
+            <span className='ea-label'>Category</span>
             <button
               type='button'
               onClick={() => applyFiltersAndNavigate({ category: [eventCategory] })}
@@ -306,7 +298,7 @@ export default function EventPageClient({ eventId }) {
         )}
 
         <div className='space-y-1.5'>
-          <span className='ea-label ea-label--muted'>Add to calendar</span>
+          <span className='ea-label'>Add to calendar</span>
           <AddToCalendar
             event={event}
             overrides={{ location: calendarLocation }}
@@ -316,7 +308,7 @@ export default function EventPageClient({ eventId }) {
 
         {(addressValue || hasMap) && (
           <div className='space-y-2'>
-            <span className='ea-label ea-label--muted'>Location</span>
+            <span className='ea-label'>Location</span>
             {addressValue && (
               <p className='text-sm text-[var(--foreground)]/85'>{addressValue}</p>
             )}

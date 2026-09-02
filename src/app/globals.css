@@ -118,16 +118,26 @@ body {
    label pattern now follows (constants/theme.ts): Mono for labels/data,
    Geist sans for body/headings. Was Geist sans at 0.32em/weight 600
    before the design-pass unification. */
+/* Sans, not mono — reverting an earlier-session call that followed the
+   written design spec's stated intent ("Geist Mono for labels/data")
+   over what mobile's own code actually does. Direct comparison against
+   the live screens proved that wrong: every sectionLabel/cityText/
+   filterSectionLabel style in the mobile app (space/[id].tsx,
+   event/[id].tsx, map.tsx) uses fonts.medium (Geist Sans) and
+   colors.chrome — never mono, never a muted/gray variant. Mobile did
+   preload Geist Mono font files (app/_layout.tsx) but never actually
+   wires them into any component style, so there was no live mobile
+   screen this could have been verified against at the time. */
 .ea-label {
   display: inline-flex;
   align-items: center;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-family: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: clamp(0.58rem, 0.78vw, 0.74rem);
+  letter-spacing: 0.04em;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.65rem, 0.78vw, 0.78rem);
   font-weight: 500;
   line-height: 1.1;
-  font-feature-settings: 'case' 1, 'calt' 0;
+  color: var(--chrome);
 }
 
 .ea-label--muted {

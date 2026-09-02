@@ -177,7 +177,7 @@ export default function SpaceListItem({
         <div className='space-y-5'>
           {displayAddress && (
             <div className='space-y-2'>
-              <span className='ea-label ea-label--muted'>Location</span>
+              <span className='ea-label'>Location</span>
               <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
               {directionsUrl && (
                 <a
@@ -204,7 +204,7 @@ export default function SpaceListItem({
 
           {space.description && (
             <div className='space-y-1.5'>
-              <span className='ea-label ea-label--muted'>About</span>
+              <span className='ea-label'>About</span>
               <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
                 {space.description}
               </p>

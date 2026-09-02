@@ -161,7 +161,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
   return (
     <div className='space-y-10'>
       <section className='space-y-4'>
-        <span className='ea-label ea-label--muted'>Been here</span>
+        <span className='ea-label'>Been here</span>
         <div className='flex flex-wrap items-center gap-4'>
           <button
             type='button'
@@ -176,7 +176,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
       </section>
 
       <section className='space-y-4'>
-        <span className='ea-label ea-label--muted'>Notes</span>
+        <span className='ea-label'>Notes</span>
 
         {notes.length === 0 ? (
           <p className='text-sm italic text-[var(--foreground)]/60'>
