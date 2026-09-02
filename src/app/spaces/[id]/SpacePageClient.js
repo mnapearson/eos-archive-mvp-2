@@ -92,7 +92,7 @@ export default function SpacePageClient({ spaceId }) {
                 href={instagramUrl}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='button'>
+                className='nav-action'>
                 Instagram
               </a>
             )}
@@ -101,7 +101,7 @@ export default function SpacePageClient({ spaceId }) {
                 href={space.website}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='button'>
+                className='nav-action'>
                 Website
               </a>
             )}

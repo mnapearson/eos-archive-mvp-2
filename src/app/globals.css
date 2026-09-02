@@ -99,31 +99,6 @@ body {
 }
 
 
-/* Simple reusable button styling */
-/* Single source of truth for every pill action button on the event/space
-   detail pages (calendar, document, directions, organizer, website...) —
-   mobile's linkButton/linkButtonText (app/event/[id].tsx, app/space/[id].tsx):
-   a card-colored pill with chrome text. */
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1rem;
-  border-radius: 999px;
-  border: 1px solid var(--card-border);
-  background: var(--card);
-  color: var(--chrome);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.button:hover,
-.button:focus-visible {
-  border-color: color-mix(in oklab, var(--chrome) 45%, var(--card-border) 55%);
-}
-
 /* Input styling */
 .input {
   @apply w-full p-2 border-b border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)];
@@ -630,9 +605,10 @@ textarea.ea-input {
   padding-inline: 0.7rem;
 }
 
-/* Layout only — button appearance comes from .button, the single
-   pill-button style shared by every action button on the event/space
-   detail pages (calendar, document, directions, organizer, website...). */
+/* Layout only — button appearance comes from .nav-action, the single
+   button style shared sitewide, including every action button on the
+   event/space detail pages (calendar, document, directions, organizer,
+   website...). */
 .event-page__calendar {
   display: flex;
   flex-wrap: wrap;

@@ -272,7 +272,7 @@ export default function EventPageClient({ eventId }) {
                 href={event.instagram_post_url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='button'>
+                className='nav-action'>
                 Organizer
               </a>
             </div>
@@ -304,13 +304,15 @@ export default function EventPageClient({ eventId }) {
           <div className='space-y-2'>
             <span className='ea-label'>Directions</span>
             {addressValue && (
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressValue)}`}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='button'>
-                {addressValue}
-              </a>
+              <div>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressValue)}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='nav-action'>
+                  {addressValue}
+                </a>
+              </div>
             )}
             {hasMap && (
               <div className='detail-map-card'>
@@ -334,7 +336,7 @@ export default function EventPageClient({ eventId }) {
                 href={event.document_url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='button'>
+                className='nav-action'>
                 PDF
               </a>
             </div>

@@ -9,7 +9,7 @@ export default function ShareButton({
   url,
   buttonText = 'Share',
   copiedText = 'Link copied!',
-  className = 'button',
+  className = 'nav-action',
   variant = '',
   children,
   disabled = false,

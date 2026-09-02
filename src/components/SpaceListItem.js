@@ -179,14 +179,16 @@ export default function SpaceListItem({
             <div className='space-y-2'>
               <span className='ea-label'>Directions</span>
               {directionsUrl ? (
-                <a
-                  href={directionsUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  onClick={handleExternalLinkClick}
-                  className='button'>
-                  {displayAddress}
-                </a>
+                <div>
+                  <a
+                    href={directionsUrl}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    onClick={handleExternalLinkClick}
+                    className='nav-action'>
+                    {displayAddress}
+                  </a>
+                </div>
               ) : (
                 <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
               )}

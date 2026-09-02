@@ -40,14 +40,14 @@ export default function AddToCalendar({
           href={googleUrl}
           target='_blank'
           rel='noopener noreferrer'
-          className='button'>
+          className='nav-action'>
           Add to G-Cal
         </a>
       )}
       {icsText && (
         <button
           onClick={handleDownloadICS}
-          className='button'>
+          className='nav-action'>
           Download .ics
         </button>
       )}
