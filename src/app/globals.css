@@ -347,10 +347,28 @@ textarea.ea-input {
 .detail-hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 2.4 / 1;
-  border-radius: var(--radius-lg);
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--card);
+}
+
+/* Full-bleed edge-to-edge on small screens, same as mobile's fixed-height
+   hero spanning the whole device width with no side margins or rounded
+   corners. Contained within the page's own padding at sm+, where nothing
+   else on the site bleeds to the viewport edge either. */
+@media (max-width: 639px) {
+  .detail-hero {
+    width: 100vw;
+    margin-left: calc(-1 * var(--page-content-padding));
+    margin-right: calc(-1 * var(--page-content-padding));
+  }
+}
+
+@media (min-width: 640px) {
+  .detail-hero {
+    aspect-ratio: 2.4 / 1;
+    border-radius: var(--radius-lg);
+  }
 }
 
 .detail-hero__image {
@@ -373,27 +391,27 @@ textarea.ea-input {
 
 .detail-hero__name {
   position: absolute;
-  left: 1.25rem;
-  right: 1.25rem;
+  left: 1rem;
+  right: 1rem;
   bottom: 1rem;
   color: #fff;
   font-weight: 700;
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  line-height: 1.15;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.2;
 }
 
 .detail-hero__actions {
   position: absolute;
   top: 0.75rem;
-  right: 0.75rem;
+  right: 1rem;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.625rem;
 }
 
 .detail-hero__status {
   position: absolute;
   top: 0.75rem;
-  left: 0.75rem;
+  left: 1rem;
   display: inline-flex;
   align-items: center;
   padding: 0.28rem 0.75rem;
@@ -658,7 +676,7 @@ textarea.ea-input {
   color: var(--chrome);
 }
 
-.event-page__map-card {
+.detail-map-card {
   border-radius: var(--radius-lg);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   overflow: hidden;
@@ -667,7 +685,7 @@ textarea.ea-input {
   margin-top: 0.5rem;
 }
 
-.event-page__map-card > div {
+.detail-map-card > div {
   height: 100%;
 }
 

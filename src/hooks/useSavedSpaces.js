@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 // race that hung /spaces/signup/complete.
 export default function useSavedSpaces() {
   const supabase = useRef(getSupabaseBrowserClient()).current;
+  const router = useRouter();
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [savedIds, setSavedIds] = useState(new Set());
@@ -31,7 +33,10 @@ export default function useSavedSpaces() {
   }, [userId, supabase]);
 
   const toggle = useCallback(async (spaceId) => {
-    if (!userId) return;
+    if (!userId) {
+      router.push('/login');
+      return;
+    }
     const key = String(spaceId);
     const saving = !savedIds.has(key);
     setSavedIds((prev) => {
@@ -44,7 +49,7 @@ export default function useSavedSpaces() {
     } else {
       await supabase.from('saved_spaces').delete().match({ user_id: userId, space_id: Number(spaceId) });
     }
-  }, [userId, savedIds, supabase]);
+  }, [userId, savedIds, supabase, router]);
 
   return { userId, savedIds, toggle };
 }

@@ -182,7 +182,7 @@ export default function EventPageClient({ eventId }) {
   const isSaved = userId ? savedIds.has(String(event.id)) : false;
 
   return (
-    <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl px-4 py-8'>
+    <div className='event-page mx-auto w-full max-w-6xl lg:max-w-5xl py-8'>
       <div className='detail-hero'>
         {hasFlyer ? (
           <Image
@@ -221,7 +221,7 @@ export default function EventPageClient({ eventId }) {
             aria-label='Share event'>
             <ShareIcon />
           </ShareButton>
-          {userId && event?.id && (
+          {event?.id && (
             <button
               type='button'
               onClick={() => toggleSave(event.id)}
@@ -315,19 +315,22 @@ export default function EventPageClient({ eventId }) {
         </div>
 
         {(addressValue || hasMap) && (
-          <div className='space-y-1.5'>
+          <div className='space-y-2'>
             <span className='ea-label ea-label--muted'>Location</span>
             {addressValue && (
+              <p className='text-sm text-[var(--foreground)]/85'>{addressValue}</p>
+            )}
+            {addressValue && (
               <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressValue)}`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressValue)}`}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='block text-sm text-[var(--foreground)]/85 underline underline-offset-4 hover:text-[var(--foreground)]'>
-                {addressValue}
+                className='detail-text-link inline-block'>
+                Get directions
               </a>
             )}
             {hasMap && (
-              <div className='event-page__map-card'>
+              <div className='detail-map-card'>
                 <MapComponent
                   spaces={event.space ? [event.space] : undefined}
                   eventId={eventId}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast';
 // race that hung /spaces/signup/complete.
 export default function useSavedEvents() {
   const supabase = useRef(getSupabaseBrowserClient()).current;
+  const router = useRouter();
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [savedIds, setSavedIds] = useState(new Set());
@@ -27,7 +29,10 @@ export default function useSavedEvents() {
   }, [userId, supabase]);
 
   const toggle = useCallback(async (eventId) => {
-    if (!userId) return;
+    if (!userId) {
+      router.push('/login');
+      return;
+    }
     const key = String(eventId);
     const saving = !savedIds.has(key);
     setSavedIds((prev) => {
@@ -49,7 +54,7 @@ export default function useSavedEvents() {
       });
       toast.error(error?.message ?? 'Could not save event.');
     }
-  }, [userId, savedIds, supabase]);
+  }, [userId, savedIds, supabase, router]);
 
   return { userId, savedIds, toggle };
 }

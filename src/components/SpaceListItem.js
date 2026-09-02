@@ -11,6 +11,7 @@ import { formatDate } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
 import { ShareIcon, HeartIcon } from '@/components/Icons';
 import { mapboxThumbnail } from '@/lib/mapboxStatic';
+import MapComponent from '@/components/MapComponent';
 import MarkerDot from './MarkerDot';
 
 export default function SpaceListItem({
@@ -33,8 +34,8 @@ export default function SpaceListItem({
   // mobile's mapboxStaticImage fallback (app/space/[id].tsx) exactly, down
   // to the chrome pin color and zoom level, so a space with no photo at
   // all still gets a real hero image instead of a blank placeholder.
-  const spaceLat = parseFloat(space.latitude ?? space.space_latitude ?? '');
-  const spaceLng = parseFloat(space.longitude ?? space.space_longitude ?? '');
+  const spaceLat = parseFloat(space.latitude ?? space.lat ?? space.space_latitude ?? '');
+  const spaceLng = parseFloat(space.longitude ?? space.lng ?? space.space_longitude ?? '');
   const displayImageUrl =
     space.image_url ||
     space.hero_image_url ||
@@ -60,11 +61,9 @@ export default function SpaceListItem({
     'Unknown location';
 
   const directionsUrl = useMemo(() => {
-    const lat = parseFloat(space.latitude ?? space.space_latitude ?? '');
-    const lng = parseFloat(space.longitude ?? space.space_longitude ?? '');
-    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+    if (!Number.isNaN(spaceLat) && !Number.isNaN(spaceLng)) {
       return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-        `${lat},${lng}`
+        `${spaceLat},${spaceLng}`
       )}`;
     }
     const destinationParts = [
@@ -79,10 +78,8 @@ export default function SpaceListItem({
       destinationParts.join(', ')
     )}`;
   }, [
-    space.latitude,
-    space.space_latitude,
-    space.longitude,
-    space.space_longitude,
+    spaceLat,
+    spaceLng,
     space.address,
     space.space_address,
     space.city_name,
@@ -112,7 +109,7 @@ export default function SpaceListItem({
   ]);
 
   const { userId, savedIds, toggle: toggleSave } = useSavedSpaces();
-  const canFocus = Boolean(onFocus && space.latitude && space.longitude);
+  const canFocus = Boolean(onFocus && !Number.isNaN(spaceLat) && !Number.isNaN(spaceLng));
 
   const handleFocus = (event) => {
     if (!canFocus) return;
@@ -163,15 +160,13 @@ export default function SpaceListItem({
               aria-label='Share space'>
               <ShareIcon />
             </ShareButton>
-            {userId && (
-              <button
-                type='button'
-                onClick={() => toggleSave(space.id)}
-                className='detail-hero__circle-btn'
-                aria-label={isSaved ? 'Remove from saved' : 'Save space'}>
-                <HeartIcon filled={isSaved} />
-              </button>
-            )}
+            <button
+              type='button'
+              onClick={() => toggleSave(space.id)}
+              className='detail-hero__circle-btn'
+              aria-label={isSaved ? 'Remove from saved' : 'Save space'}>
+              <HeartIcon filled={isSaved} />
+            </button>
           </div>
         </div>
 
@@ -181,19 +176,28 @@ export default function SpaceListItem({
 
         <div className='space-y-5'>
           {displayAddress && (
-            <div className='space-y-1.5'>
+            <div className='space-y-2'>
               <span className='ea-label ea-label--muted'>Location</span>
-              {directionsUrl ? (
+              <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
+              {directionsUrl && (
                 <a
                   href={directionsUrl}
                   target='_blank'
                   rel='noopener noreferrer'
                   onClick={handleExternalLinkClick}
-                  className='block text-sm text-[var(--foreground)]/85 underline underline-offset-4 hover:text-[var(--foreground)]'>
-                  {displayAddress}
+                  className='detail-text-link inline-block'>
+                  Get directions
                 </a>
-              ) : (
-                <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
+              )}
+              {!Number.isNaN(spaceLat) && !Number.isNaN(spaceLng) && (
+                <div className='detail-map-card'>
+                  <MapComponent
+                    spaces={[space]}
+                    autoFit
+                    focusSpaceId={space.id}
+                    showPopups={false}
+                  />
+                </div>
               )}
             </div>
           )}

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import Spinner from '@/components/Spinner';
 import EventFeedCard from '@/components/EventFeedCard';
@@ -81,17 +80,6 @@ export default function SpacePageClient({ spaceId }) {
         space={space}
         variant='detail'
       />
-
-      <div className='rounded-3xl border border-[var(--foreground)]/12 bg-[var(--background)]/70 p-4'>
-        <div className='h-[320px] overflow-hidden rounded-2xl border border-[var(--foreground)]/12'>
-          <MapComponent
-            spaces={[space]}
-            autoFit
-            focusSpaceId={space.id}
-            showPopups={false}
-          />
-        </div>
-      </div>
 
       <SpaceVisitsAndNotes spaceId={space.id} />
 
