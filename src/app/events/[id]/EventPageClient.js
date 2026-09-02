@@ -271,7 +271,7 @@ export default function EventPageClient({ eventId }) {
 
         {event.description && (
           <div className='space-y-1.5'>
-            <span className='ea-label ea-label--muted'>About</span>
+            <span className='ea-label ea-label--muted'>About event</span>
             <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
               {event.description}
             </p>
