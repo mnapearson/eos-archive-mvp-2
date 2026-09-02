@@ -166,9 +166,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
           <button
             type='button'
             onClick={toggleVisit}
-            className={`nav-action rounded-full px-5 ${
-              myVisit ? 'border-[var(--chrome)] text-[var(--chrome)] bg-[var(--chrome)]/12' : ''
-            }`}>
+            className={`detail-visit-btn ${myVisit ? 'detail-visit-btn--filled' : ''}`}>
             {myVisit ? '✓ I was here' : 'I was here'}
           </button>
           {visitCountLabel(visitCount) && (
@@ -188,9 +186,9 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
           <ul className='divide-y divide-[var(--foreground)]/10'>
             {notes.map((note) => (
               <li key={note.id} className='space-y-1 py-3 first:pt-0'>
-                <p className='text-xs uppercase tracking-[0.04em] text-[var(--foreground)]/50'>
+                <p className='text-xs text-[var(--chrome)]'>
                   @{note.username ?? 'anonymous'}
-                  <span className='text-[var(--foreground)]/35'>
+                  <span className='text-[var(--foreground)]/45'>
                     {' '}
                     · {formatRelativeTime(note.created_at)}
                   </span>
@@ -206,7 +204,7 @@ export default function SpaceVisitsAndNotes({ spaceId }) {
         <button
           type='button'
           onClick={openNoteModal}
-          className='nav-action rounded-full px-5 '>
+          className='detail-text-link'>
           {myNote ? 'Edit your note' : '+ Leave a note'}
         </button>
       </section>

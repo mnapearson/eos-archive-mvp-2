@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import MapComponent from '@/components/MapComponent';
 import SpaceListItem from '@/components/SpaceListItem';
 import Spinner from '@/components/Spinner';
-import MasonryGrid from '@/components/MasonryGrid';
+import EventFeedCard from '@/components/EventFeedCard';
 import SpaceVisitsAndNotes from '@/components/SpaceVisitsAndNotes';
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient';
 
@@ -13,32 +13,7 @@ export default function SpacePageClient({ spaceId }) {
   const id = spaceId;
   const [space, setSpace] = useState(null);
   const [events, setEvents] = useState([]);
-  const [timeFilter, setTimeFilter] = useState(null);
-
-  const displayEvents = useMemo(() => {
-    const today = new Date();
-    let evs = events;
-
-    // Time-based grouping
-    if (timeFilter) {
-      evs = evs.filter((e) => {
-        const start = new Date(e.start_date);
-        const end = e.end_date ? new Date(e.end_date) : start;
-
-        if (timeFilter === 'upcoming') {
-          return start > today;
-        }
-        if (timeFilter === 'current') {
-          return start <= today && end >= today;
-        }
-        return end < today;
-      });
-    }
-
-    return evs
-      .slice()
-      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
-  }, [events, timeFilter]);
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
   useEffect(() => {
     async function fetchSpaceDetails() {
@@ -64,26 +39,41 @@ export default function SpacePageClient({ spaceId }) {
     }
   }, [id]);
 
-  const enrichedEvents = useMemo(() => {
-    if (!space) return displayEvents;
-    return displayEvents.map((event) => ({
+  // Same split as mobile (app/space/[id].tsx): upcoming vs past by
+  // start_date only, no separate "current" bucket.
+  const { upcomingEvents, pastEvents } = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const upcoming = [];
+    const past = [];
+    events.forEach((e) => {
+      (e.start_date >= today ? upcoming : past).push(e);
+    });
+    upcoming.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+    past.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+    return { upcomingEvents: upcoming, pastEvents: past };
+  }, [events]);
+
+  const enrich = (evs) => {
+    if (!space) return evs;
+    return evs.map((event) => ({
       ...event,
       space_name: space.name || space.space_name,
       space_city: space.city || space.space_city,
       space_country: space.country || space.space_country,
       space_type: space.category || space.type,
     }));
-  }, [displayEvents, space]);
+  };
+
+  const enrichedUpcoming = useMemo(() => enrich(upcomingEvents), [upcomingEvents, space]);
+  const enrichedPast = useMemo(() => enrich(pastEvents), [pastEvents, space]);
 
   if (!space) {
     return <Spinner />;
   }
 
-  const timeOptions = [
-    { value: 'upcoming', label: 'Upcoming' },
-    { value: 'current', label: 'Current' },
-    { value: 'past', label: 'Past' },
-  ];
+  const instagramUrl = space.instagram
+    ? `https://instagram.com/${String(space.instagram).replace(/^@/, '')}`
+    : null;
 
   return (
     <div className='space-y-10 pb-10'>
@@ -105,41 +95,74 @@ export default function SpacePageClient({ spaceId }) {
 
       <SpaceVisitsAndNotes spaceId={space.id} />
 
-      <section className='space-y-6'>
-        <header className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-          <div>
-            <span className='ea-label ea-label--muted'>Events at</span>
-            <h2 className='text-2xl font-semibold tracking-tight text-[var(--foreground)]'>
-              {space.name}
-            </h2>
+      {(instagramUrl || space.website) && (
+        <section className='space-y-4'>
+          <span className='ea-label ea-label--muted'>Links</span>
+          <div className='flex flex-wrap gap-3'>
+            {instagramUrl && (
+              <a
+                href={instagramUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='detail-link-btn'>
+                Instagram
+              </a>
+            )}
+            {space.website && (
+              <a
+                href={space.website}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='detail-link-btn'>
+                Website
+              </a>
+            )}
           </div>
+        </section>
+      )}
 
-          <div className='flex flex-wrap items-center gap-2'>
-            {timeOptions.map(({ value, label }) => {
-              const active = timeFilter === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => setTimeFilter(active ? null : value)}
-                  className={`nav-pill ${active ? 'nav-pill--active' : ''}`}>
-                  {label}
-                </button>
-              );
-            })}
+      {enrichedUpcoming.length > 0 && (
+        <section className='space-y-4'>
+          <span className='ea-label ea-label--muted'>Upcoming events</span>
+          <div className='space-y-4'>
+            {enrichedUpcoming.map((event) => (
+              <EventFeedCard
+                key={event.id}
+                event={event}
+                className='event-feed-card--list'
+              />
+            ))}
           </div>
-        </header>
+        </section>
+      )}
 
-        {enrichedEvents.length > 0 ? (
-          <MasonryGrid
-            items={enrichedEvents}
-            mode='list'
-          />
-        ) : (
-          <p className='text-sm italic text-[var(--foreground)]/70'>
-            No events found.
+      {enrichedPast.length > 0 && (
+        <section className='space-y-3'>
+          <span className='ea-label ea-label--muted'>Past events</span>
+          <p className='text-xs text-[var(--foreground)]/55'>
+            A record of everything that&rsquo;s happened at this space.
           </p>
-        )}
-      </section>
+          <button
+            type='button'
+            onClick={() => setShowPastEvents((v) => !v)}
+            className='detail-text-link inline-flex items-center gap-1.5'>
+            {showPastEvents ? 'Hide' : 'Show'} {enrichedPast.length} past event
+            {enrichedPast.length === 1 ? '' : 's'}
+            <span aria-hidden>{showPastEvents ? '↑' : '↓'}</span>
+          </button>
+          {showPastEvents && (
+            <div className='space-y-4 pt-1'>
+              {enrichedPast.map((event) => (
+                <EventFeedCard
+                  key={event.id}
+                  event={event}
+                  className='event-feed-card--list'
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       <div className='flex justify-center pt-2'>
         <a

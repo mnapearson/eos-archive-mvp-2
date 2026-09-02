@@ -113,23 +113,6 @@ export default function EventPageClient({ eventId }) {
       event?.space?.lng
   );
 
-  const filterableRows = useMemo(() => {
-    if (!event) return [];
-
-    const rows = [];
-
-    if (eventCategory) {
-      rows.push({
-        id: 'info-category',
-        label: 'Category',
-        value: eventCategory,
-        filters: { category: [eventCategory] },
-      });
-    }
-
-    return rows;
-  }, [event, eventCategory]);
-
   // Mobile (app/event/[id].tsx) only ever has a single start_date/start_time
   // — one prominent date line plus a "Doors · HH:MM" line. Web events can
   // span a date range, which that format can't express, so multi-day
@@ -270,20 +253,6 @@ export default function EventPageClient({ eventId }) {
       </div>
 
       <div className='space-y-5 pt-5'>
-        {filterableRows.map(({ id, label, value, filters, mono }) => (
-          <div
-            key={id}
-            className='space-y-1.5'>
-            <span className='ea-label ea-label--muted'>{label}</span>
-            <button
-              type='button'
-              onClick={() => applyFiltersAndNavigate(filters)}
-              className={`block text-sm font-semibold text-[var(--foreground)] hover:text-[var(--chrome)] ${mono ? 'font-mono' : ''}`}>
-              {value}
-            </button>
-          </div>
-        ))}
-
         {venueName && (
           <div className='space-y-1.5'>
             <span className='ea-label ea-label--muted'>At</span>
@@ -317,10 +286,22 @@ export default function EventPageClient({ eventId }) {
                 href={event.instagram_post_url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='nav-action rounded-full px-4'>
+                className='detail-link-btn'>
                 Organizer
               </a>
             </div>
+          </div>
+        )}
+
+        {eventCategory && (
+          <div className='space-y-1.5'>
+            <span className='ea-label ea-label--muted'>Category</span>
+            <button
+              type='button'
+              onClick={() => applyFiltersAndNavigate({ category: [eventCategory] })}
+              className='block text-sm font-semibold text-[var(--foreground)] hover:text-[var(--chrome)]'>
+              {eventCategory}
+            </button>
           </div>
         )}
 
@@ -368,6 +349,16 @@ export default function EventPageClient({ eventId }) {
             Download PDF
           </a>
         )}
+
+        <ShareButton
+          title={eventTitle}
+          text={shareSummary}
+          url={eventUrl}
+          imageUrl={event.image_url}
+          className='detail-share-cta'
+          copiedText='Copied'
+          buttonText='Share this event'
+        />
       </div>
 
       <div className='event-page__footer-links'>

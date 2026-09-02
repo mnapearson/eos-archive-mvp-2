@@ -10,6 +10,7 @@ import { getMarkerState } from '@/lib/markerState';
 import { formatDate } from '@/lib/date';
 import ShareButton from '@/components/ShareButton';
 import { ShareIcon, HeartIcon } from '@/components/Icons';
+import { mapboxThumbnail } from '@/lib/mapboxStatic';
 import MarkerDot from './MarkerDot';
 
 export default function SpaceListItem({
@@ -27,9 +28,23 @@ export default function SpaceListItem({
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
   // image_url is set once a space owner uploads their own photo; until
-  // then, fall back to hero_image_url (the Airtable-synced og:image) so
-  // Airtable-sourced spaces aren't left with no image at all.
-  const displayImageUrl = space.image_url || space.hero_image_url;
+  // then, fall back to hero_image_url (the Airtable-synced og:image), and
+  // finally to a static Mapbox snapshot of the space's location — mirrors
+  // mobile's mapboxStaticImage fallback (app/space/[id].tsx) exactly, down
+  // to the chrome pin color and zoom level, so a space with no photo at
+  // all still gets a real hero image instead of a blank placeholder.
+  const spaceLat = parseFloat(space.latitude ?? space.space_latitude ?? '');
+  const spaceLng = parseFloat(space.longitude ?? space.space_longitude ?? '');
+  const displayImageUrl =
+    space.image_url ||
+    space.hero_image_url ||
+    (!Number.isNaN(spaceLat) && !Number.isNaN(spaceLng)
+      ? mapboxThumbnail(spaceLng, spaceLat, '7ab4d4', {
+          width: 1200,
+          height: 630,
+          zoom: 13,
+        })
+      : null);
 
   useEffect(() => {
     setHeroImageFailed(false);
@@ -43,15 +58,6 @@ export default function SpaceListItem({
     space.address ||
     space.space_address ||
     'Unknown location';
-
-  const websiteLabel = useMemo(() => {
-    if (!space.website) return null;
-    try {
-      return new URL(space.website).hostname.replace(/^www\./, '');
-    } catch {
-      return space.website;
-    }
-  }, [space.website]);
 
   const directionsUrl = useMemo(() => {
     const lat = parseFloat(space.latitude ?? space.space_latitude ?? '');
@@ -171,7 +177,9 @@ export default function SpaceListItem({
 
         {metaLine && <p className='detail-hero__meta'>{metaLine}</p>}
 
-        <div className='space-y-5 pt-5'>
+        <div className='detail-hero__divider' />
+
+        <div className='space-y-5'>
           {displayAddress && (
             <div className='space-y-1.5'>
               <span className='ea-label ea-label--muted'>Location</span>
@@ -196,22 +204,6 @@ export default function SpaceListItem({
               <p className='text-sm leading-relaxed text-[var(--foreground)]/85 whitespace-pre-line'>
                 {space.description}
               </p>
-            </div>
-          )}
-
-          {websiteLabel && (
-            <div className='space-y-1.5'>
-              <span className='ea-label ea-label--muted'>Links</span>
-              <div>
-                <a
-                  href={space.website}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  onClick={handleExternalLinkClick}
-                  className='nav-action rounded-full px-4'>
-                  Visit website
-                </a>
-              </div>
             </div>
           )}
         </div>

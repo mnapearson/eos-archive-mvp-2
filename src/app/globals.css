@@ -432,6 +432,96 @@ textarea.ea-input {
   text-transform: uppercase;
 }
 
+.detail-hero__divider {
+  height: 1px;
+  background: var(--card-border);
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* "Link out" button — Website/Instagram on a space, Organizer on an
+   event. Mobile's linkButton (app/space/[id].tsx, app/event/[id].tsx):
+   a card-colored pill with chrome text, not the plain nav-action look
+   used for on-page actions like Save/Share. */
+.detail-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--chrome);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.detail-link-btn:hover,
+.detail-link-btn:focus-visible {
+  border-color: color-mix(in oklab, var(--chrome) 45%, var(--card-border) 55%);
+}
+
+/* Full-width primary share CTA at the bottom of the event detail page —
+   mobile's shareCta (app/event/[id].tsx), in addition to the small share
+   icon already in the hero, not instead of it. */
+.detail-share-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--chrome);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.detail-share-cta:hover,
+.detail-share-cta:focus-visible {
+  background: color-mix(in oklab, var(--chrome) 85%, white 15%);
+}
+
+/* "I was here" visit toggle — mobile's visitButton/visitButtonFilled
+   (app/space/[id].tsx): chrome border + chrome text when off, filled
+   chrome background + white text + checkmark when on. Not the neutral
+   nav-action look. */
+.detail-visit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--chrome);
+  background: transparent;
+  color: var(--chrome);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.detail-visit-btn--filled {
+  background: var(--chrome);
+  color: var(--foreground);
+}
+
+/* Plain chrome text link, no border/background — mobile's
+   noteActionButtonText (+ Leave a note / Edit your note). */
+.detail-text-link {
+  color: var(--chrome);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.detail-text-link:hover,
+.detail-text-link:focus-visible {
+  color: color-mix(in oklab, var(--chrome) 80%, white 20%);
+}
+
 /* Event detail meta — mirrors mobile's metaRow: one date line, an
    optional doors line, an optional city line, single instance (no
    duplicate date lower on the page). */
@@ -446,7 +536,7 @@ textarea.ea-input {
   text-align: left;
   color: var(--foreground);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .event-page__meta-date:hover,
@@ -557,8 +647,8 @@ textarea.ea-input {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--foreground);
   text-decoration: none;
 }
