@@ -177,17 +177,18 @@ export default function SpaceListItem({
         <div className='space-y-5'>
           {displayAddress && (
             <div className='space-y-2'>
-              <span className='ea-label'>Location</span>
-              <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
-              {directionsUrl && (
+              <span className='ea-label'>Directions</span>
+              {directionsUrl ? (
                 <a
                   href={directionsUrl}
                   target='_blank'
                   rel='noopener noreferrer'
                   onClick={handleExternalLinkClick}
-                  className='detail-text-link inline-block'>
-                  Get directions
+                  className='detail-link-btn'>
+                  {displayAddress}
                 </a>
+              ) : (
+                <p className='text-sm text-[var(--foreground)]/85'>{displayAddress}</p>
               )}
               {!Number.isNaN(spaceLat) && !Number.isNaN(spaceLng) && (
                 <div className='detail-map-card'>

@@ -302,17 +302,14 @@ export default function EventPageClient({ eventId }) {
 
         {(addressValue || hasMap) && (
           <div className='space-y-2'>
-            <span className='ea-label'>Location</span>
-            {addressValue && (
-              <p className='text-sm text-[var(--foreground)]/85'>{addressValue}</p>
-            )}
+            <span className='ea-label'>Directions</span>
             {addressValue && (
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressValue)}`}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='detail-text-link inline-block'>
-                Get directions
+                className='detail-link-btn'>
+                {addressValue}
               </a>
             )}
             {hasMap && (
